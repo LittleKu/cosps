@@ -1,0 +1,6 @@
+
+http://www.codeproject.com/KB/graphics/cximage/cximage600_full.zip
+http://www.codeproject.com/KB/graphics/cximage/cximage600_demo.zip
+
+http://www.xdp.it/cximage/600/cximage600_full.7z
+http://www.xdp.it/cximage/600/cximage600_lite.7z
