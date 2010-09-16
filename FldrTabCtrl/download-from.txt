@@ -1,0 +1,2 @@
+http://tech.ddvip.com/2006-04/11441820003707.html
+VC实现类似Excel文件夹式样的标签控制
