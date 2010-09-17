@@ -1,0 +1,3 @@
+http://www.codeproject.com/KB/tree/shelltreectrl.aspx
+2010.09.17
+http://shellctrlslib.cvs.sourceforge.net/viewvc/shellctrlslib/  
