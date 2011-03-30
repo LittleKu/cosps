@@ -203,6 +203,10 @@ SOURCE=.\res\icon3.ico
 # End Source File
 # Begin Source File
 
+SOURCE=".\res\tab-background.bmp"
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\Toolbar.bmp
 # End Source File
 # End Group
