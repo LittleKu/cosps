@@ -24,6 +24,8 @@
 #define	_SCB_REPLACE_MINIFRAME  ///浮动时候替换原来TOOL WINDOWS的框架
 #include "sizecbar.h"
 #include "scbarg.h"
+#include "gtbutil.h"
+#include "gtb.h"
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

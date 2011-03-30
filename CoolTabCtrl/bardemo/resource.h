@@ -12,6 +12,11 @@
 #define IDD_DIALOGBAR2                  135
 #define IDI_ICON1                       136
 #define IDB_TAB_BACKGROUND              138
+#define IDB_BACKGROUND                  139
+#define IDB_LEFT                        140
+#define IDB_MIDDLE                      141
+#define IDB_RIGHT                       142
+#define IDB_SEPERATOR                   143
 #define IDC_COMBO1                      1002
 #define IDC_CHECK1                      1003
 #define IDC_CHECK2                      1004
@@ -26,7 +31,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32773
 #define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           101

@@ -55,7 +55,7 @@ protected:  // control bar embedded members
 	CChildView		m_wndView;
 	CString			m_strInfo;
 	CBitmap			m_bmpBkg;
-
+	CCoolTabCtrl::CTabBitmapSet m_tabBitmapSet;
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CMainFrame)
@@ -68,6 +68,8 @@ protected:
 	afx_msg void OnSelchangedTree(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+private:
+	void LoadResource();
 };
 
 /////////////////////////////////////////////////////////////////////////////

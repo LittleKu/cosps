@@ -13,6 +13,29 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BACKGROUND          BITMAP  DISCARDABLE     "res\\background.bmp"
+IDB_LEFT                BITMAP  DISCARDABLE     "res\\left.bmp"
+IDB_MIDDLE              BITMAP  DISCARDABLE     "res\\middle.bmp"
+IDB_RIGHT               BITMAP  DISCARDABLE     "res\\right.bmp"
+IDB_SEPERATOR           BITMAP  DISCARDABLE     "res\\seperator.BMP"
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)

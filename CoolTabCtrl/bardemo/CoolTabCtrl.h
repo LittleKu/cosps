@@ -50,6 +50,17 @@ public:
 		UINT GetAreaWidth(CDC *pDC);
 		void Draw(CDC *pDC,UINT nStyle,BOOL bActive,BOOL bHovered = FALSE);
 	};
+
+	class CTabBitmapSet
+	{
+	public:
+		CBitmap* m_pBackground;
+		CBitmap* m_pSeperator;
+		CBitmap* m_pLeft;
+		CBitmap* m_pMiddle;
+		CBitmap* m_pRight;
+		void Draw(CDC *pDC, CRect* lpRect);
+	};
 	DECLARE_DYNCREATE(CCoolTabCtrl)
 // Construction
 public:
@@ -75,6 +86,10 @@ public:
 	void SetBackgroundBitmap(CBitmap *pCBitmap) 
 	{
 		this->m_pBkgBitmap = pCBitmap;
+	}
+	void SetTabBitmapSet(CTabBitmapSet *pTabBitmapSet)
+	{
+		m_tabBitmapSet = *pTabBitmapSet;
 	}
 	void SetBorder(UINT border)
 	{
@@ -117,6 +132,7 @@ private:
 	UINT		m_nBorder;
 	CPtrList	m_PageList;
 	CBitmap*	m_pBkgBitmap;
+	CTabBitmapSet m_tabBitmapSet;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -120,7 +120,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	/// 需要注意的是:同一个ControlBar只能加入一个"一级子窗口"
 	m_bmpBkg.LoadBitmap(IDB_TAB_BACKGROUND);
 	m_TabCtrl.SetBackgroundBitmap(&m_bmpBkg);
-	m_TabCtrl.SetBorder(1);
+
+	LoadResource();
+	m_TabCtrl.SetTabBitmapSet(&m_tabBitmapSet);
+	m_TabCtrl.SetBorder(2);
 	m_TabCtrl.Create(TCS_UP|WS_CHILD|WS_VISIBLE,CRect(0,0,100,100),&m_wndMyBar1,125);
 	/////////////这一段代码创建树型控件////////////
 	if (!m_wndTree.Create(WS_CHILD|WS_VISIBLE|
@@ -139,7 +142,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	///将树型控件加入到TabCtrl中
 	m_TabCtrl.AddPage(&m_wndTree,"VC知识库",IDI_ICON1);
 	m_TabCtrl.AddPage(RUNTIME_CLASS(CVCKBASEDlg),IDD_DIALOGBAR,"第二页",IDI_ICON2);
-	m_TabCtrl.AddPage(RUNTIME_CLASS(CMyDlg),IDD_DIALOGBAR2,"第三页",IDI_ICON3);
+	m_TabCtrl.AddPage(RUNTIME_CLASS(CMyDlg),IDD_DIALOGBAR2,"第三页+Long Text Test",IDI_ICON3);
+	m_TabCtrl.AddPage(RUNTIME_CLASS(CMyDlg),IDD_DIALOGBAR2,"Fourth Page Without Icon",0);
+	m_TabCtrl.AddPage(RUNTIME_CLASS(CMyDlg),IDD_DIALOGBAR,"第5页",0);
 
 	m_TabCtrl.UpdateWindow();
 	////////对话框///////////
@@ -256,4 +261,22 @@ void CMainFrame::OnSelchangedTree(NMHDR* pNMHDR, LRESULT* pResult)
 
 	Invalidate();
 	*pResult = 0;
+}
+
+void CMainFrame::LoadResource()
+{
+	m_tabBitmapSet.m_pBackground = new CBitmap;
+	m_tabBitmapSet.m_pBackground->LoadBitmap(IDB_BACKGROUND);
+
+	m_tabBitmapSet.m_pLeft = new CBitmap;
+	m_tabBitmapSet.m_pLeft->LoadBitmap(IDB_LEFT);
+
+	m_tabBitmapSet.m_pMiddle = new CBitmap;
+	m_tabBitmapSet.m_pMiddle->LoadBitmap(IDB_MIDDLE);
+
+	m_tabBitmapSet.m_pRight = new CBitmap;
+	m_tabBitmapSet.m_pRight->LoadBitmap(IDB_RIGHT);
+
+	m_tabBitmapSet.m_pSeperator = new CBitmap;
+	m_tabBitmapSet.m_pSeperator->LoadBitmap(IDB_SEPERATOR);
 }

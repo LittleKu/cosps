@@ -106,6 +106,10 @@ SOURCE=.\CoolTabCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\gtb.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainFrm.cpp
 # End Source File
 # Begin Source File
@@ -147,6 +151,14 @@ SOURCE=.\CoolTabCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\gtb.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\gtbutil.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainFrm.h
 # End Source File
 # Begin Source File
@@ -179,6 +191,10 @@ SOURCE=.\VCKBASEDlg.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\res\background.bmp
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\BarDemo.ico
 # End Source File
 # Begin Source File
@@ -200,6 +216,22 @@ SOURCE=.\res\icon2.ico
 # Begin Source File
 
 SOURCE=.\res\icon3.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\left.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\middle.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\right.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\seperator.BMP
 # End Source File
 # Begin Source File
 

@@ -43,7 +43,7 @@ CCoolTabCtrl::CCoolTabCtrl()
 	m_nStyle = TCS_DOWN;
 	m_nActivePage = -1;
 	m_nFocusedPage = -1;
-	m_nBorder = 1;
+	m_nBorder = 0;
 	m_bEraseBkgnd = TRUE;
 	m_pBkgBitmap = NULL;
 }
@@ -108,17 +108,94 @@ BOOL CCoolTabCtrl::Create(UINT wStyle, const CRect &rect, CWnd *pParentWnd, UINT
 
 BOOL CCoolTabCtrl::OnEraseBkgnd(CDC* pDC) 
 {
-	if(m_bEraseBkgnd)
-	{
-		CRect rect;
-		GetWindowRect(&rect);
-		ScreenToClient(&rect);
-		CBrush brush(GetSysColor(COLOR_3DFACE));
-		pDC->FillRect(rect,&brush);
-	}
+// 	if(m_bEraseBkgnd)
+// 	{
+// 		CRect rect;
+// 		GetWindowRect(&rect);
+// 		ScreenToClient(&rect);
+// 		CBrush brush(GetSysColor(COLOR_3DFACE));
+// 		pDC->FillRect(rect,&brush);
+// 	}
 	return TRUE;
 }
 
+void CCoolTabCtrl::CTabBitmapSet::Draw(CDC *pDC, CRect* lpRect)
+{
+	BITMAP bmp;
+	m_pLeft->GetBitmap(&bmp);
+	
+	CRect rect = *lpRect;
+	PaintBmp(pDC, &rect, m_pLeft, COPY);
+
+	rect.left += bmp.bmWidth;
+	rect.right -= 5;
+	PaintBmp(pDC, &rect, m_pMiddle, STRETCH);
+
+	rect = *lpRect;
+	rect.right += bmp.bmWidth;
+	rect.left = rect.right - 31;
+	PaintBmp(pDC, &rect, m_pRight, COPY);
+}
+
+void CCoolTabCtrl::OnPaint() 
+{
+	CPaintDC	dc(this);
+	CPen	*pOldPen = dc.GetCurrentPen();
+	CFont	*pOldFont = dc.SelectObject(&m_font);
+	int		nOldBkMode = dc.SetBkMode(TRANSPARENT);
+	CPageItem	*pItem;
+	POSITION	pos;
+	int		nItemIndex = 0;
+	COLORREF oldColor;
+	BOOL active = FALSE;
+
+	if(m_tabBitmapSet.m_pBackground != NULL)
+	{
+		CRect rect;
+		GetTabsRect(&rect);
+		
+		PaintBmp(&dc, &rect, m_tabBitmapSet.m_pBackground, STRETCH);
+	}
+	DrawFrame(&dc);
+
+	for(pos=m_PageList.GetHeadPosition();pos!=NULL;nItemIndex++)
+	{
+		pItem=(CPageItem*)m_PageList.GetNext(pos);
+		if(pItem)
+		{
+			if(m_nFocusedPage == nItemIndex)
+			{
+				oldColor = dc.SetTextColor(RGB(255, 0, 0));
+			}
+			if(nItemIndex > 0 && nItemIndex != m_nActivePage + 1)
+			{
+				CRect rect = pItem->m_rect;
+// 				BITMAP bmp;
+// 				m_tabBitmapSet.m_pSeperator->GetBitmap(&bmp);
+// 				rect.bottom = rect.top + bmp.bmHeight;
+// 				rect.right = rect.left + bmp.bmWidth;
+// 				PaintBmp(&dc, &rect, m_tabBitmapSet.m_pSeperator, STRETCH);
+
+				PaintBmp(&dc, &rect, m_tabBitmapSet.m_pSeperator, COPY);
+			}
+			active = (m_nActivePage==nItemIndex);
+			if(active)
+			{
+				m_tabBitmapSet.Draw(&dc, &pItem->m_rect);
+			}
+			pItem->Draw(&dc,m_nStyle,active);
+			if(m_nFocusedPage == nItemIndex)
+			{
+				dc.SetTextColor(oldColor);
+			}
+		}
+	}
+
+	dc.SetBkMode(nOldBkMode);
+	dc.SelectObject(pOldFont);
+	dc.SelectObject(pOldPen);
+}
+/*
 void CCoolTabCtrl::OnPaint() 
 {
 	CPaintDC	dc(this);
@@ -171,7 +248,7 @@ void CCoolTabCtrl::OnPaint()
 	dc.SelectObject(pOldFont);
 	dc.SelectObject(pOldPen);
 }
-
+*/
 
 CCoolTabCtrl::CPageItem* CCoolTabCtrl::AddPage(CWnd *pWnd, LPCTSTR sText, UINT IconID)
 {
@@ -228,17 +305,17 @@ void CCoolTabCtrl::GetClientRect(LPRECT lpRect)
 	CWnd::GetClientRect(lpRect);
 	if(m_nStyle&TCS_DOWN)
 	{
-		lpRect->left += 2;
-		lpRect->right -= 2;
-		lpRect->top += 2;
+// 		lpRect->left += 2;
+// 		lpRect->right -= 2;
+// 		lpRect->top += 2;
 		lpRect->bottom -= ITEMBUTTON_HEIGHT;
 	}
 	else if(m_nStyle&TCS_UP)
 	{
-		lpRect->left += 2;
-		lpRect->right -= 2;
-		lpRect->top += ITEMBUTTON_HEIGHT;
-		lpRect->bottom -= 2;
+// 		lpRect->left += 2;
+// 		lpRect->right -= 2;
+// 		lpRect->bottom -= 2;
+		lpRect->top += ITEMBUTTON_HEIGHT;		
 	}
 }
 
@@ -268,6 +345,7 @@ void CCoolTabCtrl::CPageItem::Draw(CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHo
 {
 	CRect rect = m_rect;
 	rect.top += 5;
+	/*
 	if(nStyle&TCS_DOWN)
 	{
 		if(bActive)
@@ -330,6 +408,7 @@ void CCoolTabCtrl::CPageItem::Draw(CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHo
 		pDC->MoveTo(rect.right,rect.top + 1);
 		pDC->LineTo(rect.right,rect.bottom);	
 	}
+	*/
 	///////////调整位置//////////
 	rect.left += 5;
 	rect.right -= 2;
@@ -354,7 +433,7 @@ void CCoolTabCtrl::CPageItem::Draw(CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHo
 			sText += "...";
 		}
 		
-		pDC->DrawText(sText, &rect, DT_LEFT /*| DT_VCENTER */| DT_SINGLELINE);
+		pDC->DrawText(sText, &rect, /*DT_LEFT */ DT_CENTER | DT_SINGLELINE);
 	}
 }
 
@@ -365,10 +444,10 @@ void CCoolTabCtrl::AutoSize()
 	if(PageCount < 1) return;
 	CPageItem	*pItem;
 	POSITION	pos;
-	CRect		rect,ClientRect,ItemRect;
+	CRect		rect,ClientRect,tabItemRect;
 
 	GetClientRect(ClientRect);
-	ClientRect.DeflateRect(m_nBorder+1,m_nBorder+1);
+//	ClientRect.DeflateRect(m_nBorder+1,m_nBorder+1);
 	GetWindowRect(rect);
 	ScreenToClient(rect);
 
@@ -388,7 +467,7 @@ void CCoolTabCtrl::AutoSize()
 		rect.right -= 6;
 		rect.bottom = rect.top + ITEMBUTTON_HEIGHT;
 	}
-	ItemRect = rect;
+	tabItemRect = rect;
 	int AreaWidth = 0,ItemMaxWidth,ItemIndex=0;
 	ItemMaxWidth = rect.Width()/m_PageList.GetCount();
 	BOOL	bMonoSpace = ((m_nStyle&TCS_MONOSPACE) == TCS_MONOSPACE)?1:0;
@@ -401,31 +480,31 @@ void CCoolTabCtrl::AutoSize()
 			if(!bMonoSpace)
 				ItemMaxWidth = pItem->GetAreaWidth(pDC);
 			AreaWidth += ItemMaxWidth;
-			ItemRect.right = ItemRect.left+ItemMaxWidth-1;
-			pItem->m_rect = ItemRect;
-			ItemRect.left = ItemRect.right + 1;
+			tabItemRect.right = tabItemRect.left+ItemMaxWidth-1 + 35;
+			pItem->m_rect = tabItemRect;
+			tabItemRect.left = tabItemRect.right + 1;
 			if(pItem->m_pWnd)
 				pItem->m_pWnd->MoveWindow(ClientRect);
 		}
 	}
 	////////当需要的空间大于实际空间时进行调整////
-	if(AreaWidth > rect.Width() && !bMonoSpace)
-	{
-		ItemRect = rect;
-		int AreaWidth,MaxWidth = rect.Width()/PageCount;
-		for(pos=m_PageList.GetHeadPosition();pos!=NULL;)
-		{
-			pItem=(CPageItem*)m_PageList.GetNext(pos);
-			if(pItem)
-			{
-				AreaWidth = pItem->GetAreaWidth(pDC);
-				ItemMaxWidth = (ItemMaxWidth < AreaWidth)?MaxWidth:AreaWidth;
-				ItemRect.right = ItemRect.left+ItemMaxWidth;
-				pItem->m_rect = ItemRect;
-				ItemRect.left = ItemRect.right + 1;
-			}
-		}
-	}
+// 	if(AreaWidth > rect.Width() && !bMonoSpace)
+// 	{
+// 		tabItemRect = rect;
+// 		int AreaWidth,MaxWidth = rect.Width()/PageCount;
+// 		for(pos=m_PageList.GetHeadPosition();pos!=NULL;)
+// 		{
+// 			pItem=(CPageItem*)m_PageList.GetNext(pos);
+// 			if(pItem)
+// 			{
+// 				AreaWidth = pItem->GetAreaWidth(pDC);
+// 				ItemMaxWidth = (ItemMaxWidth < AreaWidth)?MaxWidth:AreaWidth;
+// 				tabItemRect.right = tabItemRect.left+ItemMaxWidth;
+// 				pItem->m_rect = tabItemRect;
+// 				tabItemRect.left = tabItemRect.right + 1;
+// 			}
+// 		}
+// 	}
 	pDC->SelectObject(pOldFont);
 	ReleaseDC(pDC);
 }
@@ -529,8 +608,8 @@ void CCoolTabCtrl::OnMouseMove( UINT nFlags, CPoint point )
 void CCoolTabCtrl::OnSizing(UINT fwSide, LPRECT pRect) 
 {
 	CWnd::OnSizing(fwSide, pRect);
-	m_bEraseBkgnd = FALSE;
-	AutoSize();
+// 	m_bEraseBkgnd = FALSE;
+// 	AutoSize();
 }
 
 void CCoolTabCtrl::OnSize(UINT nType, int cx, int cy) 

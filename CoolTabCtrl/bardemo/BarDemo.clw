@@ -14,17 +14,17 @@ Class3=CMainFrame
 Class4=CAboutDlg
 
 ResourceCount=8
-Resource1=IDR_MAINFRAME
+Resource1=IDD_DIALOGBAR2 (Chinese (P.R.C.))
 Class2=CChildView
-Resource2=IDD_DIALOGBAR
+Resource2=IDD_ABOUTBOX
 Class5=CVCKBASEDlg
-Resource3=IDD_ABOUTBOX
+Resource3=IDR_MAINFRAME
 Class6=CMyDlg
-Resource4=IDD_DIALOGBAR2
+Resource4=IDD_DIALOGBAR
 Resource5=IDD_DIALOGBAR (Chinese (P.R.C.))
 Resource6=IDR_MAINFRAME (Chinese (P.R.C.))
 Resource7=IDD_ABOUTBOX (Chinese (P.R.C.))
-Resource8=IDD_DIALOGBAR2 (Chinese (P.R.C.))
+Resource8=IDD_DIALOGBAR2
 
 [CLS:CBarDemoApp]
 Type=0
