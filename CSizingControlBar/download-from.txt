@@ -1,0 +1,6 @@
+
+http://www.codeproject.com/KB/toolbars/sizecbar.aspx
+
+CSizingControlBar - a resizable control bar
+By Cristi Posea | 15 Aug 2000
+DevStudio-like docking window
