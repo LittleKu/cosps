@@ -1580,6 +1580,19 @@ HWND CPPToolTip::GetWndFromPoint(const LPPOINT lpPoint, PPTOOLTIP_INFO & ti, BOO
 			if (FindTool(hWndTemp, &pt, ti) || !bCheckTool)
 				return hWndTemp;
 		} //if
+		else	//For support Top Level Window(Dialog)
+		{
+			// handle special case of disabled child windows
+			::ScreenToClient(hWnd, &pt);
+			hWndTemp = ::ChildWindowFromPoint(hWnd, pt);
+			if (NULL == hWndTemp)
+				return NULL;
+			if ((!::IsWindowEnabled(hWndTemp)) && bCheckTool)
+				return NULL;
+			
+			if (FindTool(hWndTemp, &pt, ti) || !bCheckTool)
+				return hWndTemp;
+		}
 	} //if
 
 	return NULL;
