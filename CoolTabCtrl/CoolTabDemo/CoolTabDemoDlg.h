@@ -24,6 +24,7 @@ class CCoolTabDemoDlg : public CResizableDialog
 // Construction
 public:
 	CCoolTabDemoDlg(CWnd* pParent = NULL);	// standard constructor
+	virtual ~CCoolTabDemoDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CCoolTabDemoDlg)
@@ -38,11 +39,12 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-
+	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
 // Implementation
 protected:
 	HICON m_hIcon;
 	CResMgr m_resMgr;
+	TabButtonGroup* m_tabBtnGroup;
 	CBitmapTabCtrl m_mainTabCtrl;
 	CTempDlg  dlg1;
 	CTempDlg2 dlg2;
@@ -54,7 +56,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnAppExit();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
+	
 	DECLARE_MESSAGE_MAP()
 };
 

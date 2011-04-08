@@ -69,6 +69,16 @@ CCoolTabDemoDlg::CCoolTabDemoDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_tabBtnGroup = NULL;
+}
+
+CCoolTabDemoDlg::~CCoolTabDemoDlg()
+{
+	if(m_tabBtnGroup != NULL)
+	{
+		delete m_tabBtnGroup;
+		m_tabBtnGroup = NULL;
+	}
 }
 
 void CCoolTabDemoDlg::DoDataExchange(CDataExchange* pDX)
@@ -86,6 +96,8 @@ BEGIN_MESSAGE_MAP(CCoolTabDemoDlg, CResizableDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_COMMAND(ID_APP_EXIT, OnAppExit)
 	ON_WM_CREATE()
+    ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
+    ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -135,8 +147,9 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 
 	//Bitmap Tab
 	m_mainTabCtrl.SetBackgroundBitmap(&m_resMgr.m_mainBkgDps);
-	TabButtonGroup* pTbg = new TabButtonGroup(&m_resMgr.m_mainNormalDps, &m_resMgr.m_mainHighlightDps, 
+	m_tabBtnGroup = new TabButtonGroup(&m_resMgr.m_mainNormalDps, &m_resMgr.m_mainHighlightDps, 
 		&m_resMgr.m_mainClickedDps, &m_resMgr.m_mainDisabledDps);
+	TabButtonGroup* pTbg = m_tabBtnGroup;
 	//button 1
 	CRect rect;
 	rect.left = 336;
@@ -162,6 +175,8 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 	m_mainTabCtrl.m_pTabBtnGroup = pTbg;
 	m_mainTabCtrl.UpdateWindow();
 	this->CenterWindow();
+
+	EnableToolTips(TRUE);   // enable tool tips for view
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -272,3 +287,47 @@ int CCoolTabDemoDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_mainTabCtrl.SetAutoAdjustWidth(FALSE);
 	return 0;
 }
+
+int CCoolTabDemoDlg::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
+{
+	POSITION pos = m_mainTabCtrl.m_tabItemList.GetHeadPosition();
+	int i=0;
+	CString tip;
+	CRect rect;
+	while(pos)
+	{
+		CCoolTabItem * pItem=(CCoolTabItem *)m_mainTabCtrl.m_tabItemList.GetNext(pos);
+		i++;
+		if(pItem->m_rect.PtInRect(point))
+		{
+// 			if(pItem->m_sText.IsEmpty())
+// 				return -1;
+			
+#if _WIN32_WINNT >= 0x0501
+			pTI->cbSize = sizeof(TOOLINFO) - sizeof(void *);
+#else
+			pTI->cbSize = sizeof(TOOLINFO);
+#endif
+			pTI->uFlags = TTF_IDISHWND;
+			pTI->hwnd = m_mainTabCtrl.GetSafeHwnd();
+			pTI->uId = (UINT_PTR)m_mainTabCtrl.GetSafeHwnd();
+			rect = pItem->m_rect;
+//			rect.OffsetRect(10, 10);
+			pTI->rect = rect;
+			tip.Format("tips for %d", i);
+			pTI->lpszText = (LPTSTR)malloc(sizeof(TCHAR)*(tip.GetLength()+1));// (LPTSTR)(LPCTSTR)pItem->m_strCaption;
+			_tcscpy(pTI->lpszText, tip);
+			return i;
+		}
+	}
+	return -1;
+}
+
+BOOL CCoolTabDemoDlg::OnToolTipNotify(UINT id, NMHDR *pNMHDR,
+							  LRESULT *pResult)
+{
+	TOOLTIPTEXT *pText = (TOOLTIPTEXT *)pNMHDR;
+//	pText->hinst = AfxGetInstanceHandle();
+	return TRUE;
+}
+

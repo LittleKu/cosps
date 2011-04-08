@@ -86,7 +86,7 @@ protected:
 	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-protected:
+public:
 	BOOL        m_bEraseBkgnd;
 	CFont		m_font;
 	int			m_nActivePage;
