@@ -1,0 +1,10 @@
+For use :
+Copy the files ResExplorer.hlp and ResExplorer.cnt on the same directory as ResExplorer.exe.
+
+For the update a help :
+Copy the files ResExplorer.rtf and ResExplorer.cnt on the hlp directory.
+
+- ResExplorer.rtf is a Word file
+- ResExplorer.cnt is a NotePad file
+
+The "rebuild All" command on the Visual Studio 6.0 tool update ResExplorer.hlp (on the Debug or Release directory).

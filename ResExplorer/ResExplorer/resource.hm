@@ -1,0 +1,5 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by ResExplorer.rc
+//
+#define HIDC_BTN_PROGRAM                0x806407e0    // IDD_ABOUTBOX
+#define HIDC_RESEXICON                  0x806407e5    // IDD_ABOUTBOX

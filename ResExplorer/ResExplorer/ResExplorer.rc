@@ -1,0 +1,747 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+// Generated Help ID header file
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.hm"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 12, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\ResExplorer.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.fra\\afxres.rc""          // Standard components\r\n"
+    "#include ""l.fra\\afxprint.rc""        // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ResExplorer.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\Toolbar.bmp"
+IDB_RESICONES           BITMAP  DISCARDABLE     "res\\resicone.bmp"
+IDB_SORTICONS           BITMAP  DISCARDABLE     "res\\sorticons.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE_AS
+    SEPARATOR
+    BUTTON      ID_PANE_BACK
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    SEPARATOR
+    BUTTON      ID_APP_ABOUT
+    BUTTON      ID_CONTEXT_HELP
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN, HELP
+        MENUITEM SEPARATOR
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT, GRAYED
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        , GRAYED
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        , GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Exit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "Pane Back",                   ID_PANE_BACK
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "Toolbar",                     ID_MAKE_TOOLBAR
+        MENUITEM SEPARATOR
+        MENUITEM "Bitmap",                      ID_BITMAP_CVRT
+        MENUITEM "Symbols",                     ID_SYMBOL_DLG
+    END
+    POPUP "&Display"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Large Icons",                 ID_VIEW_LARGEICON
+        MENUITEM "Back Color",                  ID_DSPL_BKCOLOR
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM SEPARATOR
+        MENUITEM "&About ResExplorer...",       ID_APP_ABOUT
+    END
+END
+
+IDR_RVCOPYPAST MENU DISCARDABLE 
+BEGIN
+    POPUP "ReportViewCopyPast"
+    BEGIN
+        MENUITEM "Text Copy",                   ID_EDRV_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "Raw Text",                    ID_EDRV_TRUE
+        MENUITEM "Quotes",                      ID_EDRV_QUOT
+    END
+END
+
+IDR_DVCOPYPAST MENU DISCARDABLE 
+BEGIN
+    POPUP "DrawVIewCopyPast"
+    BEGIN
+        MENUITEM "BITMAP copy",                 ID_EDDV_COPY
+        MENUITEM SEPARATOR
+        MENUITEM "Without BackColor",           ID_ICON_BKCOLOR, GRAYED
+        MENUITEM "Black BackColor",             ID_ICON_BKCOLOR1, GRAYED
+        MENUITEM "White BackColor",             ID_ICON_BKCOLOR2, GRAYED
+    END
+END
+
+IDR_EVCOPYPAST MENU DISCARDABLE 
+BEGIN
+    POPUP "EdtViewCopyPast"
+    BEGIN
+        MENUITEM "Copy",                        ID_EDIT_COPY, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Select All",                  ID_EDIT_SELECT_ALL
+    END
+END
+
+IDR_RVSYMBOLS MENU DISCARDABLE 
+BEGIN
+    POPUP "symbolHeader"
+    BEGIN
+        MENUITEM "Substitution Priority",       ID_HSYM_SORT0
+        MENUITEM SEPARATOR
+        MENUITEM "Values in Descending order",  ID_HSYM_SORT1
+        MENUITEM "Values in Ascending order",   ID_HSYM_SORT2
+        MENUITEM SEPARATOR
+        MENUITEM "Symbols in Descending order", ID_HSYM_SORT3
+        MENUITEM "Symbols in Ascending order",  ID_HSYM_SORT4
+    END
+    POPUP "symbolList"
+    BEGIN
+        MENUITEM "Copy",                        ID_SYM_COPY, GRAYED
+        MENUITEM "Paste",                       ID_SYM_PAST
+        MENUITEM "Replace",                     ID_SYM_REPLACE, GRAYED
+        MENUITEM "Find",                        ID_SYM_SEARCH, GRAYED
+        MENUITEM "Edit",                        ID_SYM_MODIF, GRAYED
+        MENUITEM "Remove",                      ID_SYM_DELETE, GRAYED
+        MENUITEM "Remove All",                  ID_SYM_DELETEALL, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Format #define",              ID_SYM_FORMAT
+        MENUITEM SEPARATOR
+        MENUITEM "Cut Fat",                     ID_SYM_CUTFAT, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "Multi Define",                ID_SYM_MLTDEF, GRAYED
+        MENUITEM "Select All",                  ID_SYM_SELALL, GRAYED
+    END
+END
+
+IDR_UVSORTHD MENU DISCARDABLE 
+BEGIN
+    POPUP "UpperViewSortHeader"
+    BEGIN
+        MENUITEM "Column Order",                65535, INACTIVE
+        MENUITEM SEPARATOR
+        MENUITEM "Column 0",                    ID_UVSORTCOL00, GRAYED
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    VK_F1,          ID_CONTEXT_HELP,        VIRTKEY, SHIFT
+    VK_F1,          ID_HELP,                VIRTKEY 
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 61
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About ResExplorer..."
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_RESEXICON,11,17,20,20,SS_NOTIFY,0,
+                    HIDC_RESEXICON
+    LTEXT           "ResExplorer version 2.0",IDC_STATIC,40,10,119,8,
+                    SS_NOPREFIX
+    LTEXT           "Copyright (C) 2003/2006",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,14
+    PUSHBUTTON      "Free Tools, by...",IDC_BTN_PROGRAM,46,41,
+                    143,13,BS_FLAT,0,HIDC_BTN_PROGRAM
+END
+
+IDD_DIRPICK_DLG DIALOGEX 0, 0, 226, 215
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Selecte a file or a folder"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,185,195,35,14
+    PUSHBUTTON      "Cancel",IDCANCEL,143,195,35,14
+    EDITTEXT        IDC_ED_SELECT,5,5,215,15,ES_AUTOHSCROLL
+    CONTROL         "Tree1",IDC_TREE_FILES,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    TVS_SHOWSELALWAYS | TVS_INFOTIP | WS_BORDER | WS_TABSTOP,
+                    5,25,215,165,WS_EX_CLIENTEDGE
+    COMBOBOX        IDC_COMBO_EXT,5,195,125,85,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+END
+
+IDD_TOOLBAR_DLG DIALOGEX 0, 0, 214, 65
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "TOOLBAR icons building"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,159,14,48,12
+    PUSHBUTTON      "Cancel",IDCANCEL,159,38,48,12
+    EDITTEXT        IDC_ED_WIDTH,90,42,48,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN_WIDTH,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_HOTTRACK,132,42,11,12
+    EDITTEXT        IDC_ED_IMAGES,90,24,48,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN_IMAGES,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_HOTTRACK,132,24,12,12
+    EDITTEXT        IDC_ED_BMP_DIM,90,6,48,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Bitmap size in pixels",IDC_STATIC,12,6,72,12,
+                    SS_CENTERIMAGE
+    LTEXT           "Build icon count",IDC_STATIC,12,24,60,12,SS_CENTERIMAGE
+    LTEXT           "Build icon width",IDC_STATIC,12,42,72,12,
+                    SS_CENTERIMAGE
+END
+
+IDD_BITMAP_DLG DIALOGEX 0, 0, 143, 81
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Bitmap extraction"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Bitmap extraction of the icon or cursor resource",
+                    IDC_STATIC,7,7,108,19
+    CONTROL         "Without",IDC_RD_BKCOLOR_1,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,20,40,47,10
+    CONTROL         "Black",IDC_RD_BKCOLOR_2,"Button",BS_AUTORADIOBUTTON,
+                    20,50,43,10
+    CONTROL         "White",IDC_RD_BKCOLOR_3,"Button",
+                    BS_AUTORADIOBUTTON,20,59,49,10
+    GROUPBOX        "Back Colors",IDC_STATIC,7,30,66,44
+    DEFPUSHBUTTON   "OK",IDOK,86,38,48,12
+    PUSHBUTTON      "Cancel",IDCANCEL,86,62,48,12
+END
+
+IDD_SYMBOL_DLG DIALOG DISCARDABLE  0, 0, 192, 114
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Symbols"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,140,80,45,12
+    PUSHBUTTON      "Cancel",IDCANCEL,140,95,45,12
+    CONTROL         "&standards",IDC_CHK_SYMSTD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,70,85,47,10
+    CONTROL         "e&xterns",IDC_CHK_SYMEXT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,70,95,43,10
+    CONTROL         "List1",IDC_LST_SYMBOL,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_SHAREIMAGELISTS | LVS_EDITLABELS | 
+                    WS_BORDER | WS_TABSTOP,5,0,180,70
+    GROUPBOX        "In use",IDC_STATIC,60,75,70,35
+    DEFPUSHBUTTON   "File Open",IDC_BTN_SYMFILE,5,95,45,12
+    DEFPUSHBUTTON   "Generate",IDC_BTN_GENERATE,5,80,45,12
+END
+
+IDD_LISTBOX_DLG DIALOG DISCARDABLE  0, 0, 90, 30
+STYLE WS_POPUP | WS_BORDER
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,2,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", " \0"
+            VALUE "FileDescription", "ResExplorer\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "ResExplorer\0"
+            VALUE "LegalCopyright", "Copyright © 2006\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "ResExplorer.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "  ResExplorer\0"
+            VALUE "ProductVersion", "1, 0, 2, 0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+        BLOCK "040c04b0"
+        BEGIN
+            VALUE "Comments", "Free Tool\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "Application MFC ResExplorer\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "ResExplorer\0"
+            VALUE "LegalCopyright", "Copyright (C) 2003\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "ResExplorer.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Application ResExplorer\0"
+            VALUE "ProductVersion", "1, 0, 2, 0\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200, 0x40c, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 54
+    END
+
+    IDD_DIRPICK_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 220
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 209
+        HORZGUIDE, 20
+        HORZGUIDE, 25
+        HORZGUIDE, 190
+        HORZGUIDE, 195
+    END
+
+    IDD_TOOLBAR_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 207
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 58
+    END
+
+    IDD_BITMAP_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 134
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 74
+    END
+
+    IDD_SYMBOL_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 183
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 107
+    END
+
+    IDD_LISTBOX_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 83
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 23
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIRPICK_DLG DLGINIT
+BEGIN
+    IDC_COMBO_EXT, 0x403, 1, 0
+"\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSHAND            CURSOR  DISCARDABLE     "res\\cur_hand.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "ResExplorer\n\nResExp\nFiles ResExp (*.res)\n.res\nResExplorer.Document\nResExp Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDS_SYMCUTFAT           "Analyze table of the symbols in progress..."
+    IDS_SYMCUTFATCUR        " %d%% of the symbol table analyzed..."
+    IDS_SYMCUTFATOK         " %d unutilised symbols were withdrawn from the table"
+    IDS_SYMDEFMLT           "The new symbol already exists in the table"
+    IDS_SYMGENWAIT          "Generation of the table of the symbols in progress..."
+    IDS_SYMMULTDEF          "This symbol is also used in"
+    IDS_SYMNOTFOUND         "This symbol was not found in the library"
+    IDS_SYMPRIORITY         "The table of the symbols is arranged by priority of substitution"
+    IDS_SYMREADWAIT         "Reading of the symbols in progress..."
+    IDS_SYMSEARCHWAIT       "Search symbol in the present library..."
+    IDS_SYMSORTMSG          "The table of the symbols is arranged by %s of the %ss "
+    IDS_TTPSDLGGLIST        "A left click on this line\ndisplay the CDIALOG"
+    IDS_TTPSDLGLLIST        "This line display the\nproperties of the element"
+    IDS_TTPSDLGLLIST0       "This line describes the CDIALOG"
+    IDS_TTPSMENGLIST        "A left click on this line display the menu"
+    IDS_TTPSMENLLIST        "This line display the properties of the menu"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDS_TTPSREPORTHD        "Modify the column width"
+    IDS_TTPSREPORTLST       "Bubbles of assistance"
+    IDS_TTPSUPPERVIEW_H     "Column width or sorting of the lines\nby ascending/descending order"
+    IDS_TTPSUPPERVIEW_L     "Left click: reading of the resources of the file\nRight click: place the name of the file in\nthe list of the recent files"
+    IDS_WHITEIMAGE          "White image"
+    IDS_WRITEERROR          "Write error"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDS_RER_DIALOG          "LName\nLStyle\nLExStyle\nRx\nRy\nRcx\nRcy\nLClass\nLHelp\nLText"
+    IDS_RER_DLGINIT         "LDialog\nLItem\nLno\nLStatus\nLText"
+    IDS_RER_ICON            "LID\nLno\nRWidth\nRHeight\nCColors\nCCompression\nLComments"
+    IDS_RER_MENU            "LID\nRStatus\nRHelp\nRNom\nLTooltip\nLtext"
+    IDS_RER_STRING          "LID\nLText"
+    IDS_RER_SYMBOLS         "NRValue\nTLSymbol"
+    IDS_RER_TOOLBAR         "LID\nRno\nRWidth\nRHeight\nLTooltip\nLComments"
+    IDS_RER_UPPERVIEW       "TLName\nNRSize\nNRResource\nNRTotal\nTLFolder"
+    IDS_RER_VERSION         "LID\nLName\nLValue"
+    IDS_REX_ACCEL           "LID\nLcnt"
+    IDS_REX_DIALOG          "LName\nLStyle\nLExStyle\nRDimension\nRcnt\nRcx\nRcy\nLTitle"
+    IDS_REX_MENU            "LID\nRStatus\nRHelp\nRcnt\nR "
+    IDS_REX_TOOLBAR         "LElement\nRcnt\nRWidth\nRHeight\nL "
+    IDS_SORTHDMSG           "The list is classified by %s of the column %s"
+    IDS_SORTORDERBACK       "descending order"
+    IDS_SORTORDERFOR        "ascending order"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDS_ANALISEDFILES       "%d analyzed files..."
+    IDS_CBWRITEERROR        "Write error in the Clipboard"
+    IDS_DATAERROR           "Error interns in the data"
+    IDS_EMPTY               "Empty"
+    IDS_EMPTYMSKIM          "Image and Mask empty"
+    IDS_FILEEXPLORE         "Count the resources contained in the files..."
+    IDS_INVALIDFMT          "Format not accepted for this resource"
+    IDS_INVALIDNBR          "The input text cannot be read like a number"
+    IDS_NOTIMPLEMENT        "This function is not implemented !"
+    IDS_READERROR           "Read error"
+    IDS_READY               "Ready"
+    IDS_RER_ACCEL           "LID\nLKey\nLType\nLComments"
+    IDS_RER_ANI             "LID\nLRIFF\nLKey\nLValue\nLComments"
+    IDS_RER_BITMAP          "LID\nRWidth\nRHeight\nCColors\nCCompression\nL "
+    IDS_RER_CURSOR          "LID\nLno\nRWidth\nRHeight\nCColors\nCCompression\nCHotspot_x\nCHotspot_y\nLComments"
+    IDS_RER_DEFAULT         "LData\nLData\nLText"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "ResExplorer"
+    AFX_IDS_IDLEMESSAGE     "For Help, press F1"
+    AFX_IDS_HELPMODEMESSAGE "Select an object on which to get Help"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "MAJ"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "DEF"
+    ID_INDICATOR_OVR        "ECR"
+    ID_INDICATOR_REC        "ENR"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_OPEN            "Open a program file or a folder that contains program files\nOpen"
+    ID_FILE_SAVE_AS         "Save the selected resource (the choice of the type of file allows)\nWrite as..."
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout..."
+    ID_APP_EXIT             "Quit the application\nExit"
+    ID_HELP_INDEX           "Opens Help\nHelp Topics"
+    ID_HELP_FINDER          "List Help topics\nHelp Topics"
+    ID_HELP_USING           "Display instructions about how to use help\nHelp"
+    ID_CONTEXT_HELP         "Display help for clicked on buttons, menus and windows\nHelp"
+    ID_HELP                 "Display help for current task or command\nHelp"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_BITMAP_CVRT          "Extraction of the BITMAP of a ICON or CURSOR resource\nExtraction Bitmap"
+    ID_DSPL_BKCOLOR         "BackColor used to post ICONs or CURSORs"
+    ID_EDDV_COPY            "Copy the BITMAP in the clipboard"
+    ID_EDRV_COPY            "Copy the selection in the Clipboard\nCopy"
+    ID_EDRV_QUOT            "The text is placed between doubles quotes\nQuotes"
+    ID_EDRV_TRUE            "The text is posted raw, the control characters are carried out (instead of being only posted)\nRaw Text"
+    ID_MAKE_TOOLBAR         "Creation of a TOOLBAR starting from resource BITMAP\nToolbar creation"
+    ID_PANE_BACK            "Return to pane back\nPane back"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SYM_COPY             "Copy the selection in the Clipboard\nCopy"
+    ID_SYM_CUTFAT           "Withdraw table the unutilised symbols"
+    ID_SYM_DELETE           "Erase the selected symbols\nErase"
+    ID_SYM_FORMAT           "Read/write compatible format with 'C' (#define)/n#define"
+    ID_SYM_MLTDEF           "Post only the symbols with multiple definition (several names for the same ID)\nMultiple definitions"
+    ID_SYM_MODIF            "To modify the value or the symbol indicated by the cursor\nModify"
+    ID_SYM_PAST             "Loading of the symbols contained in the clipboard\nPaste"
+    ID_SYM_REPLACE          "Erase the selected symbols and charges the symbols contained in the clipboard\nTo replace"
+    ID_SYM_SEARCH           "Find the symbol in all the resources present"
+    ID_SYM_SELALL           "Select all the symbols\nSelect all"
+    ID_SYMBOL_DLG           "Creation, loading or modification of a table of the symbols"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_LARGEICON       "Change the size of the thumbnails during the posting of the Bitmap resources\nThumbnails size"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_BTN_GENERATE        "Generate a table of the symbols corresponding to the loaded librairy"
+    IDC_BTN_PROGRAM         "A left click on this zone gives information on the Programmer..."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDC_BTN_SYMFILE         "Allows to choose the file containing a new table of the symbols"
+    IDC_CHK_SYMEXT          "Validate the substitution of the symbols of this table"
+    IDC_CHK_SYMSTD          "Validate the substitution of the 'Standard' symbols (IDOK, IDCANCEL...)"
+    IDC_ED_BMP_DIM          "Post dimensions in pixels of the BITMAP"
+    IDC_ED_IMAGES           "Fix the number of the thrumbnails which will be carried out in the width of the BITMAP"
+    IDC_ED_WIDTH            "Fix the width of the thrumbnails (in pixels)"
+    IDC_LST_SYMBOL          "Symbols Table; a right click opens a contextual menu"
+    IDC_RD_BKCOLOR_1        "Without BackColor"
+    IDC_RD_BKCOLOR_2        "Black BackColor"
+    IDC_RD_BKCOLOR_3        "White BackColor"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDOK                    "Finish by preserving all the modifications carried out"
+    IDCANCEL                "Finish by cancelling all the operations carried out"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_ID_PREVIEW_NEXT     "text"
+END
+
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE 12, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\ResExplorer.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.fra\afxres.rc"          // Standard components
+#include "l.fra\afxprint.rc"        // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

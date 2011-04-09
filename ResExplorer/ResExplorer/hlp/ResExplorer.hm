@@ -1,0 +1,72 @@
+ 
+// Commands (ID_* and IDM_*) 
+HID_BITMAP_CVRT                         0x18000
+HID_DSPL_BKCOLOR                        0x18001
+HID_EDDV_COPY                           0x18002
+HID_EDRV_COPY                           0x18003
+HID_EDRV_QUOT                           0x18004
+HID_EDRV_TRUE                           0x18005
+HID_HSYM_SORT0                          0x18006
+HID_HSYM_SORT1                          0x18007
+HID_HSYM_SORT2                          0x18008
+HID_HSYM_SORT3                          0x18009
+HID_HSYM_SORT4                          0x1800A
+HID_ICON_BKCOLOR                        0x1800B
+HID_ICON_BKCOLOR1                       0x1800C
+HID_ICON_BKCOLOR2                       0x1800D
+HID_MAKE_TOOLBAR                        0x1800E
+HID_PANE_BACK                           0x1800F
+HID_SYM_COPY                            0x18010
+HID_SYM_CUTFAT                          0x18011
+HID_SYM_DELETE                          0x18012
+HID_SYM_DELETEALL                       0x18013
+HID_SYM_FORMAT                          0x18014
+HID_SYM_MLTDEF                          0x18016
+HID_SYM_MODIF                           0x18017
+HID_SYM_PAST                            0x18018
+HID_SYM_REPLACE                         0x18019
+HID_SYM_SEARCH                          0x1801A
+HID_SYM_SELALL                          0x1801B
+HID_SYMBOL_DLG                          0x1801C
+HID_UVSORTCOL00                         0x18020
+HID_UVSORTCOL01                         0x18021
+HID_UVSORTCOL02                         0x18022
+HID_UVSORTCOL03                         0x18023
+HID_UVSORTCOL04                         0x18024
+HID_UVSORTCOL05                         0x18025
+HID_UVSORTCOL06                         0x18026
+HID_UVSORTCOL07                         0x18027
+HID_UVSORTCOL08                         0x18028
+HID_UVSORTCOL09                         0x18029
+HID_UVSORTCOL10                         0x1802A
+HID_UVSORTCOL11                         0x1802B
+HID_UVSORTCOL12                         0x1802C
+ 
+// Prompts (IDP_*) 
+ 
+// Resources (IDR_*) 
+HIDR_MAINFRAME                          0x20080
+HIDR_DRAWVIEW                           0x20081
+HIDR_DVCOPYPAST                         0x20082
+HIDR_EVCOPYPAST                         0x20083
+HIDR_LEFTVIEW                           0x20084
+HIDR_LISTVIEW                           0x20085
+HIDR_REPORTVIEW                         0x20086
+HIDR_REPORTVIEWHD                       0x20087
+HIDR_REPORTVIEWLS                       0x20088
+HIDR_RVCOPYPAST                         0x20089
+HIDR_RVSYMBOLS                          0x2008A
+HIDR_TEXTVIEW                           0x2008B
+HIDR_UPPERVIEW                          0x2008C
+HIDR_UPPERVIEWHD                        0x2008D
+HIDR_UVSORTHD                           0x2008E
+ 
+// Dialogs (IDD_*) 
+HIDD_ABOUTBOX                           0x20064
+HIDD_BITMAP_DLG                         0x20065
+HIDD_DIRPICK_DLG                        0x20066
+HIDD_LISTBOX_DLG                        0x20067
+HIDD_SYMBOL_DLG                         0x20068
+HIDD_TOOLBAR_DLG                        0x20069
+ 
+// Frame Controls (IDW_*) 

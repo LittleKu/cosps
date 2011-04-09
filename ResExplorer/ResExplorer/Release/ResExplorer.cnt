@@ -1,0 +1,12 @@
+:Base ResExplorer.hlp
+1 ResExplorer
+2 Généralités=ix_generalites
+2 Présentation=ix_presentation
+2 Ressource=ix_resource
+1 Menus
+2 Menu Fichier=menu_file
+2 Menu Edition=menu_edit
+2 Menu Outils=menu_tool
+2 Menu Affichage=menu_view
+2 Menu Aide (?)=menu_help
+2 Presse Papier=clip_board
