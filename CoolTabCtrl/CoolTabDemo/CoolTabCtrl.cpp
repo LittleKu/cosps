@@ -206,6 +206,7 @@ CCoolTabCtrl::CCoolTabCtrl()
 	m_nFocusedPage = -1;
 	m_bEraseBkgnd = TRUE;
 	m_nTabItemHeight = 28;
+	m_bMouseHovered = FALSE;
 }
 
 CCoolTabCtrl::~CCoolTabCtrl()
@@ -244,6 +245,8 @@ BEGIN_MESSAGE_MAP(CCoolTabCtrl, CWnd)
 	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_MESSAGE(WM_MOUSEHOVER, OnMouseHover)
 	ON_WM_SETCURSOR()
+	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipNotify)
+    ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -599,12 +602,24 @@ void CCoolTabCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CCoolTabCtrl::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	TRACKMOUSEEVENT   tme; 
-	tme.cbSize   =   sizeof(tme); 
-	tme.dwFlags   =   TME_HOVER | TME_LEAVE; 
-	tme.hwndTrack   =   this->m_hWnd; 
-	tme.dwHoverTime   =   10; 
-	::_TrackMouseEvent(&tme);
+	if(!m_bMouseHovered)
+	{
+		TRACKMOUSEEVENT tme; 
+		tme.cbSize      = sizeof(tme); 
+		tme.dwFlags     = TME_LEAVE; 
+		tme.hwndTrack   = GetSafeHwnd();
+		tme.dwHoverTime = HOVER_DEFAULT;
+		::_TrackMouseEvent(&tme);
+		
+		m_bMouseHovered = TRUE;
+	}
+
+	int nPageIndex = GetPageIndex(point);
+	if(m_nFocusedPage != nPageIndex)
+	{
+		m_nFocusedPage = nPageIndex;
+		Invalidate();
+	}
 
 	CWnd::OnMouseMove(nFlags, point);
 }
@@ -616,21 +631,27 @@ LRESULT CCoolTabCtrl::OnMouseLeave(WPARAM wParam, LPARAM lParam)
 		m_nFocusedPage = -1;
 		Invalidate();
 	}
+	m_bMouseHovered = FALSE;
+
 	return 0;
 }
 
 LRESULT CCoolTabCtrl::OnMouseHover(WPARAM wParam, LPARAM lParam)
 {
+	//This event only occured once if the mouse doesn't move out of the erea
+	/*
 	CPoint pt;
 	GetCursorPos(&pt);
 	ScreenToClient(&pt);
 	
 	int nPageIndex = GetPageIndex(pt);
+	TRACE2("Focus=%d, now=%d\n", m_nFocusedPage, nPageIndex);
 	if(m_nFocusedPage != nPageIndex)
 	{
 		m_nFocusedPage = nPageIndex;
 		Invalidate();
 	}
+	*/
 	return 0;
 }
 
@@ -748,7 +769,52 @@ int CCoolTabCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_font.CreateFontIndirect(&logFont);
 	SetFont(&m_font);
 
+	EnableToolTips(TRUE);   // enable tool tips for view
 	return 0;
 }
 
+int CCoolTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
+{
+	POSITION pos = m_tabItemList.GetHeadPosition();
+	int i=0;
+	CString tip;
+	CRect rect;
+	while(pos)
+	{
+		CCoolTabItem * pItem=(CCoolTabItem *)m_tabItemList.GetNext(pos);
+		i++;
+		if(pItem->m_rect.PtInRect(point))
+		{
+			pTI->cbSize = sizeof(TOOLINFO);
+			pTI->uFlags = 0;
+			pTI->hwnd = GetSafeHwnd();
+			pTI->uId = i;
+			pTI->rect = pItem->m_rect;
+			tip.Format("tips for %d", i);
+			pTI->lpszText = (LPTSTR)malloc(sizeof(TCHAR)*(tip.GetLength()+1));
+			_tcscpy(pTI->lpszText, tip);
+//			pTI->lpszText = LPSTR_TEXTCALLBACK;
+			return i;
+		}
+	}
+	return -1;
+}
+
+BOOL CCoolTabCtrl::OnToolTipNotify(UINT id, NMHDR *pNMHDR,
+									  LRESULT *pResult)
+{
+	TOOLTIPTEXT *pText = (TOOLTIPTEXT *)pNMHDR;
+	UINT nID =pNMHDR->idFrom;
+
+	CString str;
+#ifdef _DEBUG
+	static int count = 0;	
+	str.Format("(%d) hwndFrom=%d, idFrom=%d, code=%d, lpszText=%d, szText=%d, hinst=%d, uflags=%d\n", count++,
+		pNMHDR->hwndFrom, pNMHDR->idFrom, pNMHDR->code, pText->lpszText, pText->szText, pText->hinst, pText->uFlags);
+	TRACE(str);
+#endif
+	str.Format("tips for %d", nID);
+	_tcscpy(pText->szText, str);
+	return TRUE;
+}
 

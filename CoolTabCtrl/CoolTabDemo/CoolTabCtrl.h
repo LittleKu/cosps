@@ -57,6 +57,7 @@ public:
 	virtual void Draw(CDC* pDC);
 	virtual UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	virtual void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);
+	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
 public:
 	//Attributes
 	UINT GetStyle() { return m_nStyle; }
@@ -84,6 +85,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
@@ -94,6 +96,7 @@ public:
 	UINT		m_nStyle;
 	CPtrList	m_tabItemList;
 	UINT        m_nTabItemHeight;
+	BOOL        m_bMouseHovered;
 
 	//static variables
 	static CPen PEN_3DFACE;	

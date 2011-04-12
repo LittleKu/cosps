@@ -39,7 +39,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+//	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
 // Implementation
 protected:
 	HICON m_hIcon;
@@ -56,7 +56,6 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnAppExit();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
 	
 	DECLARE_MESSAGE_MAP()
