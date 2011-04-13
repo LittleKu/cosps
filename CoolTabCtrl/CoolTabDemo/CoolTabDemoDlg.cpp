@@ -73,7 +73,6 @@ CCoolTabDemoDlg::CCoolTabDemoDlg(CWnd* pParent /*=NULL*/)
 
 CCoolTabDemoDlg::~CCoolTabDemoDlg()
 {
-	CResMgr::Dispose();
 }
 
 void CCoolTabDemoDlg::DoDataExchange(CDataExchange* pDX)

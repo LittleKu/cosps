@@ -16,6 +16,8 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+CGarbo theResMgrGarbo;
+
 CString CResMgr::BUTTON_STATUS_NAME[BS_MAX] = {"normal", "highlighted", "clicked", "disabled"};
 CResMgr* CResMgr::m_instance = NULL;
 
@@ -26,15 +28,6 @@ CResMgr* CResMgr::GetInstance()
 		m_instance = new CResMgr;
 	}
 	return m_instance;
-}
-
-void CResMgr::Dispose()
-{
-	if(m_instance != NULL)
-	{
-		delete m_instance;
-		m_instance = NULL;
-	}
 }
 
 CResMgr::CResMgr()
