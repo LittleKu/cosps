@@ -17,6 +17,16 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 CString CResMgr::BUTTON_STATUS_NAME[BS_MAX] = {"normal", "highlighted", "clicked", "disabled"};
+CResMgr* CResMgr::m_instance = NULL;
+
+CResMgr* CResMgr::GetInstance()
+{
+	if(m_instance == NULL)
+	{
+		m_instance = new CResMgr;
+	}
+	return m_instance;
+}
 
 CResMgr::CResMgr()
 {
@@ -198,85 +208,23 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 	
 	return TRUE;
 }
-BOOL CResMgr::Init(LPCSTR lpcBaseDir)
+
+CBitmap* CResMgr::GetBitmap(LPCTSTR lpcstrImagePath)
 {
-	//Main Tool Bar
-	CString tempPath = lpcBaseDir;
-	BOOL ret = FALSE;
-	do 
+	void* value = NULL;
+	if(m_pathToBitmapMap.Lookup(lpcstrImagePath, value))
 	{
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\background.bmp", m_mainBkg)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\normal.bmp", m_mainNormal)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\highlight.bmp", m_mainHighlight)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\one_clicked.bmp", m_mainClicked1)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\two_clicked.bmp", m_mainClicked2)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_button_bar\\three_clicked.bmp", m_mainClicked3)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\tabcontrol\\background.bmp", m_tiBkg)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\tabcontrol\\left.bmp", m_tiLeft)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\tabcontrol\\middle.bmp", m_tiMid)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\tabcontrol\\right.bmp", m_tiRight)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\tabcontrol\\seperator.BMP", m_tiSep)) )
-		{
-			break;
-		}
+		return (CBitmap*)value;
+	}
+	return NULL;
+}
 
-		if( !(ret = LoadImage(tempPath + "\\main_buttonbar_dps\\main_buttonbar_normal.bmp", m_mainBkgDps)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_buttonbar_dps\\main_buttonbar_normal.bmp", m_mainNormalDps)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_buttonbar_dps\\main_buttonbar_highlight.bmp", m_mainHighlightDps)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_buttonbar_dps\\main_buttonbar_clicked.bmp", m_mainClickedDps)) )
-		{
-			break;
-		}
-		if( !(ret = LoadImage(tempPath + "\\main_buttonbar_dps\\main_buttonbar_disabled.bmp", m_mainDisabledDps)) )
-		{
-			break;
-		}
-		CBitmap m_mainBkgDps;
-		CBitmap m_mainNormalDps;
-		CBitmap m_mainHighlightDps;
-		CBitmap m_mainClickedDps;
-		CBitmap m_mainDisabledDps;
-
-	} while ( FALSE );
-	
-	return ret;
+ImageButtonGroup* CResMgr::GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup)
+{
+	void* value = NULL;
+	if(m_btnGroupMap.Lookup(lpstrImgBtnGroup, value))
+	{
+		return (ImageButtonGroup*)value;
+	}
+	return NULL;
 }

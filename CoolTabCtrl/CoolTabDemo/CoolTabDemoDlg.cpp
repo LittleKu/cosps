@@ -69,16 +69,10 @@ CCoolTabDemoDlg::CCoolTabDemoDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_tabBtnGroup = NULL;
 }
 
 CCoolTabDemoDlg::~CCoolTabDemoDlg()
 {
-	if(m_tabBtnGroup != NULL)
-	{
-		delete m_tabBtnGroup;
-		m_tabBtnGroup = NULL;
-	}
 }
 
 void CCoolTabDemoDlg::DoDataExchange(CDataExchange* pDX)
@@ -130,12 +124,7 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	if(!m_resMgr.Init(".\\skins\\en"))
-	{
-		AfxMessageBox("Failed to load skin files\n");
-		EndDialog(IDCANCEL);
-	}
-	if(!m_resMgr.Load(".\\skins\\en.xml"))
+	if(!CResMgr::GetInstance()->Load(".\\skins\\en.xml"))
 	{
 		AfxMessageBox("Failed to load skin files\n");
 		EndDialog(IDCANCEL);
@@ -146,36 +135,7 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 	// allow any size
 	ResetMinTrackSize();
 
-//	ShowWindow(SW_SHOWMAXIMIZED);
-
-	//Bitmap Tab
-	m_mainTabCtrl.SetBackgroundBitmap(&m_resMgr.m_mainBkgDps);
-	m_tabBtnGroup = new TabButtonGroup(&m_resMgr.m_mainNormalDps, &m_resMgr.m_mainHighlightDps, 
-		&m_resMgr.m_mainClickedDps, &m_resMgr.m_mainDisabledDps);
-	TabButtonGroup* pTbg = m_tabBtnGroup;
-	//button 1
-	CRect rect;
-	rect.left = 336;
-	rect.top = 6;
-	rect.right = rect.left + 152;
-	rect.bottom = rect.top + 50;
-	pTbg->AddTabButton(&rect);
-	
-	//button 2
-	rect.left = 495;
-	rect.top = 6;
-	rect.right = rect.left + 152;
-	rect.bottom = rect.top + 50;
-	pTbg->AddTabButton(&rect);
-	
-	//button 3
-	rect.left = 654;
-	rect.top = 6;
-	rect.right = rect.left + 152;
-	rect.bottom = rect.top + 50;
-	pTbg->AddTabButton(&rect);
-	
-	m_mainTabCtrl.m_pTabBtnGroup = pTbg;
+	m_mainTabCtrl.SetImageButtonGroup(CResMgr::GetInstance()->GetImageButtonGroup("main_button_bar"));
 	m_mainTabCtrl.UpdateWindow();
 	this->CenterWindow();
 

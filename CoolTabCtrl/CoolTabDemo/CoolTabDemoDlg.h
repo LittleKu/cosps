@@ -43,8 +43,6 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	CResMgr m_resMgr;
-	TabButtonGroup* m_tabBtnGroup;
 	CBitmapTabCtrl m_mainTabCtrl;
 	CTempDlg  dlg1;
 	CTempDlg2 dlg2;

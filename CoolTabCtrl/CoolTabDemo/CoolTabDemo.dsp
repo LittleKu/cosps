@@ -153,6 +153,10 @@ SOURCE=.\CCommonDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\common.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\CoolTabCtrl.h
 # End Source File
 # Begin Source File

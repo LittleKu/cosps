@@ -26,5 +26,6 @@
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 #include "gtbutil.h"
 #include "gtb.h"
+#include "common.h"
 
 #endif // !defined(AFX_STDAFX_H__1AA1A423_9124_459C_B061_2963832A5F1D__INCLUDED_)

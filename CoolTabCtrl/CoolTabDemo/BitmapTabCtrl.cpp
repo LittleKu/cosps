@@ -1,33 +1,6 @@
 #include "stdafx.h"
 #include "BitmapTabCtrl.h"
-
-
-TabButtonGroup::TabButtonGroup(CBitmap* pNormal, CBitmap* pHighlight, CBitmap* pClicked, CBitmap* pDisabled)
-{
-	m_pNormal = pNormal;
-	m_pHightlight = pHighlight;
-	m_pClicked = pClicked;
-	m_pDisabled = pDisabled;
-}
-TabButtonGroup::~TabButtonGroup()
-{
-	CRect* pRect = NULL;
-	int i, size = m_tabBtnArray.GetSize();
-	for(i = 0; i < size; i++)
-	{
-		pRect = (CRect*)m_tabBtnArray.GetAt(i);
-		if(pRect != NULL)
-		{
-			delete pRect;
-		}
-	}
-	m_tabBtnArray.RemoveAll();
-}
-void TabButtonGroup::AddTabButton(LPCRECT lpcRect)
-{
-	CRect* pRect = new CRect(lpcRect);
-	m_tabBtnArray.Add(pRect);
-}
+#include "ResMgr.h"
 
 IMPLEMENT_DYNCREATE(CBitmapTabCtrl, CCoolTabCtrl)
 
@@ -36,7 +9,7 @@ BEGIN_MESSAGE_MAP(CBitmapTabCtrl, CCoolTabCtrl)
 END_MESSAGE_MAP()
 
 
-CBitmapTabCtrl::CBitmapTabCtrl() : m_pBkgBitmap(NULL), m_pTabBtnGroup(NULL)
+CBitmapTabCtrl::CBitmapTabCtrl() : m_pBkgBitmap(NULL), m_pImgBtnGroup(NULL)
 {
 }
 CBitmapTabCtrl::~CBitmapTabCtrl()
@@ -44,11 +17,19 @@ CBitmapTabCtrl::~CBitmapTabCtrl()
 }
 
 void CBitmapTabCtrl::SetBackgroundBitmap(CBitmap* pBitmap) 
-{ 
+{
 	m_pBkgBitmap = pBitmap;
+	if(pBitmap != NULL)
+	{
+		SetTabItemHeight(GetBitmapSize(m_pBkgBitmap).cy);
+	}
+}
 
-	SetTabItemHeight(GetBitmapSize(m_pBkgBitmap).cy);
-
+void CBitmapTabCtrl::SetImageButtonGroup(ImageButtonGroup* pImgBtnGroup)
+{
+	this->m_pImgBtnGroup = pImgBtnGroup;
+	CBitmap* pBitmap = CResMgr::GetInstance()->GetBitmap(m_pImgBtnGroup->btnBitmapPath[BS_NORMAL]);
+	SetBackgroundBitmap(pBitmap);
 }
 BOOL CBitmapTabCtrl::OnEraseBkgnd(CDC* pDC)
 {
@@ -66,29 +47,31 @@ BOOL CBitmapTabCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CBitmapTabCtrl::AutoSize()
 {
+	if(m_pImgBtnGroup == NULL)
+	{
+		return;
+	}
 	CRect viewClientRect;
 	GetViewClientRect(&viewClientRect);
 
-	POSITION	 pos = NULL;
+//	POSITION	 pos = NULL;
 	CCoolTabItem *pItem = NULL;
 	UINT nIndex = 0;
 	CRect* pRect = NULL;
+	IMAGE_BUTTON* pImgBtn = NULL;
 	//1. Set the width of each tab item
 	//2. Move all the client window to the client area by the way
-	for(pos = m_tabItemList.GetHeadPosition(); pos != NULL; nIndex++)
+	POSITION pos1 = m_tabItemList.GetHeadPosition();
+	POSITION pos2 = m_pImgBtnGroup->imgBtnPtrList.GetHeadPosition();
+	for( ; pos1 != NULL && pos2 != NULL; nIndex++)
 	{
-		pItem=(CCoolTabItem*)m_tabItemList.GetNext(pos);
+		pItem=(CCoolTabItem*)m_tabItemList.GetNext(pos1);
 		ASSERT(pItem);
 
-		pRect = (CRect*)m_pTabBtnGroup->m_tabBtnArray.GetAt(nIndex);
-		ASSERT(pRect);
+		pImgBtn = (IMAGE_BUTTON*)m_pImgBtnGroup->imgBtnPtrList.GetNext(pos2);
+		ASSERT(pImgBtn);
 
-// 		pItem->m_rect.left = pRect->left;
-// 		pItem->m_rect.right = pRect->right;
-// 		pItem->m_rect.top = 0;
-// 		pItem->m_rect.bottom = m_nTabItemHeight;
-
-		pItem->m_rect = *pRect;
+		pItem->m_rect = pImgBtn->rect;
 		
 		//Move all the client window to the client area by the way
 		if(pItem->m_pWnd != NULL)
@@ -141,32 +124,36 @@ UINT CBitmapTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 {
 	int nTabItemIndex = GetPageIndex(pItem);
 	ASSERT(nTabItemIndex >= 0);
-	ASSERT(nTabItemIndex < m_pTabBtnGroup->m_tabBtnArray.GetSize());
+	ASSERT(nTabItemIndex < m_pImgBtnGroup->imgBtnPtrList.GetCount());
 
-	CRect* pRect = (CRect*)m_pTabBtnGroup->m_tabBtnArray.GetAt(nTabItemIndex);
-	ASSERT(pRect);
-
-	return pRect->Width();
+	return pItem->m_rect.Width();
+// 	CRect* pRect = (CRect*)m_pTabBtnGroup->m_tabBtnArray.GetAt(nTabItemIndex);
+// 	ASSERT(pRect);
+// 
+// 	return pRect->Width();
 }
 void CBitmapTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
 {
 	CBitmap* pBitmap = NULL;
+	CString bmpPath;
 	if(bActive)
 	{
-		pBitmap = m_pTabBtnGroup->m_pClicked;
+		bmpPath = m_pImgBtnGroup->btnBitmapPath[BS_CLICKED];
 	}
 	else if(bHovered)
 	{
-		pBitmap = m_pTabBtnGroup->m_pHightlight;
+		bmpPath = m_pImgBtnGroup->btnBitmapPath[BS_HIGHLIGHT];
 	}
 	//Disabled state now is not available
 	else
 	{
-		pBitmap = m_pTabBtnGroup->m_pNormal;
+		bmpPath = m_pImgBtnGroup->btnBitmapPath[BS_NORMAL];
 	}
 
+	pBitmap = CResMgr::GetInstance()->GetBitmap(bmpPath);
+
 	//The bitmap rect
-	CRect* pRect = (CRect*)m_pTabBtnGroup->m_tabBtnArray.GetAt(nIndex);
+	CRect* pRect = (CRect*)(&(pItem->m_rect));
 	ASSERT(pRect);
 	
 	CDC dc;
@@ -181,4 +168,43 @@ void CBitmapTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActi
 
 	dc.SelectObject(pOldBitmap);
 	dc.DeleteDC();
+}
+
+int CBitmapTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
+{
+	POSITION pos = m_tabItemList.GetHeadPosition();
+	POSITION imgBtnPos = NULL;
+	int i=0;
+	CString tip;
+	CRect rect;
+	while(pos)
+	{
+		CCoolTabItem * pItem=(CCoolTabItem *)m_tabItemList.GetNext(pos);
+		i++;
+		if(pItem->m_rect.PtInRect(point))
+		{
+			pTI->cbSize = sizeof(TOOLINFO);
+			pTI->uFlags = 0;
+			pTI->hwnd = GetSafeHwnd();
+			pTI->uId = i;
+			pTI->rect = pItem->m_rect;
+
+			imgBtnPos = m_pImgBtnGroup->imgBtnPtrList.FindIndex(i - 1);
+			if(imgBtnPos == NULL)
+			{
+				tip.Format("tips for %d", i);
+				pTI->lpszText = (LPTSTR)malloc(sizeof(TCHAR)*(tip.GetLength()+1));
+				_tcscpy(pTI->lpszText, tip);
+			}
+			else
+			{
+				IMAGE_BUTTON* pImgBtn = m_pImgBtnGroup->imgBtnPtrList.GetAt(imgBtnPos);
+				ASSERT(pImgBtn);
+				pTI->lpszText = (LPTSTR)malloc(sizeof(TCHAR)*(pImgBtn->sTips.GetLength()+1));
+				_tcscpy(pTI->lpszText, pImgBtn->sTips);				
+			}
+			return i;
+		}
+	}
+	return -1;
 }
