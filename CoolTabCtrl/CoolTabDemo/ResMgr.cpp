@@ -28,6 +28,15 @@ CResMgr* CResMgr::GetInstance()
 	return m_instance;
 }
 
+void CResMgr::Dispose()
+{
+	if(m_instance != NULL)
+	{
+		delete m_instance;
+		m_instance = NULL;
+	}
+}
+
 CResMgr::CResMgr()
 {
 
@@ -53,7 +62,7 @@ CResMgr::~CResMgr()
 	}
 	m_pathToBitmapMap.RemoveAll();
 
-	ImageButtonGroup* pImgBtnGroup;
+	CImgBtnGroup* pImgBtnGroup;
 	pos = m_btnGroupMap.GetStartPosition();
 	while (pos != NULL)
 	{
@@ -61,21 +70,11 @@ CResMgr::~CResMgr()
 		
 		if(pValue != NULL)
 		{
-			pImgBtnGroup = (ImageButtonGroup*)pValue;
+			pImgBtnGroup = (CImgBtnGroup*)pValue;
 			delete pImgBtnGroup;
 		}
 	}
 	m_btnGroupMap.RemoveAll();
-}
-
-BOOL CResMgr::LoadImage(LPCSTR lpcstrImagePath, CBitmap &cBitmap)
-{
-	HBITMAP hb = (HBITMAP)::LoadImage(/*AfxGetInstanceHandle()*/NULL, lpcstrImagePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);	
-	if(hb != NULL)
-	{
-		return cBitmap.Attach(hb);
-	}
-	return FALSE;
 }
 
 void CResMgr::ToPath(LPCSTR skinFolder, LPCSTR subFolder, LPCSTR imageName, CString& ret)
@@ -98,6 +97,12 @@ void CResMgr::ToPath(LPCSTR skinFolder, LPCSTR subFolder, LPCSTR imageName, CStr
 
 void CResMgr::LoadImage(CString& imagePath)
 {
+	void* ptr = NULL;
+	if(m_pathToBitmapMap.Lookup(imagePath, ptr))
+	{
+		TRACE1("The file %s has been loaded\n", imagePath);
+		return;
+	}
 	HBITMAP hb = (HBITMAP)::LoadImage(NULL, imagePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if(hb == NULL)
 	{
@@ -110,7 +115,7 @@ void CResMgr::LoadImage(CString& imagePath)
 	m_pathToBitmapMap.SetAt(imagePath, pBitmap);
 }
 
-IMAGE_BUTTON* CResMgr::Init(TiXmlElement *pElement)
+CImgBtn* CResMgr::Init(TiXmlElement *pElement)
 {
 	if(pElement == NULL)
 	{
@@ -120,7 +125,7 @@ IMAGE_BUTTON* CResMgr::Init(TiXmlElement *pElement)
 	const char* lpcsValue = 0;
 	int nValue;
 
-	IMAGE_BUTTON* pImageBtn = new IMAGE_BUTTON;
+	CImgBtn* pImageBtn = new CImgBtn;
 
 	lpcsValue = pElement->Attribute("id", &nValue);
 	pImageBtn->id = nValue;
@@ -168,6 +173,7 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 
 	CString subFolder;
 	CBitmap* pBitmap = NULL;
+	void* ptr = NULL;
 	CString imagePath;
 
 	int i;
@@ -178,13 +184,16 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 
 		subFolder = pElement->Attribute("folder");
 
-
-		ImageButtonGroup* pImgBtnGroup = new ImageButtonGroup;
+		CImgBtnGroup* pImgBtnGroup = new CImgBtnGroup;
 		for(i = BS_MIN; i < BS_MAX; i++)
 		{
-			ToPath(skinFolder, subFolder, pElement->Attribute(BUTTON_STATUS_NAME[i]), imagePath);
-			pImgBtnGroup->btnBitmapPath[i] = imagePath;
+			ToPath(skinFolder, subFolder, pElement->Attribute(BUTTON_STATUS_NAME[i]), imagePath);			
 			LoadImage(imagePath);
+			if(m_pathToBitmapMap.Lookup(imagePath, ptr))
+			{
+				pBitmap = (CBitmap*)ptr;
+				pImgBtnGroup->m_pBitmaps[i] = pBitmap;
+			}
 		}
 
 		for(sub_node = node->FirstChild(); sub_node != NULL; sub_node = sub_node->NextSibling())
@@ -199,8 +208,8 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 				continue;
 			}
 
-			IMAGE_BUTTON* pImageBtn = Init(sub_element);
-			pImgBtnGroup->imgBtnPtrList.AddTail(pImageBtn);
+			CImgBtn* pImgBtn = Init(sub_element);
+			pImgBtnGroup->m_imgBtnArray.Add(pImgBtn);
 		}
 
 		m_btnGroupMap.SetAt(pElement->Value(), pImgBtnGroup);
@@ -219,12 +228,12 @@ CBitmap* CResMgr::GetBitmap(LPCTSTR lpcstrImagePath)
 	return NULL;
 }
 
-ImageButtonGroup* CResMgr::GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup)
+CImgBtnGroup* CResMgr::GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup)
 {
 	void* value = NULL;
 	if(m_btnGroupMap.Lookup(lpstrImgBtnGroup, value))
 	{
-		return (ImageButtonGroup*)value;
+		return (CImgBtnGroup*)value;
 	}
 	return NULL;
 }

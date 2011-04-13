@@ -12,7 +12,7 @@ public:
 	CBitmapTabCtrl();
 	virtual ~CBitmapTabCtrl();
 	void SetBackgroundBitmap(CBitmap* pBitmap);
-	void SetImageButtonGroup(ImageButtonGroup* pImgBtnGroup);
+	void SetImageButtonGroup(CImgBtnGroup* pImgBtnGroup);
 	void AutoSize();
 	void Draw(CDC* pDC);
 	UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
@@ -23,7 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
  	CBitmap* m_pBkgBitmap;
-	ImageButtonGroup* m_pImgBtnGroup;
+	CImgBtnGroup* m_pImgBtnGroup;
 };
 
 #endif

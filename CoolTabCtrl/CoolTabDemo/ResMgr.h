@@ -13,20 +13,19 @@ class TiXmlElement;
 
 class CResMgr  
 {
-public:
+private:
 	CResMgr();
+public:	
 	virtual ~CResMgr();
-	BOOL LoadImage(LPCSTR lpcstrImagePath, CBitmap &cBitmap);
 	BOOL Load(LPCSTR lpcstrSkinFile);
-public:
 	CBitmap* GetBitmap(LPCTSTR lpcstrImagePaht);
-	ImageButtonGroup* GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup);
+	CImgBtnGroup* GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup);
 	static CResMgr* GetInstance();
+	static void Dispose();
 private:
 	void ToPath(LPCSTR skinFolder, LPCSTR subFolder, LPCSTR imageName, CString& ret);
 	void CResMgr::LoadImage(CString& imagePath);
-	IMAGE_BUTTON* Init(TiXmlElement *pElement);
-
+	CImgBtn* Init(TiXmlElement *pElement);
 private:
 	CMapStringToPtr m_pathToBitmapMap;
 	CMapStringToPtr m_btnGroupMap;

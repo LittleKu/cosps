@@ -4,43 +4,43 @@
 enum EButtonStatus
 {
 	BS_NORMAL = 0,
-		BS_HIGHLIGHT,
-		BS_CLICKED,
-		BS_DISABLED,
-		BS_MAX
+	BS_HIGHLIGHT,
+	BS_CLICKED,
+	BS_DISABLED,
+	BS_MAX
 };
 
 #define BS_MIN BS_NORMAL
 
-typedef struct tagIMAGE_BUTTON
+class CImgBtn
 {
+public:
 	UINT id;
 	CRect rect;
-	CString sTips;
-}IMAGE_BUTTON;
+	CString sTips;	
+};
 
+typedef CArray<CImgBtn*, CImgBtn*> CImgBtnArray;
 
-typedef CList<IMAGE_BUTTON*, IMAGE_BUTTON*> CImgBtnPtrList;
-
-class ImageButtonGroup
+class CImgBtnGroup
 {
 public:
-	ImageButtonGroup() {}
-	virtual ~ImageButtonGroup() 
+	CImgBtnGroup() {}
+	virtual ~CImgBtnGroup() 
 	{
-		POSITION pos = imgBtnPtrList.GetHeadPosition();
-		IMAGE_BUTTON* pImageButton;
-		while(pos != NULL)
+ 		CImgBtn* pImgBtn;
+		int i, size = m_imgBtnArray.GetSize();
+		for(i = 0; i < size; i++)
 		{
-			pImageButton = (IMAGE_BUTTON*)imgBtnPtrList.GetNext(pos);
-			ASSERT(pImageButton);
-			delete pImageButton;
+			pImgBtn = (CImgBtn*)m_imgBtnArray.GetAt(i);
+			ASSERT(pImgBtn);
+			delete pImgBtn;
 		}
-		imgBtnPtrList.RemoveAll();
+		m_imgBtnArray.RemoveAll();
 	}
 public:
-	CString btnBitmapPath[BS_MAX];
-	CImgBtnPtrList imgBtnPtrList;
+	CBitmap* m_pBitmaps[BS_MAX];
+	CImgBtnArray m_imgBtnArray;
 };
 
 #endif
