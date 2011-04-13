@@ -16,14 +16,14 @@ ResourceCount=9
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Resource3=IDD_DIALOG_TEMP2
-Resource4=IDD_DIALOG_TEMP (Neutral)
+Resource4=IDR_MENU_MAIN (Neutral)
 Resource5=IDD_DIALOG_TEMP2 (English (U.S.))
 Resource6=IDD_ABOUTBOX (English (U.S.))
 Class4=CTempDlg
 Resource7=IDD_COOLTABDEMO_DIALOG
 Class5=CTempDlg2
 Resource8=IDD_COOLTABDEMO_DIALOG (English (U.S.))
-Resource9=IDR_MENU_MAIN (Neutral)
+Resource9=IDD_DIALOG_TEMP (Neutral)
 
 [CLS:CCoolTabDemoApp]
 Type=0

@@ -135,6 +135,11 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 		AfxMessageBox("Failed to load skin files\n");
 		EndDialog(IDCANCEL);
 	}
+	if(!m_resMgr.Load(".\\skins\\en.xml"))
+	{
+		AfxMessageBox("Failed to load skin files\n");
+		EndDialog(IDCANCEL);
+	}
 
 	AddAnchor(m_mainTabCtrl.GetSafeHwnd(), TOP_LEFT, BOTTOM_RIGHT);
 
