@@ -58,6 +58,7 @@ public:
 	virtual UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	virtual void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);
 	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+	virtual void DrawBk(CDC* pDC);
 public:
 	//Attributes
 	UINT GetStyle() { return m_nStyle; }

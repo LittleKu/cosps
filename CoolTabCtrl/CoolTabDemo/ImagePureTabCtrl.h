@@ -18,9 +18,8 @@ public:
 	UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);
 	int CImagePureTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
-protected:
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	DECLARE_MESSAGE_MAP()
+
+	virtual void DrawBk(CDC* pDC);
 public:
  	CBitmap* m_pBkgBitmap;
 	CImgBtnGroup* m_pImgBtnGroup;

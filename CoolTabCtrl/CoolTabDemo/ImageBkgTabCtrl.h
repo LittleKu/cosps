@@ -9,22 +9,17 @@ class CImageBkgTabCtrl : public CCoolTabCtrl
 {
 	DECLARE_DYNCREATE(CImageBkgTabCtrl)
 public:
-	CImageBkgTabCtrl();
+	CImageBkgTabCtrl(CImgTabBtn* pImgTabBtn = NULL);
 	virtual ~CImageBkgTabCtrl();
-	void SetBackgroundBitmap(CBitmap* pBitmap) { m_pBkgBitmap = pBitmap; }
-
+	void SetImgTabBtn(CImgTabBtn* pImgTabBtn) { m_pImgTabBtn = pImgTabBtn; }
 	void Draw(CDC* pDC);
 	UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);
+	virtual void DrawBk(CDC* pDC);
 protected:
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
-public:
-	CBitmap* m_pBkgBitmap;
-	CBitmap* m_pLeft;
-	CBitmap* m_pMid;
-	CBitmap* m_pRight;
-	CBitmap* m_pSep;
+private:
+	CImgTabBtn* m_pImgTabBtn;
 };
 
 #endif

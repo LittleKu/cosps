@@ -4,29 +4,25 @@
 IMPLEMENT_DYNCREATE(CImageBkgTabCtrl, CCoolTabCtrl)
 
 BEGIN_MESSAGE_MAP(CImageBkgTabCtrl, CCoolTabCtrl)
-	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
-CImageBkgTabCtrl::CImageBkgTabCtrl() : m_pBkgBitmap(NULL)
+CImageBkgTabCtrl::CImageBkgTabCtrl(CImgTabBtn* pImgTabBtn) : m_pImgTabBtn(pImgTabBtn)
 {
 }
 CImageBkgTabCtrl::~CImageBkgTabCtrl()
 {
 }
 
-BOOL CImageBkgTabCtrl::OnEraseBkgnd(CDC* pDC)
+void CImageBkgTabCtrl::DrawBk(CDC* pDC)
 {
-	if(m_pBkgBitmap != NULL)
+	if(m_pImgTabBtn->m_pTabPart[TB_PT_BACKGROUND] != NULL)
 	{
 		CRect rect;
 		CCoolTabCtrl::GetTabItemsRect(&rect);
 
-		PaintBmp(pDC, &rect, m_pBkgBitmap, STRETCH);
-
-		return TRUE;
+		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pTabPart[TB_PT_BACKGROUND], STRETCH);
 	}
-	return CCoolTabCtrl::OnEraseBkgnd(pDC);
 }
 
 void CImageBkgTabCtrl::Draw(CDC* pDC)
@@ -72,15 +68,16 @@ UINT CImageBkgTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 {
 	UINT nWidth = CCoolTabCtrl::CalcWidth(pItem, pDC);
 
+	int status = BS_CLICKED;
 	BITMAP bmp;
-	if(m_pLeft != NULL)
+	if(m_pImgTabBtn->m_pBitmaps[status][PS_LEFT] != NULL)
 	{
-		m_pLeft->GetBitmap(&bmp);
+		m_pImgTabBtn->m_pBitmaps[status][PS_LEFT]->GetBitmap(&bmp);
 		nWidth += bmp.bmWidth;
 	}
-	if(m_pRight != NULL)
+	if(m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT] != NULL)
 	{
-		m_pRight->GetBitmap(&bmp);
+		m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT]->GetBitmap(&bmp);
 		nWidth += bmp.bmWidth;
 	}
 	return nWidth;
@@ -88,25 +85,42 @@ UINT CImageBkgTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 void CImageBkgTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
 {
 	CRect rect = pItem->m_rect;
+	int status = BS_NORMAL;
 	if(bActive)
 	{
+		status = BS_CLICKED;		
+	}
+	else if(bHovered)
+	{
+		status = BS_HIGHLIGHT;
+	}
+
+	if(m_pImgTabBtn->m_pBitmaps[status][PS_LEFT] != NULL)
+	{
 		//Left
-		PaintBmp(pDC, &rect, m_pLeft, COPY);
+		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_LEFT], COPY);
 		
 		//Right
-		rect.left = rect.right - GetBitmapSize(m_pRight).cx;
-		PaintBmp(pDC, &rect, m_pRight, COPY);
-
+		rect.left = rect.right - GetBitmapSize(m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT]).cx;
+		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT], COPY);
+		
 		//Mid
 		rect.right = rect.left;
-		rect.left = pItem->m_rect.left + GetBitmapSize(m_pLeft).cx;
-		PaintBmp(pDC, &rect, m_pMid, STRETCH);
-
+		rect.left = pItem->m_rect.left + GetBitmapSize(m_pImgTabBtn->m_pBitmaps[status][PS_LEFT]).cx;
+		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_MID], STRETCH);
+		
 		rect = pItem->m_rect;
 	}
-	else if(nIndex > 0 && nIndex != (UINT)m_nActivePage + 1)
+	/*
+	if(bActive)
 	{
-		PaintBmp(pDC, &rect, m_pSep, COPY);
+
+	}
+	else 
+	*/
+	if(!bActive && nIndex > 0 && nIndex != (UINT)m_nActivePage + 1)
+	{
+		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pTabPart[TB_PT_SEPERATOR], COPY);
 	}
 	
 	rect.top += 8;

@@ -124,18 +124,14 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	if(!CResMgr::GetInstance()->Load(".\\skins\\en.xml"))
-	{
-		AfxMessageBox("Failed to load skin files\n");
-		EndDialog(IDCANCEL);
-	}
 
 	AddAnchor(m_mainTabCtrl.GetSafeHwnd(), TOP_LEFT, BOTTOM_RIGHT);
 
 	// allow any size
 	ResetMinTrackSize();
 
-	m_mainTabCtrl.SetImageButtonGroup(CResMgr::GetInstance()->GetImageButtonGroup("main_button_bar"));
+//	m_mainTabCtrl.SetImageButtonGroup(CResMgr::GetInstance()->GetImageButtonGroup("main_button_bar"));
+	m_mainTabCtrl.SetImgTabBtn(CResMgr::GetInstance()->GetImgTabBtn("doxygen"));
 	m_mainTabCtrl.UpdateWindow();
 	this->CenterWindow();
 
@@ -224,13 +220,6 @@ int CCoolTabDemoDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TODO: Add your specialized creation code here
 	m_mainTabCtrl.Create(WS_CHILD|WS_VISIBLE, clientRect, this, 8956);
-
-	//Image Tab
-//	m_mainTabCtrl.SetBackgroundBitmap(&m_resMgr.m_tiBkg);
-// 	m_mainTabCtrl.m_pLeft = &m_resMgr.m_tiLeft;
-// 	m_mainTabCtrl.m_pMid = &m_resMgr.m_tiMid;
-// 	m_mainTabCtrl.m_pRight = &m_resMgr.m_tiRight;
-// 	m_mainTabCtrl.m_pSep = &m_resMgr.m_tiSep;
 
 	dlg1.Create(IDD_DIALOG_TEMP, &m_mainTabCtrl);
 	m_mainTabCtrl.AddTab(&dlg1,"1stabcdddddddddddddddddd123",IDI_ICON2);

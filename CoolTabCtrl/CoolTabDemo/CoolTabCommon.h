@@ -14,6 +14,7 @@ enum EButtonStatus
 
 #define BS_MIN BS_NORMAL
 
+
 class CImgBtn
 {
 public:
@@ -44,5 +45,35 @@ public:
 	CBitmap* m_pBitmaps[BS_MAX];
 	CImgBtnArray m_imgBtnArray;
 };
+
+enum EPostion
+{
+	PS_LEFT = 0,
+	PS_MID,
+	PS_RIGHT,
+	PS_MAX
+};
+
+enum ETabBtnPartType
+{
+	TB_PT_BACKGROUND = 0,
+	TB_PT_SEPERATOR,
+	TB_PT_MAX
+};
+
+#define PS_MIN PS_LEFT
+#define TB_PT_MIN TB_PT_BACKGROUND
+
+class CImgTabBtn
+{
+public:
+	CImgTabBtn();
+public:
+	CBitmap* m_pTabPart[TB_PT_MAX];
+	CBitmap* m_pBitmaps[BS_MAX][PS_MAX];
+};
+
+extern CString BUTTON_STATUS_NAME[BS_MAX];
+extern CString TAB_BTN_PART_TYPE_NAME[TB_PT_MAX];
 
 #endif

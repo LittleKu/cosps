@@ -54,6 +54,11 @@ BOOL CCoolTabDemoApp::InitInstance()
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
+	if(!CResMgr::GetInstance()->Load(".\\skins\\en.xml"))
+	{
+		AfxMessageBox("Failed to load skin files\n");
+		return FALSE;
+	}
 	CCoolTabDemoDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();

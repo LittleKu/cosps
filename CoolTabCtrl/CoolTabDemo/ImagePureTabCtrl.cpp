@@ -4,11 +4,6 @@
 
 IMPLEMENT_DYNCREATE(CImagePureTabCtrl, CCoolTabCtrl)
 
-BEGIN_MESSAGE_MAP(CImagePureTabCtrl, CCoolTabCtrl)
-	ON_WM_ERASEBKGND()
-END_MESSAGE_MAP()
-
-
 CImagePureTabCtrl::CImagePureTabCtrl() : m_pBkgBitmap(NULL), m_pImgBtnGroup(NULL)
 {
 }
@@ -31,7 +26,7 @@ void CImagePureTabCtrl::SetImageButtonGroup(CImgBtnGroup* pImgBtnGroup)
 	CBitmap* pBitmap = m_pImgBtnGroup->m_pBitmaps[BS_NORMAL];
 	SetBackgroundBitmap(pBitmap);
 }
-BOOL CImagePureTabCtrl::OnEraseBkgnd(CDC* pDC)
+void CImagePureTabCtrl::DrawBk(CDC* pDC)
 {
 	if(m_pBkgBitmap != NULL)
 	{
@@ -39,10 +34,7 @@ BOOL CImagePureTabCtrl::OnEraseBkgnd(CDC* pDC)
 		CCoolTabCtrl::GetTabItemsRect(&rect);
 
 		PaintBmp(pDC, &rect, m_pBkgBitmap, COPY);
-
-		return TRUE;
 	}
-	return CCoolTabCtrl::OnEraseBkgnd(pDC);
 }
 
 void CImagePureTabCtrl::AutoSize()

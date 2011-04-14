@@ -16,7 +16,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-CString CResMgr::BUTTON_STATUS_NAME[BS_MAX] = {"normal", "highlighted", "clicked", "disabled"};
+//CString CResMgr::BUTTON_STATUS_NAME[BS_MAX] = {"normal", "highlighted", "clicked", "disabled"};
 CResMgr* CResMgr::m_instance = NULL;
 CResMgr::CGarbo CResMgr::m_garbo;
 
@@ -44,33 +44,55 @@ CResMgr::~CResMgr()
 	CString key;
 	void* pValue;
 
-	CBitmap* pBitmap = NULL;
-	pos = m_pathToBitmapMap.GetStartPosition();		
-	while (pos != NULL)
 	{
-		m_pathToBitmapMap.GetNextAssoc( pos, key, pValue );
-		
-		if(pValue != NULL)
+		CBitmap* pBitmap = NULL;
+		pos = m_pathToBitmapMap.GetStartPosition();		
+		while (pos != NULL)
 		{
-			pBitmap = (CBitmap*)pValue;
-			delete pBitmap;
+			m_pathToBitmapMap.GetNextAssoc( pos, key, pValue );
+			
+			if(pValue != NULL)
+			{
+				pBitmap = (CBitmap*)pValue;
+				delete pBitmap;
+			}
 		}
+		m_pathToBitmapMap.RemoveAll();
 	}
-	m_pathToBitmapMap.RemoveAll();
 
-	CImgBtnGroup* pImgBtnGroup;
-	pos = m_btnGroupMap.GetStartPosition();
-	while (pos != NULL)
+
 	{
-		m_btnGroupMap.GetNextAssoc( pos, key, pValue );
-		
-		if(pValue != NULL)
+		CImgBtnGroup* pImgBtnGroup;
+		pos = m_btnGroupMap.GetStartPosition();
+		while (pos != NULL)
 		{
-			pImgBtnGroup = (CImgBtnGroup*)pValue;
-			delete pImgBtnGroup;
+			m_btnGroupMap.GetNextAssoc( pos, key, pValue );
+			
+			if(pValue != NULL)
+			{
+				pImgBtnGroup = (CImgBtnGroup*)pValue;
+				delete pImgBtnGroup;
+			}
 		}
+		m_btnGroupMap.RemoveAll();
 	}
-	m_btnGroupMap.RemoveAll();
+
+
+	{
+		CImgTabBtn* pImgTabBtn;
+		pos = m_imgTabBtnMap.GetStartPosition();
+		while (pos != NULL)
+		{
+			m_imgTabBtnMap.GetNextAssoc( pos, key, pValue );
+			
+			if(pValue != NULL)
+			{
+				pImgTabBtn = (CImgTabBtn*)pValue;
+				delete pImgTabBtn;
+			}
+		}
+		m_imgTabBtnMap.RemoveAll();
+	}
 }
 
 void CResMgr::ToPath(LPCSTR skinFolder, LPCSTR subFolder, LPCSTR imageName, CString& ret)
@@ -173,7 +195,7 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 	CString imagePath;
 
 	int i;
-	for(node = node->FirstChild(); node != NULL; node = node->NextSibling())
+	for(node = node->FirstChild("button_group"); node != NULL; node = node->NextSibling("button_group"))
 	{
 		pElement = node->ToElement();
 		ASSERT(pElement);
@@ -208,7 +230,61 @@ BOOL CResMgr::Load(LPCSTR lpcstrSkinFile)
 			pImgBtnGroup->m_imgBtnArray.Add(pImgBtn);
 		}
 
-		m_btnGroupMap.SetAt(pElement->Value(), pImgBtnGroup);
+		lpcsValue = pElement->Attribute("name");
+		m_btnGroupMap.SetAt(lpcsValue, pImgBtnGroup);
+	}
+
+	node = doc.FirstChild( "skin" );
+	ASSERT( node );
+	for(node = node->FirstChild("tab_buttons"); node != NULL; node = node->NextSibling("tab_buttons"))
+	{
+		pElement = node->ToElement();
+		ASSERT(pElement);
+		
+		subFolder = pElement->Attribute("folder");
+
+		CImgTabBtn* pImgTabBtn = new CImgTabBtn;
+		for(i = TB_PT_MIN; i < TB_PT_MAX; i++)
+		{
+			ToPath(skinFolder, subFolder, pElement->Attribute(TAB_BTN_PART_TYPE_NAME[i]), imagePath);			
+			LoadImage(imagePath);
+			if(m_pathToBitmapMap.Lookup(imagePath, ptr))
+			{
+				pBitmap = (CBitmap*)ptr;
+				pImgTabBtn->m_pTabPart[i] = pBitmap;
+			}
+		}
+
+		int status = 0, pos = 0;
+		for(sub_node = node->FirstChild(); sub_node != NULL; sub_node = sub_node->NextSibling())
+		{
+			sub_element = sub_node->ToElement();
+			ASSERT(sub_element);
+			
+			lpcsValue = sub_element->Attribute("status", &status);
+
+			TiXmlNode *temp_node = 0;
+			TiXmlElement *temp_element = 0;
+			int pos = 0;
+			for(temp_node = sub_node->FirstChild(); temp_node != NULL; temp_node = temp_node->NextSibling())
+			{
+				temp_element = temp_node->ToElement();
+				ASSERT(temp_element);
+
+				lpcsValue = temp_element->Attribute("pos", &pos);
+
+				ToPath(skinFolder, subFolder, temp_element->Attribute("bitmap"), imagePath);			
+				LoadImage(imagePath);
+				if(m_pathToBitmapMap.Lookup(imagePath, ptr))
+				{
+					pBitmap = (CBitmap*)ptr;
+					pImgTabBtn->m_pBitmaps[status][pos] = pBitmap;
+				}
+			}
+		}
+
+		lpcsValue = pElement->Attribute("name");
+		m_imgTabBtnMap.SetAt(lpcsValue, pImgTabBtn);
 	}
 	
 	return TRUE;
@@ -230,6 +306,16 @@ CImgBtnGroup* CResMgr::GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup)
 	if(m_btnGroupMap.Lookup(lpstrImgBtnGroup, value))
 	{
 		return (CImgBtnGroup*)value;
+	}
+	return NULL;
+}
+
+CImgTabBtn* CResMgr::GetImgTabBtn(LPCTSTR lpstrImgTabBtn)
+{
+	void* value = NULL;
+	if(m_imgTabBtnMap.Lookup(lpstrImgTabBtn, value))
+	{
+		return (CImgTabBtn*)value;
 	}
 	return NULL;
 }

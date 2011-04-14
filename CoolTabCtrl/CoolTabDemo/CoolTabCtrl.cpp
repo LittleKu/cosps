@@ -272,6 +272,12 @@ BOOL CCoolTabCtrl::Create(UINT wStyle, const CRect &rect, CWnd *pParentWnd, UINT
 
 BOOL CCoolTabCtrl::OnEraseBkgnd(CDC* pDC) 
 {
+	DrawBk(pDC);
+	return TRUE;
+}
+
+void CCoolTabCtrl::DrawBk(CDC* pDC)
+{
 	if(m_bEraseBkgnd)
 	{
 		CRect rect;
@@ -279,7 +285,6 @@ BOOL CCoolTabCtrl::OnEraseBkgnd(CDC* pDC)
 		CBrush brush(GetSysColor(COLOR_3DFACE));
 		pDC->FillRect(rect,&brush);
 	}
-	return TRUE;
 }
 
 void CCoolTabCtrl::OnPaint() 

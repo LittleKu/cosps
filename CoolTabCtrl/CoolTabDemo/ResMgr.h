@@ -34,16 +34,17 @@ public:
 	virtual ~CResMgr();
 	BOOL Load(LPCSTR lpcstrSkinFile);
 	CBitmap* GetBitmap(LPCTSTR lpcstrImagePaht);
-	CImgBtnGroup* GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup);	
+	CImgBtnGroup* GetImageButtonGroup(LPCTSTR lpstrImgBtnGroup);
+	CImgTabBtn* GetImgTabBtn(LPCTSTR lpstrImgTabBtn);
 private:
 	void ToPath(LPCSTR skinFolder, LPCSTR subFolder, LPCSTR imageName, CString& ret);
 	void CResMgr::LoadImage(CString& imagePath);
 	CImgBtn* Init(TiXmlElement *pElement);
 private:
 	CMapStringToPtr m_pathToBitmapMap;
-	CMapStringToPtr m_btnGroupMap;		
+	CMapStringToPtr m_btnGroupMap;
+	CMapStringToPtr m_imgTabBtnMap;
 	static CResMgr* m_instance;
-	static CString BUTTON_STATUS_NAME[BS_MAX];
 	static CGarbo m_garbo;
 };
 

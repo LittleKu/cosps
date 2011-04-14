@@ -43,7 +43,8 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	CImagePureTabCtrl m_mainTabCtrl;
+//	CImagePureTabCtrl m_mainTabCtrl;
+	CImageBkgTabCtrl  m_mainTabCtrl;
 	CTempDlg  dlg1;
 	CTempDlg2 dlg2;
 	// Generated message map functions
