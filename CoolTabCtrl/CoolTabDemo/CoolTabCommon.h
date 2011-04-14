@@ -1,5 +1,7 @@
-#ifndef _COMMON_COOLTAB_H_
-#define _COMMON_COOLTAB_H_
+#ifndef _COOL_TAB_COMMON_H_
+#define _COOL_TAB_COMMON_H_
+
+#pragma once
 
 enum EButtonStatus
 {

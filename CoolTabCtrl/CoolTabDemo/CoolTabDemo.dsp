@@ -92,7 +92,7 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\BitmapTabCtrl.cpp
+SOURCE=.\ImagePureTabCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -120,7 +120,7 @@ SOURCE=.\gtb.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ImageTabCtrl.cpp
+SOURCE=.\ImageBkgTabCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -145,7 +145,7 @@ SOURCE=.\TempDlg2.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\BitmapTabCtrl.h
+SOURCE=.\ImagePureTabCtrl.h
 # End Source File
 # Begin Source File
 
@@ -153,7 +153,7 @@ SOURCE=.\CCommonDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\common.h
+SOURCE=.\CoolTabCommon.h
 # End Source File
 # Begin Source File
 
@@ -177,7 +177,7 @@ SOURCE=.\gtbutil.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ImageTabCtrl.h
+SOURCE=.\ImageBkgTabCtrl.h
 # End Source File
 # Begin Source File
 

@@ -10,8 +10,8 @@
 
 #include "ResMgr.h"
 #include "CoolTabCtrl.h"
-#include "ImageTabCtrl.h"
-#include "BitmapTabCtrl.h"
+#include "ImagePureTabCtrl.h"
+#include "ImageBkgTabCtrl.h"
 #include "ResizableDialog.h"
 #include "TempDlg.h"
 #include "TempDlg2.h"
@@ -43,7 +43,7 @@ public:
 // Implementation
 protected:
 	HICON m_hIcon;
-	CBitmapTabCtrl m_mainTabCtrl;
+	CImagePureTabCtrl m_mainTabCtrl;
 	CTempDlg  dlg1;
 	CTempDlg2 dlg2;
 	// Generated message map functions

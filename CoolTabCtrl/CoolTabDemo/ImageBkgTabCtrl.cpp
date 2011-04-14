@@ -1,21 +1,21 @@
 #include "stdafx.h"
-#include "ImageTabCtrl.h"
+#include "ImageBkgTabCtrl.h"
 
-IMPLEMENT_DYNCREATE(CImageTabCtrl, CCoolTabCtrl)
+IMPLEMENT_DYNCREATE(CImageBkgTabCtrl, CCoolTabCtrl)
 
-BEGIN_MESSAGE_MAP(CImageTabCtrl, CCoolTabCtrl)
+BEGIN_MESSAGE_MAP(CImageBkgTabCtrl, CCoolTabCtrl)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
-CImageTabCtrl::CImageTabCtrl() : m_pBkgBitmap(NULL)
+CImageBkgTabCtrl::CImageBkgTabCtrl() : m_pBkgBitmap(NULL)
 {
 }
-CImageTabCtrl::~CImageTabCtrl()
+CImageBkgTabCtrl::~CImageBkgTabCtrl()
 {
 }
 
-BOOL CImageTabCtrl::OnEraseBkgnd(CDC* pDC)
+BOOL CImageBkgTabCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if(m_pBkgBitmap != NULL)
 	{
@@ -29,7 +29,7 @@ BOOL CImageTabCtrl::OnEraseBkgnd(CDC* pDC)
 	return CCoolTabCtrl::OnEraseBkgnd(pDC);
 }
 
-void CImageTabCtrl::Draw(CDC* pDC)
+void CImageBkgTabCtrl::Draw(CDC* pDC)
 {
 	CPen	*pOldPen   = pDC->GetCurrentPen();
 	CFont	*pOldFont  = pDC->SelectObject(&m_font);
@@ -68,7 +68,7 @@ void CImageTabCtrl::Draw(CDC* pDC)
 	pDC->SelectObject(pOldFont);
 	pDC->SelectObject(pOldPen);
 }
-UINT CImageTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
+UINT CImageBkgTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 {
 	UINT nWidth = CCoolTabCtrl::CalcWidth(pItem, pDC);
 
@@ -85,7 +85,7 @@ UINT CImageTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 	}
 	return nWidth;
 }
-void CImageTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
+void CImageBkgTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
 {
 	CRect rect = pItem->m_rect;
 	if(bActive)

@@ -5,12 +5,12 @@
 
 #include "CoolTabCtrl.h"
 
-class CImageTabCtrl : public CCoolTabCtrl
+class CImageBkgTabCtrl : public CCoolTabCtrl
 {
-	DECLARE_DYNCREATE(CImageTabCtrl)
+	DECLARE_DYNCREATE(CImageBkgTabCtrl)
 public:
-	CImageTabCtrl();
-	virtual ~CImageTabCtrl();
+	CImageBkgTabCtrl();
+	virtual ~CImageBkgTabCtrl();
 	void SetBackgroundBitmap(CBitmap* pBitmap) { m_pBkgBitmap = pBitmap; }
 
 	void Draw(CDC* pDC);

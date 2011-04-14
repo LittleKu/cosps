@@ -1,22 +1,22 @@
 #include "stdafx.h"
-#include "BitmapTabCtrl.h"
+#include "ImagePureTabCtrl.h"
 #include "ResMgr.h"
 
-IMPLEMENT_DYNCREATE(CBitmapTabCtrl, CCoolTabCtrl)
+IMPLEMENT_DYNCREATE(CImagePureTabCtrl, CCoolTabCtrl)
 
-BEGIN_MESSAGE_MAP(CBitmapTabCtrl, CCoolTabCtrl)
+BEGIN_MESSAGE_MAP(CImagePureTabCtrl, CCoolTabCtrl)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
-CBitmapTabCtrl::CBitmapTabCtrl() : m_pBkgBitmap(NULL), m_pImgBtnGroup(NULL)
+CImagePureTabCtrl::CImagePureTabCtrl() : m_pBkgBitmap(NULL), m_pImgBtnGroup(NULL)
 {
 }
-CBitmapTabCtrl::~CBitmapTabCtrl()
+CImagePureTabCtrl::~CImagePureTabCtrl()
 {
 }
 
-void CBitmapTabCtrl::SetBackgroundBitmap(CBitmap* pBitmap) 
+void CImagePureTabCtrl::SetBackgroundBitmap(CBitmap* pBitmap) 
 {
 	m_pBkgBitmap = pBitmap;
 	if(pBitmap != NULL)
@@ -25,13 +25,13 @@ void CBitmapTabCtrl::SetBackgroundBitmap(CBitmap* pBitmap)
 	}
 }
 
-void CBitmapTabCtrl::SetImageButtonGroup(CImgBtnGroup* pImgBtnGroup)
+void CImagePureTabCtrl::SetImageButtonGroup(CImgBtnGroup* pImgBtnGroup)
 {
 	this->m_pImgBtnGroup = pImgBtnGroup;
 	CBitmap* pBitmap = m_pImgBtnGroup->m_pBitmaps[BS_NORMAL];
 	SetBackgroundBitmap(pBitmap);
 }
-BOOL CBitmapTabCtrl::OnEraseBkgnd(CDC* pDC)
+BOOL CImagePureTabCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if(m_pBkgBitmap != NULL)
 	{
@@ -45,7 +45,7 @@ BOOL CBitmapTabCtrl::OnEraseBkgnd(CDC* pDC)
 	return CCoolTabCtrl::OnEraseBkgnd(pDC);
 }
 
-void CBitmapTabCtrl::AutoSize()
+void CImagePureTabCtrl::AutoSize()
 {
 	if(m_pImgBtnGroup == NULL)
 	{
@@ -80,7 +80,7 @@ void CBitmapTabCtrl::AutoSize()
 	}
 }
 
-void CBitmapTabCtrl::Draw(CDC* pDC)
+void CImagePureTabCtrl::Draw(CDC* pDC)
 {
 	CPen	*pOldPen   = pDC->GetCurrentPen();
 	CFont	*pOldFont  = pDC->SelectObject(&m_font);
@@ -119,7 +119,7 @@ void CBitmapTabCtrl::Draw(CDC* pDC)
 	pDC->SelectObject(pOldFont);
 	pDC->SelectObject(pOldPen);
 }
-UINT CBitmapTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
+UINT CImagePureTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 {
 	int nTabItemIndex = GetPageIndex(pItem);
 	ASSERT(nTabItemIndex >= 0);
@@ -129,7 +129,7 @@ UINT CBitmapTabCtrl::CalcWidth(CCoolTabItem* pItem, CDC *pDC)
 	ASSERT(pImgBtn);
 	return pImgBtn->rect.Width();
 }
-void CBitmapTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
+void CImagePureTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered, UINT nIndex)
 {
 	CBitmap* pBitmap = NULL;
 	int bs = BS_NORMAL;
@@ -161,7 +161,7 @@ void CBitmapTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActi
 	dc.DeleteDC();
 }
 
-int CBitmapTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
+int CImagePureTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
 {
 	POSITION pos = m_tabItemList.GetHeadPosition();
 	POSITION imgBtnPos = NULL;

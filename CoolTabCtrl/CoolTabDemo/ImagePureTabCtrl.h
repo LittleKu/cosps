@@ -5,19 +5,19 @@
 
 #include "CoolTabCtrl.h"
 
-class CBitmapTabCtrl : public CCoolTabCtrl
+class CImagePureTabCtrl : public CCoolTabCtrl
 {
-	DECLARE_DYNCREATE(CBitmapTabCtrl)
+	DECLARE_DYNCREATE(CImagePureTabCtrl)
 public:
-	CBitmapTabCtrl();
-	virtual ~CBitmapTabCtrl();
+	CImagePureTabCtrl();
+	virtual ~CImagePureTabCtrl();
 	void SetBackgroundBitmap(CBitmap* pBitmap);
 	void SetImageButtonGroup(CImgBtnGroup* pImgBtnGroup);
 	void AutoSize();
 	void Draw(CDC* pDC);
 	UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);
-	int CBitmapTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+	int CImagePureTabCtrl::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
 protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
