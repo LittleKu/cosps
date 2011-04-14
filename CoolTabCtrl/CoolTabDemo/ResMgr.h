@@ -10,11 +10,23 @@
 #endif // _MSC_VER > 1000
 
 class TiXmlElement;
-class CGarbo;
 
 class CResMgr  
 {
 private:
+	class CGarbo
+	{
+	public:
+		~CGarbo()
+		{
+			if(CResMgr::m_instance != NULL)
+			{
+				delete CResMgr::m_instance;
+				CResMgr::m_instance = NULL;
+			}
+			TRACE0("\n\nCResMgr destruction\n\n");
+		}
+	};
 	friend class CGarbo;
 	CResMgr();	
 public:
@@ -32,20 +44,7 @@ private:
 	CMapStringToPtr m_btnGroupMap;		
 	static CResMgr* m_instance;
 	static CString BUTTON_STATUS_NAME[BS_MAX];
-};
-
-class CGarbo
-{
-public:
-	~CGarbo()
-	{
-		if(CResMgr::m_instance != NULL)
-		{
-			delete CResMgr::m_instance;
-			CResMgr::m_instance = NULL;
-		}
-		TRACE0("\n\nCResMgr destruction\n\n");
-	}
+	static CGarbo m_garbo;
 };
 
 #endif // !defined(AFX_RESMGR_H__C786C9AB_FA68_4D06_B123_74141A600158__INCLUDED_)

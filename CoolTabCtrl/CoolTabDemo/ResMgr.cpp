@@ -16,10 +16,9 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-CGarbo theResMgrGarbo;
-
 CString CResMgr::BUTTON_STATUS_NAME[BS_MAX] = {"normal", "highlighted", "clicked", "disabled"};
 CResMgr* CResMgr::m_instance = NULL;
+CResMgr::CGarbo CResMgr::m_garbo;
 
 CResMgr* CResMgr::GetInstance()
 {
@@ -28,6 +27,10 @@ CResMgr* CResMgr::GetInstance()
 		m_instance = new CResMgr;
 	}
 	return m_instance;
+
+	//This is the std way to make singleton
+// 	static std::auto_ptr<CResMgr> ptr(new CResMgr);	
+// 	return ptr.get();
 }
 
 CResMgr::CResMgr()
