@@ -118,6 +118,10 @@ SOURCE=.\PPTooltip.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\hyperlink.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -148,6 +152,10 @@ SOURCE=.\PPHtmlDrawer.h
 # Begin Source File
 
 SOURCE=.\PPTooltip.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\hyperlink.h
 # End Source File
 # Begin Source File
 

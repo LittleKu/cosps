@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CDlgRectangleTestDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_NOTIFY_EX( TTN_NEEDTEXT, 0, OnToolTipNotify )
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -124,6 +125,11 @@ BOOL CDlgRectangleTestDlg::OnInitDialog()
 
 	m_tooltip.AddTool(this, _T("Red Area tooltips"), m_rect[0]);
 	m_tooltip.AddTool(this, _T("Green Area tooltips"), m_rect[1]);
+
+	// initialize the controls
+    m_link.ConvertStaticToHyperlink(GetSafeHwnd(), IDC_URL, _T("http://www.google.com"));
+
+	this->EnableToolTips(TRUE);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -189,4 +195,57 @@ BOOL CDlgRectangleTestDlg::PreTranslateMessage(MSG* pMsg)
 	// TODO: Add your specialized code here and/or call the base class
 	m_tooltip.RelayEvent(pMsg);
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+// int CDlgRectangleTestDlg::OnToolHitTest( CPoint point, TOOLINFO* pTI ) const
+// {
+// 	CWnd* pWnd = this->ChildWindowFromPoint(point);
+// 	if(pWnd == NULL)
+// 	{
+// 		return -1;
+// 	}
+// 	CWnd* pDlgItem = this->GetDlgItem(IDC_URL);
+// 	if(pWnd == pDlgItem)
+// 	{
+// 		CString tip;
+// 		pTI->cbSize = sizeof(TOOLINFO);
+// 		pTI->uFlags = 0;
+// 		pTI->hwnd = GetSafeHwnd();
+// 		pTI->uId = IDC_URL;
+// 		CRect rect;
+// 		pWnd->GetClientRect(&rect);
+// 		pTI->rect = rect;
+// 		tip.Format("tips for %d", IDC_URL);
+// 		pTI->lpszText = (LPTSTR)malloc(sizeof(TCHAR)*(tip.GetLength()+1));
+// 		_tcscpy(pTI->lpszText, tip);
+// 
+// 		return IDC_URL;
+// 	}
+// 	return -1;
+// }
+
+BOOL CDlgRectangleTestDlg::OnToolTipNotify( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
+{
+	// need to handle both ANSI and UNICODE versions of the message
+	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+	CString strTipText;
+	UINT nID = pNMHDR->idFrom;
+	if (pNMHDR->code == TTN_NEEDTEXTA && (pTTTA->uFlags & TTF_IDISHWND) ||
+		pNMHDR->code == TTN_NEEDTEXTW && (pTTTW->uFlags & TTF_IDISHWND))
+	{
+		// idFrom is actually the HWND of the tool
+		nID = ::GetDlgCtrlID((HWND)nID);
+	}
+	
+	if (nID != 0) // will be zero on a separator
+		strTipText.Format("Control ID = %d", nID);
+	
+	if (pNMHDR->code == TTN_NEEDTEXTA)
+		lstrcpyn(pTTTA->szText, strTipText, sizeof(pTTTA->szText));
+	else
+		_mbstowcsz(pTTTW->szText, strTipText, sizeof(pTTTW->szText));
+	*pResult = 0;
+	
+	return TRUE;    // message was handled
 }

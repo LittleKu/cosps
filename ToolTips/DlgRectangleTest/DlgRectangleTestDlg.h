@@ -12,6 +12,7 @@
 // CDlgRectangleTestDlg dialog
 
 #include "PPTooltip.h"
+#include "hyperlink.h"
 
 class CDlgRectangleTestDlg : public CDialog
 {
@@ -32,7 +33,8 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-
+//	virtual int OnToolHitTest( CPoint point, TOOLINFO* pTI ) const;
+	BOOL OnToolTipNotify( UINT id, NMHDR * pNMHDR, LRESULT * pResult );
 // Implementation
 protected:
 	HICON m_hIcon;
@@ -47,6 +49,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	CPPToolTip m_tooltip;
+	CHyperLink m_link;
 	CRect m_rect[2];
 };
 

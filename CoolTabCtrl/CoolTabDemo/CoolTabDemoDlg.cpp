@@ -131,7 +131,7 @@ BOOL CCoolTabDemoDlg::OnInitDialog()
 	ResetMinTrackSize();
 
 //	m_mainTabCtrl.SetImageButtonGroup(CResMgr::GetInstance()->GetImageButtonGroup("main_button_bar"));
-	m_mainTabCtrl.SetImgTabBtn(CResMgr::GetInstance()->GetImgTabBtn("doxygen"));
+	m_mainTabCtrl.SetImgTabBtn(CResMgr::GetInstance()->GetImgTabBtn("fdm"));
 	m_mainTabCtrl.UpdateWindow();
 	this->CenterWindow();
 

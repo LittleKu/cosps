@@ -122,9 +122,10 @@ void CResMgr::LoadImage(CString& imagePath)
 		return;
 	}
 	HBITMAP hb = (HBITMAP)::LoadImage(NULL, imagePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
 	if(hb == NULL)
 	{
-		TRACE1("Failed to load image file %s\n", imagePath);
+		TRACE2("Failed to load image file %s: errorcode=%d\n", imagePath, GetLastError());
 		return;
 	}
 	CBitmap* pBitmap = new CBitmap();

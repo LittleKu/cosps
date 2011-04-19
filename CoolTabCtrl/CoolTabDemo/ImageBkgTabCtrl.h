@@ -11,7 +11,7 @@ class CImageBkgTabCtrl : public CCoolTabCtrl
 public:
 	CImageBkgTabCtrl(CImgTabBtn* pImgTabBtn = NULL);
 	virtual ~CImageBkgTabCtrl();
-	void SetImgTabBtn(CImgTabBtn* pImgTabBtn) { m_pImgTabBtn = pImgTabBtn; }
+	void SetImgTabBtn(CImgTabBtn* pImgTabBtn, BOOL bAutoAdjustHeight = FALSE);
 	void Draw(CDC* pDC);
 	UINT CalcWidth(CCoolTabItem* pItem, CDC *pDC);
 	void Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bActive, BOOL bHovered = FALSE, UINT nIndex = 0);

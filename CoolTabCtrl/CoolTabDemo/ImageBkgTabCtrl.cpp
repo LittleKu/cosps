@@ -14,6 +14,16 @@ CImageBkgTabCtrl::~CImageBkgTabCtrl()
 {
 }
 
+void CImageBkgTabCtrl::SetImgTabBtn(CImgTabBtn* pImgTabBtn, BOOL bAutoAdjustHeight)
+{ 
+	m_pImgTabBtn = pImgTabBtn; 
+	if(bAutoAdjustHeight && m_pImgTabBtn->m_pTabPart[TB_PT_BACKGROUND] != NULL)
+	{
+		int height = GetBitmapSize(m_pImgTabBtn->m_pTabPart[TB_PT_BACKGROUND]).cy;
+		SetTabItemHeight(height);
+	}
+}
+
 void CImageBkgTabCtrl::DrawBk(CDC* pDC)
 {
 	if(m_pImgTabBtn->m_pTabPart[TB_PT_BACKGROUND] != NULL)
@@ -101,26 +111,30 @@ void CImageBkgTabCtrl::Draw(CCoolTabItem* pItem, CDC *pDC, UINT nStyle, BOOL bAc
 		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_LEFT], COPY);
 		
 		//Right
-		rect.left = rect.right - GetBitmapSize(m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT]).cx;
-		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT], COPY);
+		if(m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT] != NULL)
+		{
+			rect.left = rect.right - GetBitmapSize(m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT]).cx;
+			PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_RIGHT], COPY);
+
+			rect.right = rect.left;
+		}
 		
 		//Mid
-		rect.right = rect.left;
 		rect.left = pItem->m_rect.left + GetBitmapSize(m_pImgTabBtn->m_pBitmaps[status][PS_LEFT]).cx;
 		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pBitmaps[status][PS_MID], STRETCH);
 		
 		rect = pItem->m_rect;
 	}
-	/*
-	if(bActive)
+	if(m_pImgTabBtn->m_pTabPart[TB_PT_SEPERATOR] != NULL && !bActive && nIndex > 0 && nIndex != (UINT)m_nActivePage + 1)
 	{
-
-	}
-	else 
-	*/
-	if(!bActive && nIndex > 0 && nIndex != (UINT)m_nActivePage + 1)
-	{
+		int height = GetBitmapSize(m_pImgTabBtn->m_pTabPart[TB_PT_SEPERATOR]).cy;
+		if(rect.Height() > height)
+		{
+			rect.top += (rect.Height() - height) / 2;
+		}
 		PaintBmp(pDC, &rect, m_pImgTabBtn->m_pTabPart[TB_PT_SEPERATOR], COPY);
+
+		rect = pItem->m_rect;
 	}
 	
 	rect.top += 8;
