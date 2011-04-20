@@ -108,6 +108,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ProgressDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\SortableHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -134,6 +138,10 @@ SOURCE=.\ListCtrlDemoDlg.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiColumnSortListView.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProgressDlg.h
 # End Source File
 # Begin Source File
 

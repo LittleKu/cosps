@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "ListCtrlDemoDlg.h"
+#include "ProgressDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,17 @@ static ColumnInfo columns[] =
     { _T("Both (Code /w Comments)"),	TYPE_NUMERIC, DESCENDING,  -75, LVCFMT_RIGHT },
     { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
 };
+
+void ProcessMessages(CWnd &cwnd)
+{
+    MSG msg;
+    // process all messages pending in the queue
+    while (::PeekMessage(&msg, cwnd.m_hWnd, 0, 0, PM_REMOVE))
+    {
+        ::TranslateMessage(&msg);
+        ::DispatchMessage(&msg);
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
@@ -94,6 +106,7 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
+	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListBox);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
 	//}}AFX_DATA_MAP
 }
@@ -103,6 +116,9 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
+	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
+	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -256,4 +272,78 @@ void CListCtrlDemoDlg::InitResultListCtrl()
 	m_resultListCtrl.LoadColumnWidths();
     m_resultListCtrl.LoadColumnOrder();
     m_resultListCtrl.LoadColumnSort();
+}
+
+void CListCtrlDemoDlg::OnButtonAdd() 
+{
+	//Add selected directoy
+	char szPath[MAX_PATH];
+	ZeroMemory(szPath, sizeof(szPath)); 
+
+	LPITEMIDLIST pidlSelected = NULL;
+    BROWSEINFO bi = {0};
+
+	bi.hwndOwner = m_hWnd;
+    bi.pidlRoot = NULL;
+    bi.pszDisplayName = szPath;
+    bi.lpszTitle = "Choose a folder";
+    bi.ulFlags = 0;
+    bi.lpfn = NULL;
+    bi.lParam = 0;
+
+	pidlSelected = SHBrowseForFolder(&bi);
+	//Got a valid path
+	if(pidlSelected && SHGetPathFromIDList(pidlSelected, szPath))
+	{
+		AfxTrace("%s\n", szPath);
+		m_srcDirListBox.AddString(szPath);
+	}
+}
+
+void CListCtrlDemoDlg::OnButtonDel() 
+{
+	int nIndex = m_srcDirListBox.GetCurSel();
+	if(nIndex != LB_ERR)
+	{
+		m_srcDirListBox.DeleteString(nIndex);
+	}
+}	
+
+void CListCtrlDemoDlg::OnButtonStart() 
+{
+	CWaitCursor wc;
+	int cAllFiles = 100000;
+	
+    CProgressDlg dlgProgress;
+    dlgProgress.Create(dlgProgress.IDD);
+
+	
+	dlgProgress.m_progressCtrl.SetRange(0, 100);
+    dlgProgress.UpdateData(FALSE);
+
+	bool bInitialShowDlg = false;
+	int progress = 0;
+	for (int f = 0; f < cAllFiles; ++f)
+	{
+		if (bInitialShowDlg  &&  !dlgProgress.IsWindowVisible())
+		{
+			break;
+        }
+
+		progress = f * 100 / cAllFiles;
+        dlgProgress.m_progressCtrl.SetPos(progress);
+
+		dlgProgress.m_sTextTop.Format("Hehe, we go %d", f);
+		dlgProgress.UpdateData(FALSE);
+
+		if (!bInitialShowDlg)
+		{
+			bInitialShowDlg = true;
+			dlgProgress.ShowWindow(SW_SHOW);
+			dlgProgress.RedrawWindow();
+		}
+        ProcessMessages(dlgProgress);
+		Sleep(1);
+	}
+	dlgProgress.DestroyWindow();
 }

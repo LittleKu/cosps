@@ -10,6 +10,7 @@
 #define IDR_RESULT_MENU                 129
 #define IDB_ARROWDOWN                   130
 #define IDB_ARROWUP                     131
+#define IDD_PROGRESS                    132
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_LIST             1002
 #define IDC_SOURCE_DIR_FRAME            1003
@@ -28,6 +29,9 @@
 #define IDC_TXT_SHARP                   1017
 #define IDC_NUMBER                      1019
 #define IDC_LINES                       1020
+#define IDC_PROGRESS                    1022
+#define IDC_TEXT_TOP                    1024
+#define IDC_TEXT_BOTTOM                 1025
 #define IDM_FILE_ADD                    32771
 #define IDM_FILE_DEL                    32772
 #define IDM_FILE_START                  32773
@@ -41,9 +45,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32779
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1026
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
