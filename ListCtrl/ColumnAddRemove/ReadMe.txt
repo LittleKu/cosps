@@ -1,0 +1,1 @@
+http://www.codeproject.com/KB/list/CListCtrl_column_picker.aspx
