@@ -93,7 +93,7 @@ END_MESSAGE_MAP()
 // CListCtrlDemoDlg dialog
 
 CListCtrlDemoDlg::CListCtrlDemoDlg(CWnd* pParent /*=NULL*/)
-	: CResizableDialog(CListCtrlDemoDlg::IDD, pParent)
+	: CResizableDialog(CListCtrlDemoDlg::IDD, pParent), m_pProgressDlg(NULL)
 {
 	//{{AFX_DATA_INIT(CListCtrlDemoDlg)
 		// NOTE: the ClassWizard will add member initialization here
@@ -311,39 +311,56 @@ void CListCtrlDemoDlg::OnButtonDel()
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
-	CWaitCursor wc;
-	int cAllFiles = 100000;
-	
-    CProgressDlg dlgProgress;
-    dlgProgress.Create(dlgProgress.IDD);
+	if(m_pProgressDlg != NULL)
+	{
+		ASSERT_VALID (m_pProgressDlg);		
+		delete m_pProgressDlg;
+		m_pProgressDlg = NULL;
+		
+		return;
+	}
+	m_pProgressDlg = new CProgressDlg();
+	m_pProgressDlg->Create(this);
+	m_pProgressDlg->SetWindowText("Changed Caption");
+	m_pProgressDlg->SetStatus("Empty Status");
+	m_pProgressDlg->UpdateWindow();
+	m_pProgressDlg->ShowWindow(SW_NORMAL);
 
-	
-	dlgProgress.m_progressCtrl.SetRange(0, 100);
-    dlgProgress.UpdateData(FALSE);
-
+	int cAllFiles = 10000;
 	bool bInitialShowDlg = false;
 	int progress = 0;
 	for (int f = 0; f < cAllFiles; ++f)
 	{
-		if (bInitialShowDlg  &&  !dlgProgress.IsWindowVisible())
+		if (!m_pProgressDlg->PumpMessages ())
 		{
-			break;
-        }
-
-		progress = f * 100 / cAllFiles;
-        dlgProgress.m_progressCtrl.SetPos(progress);
-
-		dlgProgress.m_sTextTop.Format("Hehe, we go %d", f);
-		dlgProgress.UpdateData(FALSE);
-
-		if (!bInitialShowDlg)
-		{
-			bInitialShowDlg = true;
-			dlgProgress.ShowWindow(SW_SHOW);
-			dlgProgress.RedrawWindow();
+			return;
 		}
-        ProcessMessages(dlgProgress);
+
+		if (m_pProgressDlg->CheckCancelButton () || m_pProgressDlg->GetPos() >= 100)
+		{
+			delete m_pProgressDlg;
+			m_pProgressDlg = NULL;
+			
+			return;
+		}
+		
+		CString str;
+		str.Format("Currect Status = %d", f);
+		m_pProgressDlg->SetStatus(str);
+
+		int pos = (f + 1) * 100 / cAllFiles;
+		if(pos > m_pProgressDlg->GetPos())
+		{
+			m_pProgressDlg->StepIt();
+		}
+
 		Sleep(1);
 	}
-	dlgProgress.DestroyWindow();
+
+	if(m_pProgressDlg != NULL)
+	{
+		m_pProgressDlg->StepIt();
+		delete m_pProgressDlg;
+		m_pProgressDlg = NULL;
+	}
 }

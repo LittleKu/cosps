@@ -1,48 +1,69 @@
-#if !defined(AFX_PROGRESSDLG_H__BCA25D57_DB8A_4AEF_808A_1BD6A7E9F1A0__INCLUDED_)
-#define AFX_PROGRESSDLG_H__BCA25D57_DB8A_4AEF_808A_1BD6A7E9F1A0__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
 // ProgressDlg.h : header file
-//
+// CG: This file was added by the Progress Dialog component
 
 /////////////////////////////////////////////////////////////////////////////
 // CProgressDlg dialog
 
+#ifndef __PROGRESSDLG_H__
+#define __PROGRESSDLG_H__
+
 class CProgressDlg : public CDialog
 {
-// Construction
+// Construction / Destruction
 public:
-	CProgressDlg(CWnd* pParent = NULL);   // standard constructor
+    CProgressDlg(UINT nCaptionID = 0);   // standard constructor
+    ~CProgressDlg();
 
+    BOOL Create(CWnd *pParent=NULL);
+
+    // Checking for Cancel button
+    BOOL CheckCancelButton();
+    // Progress Dialog manipulation
+    void SetStatus(LPCTSTR lpszMessage);
+    void SetRange(int nLower,int nUpper);
+    int  SetStep(int nStep);
+    int  SetPos(int nPos);
+	int  GetPos();
+    int  OffsetPos(int nPos);
+    int  StepIt();
+	BOOL PumpMessages();
+        
 // Dialog Data
-	//{{AFX_DATA(CProgressDlg)
-	enum { IDD = IDD_PROGRESS };
-	CProgressCtrl	m_progressCtrl;
-	CString	m_sTextBottom;
-	CString	m_sTextTop;
-	//}}AFX_DATA
-
+    //{{AFX_DATA(CProgressDlg)
+    enum { IDD = CG_IDD_PROGRESS };
+    CProgressCtrl	m_Progress;
+    //}}AFX_DATA
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CProgressDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+    // ClassWizard generated virtual function overrides
+    //{{AFX_VIRTUAL(CProgressDlg)
+    public:
+    virtual BOOL DestroyWindow();
+    protected:
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+    //}}AFX_VIRTUAL
 
 // Implementation
 protected:
+	UINT m_nCaptionID;
+    int m_nLower;
+    int m_nUpper;
+    int m_nStep;
+    
+    BOOL m_bCancel;
+    BOOL m_bParentDisabled;
 
-	// Generated message map functions
-	//{{AFX_MSG(CProgressDlg)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+    void ReEnableParent();
+
+    virtual void OnCancel();
+    virtual void OnOK() {}; 
+    void UpdatePercent(int nCurrent);
+
+    // Generated message map functions
+    //{{AFX_MSG(CProgressDlg)
+    virtual BOOL OnInitDialog();
+    //}}AFX_MSG
+    DECLARE_MESSAGE_MAP()
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_PROGRESSDLG_H__BCA25D57_DB8A_4AEF_808A_1BD6A7E9F1A0__INCLUDED_)
+#endif // __PROGRESSDLG_H__

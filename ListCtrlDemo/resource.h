@@ -6,6 +6,10 @@
 #define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_LISTCTRLDEMO_DIALOG         102
+#define CG_IDD_PROGRESS                 103
+#define CG_IDS_PROGRESS_CAPTION         104
+#define CG_IDD_PROGRESS1                105
+#define CG_IDS_PROGRESS_CAPTION1        106
 #define IDR_MAINFRAME                   128
 #define IDR_RESULT_MENU                 129
 #define IDB_ARROWDOWN                   130
@@ -14,8 +18,11 @@
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_LIST             1002
 #define IDC_SOURCE_DIR_FRAME            1003
+#define CG_IDC_PROGDLG_PROGRESS         1003
 #define IDC_BUTTON_ADD                  1004
+#define CG_IDC_PROGDLG_PERCENT          1004
 #define IDC_BUTTON_DEL                  1005
+#define CG_IDC_PROGDLG_STATUS           1005
 #define IDC_FILTER_COMBO                1006
 #define IDC_RECURSIVE_SUB_CHECK         1007
 #define IDC_RESULT_LIST                 1009
@@ -48,6 +55,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1026
-#define _APS_NEXT_SYMED_VALUE           101
+#define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

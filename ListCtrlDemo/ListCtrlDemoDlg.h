@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
 #include "ThirdParty/MultiColumnSortListView.h"
+#include "ProgressDlg.h"
 
 class CListCtrlDemoDlg : public CResizableDialog
 {
@@ -49,6 +50,7 @@ protected:
 private:
 	void InitResultListCtrl();
 	void InitResizableDlgAnchor();
+	CProgressDlg* m_pProgressDlg;
 };
 
 //{{AFX_INSERT_LOCATION}}
