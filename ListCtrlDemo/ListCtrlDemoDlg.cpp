@@ -33,16 +33,6 @@ static ColumnInfo columns[] =
     { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
 };
 
-void ProcessMessages(CWnd &cwnd)
-{
-    MSG msg;
-    // process all messages pending in the queue
-    while (::PeekMessage(&msg, cwnd.m_hWnd, 0, 0, PM_REMOVE))
-    {
-        ::TranslateMessage(&msg);
-        ::DispatchMessage(&msg);
-    }
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
@@ -119,6 +109,8 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
 	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
+	ON_MESSAGE(WM_START_COUNT, OnStartCount)
+	ON_MESSAGE(WM_END_COUNT, OnEndCount)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -311,6 +303,8 @@ void CListCtrlDemoDlg::OnButtonDel()
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
+	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, GetSafeHwnd());
+	/*
 	if(m_pProgressDlg != NULL)
 	{
 		ASSERT_VALID (m_pProgressDlg);		
@@ -360,7 +354,38 @@ void CListCtrlDemoDlg::OnButtonStart()
 	if(m_pProgressDlg != NULL)
 	{
 		m_pProgressDlg->StepIt();
+
+		Sleep(5000);
+
 		delete m_pProgressDlg;
 		m_pProgressDlg = NULL;
 	}
+	*/
+}
+
+LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
+{
+	if(m_pProgressDlg != NULL)
+	{
+		ASSERT_VALID (m_pProgressDlg);		
+		delete m_pProgressDlg;
+		m_pProgressDlg = NULL;
+	}
+	m_pProgressDlg = new CProgressDlg();
+	m_pProgressDlg->Create(this);
+	m_pProgressDlg->SetWindowText("Changed Caption");
+	m_pProgressDlg->SetStatus("Empty Status");
+	m_pProgressDlg->UpdateWindow();
+	m_pProgressDlg->ShowWindow(SW_NORMAL);
+	return (LRESULT)m_pProgressDlg->GetSafeHwnd();
+}
+
+LRESULT CListCtrlDemoDlg::OnEndCount(WPARAM wParam, LPARAM lParam)
+{
+	if(m_pProgressDlg != NULL)
+	{
+		delete m_pProgressDlg;
+		m_pProgressDlg = NULL;
+	}
+	return (LRESULT)TRUE;
 }

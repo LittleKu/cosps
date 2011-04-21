@@ -82,6 +82,7 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
     //{{AFX_MSG_MAP(CProgressDlg)
+	ON_MESSAGE(WM_UPDATE_PROGRESS, OnUpdateProgress)
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -240,4 +241,31 @@ BOOL CProgressDlg::OnInitDialog()
     SetWindowText(strCaption);
 
     return TRUE;  
+}
+
+LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
+{
+	if (!PumpMessages ())
+	{
+		return 0;
+	}
+	
+	if (CheckCancelButton () || GetPos() >= 100)
+	{
+		return 0;
+	}
+	
+	int f = (int)wParam;
+	CString str;
+	str.Format("Currect Status = %d", f);
+	SetStatus(str);
+
+	int percent = (int)lParam;
+	
+	if(percent > GetPos())
+	{
+		StepIt();
+	}
+
+	return 1;
 }

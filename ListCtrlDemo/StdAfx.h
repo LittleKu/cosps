@@ -24,4 +24,7 @@
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 #include "ResizableDialog.h"
+#include "Util.h"
+
+
 #endif // !defined(AFX_STDAFX_H__8960EFE3_C11E_4A7C_B50A_C4AB4F3504E1__INCLUDED_)

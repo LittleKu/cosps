@@ -62,6 +62,7 @@ protected:
     // Generated message map functions
     //{{AFX_MSG(CProgressDlg)
     virtual BOOL OnInitDialog();
+	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
     //}}AFX_MSG
     DECLARE_MESSAGE_MAP()
 };

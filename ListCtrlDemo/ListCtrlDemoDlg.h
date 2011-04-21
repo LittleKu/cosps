@@ -12,6 +12,7 @@
 // CListCtrlDemoDlg dialog
 #include "ThirdParty/MultiColumnSortListView.h"
 #include "ProgressDlg.h"
+#include "Counter.h"
 
 class CListCtrlDemoDlg : public CResizableDialog
 {
@@ -45,6 +46,8 @@ protected:
 	afx_msg void OnButtonAdd();
 	afx_msg void OnButtonDel();
 	afx_msg void OnButtonStart();
+	afx_msg LRESULT OnStartCount(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

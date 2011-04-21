@@ -92,6 +92,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\Counter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.cpp
 # End Source File
 # Begin Source File
@@ -129,6 +133,10 @@ SOURCE=.\StdAfx.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\Counter.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.h
 # End Source File
 # Begin Source File
@@ -158,6 +166,10 @@ SOURCE=.\ThirdParty\SortClass.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Util.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
