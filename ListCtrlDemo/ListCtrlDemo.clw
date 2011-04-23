@@ -12,17 +12,16 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=9
+ResourceCount=8
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
-Resource3=CG_IDD_PROGRESS
+Resource3=IDD_ABOUTBOX (English (U.S.))
 Resource4=IDD_LISTCTRLDEMO_DIALOG
-Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource6=IDD_ABOUTBOX (English (U.S.))
+Resource5=IDD_PROGRESS
+Resource6=IDR_RESULT_MENU (Neutral)
 Class4=CProgressDlg
-Resource7=IDD_PROGRESS
-Resource8=IDR_RESULT_MENU (Neutral)
-Resource9=CG_IDD_PROGRESS1
+Resource7=CG_IDD_PROGRESS
+Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -141,15 +140,6 @@ LastObject=IDC_PROGRESS
 VirtualFilter=dWC
 
 [DLG:CG_IDD_PROGRESS]
-Type=1
-Class=?
-ControlCount=4
-Control1=IDCANCEL,button,1342242817
-Control2=CG_IDC_PROGDLG_PROGRESS,msctls_progress32,1350565888
-Control3=CG_IDC_PROGDLG_PERCENT,static,1342308352
-Control4=CG_IDC_PROGDLG_STATUS,static,1342308352
-
-[DLG:CG_IDD_PROGRESS1]
 Type=1
 Class=?
 ControlCount=4

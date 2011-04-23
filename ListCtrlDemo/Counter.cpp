@@ -12,8 +12,6 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	LRESULT lresult = ::SendMessage(hMainWnd, WM_START_COUNT, 0, 0);
 	HWND hProgWnd = (HWND)lresult;
 	ASSERT(hProgWnd);
-
-//	Sleep(5000);
 		
 	int cAllFiles = 10000;
 	bool bInitialShowDlg = false;
@@ -27,7 +25,6 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 			::SendMessage(hMainWnd, WM_END_COUNT, 0, 0);
 			break;
 		}
-		Sleep(1);
 	}
 	
 	::SendMessage(hMainWnd, WM_END_COUNT, 0, 0);
