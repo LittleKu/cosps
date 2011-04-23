@@ -12,27 +12,20 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CProgressDlg dialog
+clock_t CProgressDlg::m_clockLast = 0;
+clock_t CProgressDlg::m_clockCurr = 0;
 
-CProgressDlg::CProgressDlg(UINT nCaptionID)
+CProgressDlg::CProgressDlg() : m_bCancel(FALSE), m_bParentDisabled(FALSE)
 {
-	m_nCaptionID = CG_IDS_PROGRESS_CAPTION;
-	if (nCaptionID != 0)
-		m_nCaptionID = nCaptionID;
-
-    m_bCancel=FALSE;
-    m_nLower=0;
-    m_nUpper=100;
-    m_nStep=1;
-    //{{AFX_DATA_INIT(CProgressDlg)
-    // NOTE: the ClassWizard will add member initialization here
-    //}}AFX_DATA_INIT
-    m_bParentDisabled = FALSE;
 }
 
 CProgressDlg::~CProgressDlg()
 {
-    if(m_hWnd!=NULL)
-      DestroyWindow();
+    if(m_hWnd != NULL)
+	{
+		DestroyWindow();
+		m_hWnd = NULL;
+	}
 }
 
 BOOL CProgressDlg::DestroyWindow()
@@ -77,12 +70,13 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
     CDialog::DoDataExchange(pDX);
     //{{AFX_DATA_MAP(CProgressDlg)
     DDX_Control(pDX, CG_IDC_PROGDLG_PROGRESS, m_Progress);
-    //}}AFX_DATA_MAP
+	//}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
     //{{AFX_MSG_MAP(CProgressDlg)
 	ON_MESSAGE(WM_UPDATE_PROGRESS, OnUpdateProgress)
+	ON_WM_SYSCOMMAND()
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -94,119 +88,60 @@ void CProgressDlg::SetStatus(LPCTSTR lpszMessage)
 
     // Verify that the static text control exists
     ASSERT(pWndStatus!=NULL);
-    pWndStatus->SetWindowText(lpszMessage);
+
+	CString strCur; // get current percentage
+    pWndStatus->GetWindowText(strCur);
+
+	if(strCur != lpszMessage)
+	{
+//		pWndStatus->SetRedraw(FALSE);
+//		pWndStatus->EnableWindow(FALSE);
+		pWndStatus->SetWindowText(lpszMessage);
+//		pWndStatus->EnableWindow(TRUE);
+//		pWndStatus->SetRedraw(TRUE);
+// 		pWndStatus->Invalidate(FALSE);
+	}
+}
+
+void CProgressDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if (nID == SC_CLOSE)
+	{
+		OnCancel();
+	}
+	else
+	{
+		CDialog::OnSysCommand(nID, lParam);
+	}
 }
 
 void CProgressDlg::OnCancel()
 {
-    m_bCancel=TRUE;
-}
-
-void CProgressDlg::SetRange(int nLower,int nUpper)
-{
-    m_nLower = nLower;
-    m_nUpper = nUpper;
-    m_Progress.SetRange(nLower,nUpper);
-}
-  
-int CProgressDlg::SetPos(int nPos)
-{
-    PumpMessages();
-    int iResult = m_Progress.SetPos(nPos);
-    UpdatePercent(nPos);
-    return iResult;
-}
-
-int CProgressDlg::GetPos()
-{
-	int iResult = m_Progress.GetPos();
-	return iResult;
-}
-
-int CProgressDlg::SetStep(int nStep)
-{
-    m_nStep = nStep; // Store for later use in calculating percentage
-    return m_Progress.SetStep(nStep);
-}
-
-int CProgressDlg::OffsetPos(int nPos)
-{
-    PumpMessages();
-    int iResult = m_Progress.OffsetPos(nPos);
-    UpdatePercent(iResult+nPos);
-    return iResult;
-}
-
-int CProgressDlg::StepIt()
-{
-    PumpMessages();
-    int iResult = m_Progress.StepIt();
-    UpdatePercent(iResult+m_nStep);
-    return iResult;
-}
-
-BOOL CProgressDlg::PumpMessages()
-{
-    // Must call Create() before using the dialog
-    ASSERT(m_hWnd!=NULL);
-	HWND hwndThis = GetSafeHwnd ();
-	
-    MSG msg;
-    // Handle dialog messages
-    while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-    {
-		if (msg.message == WM_QUIT)
-		{
-			PostThreadMessage (GetCurrentThreadId(), msg.message, msg.wParam, msg.lParam);
-			return FALSE;
-		}
-		
-		if (!::IsWindow (hwndThis))
-		{
-			return FALSE;
-		}
-		if(!IsDialogMessage(&msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);  
-		}
-		
-		if (!::IsWindow (hwndThis))
-		{
-			return FALSE;
-		}
-    }
-	return TRUE;
+    m_bCancel = TRUE;
 }
 
 BOOL CProgressDlg::CheckCancelButton()
 {
-    // Process all pending messages
-    PumpMessages();
+    return m_bCancel;
+}
 
-    // Reset m_bCancel to FALSE so that
-    // CheckCancelButton returns FALSE until the user
-    // clicks Cancel again. This will allow you to call
-    // CheckCancelButton and still continue the operation.
-    // If m_bCancel stayed TRUE, then the next call to
-    // CheckCancelButton would always return TRUE
-
-    BOOL bResult = m_bCancel;
-    m_bCancel = FALSE;
-
-    return bResult;
+CProgressCtrl* CProgressDlg::GetProgressCtrl()
+{
+	return &m_Progress;
 }
 
 void CProgressDlg::UpdatePercent(int nNewPos)
 {
     CWnd *pWndPercent = GetDlgItem(CG_IDC_PROGDLG_PERCENT);
-    int nPercent;
-    
-    int nDivisor = m_nUpper - m_nLower;
-    ASSERT(nDivisor>0);  // m_nLower should be smaller than m_nUpper
+    int nPercent, nLower, nUpper;
 
-    int nDividend = (nNewPos - m_nLower);
-    ASSERT(nDividend>=0);   // Current position should be greater than m_nLower
+	m_Progress.GetRange(nLower, nUpper);
+
+    int nDivisor = nUpper - nLower;
+    ASSERT(nDivisor>0);  // nLower should be smaller than m_nUpper
+
+    int nDividend = (nNewPos - nLower);
+    ASSERT(nDividend>=0);   // Current position should be greater than nLower
 
     nPercent = nDividend * 100 / nDivisor;
 
@@ -232,40 +167,57 @@ void CProgressDlg::UpdatePercent(int nNewPos)
 BOOL CProgressDlg::OnInitDialog() 
 {
     CDialog::OnInitDialog();
-    m_Progress.SetRange(m_nLower,m_nUpper);
-    m_Progress.SetStep(m_nStep);
-    m_Progress.SetPos(m_nLower);
+	m_Progress.SetRange(0, 100);
+	m_Progress.SetStep(1);
+	m_Progress.SetPos(0);
 
-	CString strCaption;
-	VERIFY(strCaption.LoadString(m_nCaptionID));
-    SetWindowText(strCaption);
+	CWnd *pWndStatus = GetDlgItem(CG_IDC_PROGDLG_STATUS);
+	
+    // Verify that the static text control exists
+    ASSERT(pWndStatus!=NULL);
+	pWndStatus->SetFont(this->GetParent()->GetFont());
 
     return TRUE;  
 }
 
 LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 {
-	if (!PumpMessages ())
-	{
-		return 0;
-	}
-	
-	if (CheckCancelButton () || GetPos() >= 100)
-	{
-		return 0;
-	}
-	
-	int f = (int)wParam;
-	CString str;
-	str.Format("Currect Status = %d", f);
-	SetStatus(str);
+	m_clockCurr = clock();
+	int nPos, nLower, nUpper;
 
-	int percent = (int)lParam;
-	
-	if(percent > GetPos())
+	m_Progress.GetRange(nLower, nUpper);
+	nPos = m_Progress.GetPos();
+
+	if(CheckCancelButton () || nPos >= nUpper)
 	{
-		StepIt();
+		return FALSE;
+	}
+	
+	nPos = (int)wParam;
+
+	//SetPos
+	m_Progress.SetPos(nPos);
+
+	//The time difference in milliseconds;
+	long diff = m_clockCurr - m_clockLast;
+	if(CLOCKS_PER_SEC != 1000)
+	{
+		diff = diff * 1000 / CLOCKS_PER_SEC;
+	}
+	//This is used to reduce the flicker if the refresh speed is too fast (less than 1ms)
+	//Only the time difference is greater or equal to 1 ms, refresh the static text
+	if( diff >= 1)
+	{
+		//Status Text
+		CString str;
+		str.Format("Currect Status = %d", nPos);
+		SetStatus(str);
+		
+		//Percent
+		UpdatePercent(nPos);
+
+		m_clockLast = clock();
 	}
 
-	return 1;
+	return TRUE;
 }

@@ -7,9 +7,6 @@
 #define IDS_ABOUTBOX                    101
 #define IDD_LISTCTRLDEMO_DIALOG         102
 #define CG_IDD_PROGRESS                 103
-#define CG_IDS_PROGRESS_CAPTION         104
-#define CG_IDD_PROGRESS1                105
-#define CG_IDS_PROGRESS_CAPTION1        106
 #define IDR_MAINFRAME                   128
 #define IDR_RESULT_MENU                 129
 #define IDB_ARROWDOWN                   130

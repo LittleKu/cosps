@@ -1,33 +1,32 @@
 #include "StdAfx.h"
 #include "Counter.h"
-#include "resource.h"
-#include "ProgressDlg.h"
-
 
 UINT CCounter::CountThreadProc(LPVOID lpvData)
 {
 	HWND hMainWnd = (HWND)lpvData;
 	ASSERT(hMainWnd);
 
-	LRESULT lresult = ::SendMessage(hMainWnd, WM_START_COUNT, 0, 0);
+	int cAllFiles = 10000000;
+	LRESULT lresult = ::SendMessage(hMainWnd, WM_START_COUNT, 0, (LPARAM)cAllFiles);
 	HWND hProgWnd = (HWND)lresult;
 	ASSERT(hProgWnd);
-		
-	int cAllFiles = 10000;
-	bool bInitialShowDlg = false;
-	int progress = 0;
+	
+	BOOL bProgDlgEnded = FALSE;	
 	for (int f = 0; f < cAllFiles; ++f)
 	{
-		progress = (f + 1)*100/cAllFiles;
-		lresult = ::SendMessage(hProgWnd, WM_UPDATE_PROGRESS, (WPARAM)f, (LPARAM)progress);
+		lresult = ::SendMessage(hProgWnd, WM_UPDATE_PROGRESS, (WPARAM)f, 0);
 		if(lresult == 0)
 		{
 			::SendMessage(hMainWnd, WM_END_COUNT, 0, 0);
+			bProgDlgEnded = TRUE;
 			break;
 		}
 	}
 	
-	::SendMessage(hMainWnd, WM_END_COUNT, 0, 0);
+	if(!bProgDlgEnded)
+	{
+		::SendMessage(hMainWnd, WM_END_COUNT, 0, 0);
+	}
 
 	return 0;
 }

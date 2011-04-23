@@ -11,28 +11,21 @@ class CProgressDlg : public CDialog
 {
 // Construction / Destruction
 public:
-    CProgressDlg(UINT nCaptionID = 0);   // standard constructor
+    CProgressDlg();   // standard constructor
     ~CProgressDlg();
 
     BOOL Create(CWnd *pParent=NULL);
 
     // Checking for Cancel button
     BOOL CheckCancelButton();
-    // Progress Dialog manipulation
-    void SetStatus(LPCTSTR lpszMessage);
-    void SetRange(int nLower,int nUpper);
-    int  SetStep(int nStep);
-    int  SetPos(int nPos);
-	int  GetPos();
-    int  OffsetPos(int nPos);
-    int  StepIt();
-	BOOL PumpMessages();
         
 // Dialog Data
     //{{AFX_DATA(CProgressDlg)
-    enum { IDD = CG_IDD_PROGRESS };
-    CProgressCtrl	m_Progress;
-    //}}AFX_DATA
+	enum { IDD = CG_IDD_PROGRESS };
+	//}}AFX_DATA
+	CProgressCtrl* GetProgressCtrl();
+	void UpdatePercent(int nCurrent);
+    void SetStatus(LPCTSTR lpszMessage);
 
 // Overrides
     // ClassWizard generated virtual function overrides
@@ -44,27 +37,25 @@ public:
     //}}AFX_VIRTUAL
 
 // Implementation
-protected:
-	UINT m_nCaptionID;
-    int m_nLower;
-    int m_nUpper;
-    int m_nStep;
-    
+protected:  
     BOOL m_bCancel;
     BOOL m_bParentDisabled;
+	CProgressCtrl m_Progress;
 
     void ReEnableParent();
-
     virtual void OnCancel();
-    virtual void OnOK() {}; 
-    void UpdatePercent(int nCurrent);
+    virtual void OnOK() {};
 
     // Generated message map functions
     //{{AFX_MSG(CProgressDlg)
     virtual BOOL OnInitDialog();
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     //}}AFX_MSG
     DECLARE_MESSAGE_MAP()
+private:
+	static clock_t m_clockCurr;
+	static clock_t m_clockLast;
 };
 
 #endif // __PROGRESSDLG_H__

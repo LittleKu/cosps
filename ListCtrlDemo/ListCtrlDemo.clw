@@ -15,12 +15,12 @@ Class3=CAboutDlg
 ResourceCount=8
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
-Resource3=IDD_ABOUTBOX (English (U.S.))
+Resource3=IDR_RESULT_MENU (Neutral)
 Resource4=IDD_LISTCTRLDEMO_DIALOG
-Resource5=IDD_PROGRESS
-Resource6=IDR_RESULT_MENU (Neutral)
+Resource5=CG_IDD_PROGRESS
+Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=CG_IDD_PROGRESS
+Resource7=IDD_ABOUTBOX (English (U.S.))
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 
 [CLS:CListCtrlDemoApp]
@@ -141,7 +141,7 @@ VirtualFilter=dWC
 
 [DLG:CG_IDD_PROGRESS]
 Type=1
-Class=?
+Class=CProgressDlg
 ControlCount=4
 Control1=IDCANCEL,button,1342242817
 Control2=CG_IDC_PROGDLG_PROGRESS,msctls_progress32,1350565888
