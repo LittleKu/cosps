@@ -89,18 +89,7 @@ void CProgressDlg::SetStatus(LPCTSTR lpszMessage)
     // Verify that the static text control exists
     ASSERT(pWndStatus!=NULL);
 
-	CString strCur; // get current percentage
-    pWndStatus->GetWindowText(strCur);
-
-	if(strCur != lpszMessage)
-	{
-//		pWndStatus->SetRedraw(FALSE);
-//		pWndStatus->EnableWindow(FALSE);
-		pWndStatus->SetWindowText(lpszMessage);
-//		pWndStatus->EnableWindow(TRUE);
-//		pWndStatus->SetRedraw(TRUE);
-// 		pWndStatus->Invalidate(FALSE);
-	}
+	pWndStatus->SetWindowText(lpszMessage);
 }
 
 void CProgressDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -190,7 +179,7 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 
 	if(CheckCancelButton () || nPos >= nUpper)
 	{
-		return FALSE;
+		return (LRESULT)0;
 	}
 	
 	nPos = (int)wParam;
@@ -206,7 +195,7 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	}
 	//This is used to reduce the flicker if the refresh speed is too fast (less than 1ms)
 	//Only the time difference is greater or equal to 1 ms, refresh the static text
-	if( diff >= 1)
+	if( nPos >= nUpper || diff >= 10)
 	{
 		//Status Text
 		CString str;
@@ -219,5 +208,5 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 		m_clockLast = clock();
 	}
 
-	return TRUE;
+	return (LRESULT)1;
 }
