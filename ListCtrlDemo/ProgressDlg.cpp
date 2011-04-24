@@ -12,10 +12,8 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CProgressDlg dialog
-clock_t CProgressDlg::m_clockLast = 0;
-clock_t CProgressDlg::m_clockCurr = 0;
 
-CProgressDlg::CProgressDlg() : m_bCancel(FALSE), m_bParentDisabled(FALSE)
+CProgressDlg::CProgressDlg() : m_bCancel(FALSE), m_bParentDisabled(FALSE), m_timeCost(10)
 {
 }
 
@@ -75,8 +73,9 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
     //{{AFX_MSG_MAP(CProgressDlg)
-	ON_MESSAGE(WM_UPDATE_PROGRESS, OnUpdateProgress)
+	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
 	ON_MESSAGE(WM_PROGRESS_SET_RANGE, OnProgressSetRange)
+	ON_MESSAGE(WM_PROGRESS_IS_CANCELLED, OnProgressIsCancelled)
 	ON_WM_SYSCOMMAND()
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -110,7 +109,7 @@ void CProgressDlg::OnCancel()
     m_bCancel = TRUE;
 }
 
-BOOL CProgressDlg::CheckCancelButton()
+BOOL CProgressDlg::IsCancelled()
 {
     return m_bCancel;
 }
@@ -170,15 +169,15 @@ BOOL CProgressDlg::OnInitDialog()
     return TRUE;  
 }
 
-LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
+LRESULT CProgressDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
 {
-	m_clockCurr = clock();
+	m_timeCost.UpdateCurrClock();
 	int nPos, nLower, nUpper;
 
 	m_Progress.GetRange(nLower, nUpper);
 	nPos = m_Progress.GetPos();
 
-	if(CheckCancelButton () || nPos >= nUpper)
+	if(IsCancelled () || nPos >= nUpper)
 	{
 		return (LRESULT)0;
 	}
@@ -189,15 +188,9 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	//SetPos
 	m_Progress.SetPos(nPos);
 
-	//The time difference in milliseconds;
-	long diff = m_clockCurr - m_clockLast;
-	if(CLOCKS_PER_SEC != 1000)
-	{
-		diff = diff * 1000 / CLOCKS_PER_SEC;
-	}
 	//This is used to reduce the flicker if the refresh speed is too fast (less than 1ms)
 	//Only the time difference is greater or equal to 1 ms, refresh the static text
-	if( nPos >= nUpper || diff >= 10)
+	if( nPos >= nUpper || m_timeCost.IsTimeOut() )
 	{
 		//Status Text
 		CString str;
@@ -207,7 +200,7 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 		//Percent
 		UpdatePercent(nPos);
 
-		m_clockLast = clock();
+		m_timeCost.UpdateLastClock();
 	}
 
 	return (LRESULT)1;
@@ -220,6 +213,11 @@ LRESULT CProgressDlg::OnProgressSetRange(WPARAM wParam, LPARAM lParam)
 	m_Progress.SetRange32(nLower, nUpper);
 
 	return 0;
+}
+
+LRESULT CProgressDlg::OnProgressIsCancelled(WPARAM wParam, LPARAM lParam)
+{
+	return (LRESULT)IsCancelled();
 }
 
 

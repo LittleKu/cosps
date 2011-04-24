@@ -13,16 +13,19 @@ class CCounter
 public:
 	static UINT CountThreadProc(LPVOID lpvData);
 	static int EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor);
+	static int EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor);
 };
 
 class CFileCountVisitor : public CFileVisitor
 {
 public:
-	CFileCountVisitor();
+	CFileCountVisitor(HWND hWnd);
 	virtual int VisitFile(LPCTSTR lpszFileName);
 	virtual UINT GetResult() { return m_nCount; }
 private:
+	HWND m_hProgWnd;
 	UINT m_nCount;
+	CTimeCost m_timeCost;
 };
 
 class CFilePrintVisitor : public CFileVisitor

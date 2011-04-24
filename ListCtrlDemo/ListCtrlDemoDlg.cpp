@@ -385,9 +385,9 @@ LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 	}
 	m_pProgressDlg = new CProgressDlg();
 	m_pProgressDlg->Create(this);
-	int nLower = (int)wParam;
-	int nUpper = (int)lParam;
-	m_pProgressDlg->GetProgressCtrl()->SetRange32(nLower, nUpper);
+// 	int nLower = (int)wParam;
+// 	int nUpper = (int)lParam;
+// 	m_pProgressDlg->GetProgressCtrl()->SetRange32(nLower, nUpper);
 	m_pProgressDlg->SetWindowText("Changed Caption");
 	m_pProgressDlg->SetStatus("Empty Status");
 	m_pProgressDlg->UpdateWindow();

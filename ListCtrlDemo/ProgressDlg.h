@@ -17,7 +17,7 @@ public:
     BOOL Create(CWnd *pParent=NULL);
 
     // Checking for Cancel button
-    BOOL CheckCancelButton();
+    BOOL IsCancelled();
         
 // Dialog Data
     //{{AFX_DATA(CProgressDlg)
@@ -49,14 +49,14 @@ protected:
     // Generated message map functions
     //{{AFX_MSG(CProgressDlg)
     virtual BOOL OnInitDialog();
-	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnProgressSetRange(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnProgressIsCancelled(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     //}}AFX_MSG
     DECLARE_MESSAGE_MAP()
 private:
-	static clock_t m_clockCurr;
-	static clock_t m_clockLast;
+	CTimeCost m_timeCost;
 };
 
 #endif // __PROGRESSDLG_H__
