@@ -50,6 +50,7 @@ protected:
     //{{AFX_MSG(CProgressDlg)
     virtual BOOL OnInitDialog();
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnProgressSetRange(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     //}}AFX_MSG
     DECLARE_MESSAGE_MAP()

@@ -3,13 +3,20 @@
 
 #define WM_START_COUNT          (WM_USER + 100)
 #define WM_END_COUNT            (WM_USER + 101)
-#define WM_UPDATE_PROGRESS      (WM_USER + 102)
+#define WM_PROGRESS_SET_RANGE   (WM_USER + 102)
+#define WM_UPDATE_PROGRESS      (WM_USER + 103)
 
 typedef struct tagCountThreadParam
 {
 	HWND hwndMain;
-	HWND hwndProgress;
-}CountThreadParam, *lpCountThreadParam;
+	CStringArray dirList;
+}CountThreadParam, *LPCountThreadParam;
+
+typedef struct tagUpdateProgressParam
+{
+	UINT nPos;
+	TCHAR sFile[MAX_PATH + 1];
+}UpdateProgressParam, *LPUpdateProgressParam;
 
 
 

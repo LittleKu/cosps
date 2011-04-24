@@ -303,7 +303,18 @@ void CListCtrlDemoDlg::OnButtonDel()
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
-	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, GetSafeHwnd());
+	//Prepare parameters
+	LPCountThreadParam lpThreadParam = new CountThreadParam;
+	lpThreadParam->hwndMain = GetSafeHwnd();
+	
+	int i, count = m_srcDirListBox.GetCount();
+	CString sDir;
+	for(i = 0; i < count; i++)
+	{
+		m_srcDirListBox.GetText(i, sDir);
+		lpThreadParam->dirList.Add(sDir);
+	}
+	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, lpThreadParam);
 	/*
 	if(m_pProgressDlg != NULL)
 	{
@@ -365,6 +376,7 @@ void CListCtrlDemoDlg::OnButtonStart()
 
 LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 {
+	//Show ProgressDlg
 	if(m_pProgressDlg != NULL)
 	{
 		ASSERT_VALID (m_pProgressDlg);		
@@ -373,7 +385,6 @@ LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 	}
 	m_pProgressDlg = new CProgressDlg();
 	m_pProgressDlg->Create(this);
-
 	int nLower = (int)wParam;
 	int nUpper = (int)lParam;
 	m_pProgressDlg->GetProgressCtrl()->SetRange32(nLower, nUpper);

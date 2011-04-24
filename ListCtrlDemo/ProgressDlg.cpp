@@ -76,6 +76,7 @@ void CProgressDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CProgressDlg, CDialog)
     //{{AFX_MSG_MAP(CProgressDlg)
 	ON_MESSAGE(WM_UPDATE_PROGRESS, OnUpdateProgress)
+	ON_MESSAGE(WM_PROGRESS_SET_RANGE, OnProgressSetRange)
 	ON_WM_SYSCOMMAND()
     //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -182,7 +183,8 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 		return (LRESULT)0;
 	}
 	
-	nPos = (int)wParam;
+	LPUpdateProgressParam lpTheParam = (LPUpdateProgressParam)wParam;
+	nPos = lpTheParam->nPos;
 
 	//SetPos
 	m_Progress.SetPos(nPos);
@@ -199,7 +201,7 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	{
 		//Status Text
 		CString str;
-		str.Format("Currect Status = %d", nPos);
+		str.Format("%s", lpTheParam->sFile);
 		SetStatus(str);
 		
 		//Percent
@@ -210,3 +212,15 @@ LRESULT CProgressDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 
 	return (LRESULT)1;
 }
+LRESULT CProgressDlg::OnProgressSetRange(WPARAM wParam, LPARAM lParam)
+{
+	int nLower = (int)wParam;
+	int nUpper = (int)lParam;
+
+	m_Progress.SetRange32(nLower, nUpper);
+
+	return 0;
+}
+
+
+
