@@ -15,12 +15,12 @@ Class3=CAboutDlg
 ResourceCount=8
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
-Resource3=IDR_RESULT_MENU (Neutral)
+Resource3=CG_IDD_PROGRESS
 Resource4=IDD_LISTCTRLDEMO_DIALOG
-Resource5=CG_IDD_PROGRESS
+Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_ABOUTBOX (English (U.S.))
+Resource7=IDR_RESULT_MENU (Neutral)
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 
 [CLS:CListCtrlDemoApp]

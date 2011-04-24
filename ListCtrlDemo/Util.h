@@ -16,7 +16,7 @@ typedef struct tagCountThreadParam
 typedef struct tagUpdateProgressParam
 {
 	UINT nPos;
-	TCHAR sFile[MAX_PATH + 1];
+	CString sFile;
 }UpdateProgressParam, *LPUpdateProgressParam;
 
 class CTimeCost

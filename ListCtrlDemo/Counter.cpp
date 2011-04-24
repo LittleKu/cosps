@@ -14,7 +14,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	//Set current progress status
 	LPUpdateProgressParam lpProgressParam = new UpdateProgressParam;
 	lpProgressParam->nPos = 0;
-	_stprintf(lpProgressParam->sFile, "%s", _T("Calculating the files count..."));
+	lpProgressParam->sFile.Format("Found %d files", 0);
 	::SendMessage(hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)lpProgressParam, 0);
 	delete lpProgressParam;
 	lpProgressParam = NULL;
@@ -25,14 +25,20 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	UINT cAllFiles = 0;
 	int i, count = lpThreadParam->dirList.GetSize();
 	int result = 0, prev = 0;
+	CString sCurDir;
 	for(i = 0; i < count; i++)
 	{
-		result = EnumDirectory(lpThreadParam->dirList.GetAt(i), TRUE, pVisitor);
+		sCurDir = lpThreadParam->dirList.GetAt(i);
+		if(sCurDir.GetAt(sCurDir.GetLength() - 1) == '\\')
+		{
+			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
+		}
+		result = EnumDirectory(sCurDir, TRUE, pVisitor);
 		if(result == -1)
 		{
 			break;
 		}
-		AfxTrace("dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		AfxTrace("[COUNT]: dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
 		prev = pVisitor->GetResult();
 	}
 	cAllFiles = pVisitor->GetResult();
@@ -58,18 +64,23 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	prev = 0;
 	for(i = 0; i < count; i++)
 	{
-		if(EnumDirectoryFileFirst(lpThreadParam->dirList.GetAt(i), TRUE, pVisitor) == -1)
+		sCurDir = lpThreadParam->dirList.GetAt(i);
+		if(sCurDir.GetAt(sCurDir.GetLength() - 1) == '\\')
+		{
+			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
+		}
+		if(EnumDirectoryFileFirst(sCurDir, TRUE, pVisitor) == -1)
 		{
 			break;
 		}
-		AfxTrace("print dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		AfxTrace("[PRINT]: dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
 		prev = pVisitor->GetResult();
 	}
 	delete pVisitor;
 	pVisitor = NULL;
 
 	//Show the last status
-	Sleep(1000);
+	Sleep(2000);
 
 	//End the works
 	::SendMessage(lpThreadParam->hwndMain, WM_END_COUNT, 0, 0);
@@ -106,7 +117,7 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 	for(hasMore = (hFind != INVALID_HANDLE_VALUE); hasMore; hasMore = FindNextFile(hFind, &FindFileData))
 	{
 		//Ignore hidden files, current, and parent directory
-		if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN != 0)
+		if( ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0)
 			|| _tcscmp(FindFileData.cFileName, ".") == 0
 			|| _tcscmp(FindFileData.cFileName, "..") == 0)
 		{
@@ -116,6 +127,12 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 		if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
         {
 			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
+#ifdef _DEBUG
+			if(sCurFile.GetLength() > MAX_PATH)
+			{
+				AfxTrace("Long name file: %s\n", sCurFile);
+			}
+#endif
             if(pVisitor->VisitFile(sCurFile) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
@@ -126,7 +143,13 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 		//2. Directory
 		else if( bRecursive && ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) )
 		{
-			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);		
+			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
+#ifdef _DEBUG
+			if(sCurFile.GetLength() > MAX_PATH)
+			{
+				AfxTrace("Long name dir: %s\n", sCurFile);
+			}
+#endif
             if(EnumDirectory(sCurFile, bRecursive, pVisitor) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
@@ -171,12 +194,23 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
 	BOOL hasMore;
 	for(hasMore = (hFind != INVALID_HANDLE_VALUE); hasMore; hasMore = FindNextFile(hFind, &FindFileData))
 	{
-		//Ignore hidden files
-		//1. File
-		if( (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 
-			&& (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == 0)
+		//Ignore hidden files, current, and parent directory
+		if( ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0)
+			|| _tcscmp(FindFileData.cFileName, ".") == 0
+			|| _tcscmp(FindFileData.cFileName, "..") == 0)
+		{
+			continue;
+		}
+		//File
+		if( (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 )
         {
 			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
+#ifdef _DEBUG
+			if(sCurFile.GetLength() > MAX_PATH)
+			{
+				AfxTrace("Long name file: %s\n", sCurFile);
+			}
+#endif
             if(pVisitor->VisitFile(sCurFile) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
@@ -201,6 +235,7 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
 	}
 	
 	
+	sCurDir.Format("%s\\*", lpszDirName);
 	//Find directories
 	hFind = FindFirstFile(sCurDir, &FindFileData);	
 	if (hFind == INVALID_HANDLE_VALUE)
@@ -212,12 +247,23 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
 	
 	for(hasMore = (hFind != INVALID_HANDLE_VALUE); hasMore; hasMore = FindNextFile(hFind, &FindFileData))
 	{
-		if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 
-			&& (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == 0
-            && _tcscmp(FindFileData.cFileName, ".") != 0
-            && _tcscmp(FindFileData.cFileName, "..") != 0)
+		//Ignore hidden files, current, and parent directory
+		if( ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0)
+			|| _tcscmp(FindFileData.cFileName, ".") == 0
+			|| _tcscmp(FindFileData.cFileName, "..") == 0)
 		{
-			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);		
+			continue;
+		}
+
+		if( (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 )
+		{	
+			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
+#ifdef _DEBUG
+			if(sCurFile.GetLength() > MAX_PATH)
+			{
+				AfxTrace("Long name dir: %s\n", sCurFile);
+			}
+#endif
             if(EnumDirectoryFileFirst(sCurFile, bRecursive, pVisitor) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
@@ -244,17 +290,27 @@ CFileCountVisitor::CFileCountVisitor(HWND hWnd) : m_hProgWnd(hWnd), m_nCount(0),
 int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
 {
 	m_nCount++;
-	m_timeCost.UpdateCurrClock();
-	if(m_timeCost.IsTimeOut())
+// 	m_timeCost.UpdateCurrClock();
+// 	if(m_timeCost.IsTimeOut())
+// 	{
+// 		//Do the check works
+// 		BOOL isCancelled = ::SendMessage(m_hProgWnd, WM_PROGRESS_IS_CANCELLED, 0, 0);
+// 		if(isCancelled)
+// 		{
+// 			return -1;
+// 		}
+// 		m_timeCost.UpdateLastClock();
+// 	}
+	UpdateProgressParam param;
+	param.nPos = 0;
+	param.sFile.Format("Found %d files", m_nCount);
+	
+	LRESULT lr = ::SendMessage(m_hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)(&param), 0);
+	if(lr == 0)
 	{
-		//Do the check works
-		BOOL isCancelled = ::SendMessage(m_hProgWnd, WM_PROGRESS_IS_CANCELLED, 0, 0);
-		if(isCancelled)
-		{
-			return -1;
-		}
-		m_timeCost.UpdateLastClock();
+		return -1;
 	}
+
 	return m_nCount;
 }
 
@@ -267,8 +323,8 @@ int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
 
 	UpdateProgressParam param;
 	param.nPos = m_nCount;
-	_stprintf(param.sFile, "%s", lpszFileName);
-
+	param.sFile.Format("%s", lpszFileName);
+	AfxTrace("%s\n", param.sFile);
 	LRESULT lr = ::SendMessage(m_hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)(&param), 0);
 	if(lr == 0)
 	{

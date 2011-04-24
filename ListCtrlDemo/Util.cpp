@@ -17,10 +17,9 @@ void CTimeCost::UpdateLastClock()
 BOOL CTimeCost::IsTimeOut()
 {
 	long diff = m_clockCurr - m_clockLast;
-	if(CLOCKS_PER_SEC != 1000)
-	{
-		diff = diff * 1000 / CLOCKS_PER_SEC;
-	}
+#if (CLOCKS_PER_SEC != 1000)
+	diff = diff * 1000 / CLOCKS_PER_SEC;
+#endif
 	if(diff < 0)
 	{
 		diff = 0;
