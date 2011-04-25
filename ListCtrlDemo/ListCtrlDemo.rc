@@ -256,7 +256,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ListCtrlDemo.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\AppIcon.ico"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
