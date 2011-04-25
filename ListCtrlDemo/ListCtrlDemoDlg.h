@@ -23,8 +23,10 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
+	CComboBox	m_filterComboBox;
 	CListBox	m_srcDirListBox;
 	CMultiColumnSortListCtrl m_resultListCtrl;
+	BOOL	m_recursiveSubBtn;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -35,8 +37,8 @@ public:
 
 // Implementation
 protected:
+	void ResetResult();
 	void DeleteAllListItems();
-	HICON m_hIcon;
 	int AddRow(const CFileInfo& fi);
 	// Generated message map functions
 	//{{AFX_MSG(CListCtrlDemoDlg)
@@ -50,6 +52,7 @@ protected:
 	afx_msg LRESULT OnStartCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSummaryUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnButtonStop();
 	afx_msg void OnClose();
 	//}}AFX_MSG
@@ -57,6 +60,12 @@ protected:
 private:
 	void InitResultListCtrl();
 	void InitResizableDlgAnchor();
+	void RefreshFilterArrays();
+	//Member variables
+protected:
+	HICON m_hIcon;
+	CStringArray m_sFilterArray;
+private:
 	CProgressDlg* m_pProgressDlg;
 };
 

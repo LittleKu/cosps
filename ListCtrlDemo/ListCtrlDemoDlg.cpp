@@ -86,7 +86,7 @@ CListCtrlDemoDlg::CListCtrlDemoDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CListCtrlDemoDlg::IDD, pParent), m_pProgressDlg(NULL)
 {
 	//{{AFX_DATA_INIT(CListCtrlDemoDlg)
-		// NOTE: the ClassWizard will add member initialization here
+	m_recursiveSubBtn = FALSE;
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -96,8 +96,10 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
+	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
 	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListBox);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
+	DDX_Check(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	//}}AFX_DATA_MAP
 }
 
@@ -114,6 +116,7 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_MESSAGE(WM_START_COUNT, OnStartCount)
 	ON_MESSAGE(WM_END_COUNT, OnEndCount)
 	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
+	ON_MESSAGE(WM_SUMMARY_UPDATE, OnSummaryUpdate)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -151,19 +154,6 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	InitResultListCtrl();
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
-
-// 	CFileInfo* pFi = new CFileInfo;
-// 
-// 	pFi->SetFileName("C:\\Downloads\\PLC221Src\\Source\\LineCountVC7.idl");
-// 	AddRow(*pFi);
-
-// 	pFi = new CFileInfo;
-// 	pFi->SetFileName("C:\\abc\\PLC221Src\\Source\\LineCountVC7.idl");
-// 	AddRow(*pFi);
-
-// 	CFileInfo fi;
-// 	fi.SetFileName("C:\\abc\\PLC221Src\\Source\\LineCountVC7.idl");
-// 	AddRow(fi);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -281,6 +271,77 @@ void CListCtrlDemoDlg::InitResultListCtrl()
     m_resultListCtrl.LoadColumnSort();
 }
 
+
+void CListCtrlDemoDlg::OnClose() 
+{
+	DeleteAllListItems();
+	CResizableDialog::OnClose();
+}
+
+void CListCtrlDemoDlg::DeleteAllListItems()
+{
+	int nCount = m_resultListCtrl.GetItemCount();
+	CFileInfo* pFi = NULL;
+	for(int i = 0; i < nCount; i++)
+	{
+		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
+		ASSERT(pFi);
+		delete pFi;
+	}
+	m_resultListCtrl.DeleteAllItems();
+}
+
+void CListCtrlDemoDlg::ResetResult()
+{
+	//1. list ctrl
+	DeleteAllListItems();
+	
+	//2. Summray info
+	SetDlgItemText(IDC_NUMBER, "");
+	SetDlgItemText(IDC_LINES, "");
+}
+
+void CListCtrlDemoDlg::RefreshFilterArrays()
+{
+	m_sFilterArray.RemoveAll();
+	
+	CString sFilter;
+	m_filterComboBox.GetWindowText(sFilter);
+	AfxTrace("Original Filter: [%s]\n", sFilter);
+
+	sFilter.TrimLeft();
+	sFilter.TrimRight();
+	if(sFilter.IsEmpty())
+	{
+		return;
+	}
+
+	char cSep = ';';
+	int nStart = 0, nIndex;
+	CString str;
+	while( (nIndex = sFilter.Find(cSep, nStart)) != -1)
+	{
+		if(nIndex > nStart)
+		{
+			str = sFilter.Mid(nStart, nIndex - nStart);
+			m_sFilterArray.Add(str);
+		}
+		nStart = nIndex + 1;
+	}
+	//Not the last char
+	if(nStart < sFilter.GetLength())
+	{
+		str = sFilter.Mid(nStart);
+		m_sFilterArray.Add(str);
+	}
+#ifdef _DEBUG
+	for(int i = 0; i < m_sFilterArray.GetSize(); i++)
+	{
+		AfxTrace("Filer(%d): [%s]\n", i + 1, m_sFilterArray.GetAt(i));
+	}
+#endif
+}
+
 int CListCtrlDemoDlg::AddRow(const CFileInfo& fi)
 {
 	int nRes = -1;
@@ -298,7 +359,13 @@ int CListCtrlDemoDlg::AddRow(const CFileInfo& fi)
     int iSubItem = 0;
     m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFileExt);
     m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
-	
+
+	m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nTotalLines));
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCodeLines));
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCommentLines));
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.GetMixedLines()));
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nBlankLines));
+
 	return nRes;
 }
 
@@ -339,93 +406,35 @@ void CListCtrlDemoDlg::OnButtonDel()
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
+	//check validation
+	int nCount = m_srcDirListBox.GetCount();
+	if(nCount <= 0)
+	{
+		AfxMessageBox(_T("Please select at least one directory."));
+		return;
+	}
+	
+	RefreshFilterArrays();
 	//Remove existing data
-	DeleteAllListItems();
+	ResetResult();
+
 	//Prepare parameters
 	LPCountThreadParam lpThreadParam = new CountThreadParam;
 	lpThreadParam->hwndMain = GetSafeHwnd();
 	
-	int i, count = m_srcDirListBox.GetCount();
 	CString sDir;
-	for(i = 0; i < count; i++)
+	for(int i = 0; i < nCount; i++)
 	{
 		m_srcDirListBox.GetText(i, sDir);
 		lpThreadParam->dirList.Add(sDir);
 	}
 	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, lpThreadParam);
-	/*
-	if(m_pProgressDlg != NULL)
-	{
-		ASSERT_VALID (m_pProgressDlg);		
-		delete m_pProgressDlg;
-		m_pProgressDlg = NULL;
-		
-		return;
-	}
-	m_pProgressDlg = new CProgressDlg();
-	m_pProgressDlg->Create(this);
-	m_pProgressDlg->SetWindowText("Changed Caption");
-	m_pProgressDlg->SetStatus("Empty Status");
-	m_pProgressDlg->UpdateWindow();
-	m_pProgressDlg->ShowWindow(SW_NORMAL);
-
-	int cAllFiles = 10000;
-	bool bInitialShowDlg = false;
-	int progress = 0;
-	for (int f = 0; f < cAllFiles; ++f)
-	{
-		if (!m_pProgressDlg->PumpMessages ())
-		{
-			return;
-		}
-
-		if (m_pProgressDlg->CheckCancelButton () || m_pProgressDlg->GetPos() >= 100)
-		{
-			delete m_pProgressDlg;
-			m_pProgressDlg = NULL;
-			
-			return;
-		}
-		
-		CString str;
-		str.Format("Currect Status = %d", f);
-		m_pProgressDlg->SetStatus(str);
-
-		int pos = (f + 1) * 100 / cAllFiles;
-		if(pos > m_pProgressDlg->GetPos())
-		{
-			m_pProgressDlg->StepIt();
-		}
-
-		Sleep(1);
-	}
-
-	if(m_pProgressDlg != NULL)
-	{
-		m_pProgressDlg->StepIt();
-
-		Sleep(5000);
-
-		delete m_pProgressDlg;
-		m_pProgressDlg = NULL;
-	}
-	*/
 }
 
 
 void CListCtrlDemoDlg::OnButtonStop() 
 {
-	int nCount = m_resultListCtrl.GetItemCount();
-	LV_ITEM* pItem = NULL;
-	CFileInfo* pFi = NULL;
-	for(int i = 0; i < nCount; i++)
-	{
-		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
-		ASSERT(pFi);
-
-// 		pFi = (CFileInfo*)pItem->lParam;
-// 		ASSERT(pFi);
-	}
+	ResetResult();
 }
 
 LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
@@ -439,9 +448,6 @@ LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 	}
 	m_pProgressDlg = new CProgressDlg();
 	m_pProgressDlg->Create(this);
-// 	int nLower = (int)wParam;
-// 	int nUpper = (int)lParam;
-// 	m_pProgressDlg->GetProgressCtrl()->SetRange32(nLower, nUpper);
 	m_pProgressDlg->SetWindowText("Changed Caption");
 	m_pProgressDlg->SetStatus("Empty Status");
 	m_pProgressDlg->UpdateWindow();
@@ -467,22 +473,32 @@ LRESULT CListCtrlDemoDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-
-void CListCtrlDemoDlg::OnClose() 
+LRESULT CListCtrlDemoDlg::OnSummaryUpdate(WPARAM wParam, LPARAM lParam)
 {
-	DeleteAllListItems();
-	CResizableDialog::OnClose();
-}
+	int nTotalCount = (int)wParam;
 
-void CListCtrlDemoDlg::DeleteAllListItems()
-{
-	int nCount = m_resultListCtrl.GetItemCount();
+	int i, nCount = m_resultListCtrl.GetItemCount();
+	if(nTotalCount <= 0)
+	{
+		nTotalCount = nCount;
+	}
+
+	int nTotalLines = 0, nCodeLines = 0, nCommentLines = 0, nMixedLines = 0, nBlankLines = 0;
 	CFileInfo* pFi = NULL;
-	for(int i = 0; i < nCount; i++)
+	for(i = 0; i < nCount; i++)
 	{
 		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
 		ASSERT(pFi);
-		delete pFi;
+		nTotalLines += pFi->m_nTotalLines;
+		nCodeLines += pFi->m_nCodeLines;
+		nCommentLines += pFi->m_nCommentLines;
+		nMixedLines += pFi->GetMixedLines();
+		nBlankLines += pFi->m_nBlankLines;
 	}
-	m_resultListCtrl.DeleteAllItems();
+
+	SetDlgItemInt(IDC_NUMBER, nTotalCount);
+	SetDlgItemInt(IDC_LINES, nTotalLines);
+
+	return 0;
 }
+

@@ -6,6 +6,7 @@
 #define WM_PROGRESS_SET_RANGE     (WM_USER + 102)
 #define WM_PROGRESS_UPDATE        (WM_USER + 103)
 #define WM_PROGRESS_IS_CANCELLED  (WM_USER + 104)
+#define WM_SUMMARY_UPDATE         (WM_USER + 105)
 
 typedef struct tagCountThreadParam
 {
@@ -39,12 +40,21 @@ class CFileInfo
 public:
 	CFileInfo();
 	void SetFileName(LPCTSTR lpszFullFileName);
+	UINT GetMixedLines() const;
+	CString ToString(UINT n) const;
 public:
 	CString m_sFullFileName;
 	
     CString m_sFilePath;
     CString m_sFileName;
     CString m_sFileExt;
+
+	UINT m_nTotalLines;
+	UINT m_nCodeLines;
+	UINT m_nCommentLines;
+	UINT m_nBlankLines;
 };
+
+int wildcmp(const char *wild, const char *string);
 
 #endif

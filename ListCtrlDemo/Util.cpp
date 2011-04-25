@@ -27,7 +27,7 @@ BOOL CTimeCost::IsTimeOut()
 	return (UINT)diff >= m_nDiff;
 }
 
-CFileInfo::CFileInfo()
+CFileInfo::CFileInfo() : m_nTotalLines(0), m_nCodeLines(0), m_nCommentLines(0), m_nBlankLines(0)
 {
 }
 
@@ -49,4 +49,51 @@ void CFileInfo::SetFileName(LPCTSTR lpszFullFileName)
 
     m_sFileName = fname;
 	m_sFileName += ext;
+}
+
+UINT CFileInfo::GetMixedLines() const
+{
+	return (m_nCodeLines + m_nCommentLines) - (m_nTotalLines - m_nBlankLines);
+}
+
+CString CFileInfo::ToString(UINT n) const
+{
+	CString str;
+	str.Format("%d", n);
+	return str;
+}
+
+// the following function based on a function by Jack Handy - you may find 
+// his original article at: http://www.codeproject.com/useritems/wildcmp.asp
+int wildcmp(const char *wild, const char *string) {
+	const char *cp, *mp;
+	
+	while ((*string) && (*wild != '*')) {
+		if ((*wild != *string) && (*wild != '?')) {
+			return 0;
+		}
+		wild++;
+		string++;
+	}
+	
+	while (*string) {
+		if (*wild == '*') {
+			if (!*++wild) {
+				return 1;
+			}
+			mp = wild;
+			cp = string+1;
+		} else if ((*wild == *string) || (*wild == '?')) {
+			wild++;
+			string++;
+		} else {
+			wild = mp;
+			string = cp++;
+		}
+	}
+	
+	while (*wild == '*'  ||  *wild == '?') {
+		wild++;
+	}
+	return !*wild;
 }

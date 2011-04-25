@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CProgressDlg
+LastClass=CListCtrlDemoDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
@@ -13,16 +13,16 @@ Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=10
-Resource1=IDR_RESULT_MENU (Neutral)
+Resource1=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource2=IDR_MAINFRAME
 Resource3=CG_IDD_PROGRESS
-Resource4=IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_ABOUTBOX
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_ABOUTBOX
+Resource7=IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource9=IDR_RESULT_MENU (Neutral)
 Resource10=IDD_LISTCTRLDEMO_DIALOG
 
 [CLS:CListCtrlDemoApp]
@@ -36,7 +36,7 @@ Type=0
 HeaderFile=ListCtrlDemoDlg.h
 ImplementationFile=ListCtrlDemoDlg.cpp
 Filter=D
-LastObject=CListCtrlDemoDlg
+LastObject=IDC_FILTER_COMBO
 BaseClass=CResizableDialog
 VirtualFilter=dWC
 

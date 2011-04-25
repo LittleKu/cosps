@@ -81,8 +81,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	delete pVisitor;
 	pVisitor = NULL;
 
-	//Show the last status
-	Sleep(2000);
+	::SendMessage(lpThreadParam->hwndMain, WM_SUMMARY_UPDATE, 0, 0);
 
 	//End the works
 	::SendMessage(lpThreadParam->hwndMain, WM_END_COUNT, 0, 0);
@@ -326,7 +325,7 @@ int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
 	UpdateProgressParam param;
 	param.nPos = m_nCount;
 	param.sFile.Format(_T("%s"), lpszFileName);
-	AfxTrace("%s\n", param.sFile);
+//	AfxTrace("%s\n", param.sFile);
 	LRESULT lr = ::SendMessage(m_hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)(&param), 0);
 	if(lr == 0)
 	{
