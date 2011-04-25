@@ -12,8 +12,9 @@ class CCounter
 {
 public:
 	static UINT CountThreadProc(LPVOID lpvData);
-	static int EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor);
-	static int EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor);
+	static int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor);
+	static int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor);
+	static BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
 };
 
 class CFileCountVisitor : public CFileVisitor

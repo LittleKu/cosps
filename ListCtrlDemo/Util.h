@@ -12,6 +12,8 @@ typedef struct tagCountThreadParam
 {
 	HWND hwndMain;
 	CStringArray dirList;
+	CStringArray filterList;
+	BOOL bRecursive;
 }CountThreadParam, *LPCountThreadParam;
 
 typedef struct tagUpdateProgressParam

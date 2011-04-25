@@ -23,10 +23,10 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
+	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
 	CListBox	m_srcDirListBox;
 	CMultiColumnSortListCtrl m_resultListCtrl;
-	BOOL	m_recursiveSubBtn;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides

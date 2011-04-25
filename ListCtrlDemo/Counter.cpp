@@ -35,7 +35,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 		{
 			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
 		}
-		result = EnumDirectory(sCurDir, TRUE, pVisitor);
+		result = EnumDirectory(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor);
 		if(result == -1)
 		{
 			break;
@@ -71,7 +71,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 		{
 			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
 		}
-		if(EnumDirectoryFileFirst(sCurDir, TRUE, pVisitor) == -1)
+		if(EnumDirectoryFileFirst(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor) == -1)
 		{
 			break;
 		}
@@ -92,7 +92,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	return 0;
 }
 
-int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor)
+int CCounter::EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor)
 {
 	ASSERT(lpszDirName);
 	ASSERT(pVisitor);
@@ -127,6 +127,10 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 		//1. File
 		if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
         {
+			if(!IsMatched(sFilterArray, FindFileData.cFileName))
+			{
+				continue;
+			}
 			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
 #ifdef _DEBUG
 			if(sCurFile.GetLength() > MAX_PATH)
@@ -151,7 +155,7 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 				AfxTrace("Long name dir: %s\n", sCurFile);
 			}
 #endif
-            if(EnumDirectory(sCurFile, bRecursive, pVisitor) == -1)
+            if(EnumDirectory(sCurFile, sFilterArray, bRecursive, pVisitor) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
 				FindClose(hFind);
@@ -170,7 +174,7 @@ int CCounter::EnumDirectory(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* 
 	return dwError;
 }
 
-int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFileVisitor* pVisitor)
+int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor)
 {
 	ASSERT(lpszDirName);
 	ASSERT(pVisitor);
@@ -205,6 +209,10 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
 		//File
 		if( (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 )
         {
+			if(!IsMatched(sFilterArray, FindFileData.cFileName))
+			{
+				continue;
+			}
 			sCurFile.Format("%s\\%s", lpszDirName, FindFileData.cFileName);
 #ifdef _DEBUG
 			if(sCurFile.GetLength() > MAX_PATH)
@@ -265,7 +273,7 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
 				AfxTrace("Long name dir: %s\n", sCurFile);
 			}
 #endif
-            if(EnumDirectoryFileFirst(sCurFile, bRecursive, pVisitor) == -1)
+            if(EnumDirectoryFileFirst(sCurFile, sFilterArray, bRecursive, pVisitor) == -1)
 			{
 				AfxTrace ("VisitFile request to quit\n");
 				FindClose(hFind);
@@ -282,6 +290,27 @@ int CCounter::EnumDirectoryFileFirst(LPCTSTR lpszDirName, BOOL bRecursive, CFile
     }
     dwError = 0;
 	return dwError;
+}
+
+BOOL CCounter::IsMatched(CStringArray& sFilterList, const char* sStr)
+{
+	int nCount = sFilterList.GetSize();
+	if(nCount <= 0)
+	{
+		return TRUE;
+	}
+
+	CString filter;
+	int i;
+	for(i = 0; i < nCount; i++)
+	{
+		filter = sFilterList.GetAt(i);
+		if(wildcmp(filter, sStr))
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 CFileCountVisitor::CFileCountVisitor(HWND hWnd) : m_hProgWnd(hWnd), m_nCount(0), m_timeCost(10)

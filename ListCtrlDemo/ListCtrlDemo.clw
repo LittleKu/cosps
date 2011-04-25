@@ -21,9 +21,9 @@ Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
 Resource7=IDD_PROGRESS (Chinese (P.R.C.))
-Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource9=IDR_RESULT_MENU (Neutral)
-Resource10=IDD_LISTCTRLDEMO_DIALOG
+Resource8=IDR_RESULT_MENU (Neutral)
+Resource9=IDD_LISTCTRLDEMO_DIALOG
+Resource10=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -36,7 +36,7 @@ Type=0
 HeaderFile=ListCtrlDemoDlg.h
 ImplementationFile=ListCtrlDemoDlg.cpp
 Filter=D
-LastObject=IDC_FILTER_COMBO
+LastObject=CListCtrlDemoDlg
 BaseClass=CResizableDialog
 VirtualFilter=dWC
 
@@ -144,11 +144,12 @@ VirtualFilter=dWC
 [DLG:CG_IDD_PROGRESS]
 Type=1
 Class=CProgressDlg
-ControlCount=4
+ControlCount=5
 Control1=IDCANCEL,button,1342242817
 Control2=CG_IDC_PROGDLG_PROGRESS,msctls_progress32,1350565888
 Control3=CG_IDC_PROGDLG_PERCENT,static,1342308352
 Control4=CG_IDC_PROGDLG_STATUS,static,1342308352
+Control5=CG_IDC_PROGDLG_CURR_OBJ,static,1342308352
 
 [DLG:IDD_PROGRESS (Chinese (P.R.C.))]
 Type=1

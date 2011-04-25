@@ -86,7 +86,6 @@ CListCtrlDemoDlg::CListCtrlDemoDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CListCtrlDemoDlg::IDD, pParent), m_pProgressDlg(NULL)
 {
 	//{{AFX_DATA_INIT(CListCtrlDemoDlg)
-	m_recursiveSubBtn = FALSE;
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -96,10 +95,10 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
+	DDX_Control(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
 	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListBox);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
-	DDX_Check(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	//}}AFX_DATA_MAP
 }
 
@@ -154,6 +153,7 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	InitResultListCtrl();
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
+	m_recursiveSubBtn.SetCheck(BST_CHECKED);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -414,20 +414,34 @@ void CListCtrlDemoDlg::OnButtonStart()
 		return;
 	}
 	
-	RefreshFilterArrays();
 	//Remove existing data
 	ResetResult();
-
+	
 	//Prepare parameters
 	LPCountThreadParam lpThreadParam = new CountThreadParam;
 	lpThreadParam->hwndMain = GetSafeHwnd();
 	
+	//Dir list
 	CString sDir;
-	for(int i = 0; i < nCount; i++)
+	int i;
+	for(i = 0; i < nCount; i++)
 	{
 		m_srcDirListBox.GetText(i, sDir);
 		lpThreadParam->dirList.Add(sDir);
 	}
+
+	//Filter
+	RefreshFilterArrays();
+	nCount = m_sFilterArray.GetSize();
+	for(i = 0; i < nCount; i++)
+	{
+		lpThreadParam->filterList.Add(m_sFilterArray.GetAt(i));
+	}
+
+	//Is recursive?
+	int nChecked = m_recursiveSubBtn.GetCheck();
+	lpThreadParam->bRecursive = ((nChecked == BST_CHECKED) ? TRUE : FALSE);
+
 	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, lpThreadParam);
 }
 
