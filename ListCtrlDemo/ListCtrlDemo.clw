@@ -12,16 +12,18 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=8
-Resource1=IDD_ABOUTBOX
+ResourceCount=10
+Resource1=IDR_RESULT_MENU (Neutral)
 Resource2=IDR_MAINFRAME
 Resource3=CG_IDD_PROGRESS
-Resource4=IDD_LISTCTRLDEMO_DIALOG
+Resource4=IDD_PROGRESS (Chinese (P.R.C.))
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDR_RESULT_MENU (Neutral)
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource10=IDD_LISTCTRLDEMO_DIALOG
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -147,4 +149,23 @@ Control1=IDCANCEL,button,1342242817
 Control2=CG_IDC_PROGDLG_PROGRESS,msctls_progress32,1350565888
 Control3=CG_IDC_PROGDLG_PERCENT,static,1342308352
 Control4=CG_IDC_PROGDLG_STATUS,static,1342308352
+
+[DLG:IDD_PROGRESS (Chinese (P.R.C.))]
+Type=1
+Class=?
+ControlCount=4
+Control1=IDC_TEXT_TOP,static,1342308353
+Control2=IDC_PROGRESS,msctls_progress32,1350565888
+Control3=IDC_TEXT_BOTTOM,static,1342308352
+Control4=IDCANCEL,button,1342242816
+
+[DLG:CG_IDD_PROGRESS (Chinese (P.R.C.))]
+Type=1
+Class=?
+ControlCount=5
+Control1=IDCANCEL,button,1342242817
+Control2=CG_IDC_PROGDLG_PROGRESS,msctls_progress32,1350565888
+Control3=CG_IDC_PROGDLG_PERCENT,static,1342308352
+Control4=CG_IDC_PROGDLG_STATUS,static,1342308352
+Control5=CG_IDC_PROGDLG_CURR_OBJ,static,1342308352
 

@@ -35,8 +35,9 @@ public:
 
 // Implementation
 protected:
+	void DeleteAllListItems();
 	HICON m_hIcon;
-
+	int AddRow(const CFileInfo& fi);
 	// Generated message map functions
 	//{{AFX_MSG(CListCtrlDemoDlg)
 	virtual BOOL OnInitDialog();
@@ -48,6 +49,9 @@ protected:
 	afx_msg void OnButtonStart();
 	afx_msg LRESULT OnStartCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnButtonStop();
+	afx_msg void OnClose();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

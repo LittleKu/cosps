@@ -15,8 +15,10 @@ typedef struct tagCountThreadParam
 
 typedef struct tagUpdateProgressParam
 {
-	UINT nPos;
+	CString sTitle;
+	CString sStatus;
 	CString sFile;
+	UINT nPos;
 }UpdateProgressParam, *LPUpdateProgressParam;
 
 class CTimeCost
@@ -30,6 +32,19 @@ private:
 	UINT    m_nDiff;
 	clock_t m_clockCurr;
 	clock_t m_clockLast;
+};
+
+class CFileInfo
+{
+public:
+	CFileInfo();
+	void SetFileName(LPCTSTR lpszFullFileName);
+public:
+	CString m_sFullFileName;
+	
+    CString m_sFilePath;
+    CString m_sFileName;
+    CString m_sFileExt;
 };
 
 #endif

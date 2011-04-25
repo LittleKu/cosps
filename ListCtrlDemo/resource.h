@@ -36,6 +36,7 @@
 #define IDC_PROGRESS                    1022
 #define IDC_TEXT_TOP                    1024
 #define IDC_TEXT_BOTTOM                 1025
+#define CG_IDC_PROGDLG_CURR_OBJ         1026
 #define IDM_FILE_ADD                    32771
 #define IDM_FILE_DEL                    32772
 #define IDM_FILE_START                  32773

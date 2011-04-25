@@ -14,7 +14,9 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	//Set current progress status
 	LPUpdateProgressParam lpProgressParam = new UpdateProgressParam;
 	lpProgressParam->nPos = 0;
-	lpProgressParam->sFile.Format("Found %d files", 0);
+	lpProgressParam->sTitle.Format(_T("%s"), "Waiting...."); 
+	lpProgressParam->sStatus.Format(_T("Found %d files"), 0);
+	lpProgressParam->sFile.Empty();
 	::SendMessage(hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)lpProgressParam, 0);
 	delete lpProgressParam;
 	lpProgressParam = NULL;
@@ -60,7 +62,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	::SendMessage(hProgWnd, WM_PROGRESS_SET_RANGE, 0, cAllFiles);
 	
 	//Do the works
-	pVisitor = new CFilePrintVisitor(hProgWnd);
+	pVisitor = new CFilePrintVisitor(lpThreadParam->hwndMain, hProgWnd);
 	prev = 0;
 	for(i = 0; i < count; i++)
 	{
@@ -303,8 +305,8 @@ int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
 // 	}
 	UpdateProgressParam param;
 	param.nPos = 0;
-	param.sFile.Format("Found %d files", m_nCount);
-	
+	param.sStatus.Format(_T("Found %d files"), m_nCount);
+	param.sFile.Format(_T("%s"), lpszFileName);
 	LRESULT lr = ::SendMessage(m_hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)(&param), 0);
 	if(lr == 0)
 	{
@@ -314,7 +316,7 @@ int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
 	return m_nCount;
 }
 
-CFilePrintVisitor::CFilePrintVisitor(HWND hWnd) : m_hProgWnd(hWnd), m_nCount(0)
+CFilePrintVisitor::CFilePrintVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMainWnd(hMainWnd), m_hProgWnd(hProgressWnd), m_nCount(0)
 {
 }
 int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
@@ -323,13 +325,18 @@ int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
 
 	UpdateProgressParam param;
 	param.nPos = m_nCount;
-	param.sFile.Format("%s", lpszFileName);
+	param.sFile.Format(_T("%s"), lpszFileName);
 	AfxTrace("%s\n", param.sFile);
 	LRESULT lr = ::SendMessage(m_hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)(&param), 0);
 	if(lr == 0)
 	{
 		return -1;
 	}
+
+	CFileInfo* pFi = new CFileInfo();
+	pFi->SetFileName(lpszFileName);
+
+	::SendMessage(m_hMainWnd, WM_PROGRESS_UPDATE, (WPARAM)(pFi), 0);
 
 	return m_nCount;
 }

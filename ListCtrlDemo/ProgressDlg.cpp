@@ -92,6 +92,18 @@ void CProgressDlg::SetStatus(LPCTSTR lpszMessage)
 	pWndStatus->SetWindowText(lpszMessage);
 }
 
+void CProgressDlg::SetCurObj(LPCTSTR lpszMessage)
+{
+    ASSERT(m_hWnd); // Don't call this _before_ the dialog has
+					// been created. Can be called from OnInitDialog
+    CWnd *pWnd = GetDlgItem(CG_IDC_PROGDLG_CURR_OBJ);
+	
+    // Verify that the static text control exists
+    ASSERT(pWnd!=NULL);
+	
+	pWnd->SetWindowText(lpszMessage);
+}
+
 void CProgressDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if (nID == SC_CLOSE)
@@ -117,6 +129,20 @@ BOOL CProgressDlg::IsCancelled()
 CProgressCtrl* CProgressDlg::GetProgressCtrl()
 {
 	return &m_Progress;
+}
+
+void CProgressDlg::SetTitle(LPCTSTR lpszTitle)
+{
+	CString sCurTitle;
+    GetWindowText(sCurTitle);
+
+	CString sBuf;
+	sBuf.Format(_T("%s"), lpszTitle);
+
+	if(sCurTitle != sBuf)
+	{
+		SetWindowText(sBuf);
+	}
 }
 
 void CProgressDlg::UpdatePercent(int nNewPos)
@@ -172,6 +198,7 @@ BOOL CProgressDlg::OnInitDialog()
 LRESULT CProgressDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
 {
 	m_timeCost.UpdateCurrClock();
+
 	int nPos, nLower, nUpper;
 
 	m_Progress.GetRange(nLower, nUpper);
@@ -183,22 +210,36 @@ LRESULT CProgressDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
 	}
 	
 	LPUpdateProgressParam lpTheParam = (LPUpdateProgressParam)wParam;
-	nPos = lpTheParam->nPos;
-
-	//SetPos
-	m_Progress.SetPos(nPos);
+	
 
 	//This is used to reduce the flicker if the refresh speed is too fast (less than 1ms)
 	//Only the time difference is greater or equal to 1 ms, refresh the static text
-	if( nPos >= nUpper || m_timeCost.IsTimeOut() )
+	if( ((int)lpTheParam->nPos >= (nUpper - 3)) || m_timeCost.IsTimeOut() )
 	{
+		//Title
+		if(!lpTheParam->sTitle.IsEmpty())
+		{
+			SetTitle(lpTheParam->sTitle);
+		}
+
 		//Status Text
-		CString str;
-		str.Format("%s", lpTheParam->sFile);
-		SetStatus(str);
+		CString sStatus;
+		if(lpTheParam->sStatus.IsEmpty())
+		{
+			sStatus.Format(_T("Processing - %d of %d"), lpTheParam->nPos, nUpper);
+		}
+		else
+		{
+			sStatus = lpTheParam->sStatus;
+		}
+		SetStatus(sStatus);
 		
 		//Percent
-		UpdatePercent(nPos);
+		m_Progress.SetPos(lpTheParam->nPos);	
+		UpdatePercent(lpTheParam->nPos);
+
+		//Curr Obj
+		SetCurObj(lpTheParam->sFile);
 
 		m_timeCost.UpdateLastClock();
 	}

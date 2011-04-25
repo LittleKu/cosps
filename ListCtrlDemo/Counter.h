@@ -31,10 +31,11 @@ private:
 class CFilePrintVisitor : public CFileVisitor
 {
 public:
-	CFilePrintVisitor(HWND hWnd);
+	CFilePrintVisitor(HWND hMainWnd, HWND hProgressWnd);
 	virtual int VisitFile(LPCTSTR lpszFileName);
 	virtual UINT GetResult() { return m_nCount; }
 private:
+	HWND m_hMainWnd;
 	HWND m_hProgWnd;
 	UINT m_nCount;
 };

@@ -106,11 +106,14 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
 	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
+	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStop)
 	ON_MESSAGE(WM_START_COUNT, OnStartCount)
 	ON_MESSAGE(WM_END_COUNT, OnEndCount)
+	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -149,6 +152,18 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
 
+// 	CFileInfo* pFi = new CFileInfo;
+// 
+// 	pFi->SetFileName("C:\\Downloads\\PLC221Src\\Source\\LineCountVC7.idl");
+// 	AddRow(*pFi);
+
+// 	pFi = new CFileInfo;
+// 	pFi->SetFileName("C:\\abc\\PLC221Src\\Source\\LineCountVC7.idl");
+// 	AddRow(*pFi);
+
+// 	CFileInfo fi;
+// 	fi.SetFileName("C:\\abc\\PLC221Src\\Source\\LineCountVC7.idl");
+// 	AddRow(fi);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -266,6 +281,27 @@ void CListCtrlDemoDlg::InitResultListCtrl()
     m_resultListCtrl.LoadColumnSort();
 }
 
+int CListCtrlDemoDlg::AddRow(const CFileInfo& fi)
+{
+	int nRes = -1;
+	
+    LV_ITEM lvi;
+	
+    lvi.mask = LVIF_TEXT | LVIF_PARAM;
+    lvi.iItem = m_resultListCtrl.GetItemCount();
+    lvi.lParam = (LPARAM)&fi;
+	
+    lvi.iSubItem = 0;
+    lvi.pszText = (LPTSTR)(LPCTSTR)fi.m_sFileName;
+    nRes = m_resultListCtrl.InsertItem(&lvi);
+	
+    int iSubItem = 0;
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFileExt);
+    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
+	
+	return nRes;
+}
+
 void CListCtrlDemoDlg::OnButtonAdd() 
 {
 	//Add selected directoy
@@ -303,6 +339,8 @@ void CListCtrlDemoDlg::OnButtonDel()
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
+	//Remove existing data
+	DeleteAllListItems();
 	//Prepare parameters
 	LPCountThreadParam lpThreadParam = new CountThreadParam;
 	lpThreadParam->hwndMain = GetSafeHwnd();
@@ -374,6 +412,22 @@ void CListCtrlDemoDlg::OnButtonStart()
 	*/
 }
 
+
+void CListCtrlDemoDlg::OnButtonStop() 
+{
+	int nCount = m_resultListCtrl.GetItemCount();
+	LV_ITEM* pItem = NULL;
+	CFileInfo* pFi = NULL;
+	for(int i = 0; i < nCount; i++)
+	{
+		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
+		ASSERT(pFi);
+
+// 		pFi = (CFileInfo*)pItem->lParam;
+// 		ASSERT(pFi);
+	}
+}
+
 LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 {
 	//Show ProgressDlg
@@ -403,4 +457,32 @@ LRESULT CListCtrlDemoDlg::OnEndCount(WPARAM wParam, LPARAM lParam)
 		m_pProgressDlg = NULL;
 	}
 	return (LRESULT)TRUE;
+}
+
+LRESULT CListCtrlDemoDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
+{
+	CFileInfo* pFi = (CFileInfo*)wParam;
+	AddRow(*pFi);
+
+	return 0;
+}
+
+
+void CListCtrlDemoDlg::OnClose() 
+{
+	DeleteAllListItems();
+	CResizableDialog::OnClose();
+}
+
+void CListCtrlDemoDlg::DeleteAllListItems()
+{
+	int nCount = m_resultListCtrl.GetItemCount();
+	CFileInfo* pFi = NULL;
+	for(int i = 0; i < nCount; i++)
+	{
+		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
+		ASSERT(pFi);
+		delete pFi;
+	}
+	m_resultListCtrl.DeleteAllItems();
 }

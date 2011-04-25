@@ -26,3 +26,27 @@ BOOL CTimeCost::IsTimeOut()
 	}
 	return (UINT)diff >= m_nDiff;
 }
+
+CFileInfo::CFileInfo()
+{
+}
+
+void CFileInfo::SetFileName(LPCTSTR lpszFullFileName)
+{
+    TCHAR drive[MAX_PATH];
+    TCHAR dir[MAX_PATH];
+    TCHAR fname[MAX_PATH];
+    TCHAR ext[MAX_PATH];
+
+    m_sFullFileName = lpszFullFileName;
+
+    _tsplitpath(m_sFullFileName, drive, dir, fname, ext);
+
+    m_sFilePath = drive;
+    m_sFilePath += dir;
+
+	m_sFileExt = ext;
+
+    m_sFileName = fname;
+	m_sFileName += ext;
+}

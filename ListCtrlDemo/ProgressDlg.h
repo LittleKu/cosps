@@ -25,7 +25,9 @@ public:
 	//}}AFX_DATA
 	CProgressCtrl* GetProgressCtrl();
 	void UpdatePercent(int nCurrent);
+	void SetTitle(LPCTSTR lpszTitle);
     void SetStatus(LPCTSTR lpszMessage);
+	void SetCurObj(LPCTSTR lpszMessage);
 
 // Overrides
     // ClassWizard generated virtual function overrides
@@ -41,7 +43,6 @@ protected:
     BOOL m_bCancel;
     BOOL m_bParentDisabled;
 	CProgressCtrl m_Progress;
-
     void ReEnableParent();
     virtual void OnCancel();
     virtual void OnOK() {};
