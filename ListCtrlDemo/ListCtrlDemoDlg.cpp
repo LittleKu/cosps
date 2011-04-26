@@ -111,7 +111,7 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
 	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
-	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStop)
+	ON_BN_CLICKED(IDC_BUTTON_CLEAR, OnButtonClear)
 	ON_MESSAGE(WM_START_COUNT, OnStartCount)
 	ON_MESSAGE(WM_END_COUNT, OnEndCount)
 	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
@@ -171,18 +171,37 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
     AddAnchor(IDC_BUTTON_ADD, TOP_RIGHT, TOP_RIGHT);
 	AddAnchor(IDC_BUTTON_DEL, TOP_RIGHT, TOP_RIGHT);
 	AddAnchor(IDC_BUTTON_START, TOP_RIGHT, TOP_RIGHT);
-	AddAnchor(IDC_BUTTON_STOP, TOP_RIGHT, TOP_RIGHT);
+	AddAnchor(IDC_BUTTON_CLEAR, TOP_RIGHT, TOP_RIGHT);
 	
     AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_RESULT_LIST, TOP_LEFT, BOTTOM_RIGHT);
 
 	AddAnchor(IDC_SUMMARY_FRAME, BOTTOM_LEFT, BOTTOM_RIGHT);
+
 	AddAnchor(IDC_TXT_TOTAL, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_TXT_FILE_NUMBER, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_TXT_LINES, BOTTOM_LEFT, BOTTOM_LEFT);
-	AddAnchor(IDC_TXT_SHARP, BOTTOM_LEFT, BOTTOM_LEFT);
-	AddAnchor(IDC_NUMBER, BOTTOM_LEFT, BOTTOM_LEFT);
-	AddAnchor(IDC_LINES, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_CODE, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_COMMENT, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_MIXED, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_BLANK, BOTTOM_LEFT, BOTTOM_LEFT);
+
+	AddAnchor(IDC_TXT_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_NUMBER_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LINES_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_CODE_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_COMMENT_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_MIXED_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_BLANK_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	
+
+	AddAnchor(IDC_TXT_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_NUMBER_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LINES_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_CODE_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_COMMENT_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_MIXED_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_BLANK_P, BOTTOM_LEFT, BOTTOM_LEFT);
 	
     EnableSaveRestore("ListCtrlDemoDlg");
 }
@@ -297,8 +316,13 @@ void CListCtrlDemoDlg::ResetResult()
 	DeleteAllListItems();
 	
 	//2. Summray info
-	SetDlgItemText(IDC_NUMBER, "");
-	SetDlgItemText(IDC_LINES, "");
+	SetPair(IDC_NUMBER_C, IDC_NUMBER_P, -1);
+	
+	SetPair(IDC_LINES_C, IDC_LINES_P, -1);
+	SetPair(IDC_CODE_C, IDC_CODE_P, -1);
+	SetPair(IDC_COMMENT_C, IDC_COMMENT_P, -1);
+	SetPair(IDC_MIXED_C, IDC_MIXED_P, -1);
+	SetPair(IDC_BLANK_C, IDC_BLANK_P, -1);
 }
 
 void CListCtrlDemoDlg::RefreshFilterArrays()
@@ -446,7 +470,7 @@ void CListCtrlDemoDlg::OnButtonStart()
 }
 
 
-void CListCtrlDemoDlg::OnButtonStop() 
+void CListCtrlDemoDlg::OnButtonClear() 
 {
 	ResetResult();
 }
@@ -510,9 +534,37 @@ LRESULT CListCtrlDemoDlg::OnSummaryUpdate(WPARAM wParam, LPARAM lParam)
 		nBlankLines += pFi->m_nBlankLines;
 	}
 
-	SetDlgItemInt(IDC_NUMBER, nTotalCount);
-	SetDlgItemInt(IDC_LINES, nTotalLines);
+	SetPair(IDC_NUMBER_C, IDC_NUMBER_P, nTotalCount, nTotalCount);
+
+	SetPair(IDC_LINES_C, IDC_LINES_P, nTotalLines, nTotalLines);
+	SetPair(IDC_CODE_C, IDC_CODE_P, nCodeLines, nTotalLines);
+	SetPair(IDC_COMMENT_C, IDC_COMMENT_P, nCommentLines, nTotalLines);
+	SetPair(IDC_MIXED_C, IDC_MIXED_P, nMixedLines, nTotalLines);
+	SetPair(IDC_BLANK_C, IDC_BLANK_P, nBlankLines, nTotalLines);
 
 	return 0;
 }
 
+
+void CListCtrlDemoDlg::SetPair(int idc, int idp, int count, int total)
+{
+	if(count < 0)
+	{
+		GetDlgItem(idc)->SetWindowText("");
+		GetDlgItem(idp)->SetWindowText("");
+		return;
+	}
+
+	SetDlgItemInt(idc, count);
+
+	CString sPercent;
+	if(total > 0)
+	{
+		sPercent.Format(_T("%d%c"), (count * 100) / total, '%');
+	}
+	else
+	{
+		sPercent = "0%";
+	}
+	SetDlgItemText(idp, sPercent);
+}

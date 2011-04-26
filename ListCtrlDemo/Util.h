@@ -1,6 +1,9 @@
 #ifndef _LIST_CTRL_DEMO_UTIL_H_
 #define _LIST_CTRL_DEMO_UTIL_H_
 
+#define BEGIN_NAMESPACE(ns) namespace ns {
+#define END_NAMESPACE() }
+
 #define WM_START_COUNT            (WM_USER + 100)
 #define WM_END_COUNT              (WM_USER + 101)
 #define WM_PROGRESS_SET_RANGE     (WM_USER + 102)
@@ -24,6 +27,22 @@ typedef struct tagUpdateProgressParam
 	UINT nPos;
 }UpdateProgressParam, *LPUpdateProgressParam;
 
+class CFileVisitor
+{
+public:
+	virtual ~CFileVisitor(){}
+	virtual int VisitFile(LPCTSTR lpszFileName) = 0;
+	virtual UINT GetResult() = 0;
+};
+
+class CCancelledChecker
+{
+public:
+	virtual ~CCancelledChecker(){}
+	virtual BOOL IsCancelled() = 0;
+	virtual void Reset() = 0;
+};
+
 class CTimeCost
 {
 public:
@@ -31,6 +50,8 @@ public:
 	void UpdateCurrClock();
 	void UpdateLastClock();
 	BOOL IsTimeOut();
+	UINT GetTimeCost();
+	void Reset();
 private:
 	UINT    m_nDiff;
 	clock_t m_clockCurr;
@@ -57,6 +78,13 @@ public:
 	UINT m_nBlankLines;
 };
 
-int wildcmp(const char *wild, const char *string);
+BEGIN_NAMESPACE(CommonUtils)
+	int wildcmp(const char *wild, const char *string);
+	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
+	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
+	int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
+	int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
+END_NAMESPACE()
+
 
 #endif

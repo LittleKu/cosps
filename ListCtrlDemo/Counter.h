@@ -1,21 +1,21 @@
 #ifndef _COUNTER_H_
 #define _COUNTER_H_
 
-class CFileVisitor
-{
-public:
-	virtual int VisitFile(LPCTSTR lpszFileName) = 0;
-	virtual UINT GetResult() = 0;
-};
-
 class CCounter
 {
 public:
 	static UINT CountThreadProc(LPVOID lpvData);
-	static int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor);
-	static int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor);
-	static int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor);
-	static BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
+};
+
+class CProgressChecker : public CCancelledChecker
+{
+public:
+	CProgressChecker(HWND hProgWnd);
+	BOOL IsCancelled();
+	void Reset();
+private:
+	HWND m_hProgWnd;
+	CTimeCost m_timeCost;
 };
 
 class CFileCountVisitor : public CFileVisitor

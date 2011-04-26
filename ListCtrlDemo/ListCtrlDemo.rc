@@ -13,12 +13,81 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Counting..."
+FONT 10, "System"
+BEGIN
+    CTEXT           "Processing",IDC_TEXT_TOP,7,7,173,10
+    CONTROL         "Progress2",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
+                    32,173,7
+    LTEXT           "file name...",IDC_TEXT_BOTTOM,7,57,173,13
+    PUSHBUTTON      "Cancel",IDCANCEL,57,73,50,14
+END
+
+CG_IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,67,74,50,14
+    CONTROL         "Progress1",CG_IDC_PROGDLG_PROGRESS,"msctls_progress32",
+                    WS_BORDER,15,34,154,13
+    LTEXT           " 0 %",CG_IDC_PROGDLG_PERCENT,85,23,18,8
+    LTEXT           "",CG_IDC_PROGDLG_STATUS,13,7,158,8
+    LTEXT           "",CG_IDC_PROGDLG_CURR_OBJ,13,59,158,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    CG_IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,75 +134,6 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
-LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Counting..."
-FONT 10, "System"
-BEGIN
-    CTEXT           "Processing",IDC_TEXT_TOP,7,7,173,10
-    CONTROL         "Progress2",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
-                    32,173,7
-    LTEXT           "file name...",IDC_TEXT_BOTTOM,7,57,173,13
-    PUSHBUTTON      "Cancel",IDCANCEL,57,73,50,14
-END
-
-CG_IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 186, 95
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "Cancel",IDCANCEL,67,74,50,14
-    CONTROL         "Progress1",CG_IDC_PROGDLG_PROGRESS,"msctls_progress32",
-                    WS_BORDER,15,34,154,13
-    LTEXT           " 0 %",CG_IDC_PROGDLG_PERCENT,85,23,18,8
-    LTEXT           "",CG_IDC_PROGDLG_STATUS,13,7,158,8
-    LTEXT           "",CG_IDC_PROGDLG_CURR_OBJ,13,59,158,8    
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
-    IDD_PROGRESS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 180
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 87
-    END
-
-    CG_IDD_PROGRESS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 179
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 73
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Chinese (P.R.C.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -159,13 +159,13 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 436, 334
+IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 436, 355
 STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "ListCtrlDemo"
 MENU IDR_RESULT_MENU
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "",IDC_MENU_SEP,"Static",SS_ETCHEDHORZ,0,0,440,1
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,7,5,410,135
@@ -181,14 +181,29 @@ BEGIN
     CONTROL         "List4",IDC_RESULT_LIST,"SysListView32",LVS_REPORT | 
                     WS_BORDER | WS_TABSTOP,14,159,394,104
     PUSHBUTTON      "Start",IDC_BUTTON_START,354,68,50,14
-    PUSHBUTTON      "Stop",IDC_BUTTON_STOP,354,94,50,14
-    GROUPBOX        "Summary",IDC_SUMMARY_FRAME,7,275,410,49
-    RTEXT           "Total:",IDC_TXT_TOTAL,17,291,36,8
-    LTEXT           "Number",IDC_TXT_FILE_NUMBER,75,291,36,8
-    LTEXT           "Lines",IDC_TXT_LINES,138,292,36,8
-    RTEXT           "#:",IDC_TXT_SHARP,15,305,36,8
-    LTEXT           "n/a",IDC_NUMBER,75,305,36,8,SS_SUNKEN
-    LTEXT           "n/a",IDC_LINES,138,305,36,8,SS_SUNKEN
+    PUSHBUTTON      "Clear",IDC_BUTTON_CLEAR,354,94,50,14
+    GROUPBOX        "Summary",IDC_SUMMARY_FRAME,7,275,410,68
+    RTEXT           "Total:",IDC_TXT_TOTAL,17,286,45,12
+    LTEXT           "Number",IDC_TXT_FILE_NUMBER,76,286,45,12
+    LTEXT           "Lines",IDC_TXT_LINES,129,286,45,12
+    RTEXT           "#:",IDC_TXT_C,17,303,45,12
+    LTEXT           "",IDC_NUMBER_C,76,304,45,12,SS_SUNKEN
+    LTEXT           "",IDC_LINES_C,129,304,45,12,SS_SUNKEN
+    LTEXT           "Code",IDC_TXT_CODE,182,286,45,12
+    LTEXT           "Comment",IDC_TXT_COMMENT,235,286,45,12
+    LTEXT           "Mixed",IDC_TXT_MIXED,288,286,45,12
+    LTEXT           "Blank",IDC_TXT_BLANK,341,286,45,12
+    LTEXT           "",IDC_CODE_C,182,304,45,12,SS_SUNKEN
+    LTEXT           "",IDC_COMMENT_C,235,304,45,12,SS_SUNKEN
+    LTEXT           "",IDC_MIXED_C,288,304,45,12,SS_SUNKEN
+    LTEXT           "",IDC_BLANK_C,341,304,45,12,SS_SUNKEN
+    RTEXT           "%:",IDC_TXT_P,17,320,45,12
+    LTEXT           "",IDC_NUMBER_P,76,322,45,12,SS_SUNKEN
+    LTEXT           "",IDC_LINES_P,129,322,45,12,SS_SUNKEN
+    LTEXT           "",IDC_CODE_P,182,322,45,12,SS_SUNKEN
+    LTEXT           "",IDC_COMMENT_P,235,322,45,12,SS_SUNKEN
+    LTEXT           "",IDC_MIXED_P,288,322,45,12,SS_SUNKEN
+    LTEXT           "",IDC_BLANK_P,341,322,45,12,SS_SUNKEN
 END
 
 

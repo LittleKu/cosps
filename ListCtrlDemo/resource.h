@@ -25,18 +25,33 @@
 #define IDC_RESULT_LIST                 1009
 #define IDC_RESULT_FRAME                1010
 #define IDC_BUTTON_START                1011
-#define IDC_BUTTON_STOP                 1012
+#define IDC_BUTTON_CLEAR                1012
 #define IDC_SUMMARY_FRAME               1013
 #define IDC_TXT_TOTAL                   1014
 #define IDC_TXT_FILE_NUMBER             1015
 #define IDC_TXT_LINES                   1016
-#define IDC_TXT_SHARP                   1017
-#define IDC_NUMBER                      1019
-#define IDC_LINES                       1020
+#define IDC_TXT_C                       1017
+#define IDC_NUMBER_C                    1019
+#define IDC_LINES_C                     1020
 #define IDC_PROGRESS                    1022
 #define IDC_TEXT_TOP                    1024
 #define IDC_TEXT_BOTTOM                 1025
 #define CG_IDC_PROGDLG_CURR_OBJ         1026
+#define IDC_TXT_CODE                    1026
+#define IDC_TXT_COMMENT                 1027
+#define IDC_TXT_MIXED                   1028
+#define IDC_TXT_BLANK                   1029
+#define IDC_CODE_C                      1030
+#define IDC_COMMENT_C                   1031
+#define IDC_MIXED_C                     1032
+#define IDC_BLANK_C                     1033
+#define IDC_TXT_P                       1034
+#define IDC_NUMBER_P                    1035
+#define IDC_LINES_P                     1036
+#define IDC_CODE_P                      1037
+#define IDC_COMMENT_P                   1038
+#define IDC_MIXED_P                     1039
+#define IDC_BLANK_P                     1040
 #define IDM_FILE_ADD                    32771
 #define IDM_FILE_DEL                    32772
 #define IDM_FILE_START                  32773
@@ -52,7 +67,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32779
-#define _APS_NEXT_CONTROL_VALUE         1026
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

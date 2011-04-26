@@ -53,7 +53,7 @@ protected:
 	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSummaryUpdate(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnButtonStop();
+	afx_msg void OnButtonClear();
 	afx_msg void OnClose();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
@@ -66,6 +66,7 @@ protected:
 	HICON m_hIcon;
 	CStringArray m_sFilterArray;
 private:
+	void SetPair(int idc, int idp, int count, int total = 0);
 	CProgressDlg* m_pProgressDlg;
 };
 
