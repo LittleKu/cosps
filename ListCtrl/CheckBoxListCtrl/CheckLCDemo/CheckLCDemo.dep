@@ -1,0 +1,22 @@
+# Microsoft Developer Studio Generated Dependency File, included by CheckLCDemo.mak
+
+.\CheckLCDemo.cpp : \
+	".\CheckLCDemo.h"\
+	".\CheckLCDemoDlg.h"\
+	".\StdAfx.h"\
+	
+
+.\CheckLCDemo.rc : \
+	".\res\CheckLCDemo.ico"\
+	".\res\CheckLCDemo.rc2"\
+	
+
+.\CheckLCDemoDlg.cpp : \
+	".\CheckLCDemo.h"\
+	".\CheckLCDemoDlg.h"\
+	".\StdAfx.h"\
+	
+
+.\StdAfx.cpp : \
+	".\StdAfx.h"\
+	
