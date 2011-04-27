@@ -11,23 +11,26 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#ifdef _DEBUG
+#define ASSERT_ROW_COUNT(nItem) ASSERT(nItem >= 0 && nItem < GetItemCount())
+#define ASSERT_COL_COUNT(nItem) ASSERT(nItem >= 0 && nItem < GetHeaderCtrl()->GetItemCount())
+#define ASSERT_ROW_COL_COUNT(nItem, nSubItem) \
+	ASSERT_ROW_COUNT(nItem); \
+	ASSERT_COL_COUNT(nSubItem)
+#else
+#define ASSERT_ROW_COUNT(nItem)
+#define ASSERT_COL_COUNT(nItem)
+#define ASSERT_ROW_COL_COUNT(nItem, nSubItem)
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CCDListCtrl
 
 CCDListCtrl::CCDListCtrl()
 {
-	m_cr3DFace              = ::GetSysColor(COLOR_3DFACE);
-	m_cr3DHighLight         = ::GetSysColor(COLOR_3DHIGHLIGHT);
-	m_cr3DShadow            = ::GetSysColor(COLOR_3DSHADOW);
-	m_crActiveCaption       = ::GetSysColor(COLOR_ACTIVECAPTION);
 	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
-	m_crBtnShadow           = ::GetSysColor(COLOR_BTNSHADOW);
-	m_crBtnText             = ::GetSysColor(COLOR_BTNTEXT);
-	m_crGrayText            = ::GetSysColor(COLOR_GRAYTEXT);
 	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
 	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-	m_crInactiveCaption     = ::GetSysColor(COLOR_INACTIVECAPTION);
-	m_crInactiveCaptionText = ::GetSysColor(COLOR_INACTIVECAPTIONTEXT);
 	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
 	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
 }
@@ -50,8 +53,6 @@ END_MESSAGE_MAP()
 int CCDListCtrl::InsertItem(const LVITEM* pItem)
 {
 	ASSERT(pItem->iItem >= 0);
-	if (pItem->iItem < 0)
-		return -1;
 	
 	int index = CListCtrl::InsertItem(pItem);
 	
@@ -75,10 +76,7 @@ int CCDListCtrl::InsertItem(const LVITEM* pItem)
 // DeleteItem
 BOOL CCDListCtrl::DeleteItem(int nItem)
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return FALSE;
+	ASSERT_ROW_COUNT(nItem);
 	
 	CCDListCtrlData *pXLCD = (CCDListCtrlData *) CListCtrl::GetItemData(nItem);
 	if (pXLCD)
@@ -105,11 +103,8 @@ BOOL CCDListCtrl::DeleteAllItems()
 
 DWORD CCDListCtrl::GetItemData(int nItem) const
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return 0;
-	
+	ASSERT_ROW_COUNT(nItem);
+		
 	CCDListCtrlData *pXLCD = (CCDListCtrlData *) CListCtrl::GetItemData(nItem);
 	if (!pXLCD)
 	{
@@ -212,11 +207,8 @@ BOOL CCDListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* pResult)
 // CountCheckedItems
 int CCDListCtrl::CountCheckedItems(int nSubItem)
 {
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return 0;
-	
+	ASSERT_COL_COUNT(nSubItem);
+
 	int nCount = 0;
 	
 	for (int nItem = 0; nItem < GetItemCount(); nItem++)
@@ -244,10 +236,7 @@ int CCDListCtrl::CountCheckedItems(int nSubItem)
 //
 int CCDListCtrl::GetHeaderCheckedState(int nSubItem)
 {
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return -1;
+	ASSERT_COL_COUNT(nSubItem);
 	
 	HDITEM hditem;
 	
@@ -261,10 +250,8 @@ int CCDListCtrl::GetHeaderCheckedState(int nSubItem)
 // SetHeaderCheckedState
 BOOL CCDListCtrl::SetHeaderCheckedState(int nSubItem, int nCheckedState)
 {
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return FALSE;
+	ASSERT_COL_COUNT(nSubItem);
+
 	ASSERT(nCheckedState == 0 || nCheckedState == 1 || nCheckedState == 2);
 	
 	HDITEM hditem;
@@ -456,14 +443,7 @@ void CCDListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crTex
 
 void CCDListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState)
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return;
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return;
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	
 	CCDListCtrlData *pCDListCtrlData = (CCDListCtrlData *) CListCtrl::GetItemData(nItem);
 	if (pCDListCtrlData)
@@ -477,14 +457,7 @@ void CCDListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState
 
 int CCDListCtrl::GetItemCheckedState(int nItem, int nSubItem)		//+++
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return -1;
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return -1;
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	
 	CCDListCtrlData *pXLCD = (CCDListCtrlData *) CListCtrl::GetItemData(nItem);
 	if (!pXLCD)
@@ -498,14 +471,7 @@ int CCDListCtrl::GetItemCheckedState(int nItem, int nSubItem)		//+++
 
 void CCDListCtrl::UpdateSubItem(int nItem, int nSubItem)
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return;
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return;
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	
 	CRect rect;
 	if (nSubItem == -1)
@@ -525,14 +491,7 @@ void CCDListCtrl::UpdateSubItem(int nItem, int nSubItem)
 
 BOOL CCDListCtrl::GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect)
 {
-	ASSERT(nItem >= 0);
-	ASSERT(nItem < GetItemCount());
-	if ((nItem < 0) || nItem >= GetItemCount())
-		return FALSE;
-	ASSERT(nSubItem >= 0);
-	ASSERT(nSubItem < GetHeaderCtrl()->GetItemCount());
-	if ((nSubItem < 0) || nSubItem >= GetHeaderCtrl()->GetItemCount())
-		return FALSE;
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	
 	BOOL bRC = CListCtrl::GetSubItemRect(nItem, nSubItem, nArea, rect);
 	
@@ -639,7 +598,6 @@ void CCDListCtrl::PreSubclassWindow()
 	if (pHeader)
 	{
 		VERIFY(m_HeaderCtrl.SubclassWindow(pHeader->m_hWnd));
-		m_HeaderCtrl.SetListCtrl(this);
 	}
 
 	CListCtrl::PreSubclassWindow();

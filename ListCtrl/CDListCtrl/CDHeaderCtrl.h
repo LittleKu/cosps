@@ -34,9 +34,8 @@ public:
 
 // Attributes
 public:
-	CListCtrl * m_pListCtrl;	//+++
 	UINT m_nFormat;				//+++
-	COLORREF m_rgbText;			//+++
+	
 	BOOL m_bDividerLines;		//+++
 	BOOL m_bDoubleBuffer;
 	BOOL m_bStaticBorder;
@@ -48,13 +47,13 @@ public:
 	UINT m_nClickFlags;
 	CPoint m_ptClickPoint;
 	
+	COLORREF m_rgbText;			//+++
 	COLORREF m_cr3DHighLight;
 	COLORREF m_cr3DShadow;
 	COLORREF m_cr3DFace;
 	COLORREF m_crBtnText;
 // Operations
 public:
-	void SetListCtrl(CListCtrl *pListCtrl) { m_pListCtrl = pListCtrl; }
 //	BOOL ModifyProperty(WPARAM wParam, LPARAM lParam);
 	int GetSpacing() { return m_iSpacing; }
 	void SetSpacing(int nSpacing) { m_iSpacing = nSpacing; }

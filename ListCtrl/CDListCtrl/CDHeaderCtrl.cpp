@@ -21,7 +21,6 @@ CCDHeaderCtrl::CCDHeaderCtrl()
 	m_cr3DFace        = ::GetSysColor(COLOR_3DFACE);
 	m_crBtnText       = ::GetSysColor(COLOR_BTNTEXT);
 	
-	m_pListCtrl       = NULL;			//+++
 	m_nFormat         = DT_DEFAULT;		//+++
 	m_rgbText         = m_crBtnText;	//+++
 	m_bDividerLines   = TRUE;			//+++
@@ -67,10 +66,8 @@ BOOL CCDHeaderCtrl::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 void CCDHeaderCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
-{
-	
+{	
 	SendMessage(WM_LBUTTONDOWN, nFlags, MAKELPARAM(point.x, point.y));
-	
 	//CHeaderCtrl::OnLButtonDown(nFlags, point);
 }
 

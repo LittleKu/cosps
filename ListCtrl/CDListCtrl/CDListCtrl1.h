@@ -74,18 +74,10 @@ protected:
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
 	//}}AFX_MSG
-	COLORREF		m_cr3DFace;
-	COLORREF		m_cr3DHighLight;
-	COLORREF		m_cr3DShadow;
-	COLORREF		m_crActiveCaption;
 	COLORREF		m_crBtnFace;
-	COLORREF		m_crBtnShadow;
 	COLORREF		m_crBtnText;
-	COLORREF		m_crGrayText;
 	COLORREF		m_crHighLight;
 	COLORREF		m_crHighLightText;
-	COLORREF		m_crInactiveCaption;
-	COLORREF		m_crInactiveCaptionText;
 	COLORREF		m_crWindow;
 	COLORREF		m_crWindowText;
 	DECLARE_MESSAGE_MAP()
