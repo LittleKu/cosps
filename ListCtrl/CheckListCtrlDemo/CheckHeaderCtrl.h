@@ -37,6 +37,7 @@ public:
 	BOOL m_bDividerLines;
 	int m_nSpace;
 	SIZE m_sizeImage;
+	BOOL m_bTrack;
 // Operations
 public:
 	static void CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
@@ -60,6 +61,11 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg BOOL OnBeginTrack(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnEndTrack(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnTrack(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSetImageList(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()

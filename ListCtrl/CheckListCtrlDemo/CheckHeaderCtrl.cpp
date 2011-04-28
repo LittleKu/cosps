@@ -3,11 +3,24 @@
 
 #include "stdafx.h"
 #include "CheckHeaderCtrl.h"
+#include "MemDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
+#endif
+
+#ifdef _DEBUG
+static int prev = 0;
+void MyTrace(int count, LPCTSTR lpmsg)
+{ 
+	if(count != prev)
+	{
+		prev = count;
+		AfxTrace(lpmsg);
+	}
+}
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
@@ -26,6 +39,8 @@ CCheckHeaderCtrl::CCheckHeaderCtrl()
 	m_nSpace        = 6;
 	m_sizeImage.cx    = 0;
 	m_sizeImage.cy    = 0;
+
+	m_bTrack = FALSE;
 }
 
 CCheckHeaderCtrl::~CCheckHeaderCtrl()
@@ -39,6 +54,16 @@ BEGIN_MESSAGE_MAP(CCheckHeaderCtrl, CHeaderCtrl)
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDBLCLK()
 	ON_MESSAGE(HDM_SETIMAGELIST, OnSetImageList)
+	ON_NOTIFY_REFLECT_EX(HDN_BEGINTRACKW, OnBeginTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_BEGINTRACKA, OnBeginTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_ENDTRACKW, OnEndTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_ENDTRACKA, OnEndTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_TRACKW, OnTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_TRACKA, OnTrack)
+	ON_NOTIFY_REFLECT_EX(HDN_ITEMCHANGINGW, OnItemChanging)
+	ON_NOTIFY_REFLECT_EX(HDN_ITEMCHANGINGA, OnItemChanging)
+	ON_NOTIFY_REFLECT_EX(HDN_ITEMCHANGEDW, OnItemChanged)
+	ON_NOTIFY_REFLECT_EX(HDN_ITEMCHANGEDA, OnItemChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -53,7 +78,8 @@ BOOL CCheckHeaderCtrl::OnEraseBkgnd(CDC* pDC)
 void CCheckHeaderCtrl::OnPaint() 
 {
 	CPaintDC dc(this);
-	DrawCtrl(&dc);
+	CMemDC memDC(&dc);
+	DrawCtrl(&memDC);
 }
 
 void CCheckHeaderCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
@@ -76,6 +102,57 @@ LRESULT CCheckHeaderCtrl::OnSetImageList(WPARAM, LPARAM lParam)
 	
 	return Default();
 }
+
+BOOL CCheckHeaderCtrl::OnBeginTrack(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	MyTrace(1, "OnBeginTrack\n");
+	m_bTrack = TRUE;
+	*pResult = 0;
+
+	return FALSE;
+}
+BOOL CCheckHeaderCtrl::OnEndTrack(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	MyTrace(2, "OnEndTrack\n");
+	m_bTrack = FALSE;
+	*pResult = 0;
+
+	return FALSE;
+}
+BOOL CCheckHeaderCtrl::OnTrack(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	MyTrace(3, "OnTrack\n");
+	*pResult = 0;
+
+	return FALSE;
+}
+
+BOOL CCheckHeaderCtrl::OnItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+	if ((phdr->pitem) != 0 && (phdr->pitem->mask & HDI_WIDTH) != 0) 
+	{
+		MyTrace(4, "OnItemChanging 4\n");
+		SetRedraw(FALSE);
+	}
+	return FALSE;
+}
+BOOL CCheckHeaderCtrl::OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+	if ((phdr->pitem) != 0 && (phdr->pitem->mask & HDI_WIDTH) != 0) 
+	{
+		MyTrace(6, "OnItemChanged 6\n");
+		SetRedraw(TRUE);
+		Invalidate();
+//		UpdateWindow();
+	}
+	return FALSE;
+}
 void CCheckHeaderCtrl::CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter, int h)
 {
 	checkboxRect = boundRect;
@@ -89,8 +166,8 @@ void CCheckHeaderCtrl::CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxR
 	// center the checkbox
 	if(bCenter)
 	{
-		checkboxRect.left  = boundRect.left + (boundRect.Width() - h) / 2;
-		checkboxRect.right = checkboxRect.left + h;
+		checkboxRect.left = boundRect.left + boundRect.Width() / 2 - checkboxRect.Height() / 2 - 1;
+		checkboxRect.right = checkboxRect.left + checkboxRect.Height();
 	}
 }
 void CCheckHeaderCtrl::DrawCheckBox(CDC* pDC, LPCRECT lpcRect, BOOL bDrawMark, COLORREF crBkg, COLORREF crBorder, COLORREF crMark)
@@ -142,7 +219,7 @@ void CCheckHeaderCtrl::DrawCtrl(CDC* pDC)
 	CRect rectClip;
 	if (pDC->GetClipBox(&rectClip) == ERROR)
 		return;
-
+	MyTrace(88, "DrawCtrl 88\n");
 	CRect rectClient, rectItem;
 	GetClientRect(&rectClient);
 
@@ -177,6 +254,7 @@ void CCheckHeaderCtrl::DrawCtrl(CDC* pDC)
 		VERIFY(GetItemRect(iItem, rectItem));
 		
 		//The item should be repaint
+		rectClip.InflateRect(1, 0);
 		if(rectInter.IntersectRect(&rectItem, &rectClip))
 		{
 			//Owner draw
@@ -219,11 +297,14 @@ void CCheckHeaderCtrl::DrawCtrl(CDC* pDC)
 		iWidth += hditem.cxy;
 	}
 
-	if (iWidth > 0)
+	if(iWidth > 0)
 	{
-		/*rectClient.right = rectClient.left + iWidth;*/
-		pDC->Draw3dRect(rectClient, m_cr3DHighLight, m_cr3DShadow);
-	}
+		if(m_bTrack)
+		{
+//			rectClient.right = rectClient.left + iWidth;
+		}
+		pDC->Draw3dRect(&rectClient, m_cr3DHighLight, m_cr3DShadow);
+	}	
 
 	pDC->SelectObject(pOldFont);
 	pDC->SelectObject(pOldPen);

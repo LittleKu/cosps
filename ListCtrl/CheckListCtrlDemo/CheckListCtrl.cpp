@@ -137,17 +137,25 @@ void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF cr
 	}
 	
 	GetDrawColors(nItem, nSubItem, crText, crBkgnd);
-	
 	pDC->FillSolidRect(&rect, crBkgnd);
 	
 	CString str = GetItemText(nItem, nSubItem);
 	BOOL bCenter = str.IsEmpty();
 
-	CRect boundRect = rect;	
+	CRect boundRect = rect;
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
 
 	CRect chkboxrect;
-	CCheckHeaderCtrl::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
+	chkboxrect = boundRect;
+	chkboxrect.bottom -= 1;
+	chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;	// width = height
+	
+	if(bCenter)
+	{
+		// center the checkbox		
+		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
+		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
+	}
 	
 	CCheckHeaderCtrl::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	
