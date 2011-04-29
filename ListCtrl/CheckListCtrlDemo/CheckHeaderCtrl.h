@@ -39,6 +39,7 @@ public:
 	BOOL m_bTrack;
 // Operations
 public:
+	void CalcCheckBoxRect(int nSubItem, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
 	static void CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
 	static void DrawCheckBox(CDC* pDC, LPCRECT lpcRect, BOOL bDrawMark, COLORREF crBkg = ::GetSysColor(COLOR_WINDOW), COLORREF crBorder = RGB(51,102,153), COLORREF crMark = RGB(51,153,51));
 // Overrides
@@ -60,6 +61,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSetImageList(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()

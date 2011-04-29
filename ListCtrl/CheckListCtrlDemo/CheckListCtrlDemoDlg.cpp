@@ -193,9 +193,9 @@ HCURSOR CCheckListCtrlDemoDlg::OnQueryDragIcon()
 
 void CCheckListCtrlDemoDlg::InitListCtrl()
 {
-	m_listCtrl.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, (LPARAM) 
-        LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT |
-        m_listCtrl.SendMessage(LVM_GETEXTENDEDLISTVIEWSTYLE));
+	DWORD dwExtendedStyle = m_listCtrl.GetExtendedStyle();
+	dwExtendedStyle = ((dwExtendedStyle | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT) & (~LVS_EX_TRACKSELECT));
+	m_listCtrl.SetExtendedStyle(dwExtendedStyle);
 	
 	int         i;
     LVCOLUMN    lvc;
@@ -247,6 +247,7 @@ void CCheckListCtrlDemoDlg::InitListCtrl()
 		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_UNCHECKED, FALSE);
 
 		cs.Format(_T("Second column name. To make this column longer. %d"), i+1);
+//		cs = "";
 		m_listCtrl.SetItemText(i, ++iSubItem, cs);
 		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_CHECKED, FALSE);
 		
@@ -256,6 +257,7 @@ void CCheckListCtrlDemoDlg::InitListCtrl()
 		
 		cs.Format(_T("Last %d"), i+1);
 		m_listCtrl.SetItemText(i, ++iSubItem, cs);
+//		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_CHECKED, FALSE);
 	}
 	m_listCtrl.SetRedraw(TRUE);
 	m_listCtrl.ValidateCheck();

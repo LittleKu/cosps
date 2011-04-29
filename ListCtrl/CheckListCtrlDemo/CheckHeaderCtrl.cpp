@@ -38,6 +38,7 @@ BEGIN_MESSAGE_MAP(CCheckHeaderCtrl, CHeaderCtrl)
 	//{{AFX_MSG_MAP(CCheckHeaderCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
+	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_MESSAGE(HDM_SETIMAGELIST, OnSetImageList)
 	//}}AFX_MSG_MAP
@@ -58,6 +59,11 @@ void CCheckHeaderCtrl::OnPaint()
 	DrawCtrl(&memDC);
 }
 
+void CCheckHeaderCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+	AfxTrace("OnLButtonDown: %d, %d\n", point.x, point.y);
+	CHeaderCtrl::OnLButtonDown(nFlags, point);
+}
 void CCheckHeaderCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
 	CHeaderCtrl::OnLButtonDblClk(nFlags, point);
@@ -81,19 +87,27 @@ LRESULT CCheckHeaderCtrl::OnSetImageList(WPARAM, LPARAM lParam)
 void CCheckHeaderCtrl::CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter, int h)
 {
 	checkboxRect = boundRect;
-
+	
 	//left, right
 	checkboxRect.right     = checkboxRect.left + h;
 	//top, bottom
 	checkboxRect.top       = boundRect.top + (boundRect.Height() - h) / 2;
 	checkboxRect.bottom    = checkboxRect.top + h;
-
+	
 	// center the checkbox
 	if(bCenter)
 	{
 		checkboxRect.left = boundRect.left + boundRect.Width() / 2 - checkboxRect.Height() / 2 - 1;
 		checkboxRect.right = checkboxRect.left + checkboxRect.Height();
 	}
+}
+void CCheckHeaderCtrl::CalcCheckBoxRect(int nSubItem, CRect& checkboxRect, BOOL bCenter, int h)
+{
+	CRect boundRect;
+	GetItemRect(nSubItem, &boundRect);
+	boundRect.DeflateRect(m_nSpace, 0);
+
+	CalcCheckBoxRect(boundRect, checkboxRect, bCenter, h);
 }
 void CCheckHeaderCtrl::DrawCheckBox(CDC* pDC, LPCRECT lpcRect, BOOL bDrawMark, COLORREF crBkg, COLORREF crBorder, COLORREF crMark)
 {

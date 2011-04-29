@@ -64,10 +64,13 @@ public:
 	int	 GetHeaderCheckedState(int nSubItem);
 	void SetHeaderCheckedState(int nSubItem, int nCheckedState);
 	void DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark);
+	void DrawText(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect& rect);
 	void GetDrawColors(int nItem, int nSubItem, COLORREF& colorText, COLORREF& colorBkgnd);
+	void CalcCheckBoxRect(int nItem, int nSubItem, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
 	inline int* GetCheckedState(int nItem);
 private:
 	void SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader = TRUE);
+	BOOL IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt);
 	inline int SwitchCheckedState(int nCheckedState);
 // Overrides
 	// ClassWizard generated virtual function overrides

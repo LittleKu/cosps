@@ -122,6 +122,11 @@ void CCheckListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			
 			*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
 		}
+		else
+		{
+			DrawText(nItem, nSubItem, pDC, crText, crBkgnd, rect);
+			*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
+		}
 	}
 }
 
@@ -160,7 +165,7 @@ BOOL CCheckListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* pResult)
 		if (nSubItem != -1)
 		{
 			int* pCheckStates = GetCheckedState(nItem);
-			if (pCheckStates[nSubItem] != CL_NONE_CHECK_BOX)
+			if (pCheckStates[nSubItem] != CL_NONE_CHECK_BOX && IsPtInSubItemCheckBox(nItem, nSubItem, pNMActivate->ptAction))
 			{
 
 				int nChecked = pCheckStates[nSubItem];
@@ -180,6 +185,7 @@ BOOL CCheckListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 	
 	int nSubItem = pNMListView->iSubItem;
+	AfxTrace("OnColumnClick %d\n", nSubItem);
 	
 	int nCheckedState = GetHeaderCheckedState(nSubItem);
 	
@@ -205,6 +211,25 @@ BOOL CCheckListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	return FALSE;
 }
 
+void CCheckListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)
+{
+	CRect rect;
+	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
+
+	CRect boundRect = rect;
+	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
+	
+	chkboxrect = boundRect;
+	chkboxrect.bottom -= 1;
+	chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;	// width = height
+	
+	if(bCenter)
+	{
+		// center the checkbox		
+		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
+		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
+	}
+}
 void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark)
 {
 	ASSERT(pDC);
@@ -220,6 +245,9 @@ void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF cr
 	CString str = GetItemText(nItem, nSubItem);
 	BOOL bCenter = str.IsEmpty();
 
+	CRect chkboxrect;
+	CalcCheckBoxRect(nItem, nSubItem, chkboxrect, bCenter);
+	/*
 	CRect boundRect = rect;
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
 
@@ -234,6 +262,7 @@ void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF cr
 		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
 		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
 	}
+	*/
 	
 	CCheckHeaderCtrl::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	
@@ -244,7 +273,7 @@ void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF cr
 		pDC->SetBkColor(crBkgnd);
 		CRect textrect;
 		textrect = rect;
-		textrect.left = chkboxrect.right + 4;
+		textrect.left = chkboxrect.right + m_HeaderCtrl.m_nSpace;
 		
 		UINT nFormat = DT_LEFT | DT_VCENTER | DT_SINGLELINE;	//+++
 		BOOL m_bUseEllipsis = TRUE;
@@ -253,6 +282,54 @@ void CCheckListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF cr
 		
 		pDC->DrawText(str, &textrect, nFormat);
 	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// DrawText
+void CCheckListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect& rect)
+{
+	if (rect.IsRectEmpty())
+	{
+		return;
+	}
+	
+	COLORREF oldBkColor = pDC->GetBkColor();
+	
+	GetDrawColors(nItem, nSubItem, crText, crBkgnd);
+	pDC->FillSolidRect(&rect, crBkgnd);
+
+	CString str;
+	str = GetItemText(nItem, nSubItem);
+	if(str.IsEmpty())
+	{
+		pDC->SetBkColor(oldBkColor);
+		return;
+	}
+
+	// get text justification
+	HDITEM hditem;
+	hditem.mask = HDI_FORMAT;
+	m_HeaderCtrl.GetItem(nSubItem, &hditem);
+	int nFmt = hditem.fmt & HDF_JUSTIFYMASK;
+	UINT nFormat = DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS;
+	if (nFmt == HDF_CENTER)
+		nFormat |= DT_CENTER;
+	else if (nFmt == HDF_LEFT)
+		nFormat |= DT_LEFT;
+	else
+		nFormat |= DT_RIGHT;
+	
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+	pDC->SetBkColor(crBkgnd);
+
+	int m_nPadding = m_HeaderCtrl.m_nSpace;
+	rect.DeflateRect(m_nPadding, 0);
+	pDC->DrawText(str, &rect, nFormat);
+	rect.InflateRect(m_nPadding, 0);
+
+	pDC->SetBkColor(oldBkColor);
 }
 
 void CCheckListCtrl::GetDrawColors(int nItem, int nSubItem, COLORREF& colorText, COLORREF& colorBkgnd)
@@ -614,6 +691,18 @@ int CCheckListCtrl::SwitchCheckedState(int nCheckedState)
 		nCheckedState = CL_CHECKED;
 	}
 	return nCheckedState;
+}
+
+BOOL CCheckListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
+{
+	CString sText = GetItemText(nItem, nSubItem);
+	
+	CRect checkboxRect;
+	CalcCheckBoxRect(nItem, nSubItem, checkboxRect, sText.IsEmpty());
+
+	BOOL bResult = checkboxRect.PtInRect(pt);
+	AfxTrace("IsPtInSubItemCheckBox: %d\n", bResult);
+	return bResult;
 }
 
 
