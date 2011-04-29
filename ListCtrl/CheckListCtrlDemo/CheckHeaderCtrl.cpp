@@ -277,7 +277,7 @@ void CCheckHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRight)
 {	
 	//No need to draw image
-	if(lphdi->iImage == CHECK_LIST_CTRL_NO_IMAGE)
+	if(lphdi->iImage == CL_NONE_CHECK_BOX)
 	{
 		return 0;
 	}
@@ -318,7 +318,7 @@ int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRigh
 
 		CRect chkboxrect;
 		CalcCheckBoxRect(rect, chkboxrect, bCenter);
-		DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == CHECK_LIST_CTRL_CHECKED_IMAGE, ::GetSysColor(COLOR_WINDOW));	
+		DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == CL_CHECKED, ::GetSysColor(COLOR_WINDOW));	
 		iWidth = chkboxrect.Width();
 	}
 	else

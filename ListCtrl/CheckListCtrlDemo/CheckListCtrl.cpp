@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "CheckListCtrlDemo.h"
 #include "CheckListCtrl.h"
 
 #ifdef _DEBUG
@@ -10,6 +9,20 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+#ifdef _DEBUG
+#define ASSERT_ROW_COUNT(nItem) ASSERT(nItem >= 0 && nItem < GetItemCount())
+#define ASSERT_COL_COUNT(nItem) ASSERT(nItem >= 0 && nItem < GetHeaderCtrl()->GetItemCount())
+#define ASSERT_ROW_COL_COUNT(nItem, nSubItem) \
+	ASSERT_ROW_COUNT(nItem); \
+ASSERT_COL_COUNT(nSubItem)
+#else
+#define ASSERT_ROW_COUNT(nItem)
+#define ASSERT_COL_COUNT(nItem)
+#define ASSERT_ROW_COL_COUNT(nItem, nSubItem)
+#endif
+
+UINT WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED = ::RegisterWindowMessage(_T("WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED"));
 
 /////////////////////////////////////////////////////////////////////////////
 // CCheckListCtrl
@@ -52,7 +65,8 @@ void CCheckListCtrl::PreSubclassWindow()
 }
 void CCheckListCtrl::OnDestroy()
 {
-
+	DeleteAllItems();
+	CListCtrl::OnDestroy();
 }
 
 void CCheckListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
@@ -101,9 +115,9 @@ void CCheckListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		CRect rect;
 		GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
 		
-		if(pListCtrlData->pCheckStates[nSubItem] != CHECK_LIST_CTRL_NO_IMAGE)
+		if(pListCtrlData->pCheckStates[nSubItem] != CL_NONE_CHECK_BOX)
 		{
-			BOOL bDrawMark = (pListCtrlData->pCheckStates[nSubItem] == CHECK_LIST_CTRL_CHECKED_IMAGE);
+			BOOL bDrawMark = (pListCtrlData->pCheckStates[nSubItem] == CL_CHECKED);
 			DrawCheckbox(nItem, nSubItem, pDC, crText, crBkgnd, rect, bDrawMark);
 			
 			*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
@@ -116,6 +130,47 @@ BOOL CCheckListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	NMITEMACTIVATE* pNMActivate = (NMITEMACTIVATE*)pNMHDR;
 	*pResult = 0;
 
+	int nItem = -1;
+	
+	//+++
+	LVHITTESTINFO lvhit;
+	lvhit.pt = pNMActivate->ptAction;
+	SubItemHitTest(&lvhit);
+	if (lvhit.flags & LVHT_ONITEMLABEL)
+	{
+		nItem = lvhit.iItem;
+	}
+	
+	if(nItem != -1)
+	{	
+		CRect rect;
+		int nSubItem = -1;
+		
+		// check if a subitem checkbox was clicked
+		for (int i = 0; i < GetHeaderCtrl()->GetItemCount(); i++)
+		{
+			GetSubItemRect(nItem, i, LVIR_BOUNDS, rect);
+			if (rect.PtInRect(pNMActivate->ptAction))
+			{
+				nSubItem = i;
+				break;
+			}
+		}
+		
+		if (nSubItem != -1)
+		{
+			int* pCheckStates = GetCheckedState(nItem);
+			if (pCheckStates[nSubItem] != CL_NONE_CHECK_BOX)
+			{
+
+				int nChecked = pCheckStates[nSubItem];
+				nChecked = SwitchCheckedState(nChecked);
+				
+				SetItemCheckedStateByClick(nItem, nSubItem, nChecked, TRUE);
+			}
+		}
+	}
+
 	return FALSE;
 }
 
@@ -123,7 +178,30 @@ BOOL CCheckListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	*pResult = 0;
+	
+	int nSubItem = pNMListView->iSubItem;
+	
+	int nCheckedState = GetHeaderCheckedState(nSubItem);
+	
+	// CHECK_LIST_CTRL_NO_IMAGE = no checkbox
+	if (nCheckedState != CL_NONE_CHECK_BOX)
+	{
+		nCheckedState = SwitchCheckedState(nCheckedState);
 
+		SetHeaderCheckedState(nSubItem, nCheckedState);
+		m_HeaderCtrl.UpdateWindow();
+		
+		for (int nItem = 0; nItem < GetItemCount(); nItem++)
+		{
+			int* pCheckStates = GetCheckedState(nItem);
+			if (pCheckStates[nSubItem] != CL_NONE_CHECK_BOX)
+			{
+				pCheckStates[nSubItem] = nCheckedState;
+				InvalidateSubItem(nItem, nSubItem);
+			}
+		}
+		UpdateWindow();
+	}
 	return FALSE;
 }
 
@@ -238,6 +316,29 @@ void CCheckListCtrl::GetDrawColors(int nItem, int nSubItem, COLORREF& colorText,
 	colorBkgnd = crBkgnd;
 }
 
+int  CCheckListCtrl::InsertItem( int nItem, LPCTSTR lpszItem )
+{
+	ASSERT(nItem >= 0);
+	int index = CListCtrl::InsertItem(nItem, lpszItem);
+	if (index < 0)
+	{
+		return index;
+	}
+
+	DWORD dwItemData = CListCtrl::GetItemData(index);
+
+	CCheckListItemData *pListCtrlData = new CCheckListItemData;
+	pListCtrlData->pCheckStates = new int[GetHeaderCtrl()->GetItemCount()];
+	for(int i = 0; i < GetHeaderCtrl()->GetItemCount(); i++)
+	{
+		pListCtrlData->pCheckStates[i] = CL_NONE_CHECK_BOX;
+	}
+	pListCtrlData->dwItemData = dwItemData;
+
+	CListCtrl::SetItemData(index, (DWORD)pListCtrlData);
+	return index;
+}
+
 int CCheckListCtrl::InsertItem(const LVITEM* pItem, BOOL bVirgin)
 {
 	ASSERT(pItem->iItem >= 0);
@@ -258,7 +359,7 @@ int CCheckListCtrl::InsertItem(const LVITEM* pItem, BOOL bVirgin)
 	pListCtrlData->pCheckStates = new int[GetHeaderCtrl()->GetItemCount()];
 	for(int i = 0; i < GetHeaderCtrl()->GetItemCount(); i++)
 	{
-		pListCtrlData->pCheckStates[i] = CHECK_LIST_CTRL_NO_IMAGE;
+		pListCtrlData->pCheckStates[i] = CL_NONE_CHECK_BOX;
 	}
 	pListCtrlData->dwItemData = pItem->lParam;
 	
@@ -267,6 +368,66 @@ int CCheckListCtrl::InsertItem(const LVITEM* pItem, BOOL bVirgin)
 	return index;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// DeleteItem
+BOOL CCheckListCtrl::DeleteItem(int nItem)
+{
+	ASSERT_ROW_COUNT(nItem);
+	
+	CCheckListItemData *pXLCD = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	if (pXLCD)
+		delete pXLCD;
+	CListCtrl::SetItemData(nItem, 0);
+	return CListCtrl::DeleteItem(nItem);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// DeleteAllItems
+BOOL CCheckListCtrl::DeleteAllItems()
+{
+	int n = GetItemCount();
+	for (int i = 0; i < n; i++)
+	{
+		CCheckListItemData *pXLCD = (CCheckListItemData *) CListCtrl::GetItemData(i);
+		if (pXLCD)
+			delete pXLCD;
+		CListCtrl::SetItemData(i, 0);
+	}
+	
+	return CListCtrl::DeleteAllItems();
+}
+
+DWORD CCheckListCtrl::GetItemData(int nItem) const
+{
+	ASSERT_ROW_COUNT(nItem);
+	
+	CCheckListItemData *pXLCD = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	if (!pXLCD)
+	{
+		return 0;
+	}
+	
+	return pXLCD->dwItemData;
+}
+
+void CCheckListCtrl::InvalidateSubItem(int nItem, int nSubItem)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	
+	CRect rect;
+	if (nSubItem == -1)
+	{
+		GetItemRect(nItem, &rect, LVIR_BOUNDS);
+	}
+	else
+	{
+		GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
+	}
+	
+	rect.InflateRect(2, 2);
+	
+	InvalidateRect(&rect);
+}
 ///////////////////////////////////////////////////////////////////////////////
 // GetSubItemRect
 BOOL CCheckListCtrl::GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect)
@@ -307,3 +468,153 @@ BOOL CCheckListCtrl::GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& r
 	
 	return bRC;
 }
+
+int	 CCheckListCtrl::GetHeaderCheckedState(int nSubItem)
+{
+	ASSERT_COL_COUNT(nSubItem);
+	HDITEM hditem;
+	
+	// use the image index (0 or 1) to indicate the checked status
+	hditem.mask = HDI_IMAGE;
+	m_HeaderCtrl.GetItem(nSubItem, &hditem);
+	return hditem.iImage;
+}
+void CCheckListCtrl::SetHeaderCheckedState(int nSubItem, int nCheckedState)
+{
+	ASSERT_COL_COUNT(nSubItem);
+	ASSERT(nCheckedState >= CL_NONE_CHECK_BOX && nCheckedState <= CL_CHECKED);
+	
+	HDITEM hditem;
+	
+	hditem.mask = HDI_IMAGE;
+	hditem.iImage = nCheckedState;
+	m_HeaderCtrl.SetItem(nSubItem, &hditem);
+}
+
+void CCheckListCtrl::SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	ASSERT(nCheckedState >= CL_NONE_CHECK_BOX && nCheckedState <= CL_CHECKED);
+	
+	int* pCheckStates = GetCheckedState(nItem);
+
+	//1. Update data: checked state
+	pCheckStates[nSubItem] = nCheckedState;
+	
+	//2. Update window
+	InvalidateSubItem(nItem, nSubItem);
+	UpdateWindow();
+	
+	//3. Update header
+	if(bUpdateHeader)
+	{
+		// now update checkbox in header
+		if (GetHeaderCheckedState(nSubItem) != CL_NONE_CHECK_BOX)
+		{
+			int nCheckedCount = CountCheckedItems(nSubItem);
+			
+			if (nCheckedCount == GetItemCount())
+				SetHeaderCheckedState(nSubItem, CL_CHECKED);
+			else
+				SetHeaderCheckedState(nSubItem, CL_UNCHECKED);
+			m_HeaderCtrl.UpdateWindow();
+		}
+	}
+	
+	//4. Send message to parent
+	CWnd *pWnd = GetParent();
+	if (pWnd == NULL)
+	{
+		pWnd = GetOwner();
+	}
+	if(pWnd != NULL && ::IsWindow(pWnd->GetSafeHwnd()))
+	{
+		::SendMessage(pWnd->GetSafeHwnd(), WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED, nItem, nSubItem);
+	}
+}
+
+void CCheckListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateImmediately)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	ASSERT(nCheckedState >= CL_NONE_CHECK_BOX && nCheckedState <= CL_CHECKED);
+	
+	int* pCheckStates = GetCheckedState(nItem);
+	
+	//1. Update data: checked state
+	pCheckStates[nSubItem] = nCheckedState;
+	
+	//2. Update window
+	InvalidateSubItem(nItem, nSubItem);
+	if(bUpdateImmediately)
+	{
+		UpdateWindow();
+	}	
+}
+int  CCheckListCtrl::GetItemCheckedState(int nItem, int nSubItem)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	int* pCheckStates = GetCheckedState(nItem);
+	return pCheckStates[nSubItem];
+}
+
+void CCheckListCtrl::ValidateCheck()
+{
+	int nColCount = GetHeaderCtrl()->GetItemCount();
+	for(int nSubItem = 0; nSubItem < nColCount; nSubItem++)
+	{
+		if(GetHeaderCheckedState(nSubItem) == CL_NONE_CHECK_BOX)
+		{
+			continue;
+		}
+
+		//Column state		
+		if (CountCheckedItems(nSubItem) == GetItemCount())
+			SetHeaderCheckedState(nSubItem, CL_CHECKED);
+		else
+			SetHeaderCheckedState(nSubItem, CL_UNCHECKED);
+	}
+	m_HeaderCtrl.UpdateWindow();
+	UpdateWindow();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// CountCheckedItems
+int CCheckListCtrl::CountCheckedItems(int nSubItem)
+{
+	ASSERT_COL_COUNT(nSubItem);
+	
+	int nCount = 0;
+	for (int nItem = 0; nItem < GetItemCount(); nItem++)
+	{
+		if(GetItemCheckedState(nItem, nSubItem) == CL_CHECKED)
+		{
+			nCount++;
+		}			
+	}
+	
+	return nCount;
+}
+
+int* CCheckListCtrl::GetCheckedState(int nItem)
+{
+	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->pCheckStates);
+	return pData->pCheckStates;
+}
+int CCheckListCtrl::SwitchCheckedState(int nCheckedState)
+{
+	ASSERT(nCheckedState == CL_CHECKED || nCheckedState == CL_UNCHECKED);
+
+	if(nCheckedState == CL_CHECKED)
+	{
+		nCheckedState = CL_UNCHECKED;
+	}
+	else
+	{
+		nCheckedState = CL_CHECKED;
+	}
+	return nCheckedState;
+}
+
+
+

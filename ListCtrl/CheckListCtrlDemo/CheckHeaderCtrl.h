@@ -13,10 +13,9 @@
 
 #define FLATHEADER_TEXT_MAX	    80
 
-#define CHECK_LIST_CTRL_NO_IMAGE		    0
-#define CHECK_LIST_CTRL_UNCHECKED_IMAGE	    1
-#define CHECK_LIST_CTRL_CHECKED_IMAGE	    2
-
+#define CL_NONE_CHECK_BOX		    0
+#define CL_UNCHECKED	            1
+#define CL_CHECKED	                2
 
 class CCheckHeaderCtrl : public CHeaderCtrl
 {

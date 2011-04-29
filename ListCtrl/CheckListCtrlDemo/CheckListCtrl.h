@@ -8,6 +8,7 @@
 #endif // _MSC_VER > 1000
 // CheckListCtrl.h : header file
 //
+extern UINT WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED;
 
 class CCheckListItemData
 {
@@ -48,10 +49,26 @@ public:
 	COLORREF		m_crWindowText;
 // Operations
 public:
-	int InsertItem(const LVITEM* pItem, BOOL bVirgin = FALSE);
+	int  InsertItem( int nItem, LPCTSTR lpszItem );
+	int  InsertItem(const LVITEM* pItem, BOOL bVirgin = FALSE);
+	BOOL DeleteItem(int nItem);
+	BOOL DeleteAllItems();
+	DWORD GetItemData(int nItem) const;
+	void ValidateCheck();
+	
+	void InvalidateSubItem(int nItem, int nSubItem);
+	void SetItemCheckedState(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateImmediately = TRUE);
+	int  GetItemCheckedState(int nItem, int nSubItem);
+	BOOL GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect);
+	int  CountCheckedItems(int nSubItem);
+	int	 GetHeaderCheckedState(int nSubItem);
+	void SetHeaderCheckedState(int nSubItem, int nCheckedState);
 	void DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark);
 	void GetDrawColors(int nItem, int nSubItem, COLORREF& colorText, COLORREF& colorBkgnd);
-	BOOL GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect);
+	inline int* GetCheckedState(int nItem);
+private:
+	void SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader = TRUE);
+	inline int SwitchCheckedState(int nCheckedState);
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CCheckListCtrl)

@@ -41,7 +41,9 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg void OnRClick(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
+	afx_msg LRESULT OnCheckbox(WPARAM, LPARAM);
 	DECLARE_MESSAGE_MAP()
 private:
 	void InitListCtrl();

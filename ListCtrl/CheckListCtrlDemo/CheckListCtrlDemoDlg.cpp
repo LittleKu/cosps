@@ -101,7 +101,9 @@ BEGIN_MESSAGE_MAP(CCheckListCtrlDemoDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_NOTIFY(NM_RCLICK , IDC_LIST1, OnRClick)
 	//}}AFX_MSG_MAP
+	ON_REGISTERED_MESSAGE(WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED, OnCheckbox)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -220,55 +222,62 @@ void CCheckListCtrlDemoDlg::InitListCtrl()
 		pList->m_HeaderCtrl.GetItem(i, &hditem);
 		hditem.fmt |=  HDF_IMAGE;
 		if (i == 0 || i == 2)
-			hditem.iImage = CHECK_LIST_CTRL_CHECKED_IMAGE;
+			hditem.iImage = CL_CHECKED;
 		else if(i == 1)
-			hditem.iImage = CHECK_LIST_CTRL_UNCHECKED_IMAGE;
+			hditem.iImage = CL_UNCHECKED;
 		else
-			hditem.iImage = CHECK_LIST_CTRL_NO_IMAGE;
+			hditem.iImage = CL_NONE_CHECK_BOX;
 		
 		pList->m_HeaderCtrl.SetItem(i, &hditem);
 	}
 	
+	m_listCtrl.SetRedraw(FALSE);
 	CString cs(_T(""));
 	int iSubItem = 0;
-	
-	LV_ITEM lvi;	
-    lvi.mask = LVIF_TEXT | LVIF_PARAM;
-
-	CCheckListItemData* pListItemData = NULL;
-	for(i = 0; i < 2; i++)
+	int nItem;
+	for(i = 0; i < 8; i++)
 	{
-		lvi.iItem = i;
-		
-		pListItemData = new CCheckListItemData;
-		pListItemData->pCheckStates = new int[pList->m_HeaderCtrl.GetItemCount()];
-		for(int j = 0; j < pList->m_HeaderCtrl.GetItemCount(); j++)
+		cs = "";
+		nItem = m_listCtrl.InsertItem(i, cs);
+		if(nItem < 0)
 		{
-			pListItemData->pCheckStates[j] = CHECK_LIST_CTRL_NO_IMAGE;
+			continue;
 		}
-		pListItemData->pCheckStates[0] = CHECK_LIST_CTRL_CHECKED_IMAGE;
-		pListItemData->pCheckStates[1] = CHECK_LIST_CTRL_UNCHECKED_IMAGE;
-		pListItemData->pCheckStates[2] = CHECK_LIST_CTRL_CHECKED_IMAGE;
-
-		lvi.iSubItem = 0;
-		lvi.lParam = (LPARAM)pListItemData;
-		cs ="";
-		lvi.pszText = (LPTSTR)(LPCTSTR)cs;
-		
-		
-		m_listCtrl.InsertItem(&lvi, TRUE);
-		
 		iSubItem = 0;
+		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_UNCHECKED, FALSE);
+
 		cs.Format(_T("Second column name. To make this column longer. %d"), i+1);
 		m_listCtrl.SetItemText(i, ++iSubItem, cs);
+		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_CHECKED, FALSE);
 		
 		cs.Format(_T("Enable %d"), i+1);
 		m_listCtrl.SetItemText(i, ++iSubItem, cs);
+		m_listCtrl.SetItemCheckedState(nItem, iSubItem, CL_CHECKED, FALSE);
 		
 		cs.Format(_T("Last %d"), i+1);
 		m_listCtrl.SetItemText(i, ++iSubItem, cs);
-		
-// 		m_listCtrl.SetItemCheckedState(i, 0, 0);
-// 		m_listCtrl.SetItemCheckedState(i, 2, 1);
 	}
+	m_listCtrl.SetRedraw(TRUE);
+	m_listCtrl.ValidateCheck();
+}
+
+
+void CCheckListCtrlDemoDlg::OnRClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE lpNMActivate = (LPNMITEMACTIVATE)pNMHDR;
+	*pResult = 0;
+
+	DWORD pVirginData = m_listCtrl.CListCtrl::GetItemData(lpNMActivate->iItem);
+
+	CCheckListItemData* pData = (CCheckListItemData*)pVirginData;
+
+	DWORD pAppData = m_listCtrl.GetItemData(lpNMActivate->iItem);
+	AfxTrace("OnRClick: %d, %d, %d, %d, %d, %d\n", lpNMActivate->iItem, lpNMActivate->iSubItem, 
+		lpNMActivate->ptAction.x, lpNMActivate->ptAction.y, lpNMActivate->lParam, lpNMActivate->uNewState);
+}
+
+LRESULT CCheckListCtrlDemoDlg::OnCheckbox(WPARAM nItem, LPARAM nSubItem)
+{
+	AfxTrace("OnCheckbox: %d, %d\n", nItem, nSubItem);
+	return 0;
 }
