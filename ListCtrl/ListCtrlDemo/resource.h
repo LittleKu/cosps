@@ -13,7 +13,6 @@
 #define IDB_ARROWUP                     131
 #define IDD_PROGRESS                    132
 #define IDC_MENU_SEP                    1001
-#define IDC_SOURCE_DIR_LIST             1002
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
 #define IDC_BUTTON_ADD                  1004
@@ -22,6 +21,7 @@
 #define CG_IDC_PROGDLG_STATUS           1005
 #define IDC_FILTER_COMBO                1006
 #define IDC_RECURSIVE_SUB_CHECK         1007
+#define IDC_SOURCE_DIR_LIST             1008
 #define IDC_RESULT_LIST                 1009
 #define IDC_RESULT_FRAME                1010
 #define IDC_BUTTON_START                1011
@@ -67,7 +67,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32779
-#define _APS_NEXT_CONTROL_VALUE         1035
+#define _APS_NEXT_CONTROL_VALUE         1042
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

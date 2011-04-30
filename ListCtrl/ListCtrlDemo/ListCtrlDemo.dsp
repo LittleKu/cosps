@@ -92,6 +92,14 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\ThirdParty\CheckHeaderCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\CheckListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Counter.cpp
 # End Source File
 # Begin Source File
@@ -137,6 +145,14 @@ SOURCE=.\Util.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\ThirdParty\CheckHeaderCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\CheckListCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Counter.h
 # End Source File
 # Begin Source File
@@ -146,6 +162,10 @@ SOURCE=.\ListCtrlDemo.h
 # Begin Source File
 
 SOURCE=.\ListCtrlDemoDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\MemDC.h
 # End Source File
 # Begin Source File
 

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
 #include "ThirdParty/MultiColumnSortListView.h"
+#include "ThirdParty/CheckListCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
 
@@ -25,7 +26,7 @@ public:
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
-	CListBox	m_srcDirListBox;
+	CCheckListCtrl m_srcDirListCtrl;
 	CMultiColumnSortListCtrl m_resultListCtrl;
 	//}}AFX_DATA
 
@@ -66,6 +67,8 @@ protected:
 	HICON m_hIcon;
 	CStringArray m_sFilterArray;
 private:
+	void AddSrcDir(LPCTSTR lpszDir);
+	void InitSrcDirListCtrl();
 	void SetPair(int idc, int idp, int count, int total = 0);
 	CProgressDlg* m_pProgressDlg;
 };

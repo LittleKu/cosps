@@ -33,6 +33,19 @@ static ColumnInfo columns[] =
     { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
 };
 
+struct SrcDirColumnInfo
+{
+	LPCTSTR     lpszName;
+	int         nType;
+	int         nWidth;
+};
+
+static SrcDirColumnInfo srcDirColumns[] =
+{
+    { _T(""),				CL_UNCHECKED,         50   },
+    { _T("Directory"),		CL_NONE_CHECK_BOX,    400  }
+};
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
@@ -97,8 +110,8 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
 	DDX_Control(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
-	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListBox);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
+	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListCtrl);
 	//}}AFX_DATA_MAP
 }
 
@@ -150,9 +163,16 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	InitResultListCtrl();
+
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
+	
+	//Source dir list
+	InitSrcDirListCtrl();
+
+	//Result List
+	InitResultListCtrl();
+	
 	m_recursiveSubBtn.SetCheck(BST_CHECKED);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -414,24 +434,31 @@ void CListCtrlDemoDlg::OnButtonAdd()
 	//Got a valid path
 	if(pidlSelected && SHGetPathFromIDList(pidlSelected, szPath))
 	{
-		AfxTrace("%s\n", szPath);
-		m_srcDirListBox.AddString(szPath);
+		AddSrcDir(szPath);
 	}
 }
 
 void CListCtrlDemoDlg::OnButtonDel() 
 {
-	int nIndex = m_srcDirListBox.GetCurSel();
-	if(nIndex != LB_ERR)
+	//Delete all selected items
+	POSITION pos = m_srcDirListCtrl.GetFirstSelectedItemPosition();
+
+	int nItem = -1;
+	while (pos != NULL)
 	{
-		m_srcDirListBox.DeleteString(nIndex);
+		nItem = m_srcDirListCtrl.GetNextSelectedItem(pos);
+		AfxTrace("Selected %d\n", nItem);
+		m_srcDirListCtrl.DeleteItem(nItem);
+		
+		//Delete the previous one item will affect the pos
+		pos = m_srcDirListCtrl.GetFirstSelectedItemPosition();
 	}
 }	
 
 void CListCtrlDemoDlg::OnButtonStart() 
 {
 	//check validation
-	int nCount = m_srcDirListBox.GetCount();
+	int nCount = m_srcDirListCtrl.CountCheckedItems(0);
 	if(nCount <= 0)
 	{
 		AfxMessageBox(_T("Please select at least one directory."));
@@ -447,11 +474,15 @@ void CListCtrlDemoDlg::OnButtonStart()
 	
 	//Dir list
 	CString sDir;
+	nCount = m_srcDirListCtrl.GetItemCount();
 	int i;
 	for(i = 0; i < nCount; i++)
 	{
-		m_srcDirListBox.GetText(i, sDir);
-		lpThreadParam->dirList.Add(sDir);
+		if(m_srcDirListCtrl.GetItemCheckedState(i, 0) == CL_CHECKED)
+		{
+			sDir = m_srcDirListCtrl.GetItemText(i, 1);
+			lpThreadParam->dirList.Add(sDir);
+		}
 	}
 
 	//Filter
@@ -567,4 +598,61 @@ void CListCtrlDemoDlg::SetPair(int idc, int idp, int count, int total)
 		sPercent = "0%";
 	}
 	SetDlgItemText(idp, sPercent);
+}
+
+void CListCtrlDemoDlg::InitSrcDirListCtrl()
+{
+	//1. Set Extended Style
+	DWORD dwExtendedStyle = m_srcDirListCtrl.GetExtendedStyle();
+	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
+	m_srcDirListCtrl.SetExtendedStyle(dwExtendedStyle);
+	
+	//2. Insert Columns
+    LVCOLUMN    lvc;
+    lvc.mask = LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
+	
+	int size = sizeof(srcDirColumns)/sizeof(srcDirColumns[0]);
+	int i;
+    for(i = 0; i < size; i++)
+    {
+        lvc.iSubItem = i;
+        lvc.pszText = (LPTSTR)srcDirColumns[i].lpszName;
+		lvc.cx = srcDirColumns[i].nWidth;
+
+        m_srcDirListCtrl.InsertColumn(i, &lvc);
+    }
+
+	//3. Init CheckBox Header Ctrl
+	HDITEM hditem;
+
+	size = m_srcDirListCtrl.GetHeaderCtrl()->GetItemCount();
+	for(i = 0; i < size; i++)
+	{
+		hditem.mask = HDI_IMAGE | HDI_FORMAT;
+		m_srcDirListCtrl.GetHeaderCtrl()->GetItem(i, &hditem);
+		hditem.fmt |=  HDF_IMAGE;
+		hditem.iImage = srcDirColumns[i].nType;
+		m_srcDirListCtrl.GetHeaderCtrl()->SetItem(i, &hditem);
+	}
+
+#ifdef _DEBUG
+	CString sDir;
+	for(i = 0; i < 10; i++)
+	{
+		sDir.Format("E:\\temp\\long\\%d", i);
+		AddSrcDir(sDir);
+	}
+#endif
+}
+
+void CListCtrlDemoDlg::AddSrcDir(LPCTSTR lpszDir)
+{
+	int nItem = m_srcDirListCtrl.GetItemCount();
+
+	m_srcDirListCtrl.InsertItem(nItem, _T(""));
+	m_srcDirListCtrl.SetItemCheckedState(nItem, 0, CL_CHECKED, FALSE);
+
+	m_srcDirListCtrl.SetItemText(nItem, 1, lpszDir);
+
+	m_srcDirListCtrl.ValidateCheck();
 }
