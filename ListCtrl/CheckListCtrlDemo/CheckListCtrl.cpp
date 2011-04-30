@@ -141,7 +141,7 @@ BOOL CCheckListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	LVHITTESTINFO lvhit;
 	lvhit.pt = pNMActivate->ptAction;
 	SubItemHitTest(&lvhit);
-	if (lvhit.flags & LVHT_ONITEMLABEL)
+	if (lvhit.flags & LVHT_ONITEM)
 	{
 		nItem = lvhit.iItem;
 	}
@@ -705,5 +705,22 @@ BOOL CCheckListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 	return bResult;
 }
 
-
-
+void CCheckListCtrl::SetRowHeight(int nRowHeight)
+{
+	ASSERT(::IsWindow(m_hWnd));
+	m_nRowHeight = nRowHeight;
+	if(m_nRowHeight < 0)
+	{
+		return;
+	}
+	if(m_ILRowHeight.GetSafeHandle() != NULL)
+	{
+		m_ILRowHeight.DeleteImageList();
+	}
+	m_ILRowHeight.Create(m_nRowHeight, m_nRowHeight, ILC_COLOR4, 1, 1);
+	SetImageList(&m_ILRowHeight, LVSIL_SMALL);
+}
+int  CCheckListCtrl::GetRowHeight()
+{
+	return m_nRowHeight;
+}

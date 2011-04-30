@@ -34,11 +34,14 @@ public:
 
 	UINT m_nFormat;
 	BOOL m_bDividerLines;
-	int m_nSpace;
+	int  m_nSpace;
 	SIZE m_sizeImage;
 	BOOL m_bTrack;
+	int  m_nHeight;
 // Operations
 public:
+	void SetHeight(int nHeight);
+	int  GetHeight();
 	void CalcCheckBoxRect(int nSubItem, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
 	static void CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
 	static void DrawCheckBox(CDC* pDC, LPCRECT lpcRect, BOOL bDrawMark, COLORREF crBkg = ::GetSysColor(COLOR_WINDOW), COLORREF crBorder = RGB(51,102,153), COLORREF crMark = RGB(51,153,51));
@@ -52,8 +55,8 @@ public:
 public:
 	virtual ~CCheckHeaderCtrl();
 	void DrawCtrl  (CDC* pDC);
-	int  DrawImage (CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRight);
-	int  DrawBitmap(CDC* pDC, CRect rect, LPHDITEM lphdi, HBITMAP hb, BOOL bRight);
+	int  DrawImage (CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bDrawBoth = TRUE, BOOL bRight = TRUE);
+	int  DrawBitmap(CDC* pDC, CRect rect, LPHDITEM lphdi, HBITMAP hb, BOOL bRight = TRUE);
 	int  DrawText  (CDC* pDC, CRect rect, LPHDITEM lphdi);
 	// Generated message map functions
 protected:
@@ -64,6 +67,7 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSetImageList(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnLayout(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()
 };
 

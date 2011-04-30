@@ -73,7 +73,7 @@ struct ColumnInfo
 
 static ColumnInfo columns[] =
 {
-    { _T(""),  				TYPE_CHECKBOX,		LVCFMT_CENTER,	50},
+    { _T(""),  				TYPE_CHECKBOX,		LVCFMT_CENTER,	60},
     { _T("Description"),    TYPE_TEXT,			LVCFMT_LEFT,	200},
     { _T("Enable"),			TYPE_CHECKBOX,		LVCFMT_LEFT,	80},
 	{ _T("Last"),			TYPE_TEXT,			LVCFMT_LEFT,	150}
@@ -197,6 +197,8 @@ void CCheckListCtrlDemoDlg::InitListCtrl()
 	dwExtendedStyle = ((dwExtendedStyle | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT) & (~LVS_EX_TRACKSELECT));
 	m_listCtrl.SetExtendedStyle(dwExtendedStyle);
 	
+	m_listCtrl.SetRowHeight(22);
+	m_listCtrl.m_HeaderCtrl.SetHeight(22);
 	int         i;
     LVCOLUMN    lvc;
 	

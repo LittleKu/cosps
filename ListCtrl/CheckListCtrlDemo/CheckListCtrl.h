@@ -47,15 +47,19 @@ public:
 	COLORREF		m_crHighLightText;
 	COLORREF		m_crWindow;
 	COLORREF		m_crWindowText;
+	int             m_nRowHeight;
+	CImageList      m_ILRowHeight;
 // Operations
 public:
 	int  InsertItem( int nItem, LPCTSTR lpszItem );
 	int  InsertItem(const LVITEM* pItem, BOOL bVirgin = FALSE);
 	BOOL DeleteItem(int nItem);
 	BOOL DeleteAllItems();
-	DWORD GetItemData(int nItem) const;
 	void ValidateCheck();
-	
+	void SetRowHeight(int nRowHeight);
+	int  GetRowHeight();
+	DWORD GetItemData(int nItem) const;
+
 	void InvalidateSubItem(int nItem, int nSubItem);
 	void SetItemCheckedState(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateImmediately = TRUE);
 	int  GetItemCheckedState(int nItem, int nSubItem);

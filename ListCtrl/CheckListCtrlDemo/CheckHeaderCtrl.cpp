@@ -24,9 +24,11 @@ CCheckHeaderCtrl::CCheckHeaderCtrl()
 
 	m_nFormat         = DT_DEFAULT;
 	m_bDividerLines   = TRUE;
-	m_nSpace        = 6;
+	m_nSpace          = 6;
 	m_sizeImage.cx    = 0;
 	m_sizeImage.cy    = 0;
+
+	m_nHeight         = -1; //-1 means use the default height
 }
 
 CCheckHeaderCtrl::~CCheckHeaderCtrl()
@@ -41,6 +43,7 @@ BEGIN_MESSAGE_MAP(CCheckHeaderCtrl, CHeaderCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_MESSAGE(HDM_SETIMAGELIST, OnSetImageList)
+	ON_MESSAGE(HDM_LAYOUT, OnLayout)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -84,6 +87,52 @@ LRESULT CCheckHeaderCtrl::OnSetImageList(WPARAM, LPARAM lParam)
 	
 	return Default();
 }
+
+/*
+This code is from: http://www.codeproject.com/KB/list/Emery-Emerald.aspx
+*/
+LRESULT CCheckHeaderCtrl::OnLayout(WPARAM, LPARAM lParam)
+{
+	LPHDLAYOUT pHL = reinterpret_cast<LPHDLAYOUT>(lParam);
+
+	//*** Sends HDM_LAYOUT message to the base class
+	if(m_nHeight <= 0)
+	{
+		return CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
+	}
+	
+	//*** The table list rectangle
+	RECT *pRect = pHL->prc;
+
+	//*** The table header rectangle
+	WINDOWPOS *pWPos = pHL->pwpos;
+
+	//*** Here's equivalent code for the code which follows after
+	/*
+	pWPos->hwndInsertAfter = NULL;
+
+	//*** Moves the table header to the righ
+	pWPos->x = pRect->left;
+	pWPos->y = pRect->top;
+	pWPos->cx = pRect->right - pRect->left;
+
+	//*** New table header height
+	pWPos->cy = m_nHeight;
+
+	pWPos->flags = SWP_NOACTIVATE|SWP_NOZORDER;
+
+	//*** Decreases the table list height on the table header height
+	pRect->top += m_nHeight;
+
+	return TRUE;
+	*/
+	
+	// Method 2
+	int nRet = CHeaderCtrl::DefWindowProc(HDM_LAYOUT, 0, lParam);
+	pWPos->cy = m_nHeight;
+	pRect->top = m_nHeight;
+	return nRet;
+}  // OnLayout
 void CCheckHeaderCtrl::CalcCheckBoxRect(const CRect& boundRect, CRect& checkboxRect, BOOL bCenter, int h)
 {
 	checkboxRect = boundRect;
@@ -288,7 +337,7 @@ void CCheckHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 
 ///////////////////////////////////////////////////////////////////////////////
 // DrawImage
-int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRight)
+int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bDrawBoth, BOOL bRight)
 {	
 	//No need to draw image
 	if(lphdi->iImage == CL_NONE_CHECK_BOX)
@@ -299,7 +348,7 @@ int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRigh
 
 	//
 	CImageList* pImageList = GetImageList();
-	if (pImageList && (rect.Width() > 0))
+	if (pImageList)
 	{
 		POINT point;
 		
@@ -324,7 +373,8 @@ int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRigh
 		
 		iWidth = m_sizeImage.cx;
 	}
-	else if (rect.Width() > 0)
+	rect.left += iWidth;
+	if (rect.Width() > 0)
 	{
 		// no image list, just draw checkbox
 
@@ -334,10 +384,6 @@ int CCheckHeaderCtrl::DrawImage(CDC* pDC, CRect rect, LPHDITEM lphdi, BOOL bRigh
 		CalcCheckBoxRect(rect, chkboxrect, bCenter);
 		DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == CL_CHECKED, ::GetSysColor(COLOR_WINDOW));	
 		iWidth = chkboxrect.Width();
-	}
-	else
-	{
-		// width = 0, do nothing
 	}
 
 	return iWidth;
@@ -411,4 +457,15 @@ int CCheckHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 	size.cx = rect.Width() > size.cx ? size.cx : rect.Width();
 
 	return size.cx > 0 ? size.cx : 0;
+}
+
+void CCheckHeaderCtrl::SetHeight(int nHeight)
+{ 
+	m_nHeight = nHeight;
+	Invalidate();
+	UpdateWindow();
+}
+int  CCheckHeaderCtrl::GetHeight() 
+{ 
+	return m_nHeight; 
 }
