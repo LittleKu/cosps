@@ -37,7 +37,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 		{
 			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
 		}
-		result = CommonUtils::EnumDirectory(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor, &progChecker);
+		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor, &progChecker);
 		if(result == -1)
 		{
 			break;
