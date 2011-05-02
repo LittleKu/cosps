@@ -5,6 +5,7 @@
 #define AFX_CHECKLISTCTRLDEMODLG_H__9903514F_9A93_4AF4_B30E_035742FDE6FC__INCLUDED_
 
 #include "CheckListCtrl.h"
+#include "RMenuCheckListCtrl.h"
 
 #if _MSC_VER > 1000
 #pragma once
@@ -22,7 +23,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CCheckListCtrlDemoDlg)
 	enum { IDD = IDD_CHECKLISTCTRLDEMO_DIALOG };
-	CCheckListCtrl	m_listCtrl;
+	CRMenuCheckListCtrl	m_listCtrl;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides

@@ -13,6 +13,66 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+IDR_TOOLBAR1 TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_CXIMAGE_MIRROR
+    BUTTON      ID_CXIMAGE_FLIP
+    BUTTON      ID_CXIMAGE_ROTATEL
+    BUTTON      ID_CXIMAGE_ROTATER
+    BUTTON      ID_CXIMAGE_ROTATE
+    BUTTON      ID_CXIMAGE_RESAMPLE
+    SEPARATOR
+    BUTTON      ID_CXIMAGE_NEGATIVE
+    BUTTON      ID_CXIMAGE_GRAYSCALE
+    BUTTON      ID_CXIMAGE_THRESHOLD
+    BUTTON      ID_CXIMAGE_DECREASEBPP
+    BUTTON      ID_CXIMAGE_INCREASEBPP
+    SEPARATOR
+    BUTTON      ID_CXIMAGE_LIGHTEN
+    BUTTON      ID_CXIMAGE_DARKEN
+    BUTTON      ID_CXIMAGE_CONTRAST
+    BUTTON      ID_CXIMAGE_LESSCONTRAST
+    SEPARATOR
+    BUTTON      ID_COLORS_MORESATURATIONHSL
+    BUTTON      ID_COLORS_MORESATURATIONYUV
+    BUTTON      ID_COLORS_LESSSATURATION
+    SEPARATOR
+    BUTTON      ID_CXIMAGE_COLORIZE
+    BUTTON      ID_CXIMAGE_GAMMA
+    SEPARATOR
+    BUTTON      ID_CXIMAGE_SOFTEN
+    BUTTON      ID_CXIMAGE_GAUSSIAN3X3
+    BUTTON      ID_CXIMAGE_SHARPEN
+    BUTTON      ID_CXIMAGE_SELECTIVEBLUR
+    BUTTON      ID_CXIMAGE_UNSHARPMASK
+    BUTTON      ID_CXIMAGE_ERODE
+    BUTTON      ID_CXIMAGE_DILATE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_TOOLBAR1            BITMAP  DISCARDABLE     "res\\toolbar1.bmp"
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)

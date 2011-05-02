@@ -90,6 +90,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\BCMenu.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CheckHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -110,6 +114,10 @@ SOURCE=.\CheckListCtrlDemoDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RMenuCheckListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -117,6 +125,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\BCMenu.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\CheckHeaderCtrl.h
@@ -139,7 +151,15 @@ SOURCE=.\MemDC.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MenuCmds.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RMenuCheckListCtrl.h
 # End Source File
 # Begin Source File
 
@@ -156,6 +176,10 @@ SOURCE=.\res\CheckListCtrlDemo.ico
 # Begin Source File
 
 SOURCE=.\res\CheckListCtrlDemo.rc2
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\toolbar1.bmp
 # End Source File
 # End Group
 # Begin Source File
