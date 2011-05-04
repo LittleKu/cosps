@@ -713,12 +713,17 @@ void CCheckListCtrl::SetRowHeight(int nRowHeight)
 	{
 		return;
 	}
-	if(m_ILRowHeight.GetSafeHandle() != NULL)
-	{
-		m_ILRowHeight.DeleteImageList();
-	}
-	m_ILRowHeight.Create(m_nRowHeight, m_nRowHeight, ILC_COLOR4, 1, 1);
-	SetImageList(&m_ILRowHeight, LVSIL_SMALL);
+// 	if(m_ILRowHeight.GetSafeHandle() != NULL)
+// 	{
+// 		m_ILRowHeight.DeleteImageList();
+// 	}
+// 	m_ILRowHeight.Create(m_nRowHeight, m_nRowHeight, ILC_COLOR4, 1, 1);
+// 	SetImageList(&m_ILRowHeight, LVSIL_SMALL);
+
+	CImageList hImageList;
+	hImageList.Create(1, m_nRowHeight, ILC_COLOR4, 1, 1);
+	SetImageList(&hImageList, LVSIL_SMALL);
+	hImageList.DeleteImageList();
 }
 int  CCheckListCtrl::GetRowHeight()
 {

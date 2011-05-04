@@ -197,8 +197,8 @@ void CCheckListCtrlDemoDlg::InitListCtrl()
 	dwExtendedStyle = ((dwExtendedStyle | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT) & (~LVS_EX_TRACKSELECT));
 	m_listCtrl.SetExtendedStyle(dwExtendedStyle);
 	
-	m_listCtrl.SetRowHeight(22);
-	m_listCtrl.m_HeaderCtrl.SetHeight(22);
+	m_listCtrl.SetRowHeight(8);
+	m_listCtrl.m_HeaderCtrl.SetHeight(50);
 	int         i;
     LVCOLUMN    lvc;
 	
