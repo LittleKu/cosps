@@ -12,12 +12,15 @@ Class1=CToolBarDemoApp
 Class2=CToolBarDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=4
+ResourceCount=7
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Resource3=IDR_MENU1
 Class4=CToolBarCtrEx
 Resource4=IDD_TOOLBARDEMO_DIALOG
+Resource5=IDD_TOOLBARDEMO_DIALOG (English (U.S.))
+Resource6=IDD_ABOUTBOX (English (U.S.))
+Resource7=IDR_MENU1 (English (U.S.))
 
 [CLS:CToolBarDemoApp]
 Type=0
@@ -69,4 +72,27 @@ HeaderFile=ToolBarCtrEx.h
 ImplementationFile=ToolBarCtrEx.cpp
 BaseClass=CToolBarCtrl
 Filter=W
+
+[DLG:IDD_TOOLBARDEMO_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=3
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_STATIC,button,1342177287
+
+[DLG:IDD_ABOUTBOX (English (U.S.))]
+Type=1
+Class=?
+ControlCount=4
+Control1=IDC_STATIC,static,1342177283
+Control2=IDC_STATIC,static,1342308480
+Control3=IDC_STATIC,static,1342308352
+Control4=IDOK,button,1342373889
+
+[MNU:IDR_MENU1 (English (U.S.))]
+Type=1
+Class=?
+Command1=IDM_TEST
+CommandCount=1
 

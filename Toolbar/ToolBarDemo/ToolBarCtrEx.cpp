@@ -20,6 +20,7 @@ CToolBarCtrEx::CToolBarCtrEx()
 
 CToolBarCtrEx::~CToolBarCtrEx()
 {
+	m_normalIL.DeleteImageList();
 }
 
 
@@ -31,38 +32,31 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToolBarCtrEx message handlers
-BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, UINT nFirstButtonID, UINT nLastButtonID)
+BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, COLORREF crMask, UINT nFirstButtonID, UINT nLastButtonID)
 {
 	BOOL bRet = CToolBarCtrl::Create(dwStyle, rect, pParentWnd, nID);
 	
-	CBitmap cBitmap;
-	cBitmap.LoadBitmap(nID);
+	CBitmap tbBitmap;
+	tbBitmap.LoadBitmap(nID);
 
- 	BITMAP bmp;
-	cBitmap.GetBitmap(&bmp);
-	bmp.bmHeight = 24;
+ 	BITMAP bmpInfo;
+	tbBitmap.GetBitmap(&bmpInfo);
 
-	CSize bitmapSize(bmp.bmHeight, bmp.bmHeight);
+	CSize bitmapSize(bmpInfo.bmHeight, bmpInfo.bmHeight);
 	SetBitmapSize(bitmapSize);
 
-	CSize buttonSize(bmp.bmHeight + 7, bmp.bmHeight + 7);
+	CSize buttonSize(bmpInfo.bmHeight + 7, bmpInfo.bmHeight + 7);
 	SetButtonSize(buttonSize);
-/*	cBitmap.DeleteObject();*/
 
 	int m_nButtonCount = nLastButtonID - nFirstButtonID + 1;
-	m_nButtonCount = 9;
 	
-	m_normalIL.Create(24, 24, ILC_COLOR24|ILC_MASK, 1, 1);
-	m_normalIL.Add(&cBitmap, RGB(255, 0, 255));
-//	SetHotImageList(&m_normalIL);
+	m_normalIL.Create(bmpInfo.bmHeight, bmpInfo.bmHeight, ILC_COLOR24|ILC_MASK, 1, 1);
+	m_normalIL.Add(&tbBitmap, crMask);
 	SetImageList(&m_normalIL);
-	cBitmap.DeleteObject();
+	tbBitmap.DeleteObject();
 
-// 	if(AddBitmap(m_nButtonCount,nID) == -1)
-// 	{
-// 		AfxTrace("%d\n", GetLastError());
-// 		ASSERT(FALSE);
-// 	}
+	//For less than 256 color bitmap
+//	VERIFY(AddBitmap(m_nButtonCount,nID) != -1);
 	
 	TBBUTTON tb;
 	for (int nIndex = 0; nIndex < m_nButtonCount; nIndex++)
@@ -89,5 +83,38 @@ BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, U
 		AddButtons(1, &tb);
 	}
 	
+	AutoAdjust();
+
 	return bRet;
+}
+
+void CToolBarCtrEx::AutoAdjust()
+{
+	AutoSize();
+
+	CRect toolbarRect;
+	GetClientRect(&toolbarRect);
+	
+	CWnd* pParentWnd = GetParent();
+	ASSERT(pParentWnd);
+	CRect parentRect;
+	pParentWnd->GetClientRect(&parentRect);
+	//Increase the dlg height for toolbar's space
+	pParentWnd->SetWindowPos(&wndTop, 0, 0, parentRect.Width(), parentRect.Height() + toolbarRect.Height(), 
+		SWP_NOZORDER | SWP_NOMOVE); 
+	
+	//Move all the children window down for "toolbarRect.Height()"
+	CRect  rcChild;
+	CWnd* pwndChild = pParentWnd->GetWindow(GW_CHILD);
+	for( ; pwndChild != NULL; pwndChild = pwndChild->GetNextWindow())
+	{
+		if(pwndChild == this)
+		{
+			continue;
+		}
+		pwndChild->GetWindowRect(rcChild);
+		ScreenToClient(rcChild);
+		rcChild.OffsetRect(0, toolbarRect.Height());
+		pwndChild->MoveWindow(rcChild, TRUE);
+	}
 }

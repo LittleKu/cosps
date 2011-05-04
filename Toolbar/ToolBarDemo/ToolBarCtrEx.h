@@ -25,7 +25,8 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToolBarCtrEx)
 	//}}AFX_VIRTUAL
-	virtual BOOL Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, UINT nFirstButtonID, UINT nLastButtonID);
+	virtual BOOL Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, COLORREF crMask, UINT nFirstButtonID, UINT nLastButtonID);
+	void AutoAdjust();
 // Implementation
 public:
 	virtual ~CToolBarCtrEx();

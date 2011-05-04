@@ -118,28 +118,7 @@ BOOL CToolBarDemoDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	m_toolbar.Create(WS_BORDER | WS_VISIBLE | WS_CHILD
 		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
-		CRect(0,0,0,0),this, IDB_TOOLBAR, IDM_TEST, IDM_TEST9);
-	m_toolbar.AutoSize();
-	CRect rect;
-	m_toolbar.GetClientRect(&rect);
-	AfxTrace("Height = %d\n", rect.Height());
-
-	
-	CRect  rcChild;
-	CWnd* pwndChild = GetWindow(GW_CHILD);
-	while (pwndChild)
-	{
-		if(pwndChild == &m_toolbar)
-		{
-			pwndChild = pwndChild->GetNextWindow();
-			continue;
-		}
-		pwndChild->GetWindowRect(rcChild);
-		ScreenToClient(rcChild);
-		rcChild.OffsetRect(0, rect.Height());
-		pwndChild->MoveWindow(rcChild, TRUE);
-		pwndChild = pwndChild->GetNextWindow();
-	}
+		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), IDM_TEST, IDM_TEST7);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
