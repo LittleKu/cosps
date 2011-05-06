@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CToolBarDemoDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -116,9 +117,12 @@ BOOL CToolBarDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	m_toolbar.Create(WS_BORDER | WS_VISIBLE | WS_CHILD
-		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
-		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), IDM_TEST, IDM_TEST7);
+// 	m_toolbar.Create(WS_BORDER | WS_VISIBLE | WS_CHILD
+// 		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
+// 		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), IDM_TEST, IDM_TEST7);
+// 	m_toolbar.AutoSize();
+
+	m_toolbar.CreateFromStatic(IDC_STATIC_TB, this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -175,6 +179,22 @@ HCURSOR CToolBarDemoDlg::OnQueryDragIcon()
 void CToolBarDemoDlg::PreSubclassWindow() 
 {
 	// TODO: Add your specialized code here and/or call the base class
-//	m_toolbar.SubclassDlgItem(IDC_CUSTOM1, this);
+//	m_toolbar.SubclassDlgItem(IDC_STATIC_TB, this);
 	CDialog::PreSubclassWindow();
+}
+
+void CToolBarDemoDlg::OnSize(UINT nType, int cx, int cy) 
+{
+	CDialog::OnSize(nType, cx, cy);
+	if(::IsWindow(m_toolbar.m_hWnd))
+	{
+		m_toolbar.AutoSize();
+		CRect rect;
+		m_toolbar.GetClientRect(&rect);
+// 		m_toolbar.SetWindowPos(NULL, 0, 0, rect.Width(), rect.Height() - 5, 
+// 		SWP_NOZORDER|SWP_NOACTIVATE|SWP_NOCOPYBITS|SWP_NOMOVE);
+		
+// 		::SetWindowPos(m_toolbar.m_hWnd, NULL, 10, 0, rect.Width(), rect.Height() - 15, 
+// 		SWP_NOZORDER); 
+	}
 }

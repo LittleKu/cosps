@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "ToolBarDemo.h"
 #include "ToolBarCtrEx.h"
 
 #ifdef _DEBUG
@@ -131,15 +130,16 @@ BOOL CToolBarCtrEx::CreateFromStatic(UINT nID, CWnd* pParent)
 	pParent->ScreenToClient(&rc);
 	wndStatic.DestroyWindow();
 
-	BOOL bResult = Create(/*WS_BORDER | */WS_VISIBLE | WS_CHILD
-		| CCS_TOP | CCS_NODIVIDER /*| CCS_NOHILITE*/ | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
-		rc,pParent, IDB_TOOLBAR, RGB(255, 0, 255), IDM_TEST, IDM_TEST7);
+// 	BOOL bResult = Create(/*WS_BORDER | */WS_VISIBLE | WS_CHILD
+// 		| CCS_TOP | CCS_NODIVIDER /*| CCS_NOHILITE*/ | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
+// 		rc,pParent, IDB_TOOLBAR, RGB(255, 0, 255), IDM_TEST, IDM_TEST7);
 	AutoSize();
 // 	CRect rect;
 // 	GetClientRect(&rect);
 // 	::SetWindowPos(m_hWnd, NULL, 10, 0, rect.Width(), rect.Height() - 15, 
 // 		SWP_NOZORDER); 
-	return bResult;
+//	return bResult;
+	return TRUE;
 }
 
 BOOL CToolBarCtrEx::OnEraseBkgnd(CDC* pDC) 

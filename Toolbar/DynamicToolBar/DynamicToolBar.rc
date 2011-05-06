@@ -50,7 +50,7 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\ToolBarDemo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""res\\DynamicToolBar.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#endif\r\n"
     "\0"
@@ -66,7 +66,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ToolBarDemo.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\DynamicToolBar.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -75,29 +75,48 @@ IDR_MAINFRAME           ICON    DISCARDABLE     "res\\ToolBarDemo.ico"
 
 IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 235, 55
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About ToolBarDemo"
+CAPTION "About DynamicToolBar"
 FONT 8, "MS Sans Serif"
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "ToolBarDemo Version 1.0",IDC_STATIC,40,10,119,8,
+    LTEXT           "DynamicToolBar Version 1.0",IDC_STATIC,40,10,119,8,
                     SS_NOPREFIX
     LTEXT           "Copyright (C) 2011",IDC_STATIC,40,25,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_TOOLBARDEMO_DIALOG DIALOGEX 0, 0, 298, 225
-STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU | WS_THICKFRAME
+IDD_DYNAMICTOOLBAR_DIALOG DIALOGEX 0, 0, 320, 200
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "ToolBarDemo"
+CAPTION "DynamicToolBar"
 MENU IDR_MENU1
-FONT 8, "MS Sans Serif"
+FONT 8, "MS UI Gothic"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,119,204,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,223,204,50,14
-    LTEXT           "",IDC_STATIC_TB,7,7,284,21
+    CONTROL         "Statusbar",IDC_STATUSBAR,"msctls_statusbar32",
+                    WS_TABSTOP,7,174,306,19
+END
+
+IDD_DIALOG1 DIALOG DISCARDABLE  0, 0, 283, 186
+STYLE WS_CHILD | WS_THICKFRAME
+FONT 10, "System"
+BEGIN
+    GROUPBOX        "Static",IDC_FRAME1,0,0,269,146
+    PUSHBUTTON      "Button1",IDC_BUTTON1,15,18,66,23
+    PUSHBUTTON      "Button2",IDC_BUTTON2,206,23,51,30
+    PUSHBUTTON      "Button3",IDC_BUTTON3,106,117,61,16
+    PUSHBUTTON      "Button4",IDC_BUTTON4,128,167,45,12
+    PUSHBUTTON      "Button5",IDC_BUTTON5,216,165,52,14
+END
+
+IDD_DIALOG2 DIALOG DISCARDABLE  0, 0, 311, 204
+STYLE WS_CHILD
+FONT 10, "System"
+BEGIN
+    DEFPUSHBUTTON   "OK",ID_OK2,254,183,50,14
+    PUSHBUTTON      "Cancel",ID_CANCEL2,186,183,50,14
     CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | WS_BORDER | 
-                    WS_TABSTOP,7,31,284,165
+                    WS_TABSTOP,0,0,297,156
 END
 
 
@@ -125,13 +144,13 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "ToolBarDemo MFC Application\0"
+            VALUE "FileDescription", "DynamicToolBar MFC Application\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "ToolBarDemo\0"
+            VALUE "InternalName", "DynamicToolBar\0"
             VALUE "LegalCopyright", "Copyright (C) 2011\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "ToolBarDemo.EXE\0"
-            VALUE "ProductName", "ToolBarDemo Application\0"
+            VALUE "OriginalFilename", "DynamicToolBar.EXE\0"
+            VALUE "ProductName", "DynamicToolBar Application\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -160,12 +179,28 @@ BEGIN
         BOTTOMMARGIN, 48
     END
 
-    IDD_TOOLBARDEMO_DIALOG, DIALOG
+    IDD_DYNAMICTOOLBAR_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 291
+        RIGHTMARGIN, 313
         TOPMARGIN, 7
-        BOTTOMMARGIN, 218
+        BOTTOMMARGIN, 193
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 276
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 179
+    END
+
+    IDD_DIALOG2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 304
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 197
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -178,9 +213,9 @@ END
 
 IDR_MENU1 MENU DISCARDABLE 
 BEGIN
-    POPUP "File"
+    POPUP "Dummy"
     BEGIN
-        MENUITEM "Test",                        IDM_TEST
+        MENUITEM "Test1",                       IDM_TEST1
     END
 END
 
@@ -199,20 +234,10 @@ IDB_TOOLBAR             BITMAP  DISCARDABLE     "res\\tb24.bmp"
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ABOUTBOX            "&About ToolBarDemo..."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_TEST                "Test 1 + long text name"
-    IDM_TEST2               "Test 2"
-    IDM_TEST3               "Test 3"
-    IDM_TEST4               "Test 4"
-    IDM_TEST5               "Test 5"
-    IDM_TEST6               "Test 6"
-    IDM_TEST7               "Test 7"
-    IDM_TEST8               "Test 8"
-    IDM_TEST9               "Test 9"
+    IDS_ABOUTBOX            "&About DynamicToolBar..."
+    IDS_STRING102           "string 10222"
+    IDS_STRING103           "helloo sdfas2 103"
+    IDS_STRING104           "fasdfewff sfasdfe104"
 END
 
 #endif    // English (U.S.) resources
@@ -235,7 +260,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "res\ToolBarDemo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "res\DynamicToolBar.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #endif
 

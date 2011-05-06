@@ -119,6 +119,7 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CListCtrlDemoDlg)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
@@ -242,7 +243,17 @@ void CListCtrlDemoDlg::OnSysCommand(UINT nID, LPARAM lParam)
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-
+BOOL CListCtrlDemoDlg::OnEraseBkgnd(CDC* pDC)
+{
+	CBrush brush(RGB(255, 128, 0));
+	
+	CRect rect;
+	GetClientRect(&rect);
+	
+	pDC->FillRect(&rect, &brush);
+	
+	return TRUE;
+}
 void CListCtrlDemoDlg::OnPaint() 
 {
 	if (IsIconic())
