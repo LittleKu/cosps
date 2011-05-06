@@ -111,6 +111,10 @@ SOURCE=.\DynamicToolBarDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MyReBar.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -137,6 +141,10 @@ SOURCE=.\DynamicToolBar.h
 # Begin Source File
 
 SOURCE=.\DynamicToolBarDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MyReBar.h
 # End Source File
 # Begin Source File
 

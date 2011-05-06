@@ -203,9 +203,9 @@ void CDynamicToolBarDlg::Init()
 {
 	BOOL bUseReBar = TRUE;
 	CWnd* pwndToolbarX = toolbar;
-	if (toolbar->Create(WS_BORDER | WS_VISIBLE | WS_CHILD
-		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT  | TBSTYLE_LIST,
-		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), 102, 104))
+	if (toolbar->Create(/*WS_BORDER | */WS_VISIBLE | WS_CHILD
+		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | TBSTYLE_LIST,
+		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), 102, 109))
 	{
 		toolbar->AutoSize();
 		if(bUseReBar)

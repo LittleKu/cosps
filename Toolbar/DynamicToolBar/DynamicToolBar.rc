@@ -91,7 +91,7 @@ STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP |
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "DynamicToolBar"
 MENU IDR_MENU1
-FONT 8, "MS UI Gothic"
+FONT 8, "MS UI Gothic", 0, 0, 0x1
 BEGIN
     CONTROL         "Statusbar",IDC_STATUSBAR,"msctls_statusbar32",
                     WS_TABSTOP,7,174,306,19
@@ -238,6 +238,11 @@ BEGIN
     IDS_STRING102           "string 10222"
     IDS_STRING103           "helloo sdfas2 103"
     IDS_STRING104           "fasdfewff sfasdfe104"
+    IDS_STRING105           "longlong name for 105"
+    IDS_STRING106           "106"
+    IDS_STRING107           "107"
+    IDS_STRING108           "+++++++++++++++++++108"
+    IDS_STRING109           "109"
 END
 
 #endif    // English (U.S.) resources

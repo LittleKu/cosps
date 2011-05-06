@@ -9,6 +9,11 @@
 #define IDS_STRING102                   102
 #define IDS_STRING103                   103
 #define IDS_STRING104                   104
+#define IDS_STRING105                   105
+#define IDS_STRING106                   106
+#define IDS_STRING107                   107
+#define IDS_STRING108                   108
+#define IDS_STRING109                   109
 #define IDR_MAINFRAME                   128
 #define IDR_MENU1                       129
 #define IDD_DIALOG1                     130

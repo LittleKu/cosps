@@ -12,6 +12,7 @@
 #include "Dlg1.h"
 #include "Dlg2.h"
 #include "ToolBarCtrEx.h"
+#include "MyReBar.h"
 
 #define IDC_TOOLBAR			16127
 
@@ -29,7 +30,7 @@ public:
 	CDlg1* pDlg1;
 	CDlg2* pDlg2;
 	CWnd*			activewnd;
-	CReBarCtrl		m_ctlMainTopReBar;
+	CMyReBar		m_ctlMainTopReBar;
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 // Dialog Data
 	//{{AFX_DATA(CDynamicToolBarDlg)

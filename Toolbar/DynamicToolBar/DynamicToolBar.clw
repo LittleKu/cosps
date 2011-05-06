@@ -2,12 +2,12 @@
 
 [General Info]
 Version=1
-LastClass=CDlg2
-LastTemplate=CDialog
+LastClass=CMyReBar
+LastTemplate=CStatic
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "DynamicToolBar.h"
 
-ClassCount=6
+ClassCount=7
 Class1=CDynamicToolBarApp
 Class2=CDynamicToolBarDlg
 Class3=CAboutDlg
@@ -15,11 +15,12 @@ Class3=CAboutDlg
 ResourceCount=6
 Resource1=IDD_DIALOG2
 Resource2=IDR_MAINFRAME
-Resource3=IDD_DYNAMICTOOLBAR_DIALOG
+Resource3=IDD_ABOUTBOX
 Resource4=IDD_DIALOG1
-Resource5=IDD_ABOUTBOX
+Resource5=IDD_DYNAMICTOOLBAR_DIALOG
 Class5=CDlg1
 Class6=CDlg2
+Class7=CMyReBar
 Resource6=IDR_MENU1
 
 [CLS:CDynamicToolBarApp]
@@ -95,4 +96,11 @@ ImplementationFile=Dlg2.cpp
 BaseClass=CResizableDialog
 Filter=D
 VirtualFilter=dWC
+
+[CLS:CMyReBar]
+Type=0
+HeaderFile=MyReBar.h
+ImplementationFile=MyReBar.cpp
+BaseClass=CReBar
+Filter=W
 
