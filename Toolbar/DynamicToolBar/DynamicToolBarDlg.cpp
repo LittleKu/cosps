@@ -112,6 +112,7 @@ BEGIN_MESSAGE_MAP(CDynamicToolBarDlg, CResizableDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -166,7 +167,26 @@ void CDynamicToolBarDlg::OnSysCommand(UINT nID, LPARAM lParam)
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
+BOOL CDynamicToolBarDlg::OnEraseBkgnd(CDC* pDC)
+{
+	BOOL bRet = CResizableDialog::OnEraseBkgnd(pDC);
 
+	CRect dlgRect;
+	GetWindowRect(&dlgRect);
+
+	CRect toolbarRect;
+	GetWindowRect(&toolbarRect);
+
+	CRect rect;
+	rect.IntersectRect(&dlgRect, &toolbarRect);
+
+	ScreenToClient(&rect);
+
+	CBrush brush(RGB(255, 128, 0));
+	pDC->FillRect(&rect, &brush);
+
+	return bRet;
+}
 void CDynamicToolBarDlg::OnPaint() 
 {
 	if (IsIconic())
@@ -204,7 +224,7 @@ void CDynamicToolBarDlg::Init()
 	BOOL bUseReBar = TRUE;
 	CWnd* pwndToolbarX = toolbar;
 	if (toolbar->Create(/*WS_BORDER | */WS_VISIBLE | WS_CHILD
-		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | TBSTYLE_LIST,
+		| CCS_TOP | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT | TBSTYLE_LIST,
 		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), 102, 109))
 	{
 		toolbar->AutoSize();
