@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ToolBarCtrEx.h"
+//#include "DynamicToolBarDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,9 +28,29 @@ BEGIN_MESSAGE_MAP(CToolBarCtrEx, CToolBarCtrl)
 	//{{AFX_MSG_MAP(CToolBarCtrEx)
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(TB_AUTOSIZE, OnAutoSize)
+	ON_NOTIFY_REFLECT_EX(TBN_ENDADJUST, OnTbnEndAdjust)
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+BOOL CToolBarCtrEx::GetMaxSize(LPSIZE pSize) const
+{
+	BOOL bResult = CToolBarCtrl::GetMaxSize(pSize);
+	int iWidth = 0;
+	int iButtons = GetButtonCount();
+	for (int i = 0; i < iButtons; i++)
+	{
+		CRect rcButton;
+		if (GetItemRect(i, &rcButton))
+		{
+			iWidth += rcButton.Width();
+		}
+			
+	}
+	pSize->cx = iWidth;
+	
+	return bResult;
+}
 /////////////////////////////////////////////////////////////////////////////
 // CToolBarCtrEx message handlers
 BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, COLORREF crMask, UINT nFirstButtonID, UINT nLastButtonID)
@@ -53,6 +74,10 @@ BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, U
 	m_normalIL.Create(bmpInfo.bmHeight, bmpInfo.bmHeight, ILC_COLOR24|ILC_MASK, 1, 1);
 	m_normalIL.Add(&tbBitmap, crMask);
 	SetImageList(&m_normalIL);
+
+// 	m_hotIL.Create(bmpInfo.bmHeight, bmpInfo.bmHeight, ILC_COLOR24|ILC_MASK, 1, 1);
+// 	m_hotIL.Add(&tbBitmap, crMask);
+// 	SetHotImageList(&m_hotIL);
 	tbBitmap.DeleteObject();
 
 	//For less than 256 color bitmap
@@ -82,42 +107,10 @@ BOOL CToolBarCtrEx::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, U
 		
 		AddButtons(1, &tb);
 	}
-	
-//	AutoAdjust();
 
 	return bRet;
 }
 
-void CToolBarCtrEx::AutoAdjust()
-{
-	AutoSize();
-
-	CRect toolbarRect;
-	GetClientRect(&toolbarRect);
-	
-	CWnd* pParentWnd = GetParent();
-	ASSERT(pParentWnd);
-	CRect parentRect;
-	pParentWnd->GetClientRect(&parentRect);
-	//Increase the dlg height for toolbar's space
-	pParentWnd->SetWindowPos(&wndTop, 0, 0, parentRect.Width(), parentRect.Height() + toolbarRect.Height(), 
-		SWP_NOZORDER | SWP_NOMOVE); 
-	
-	//Move all the children window down for "toolbarRect.Height()"
-	CRect  rcChild;
-	CWnd* pwndChild = pParentWnd->GetWindow(GW_CHILD);
-	for( ; pwndChild != NULL; pwndChild = pwndChild->GetNextWindow())
-	{
-		if(pwndChild == this)
-		{
-			continue;
-		}
-		pwndChild->GetWindowRect(rcChild);
-		ScreenToClient(rcChild);
-		rcChild.OffsetRect(0, toolbarRect.Height());
-		pwndChild->MoveWindow(rcChild, TRUE);
-	}
-}
 
 BOOL CToolBarCtrEx::CreateFromStatic(UINT nID, CWnd* pParent)
 {
@@ -142,32 +135,49 @@ BOOL CToolBarCtrEx::CreateFromStatic(UINT nID, CWnd* pParent)
 	return TRUE;
 }
 
+BOOL CToolBarCtrEx::OnTbnEndAdjust(NMHDR*, LRESULT* pResult)
+{
+	CSize sizeBar;
+	GetMaxSize(&sizeBar);
+	ASSERT( sizeBar.cx != 0 && sizeBar.cy != 0 );
+	
+	REBARBANDINFO rbbi = {0};
+	rbbi.cbSize = sizeof(rbbi);
+	rbbi.fMask = RBBIM_IDEALSIZE;
+	rbbi.cxIdeal = sizeBar.cx;
+	CWnd* pParent = this->GetParent();
+//	CDynamicToolBarDlg* pDlg = (CDynamicToolBarDlg*)AfxGetApp()->GetMainWnd();
+// 	VERIFY( pDlg->m_ctlMainTopReBar.SetBandInfo(0, &rbbi) );
+	*pResult = 0; // return value is ignored
+
+	return FALSE;
+}
+
+void CToolBarCtrEx::OnSize(UINT nType, int cx, int cy)
+{
+	AfxTrace("OnSize\n");
+	CWnd* pParent = AfxGetApp()->GetMainWnd();
+	pParent->SendMessage(48297, cx, 0);
+	CToolBarCtrl::OnSize(nType, cx, cy);
+	
+}
+
 BOOL CToolBarCtrEx::OnEraseBkgnd(CDC* pDC) 
 {
-	CBrush brush(RGB(255, 128, 0));
+	return CToolBarCtrl::OnEraseBkgnd(pDC);
+// 	CBrush brush(RGB(255, 128, 0));
+// 
+// 	CRect rect;
+// 	GetClientRect(&rect);
+// 	pDC->FillRect(&rect, &brush);
 
-	CRect rect;
-	GetClientRect(&rect);
-	pDC->FillRect(&rect, &brush);
-
-	return TRUE;
+//	return TRUE;
 }
 
 LRESULT CToolBarCtrEx::OnAutoSize(WPARAM wParam, LPARAM lParam)
 {
 	AfxTrace("OnAutoSize\n");
 	LRESULT lr = 0;
-//	lr = CToolBarCtrl::DefWindowProc(TB_AUTOSIZE, 0, 0);
-
-	CRect rect;
-	GetClientRect(&rect);
-	
-	BOOL ret = ::SetWindowPos(m_hWnd, NULL, 100, 0, rect.Width(), rect.Height() - 15, 
-		SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOREPOSITION | SWP_NOCOPYBITS); 
-	if(!ret)
-	{
-		AfxTrace("%d\n", GetLastError());
-	}
-	AfxTrace("%d\n", GetLastError());
+	lr = CToolBarCtrl::DefWindowProc(TB_AUTOSIZE, 0, 0);
 	return lr;
 }

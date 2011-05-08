@@ -23,6 +23,8 @@ class CDynamicToolBarDlg : public CResizableDialog
 {
 // Construction
 public:
+	CWnd* GetActualToolBar();
+	BOOL IsUseReBar();
 	CDynamicToolBarDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CDynamicToolBarDlg();
 	CToolBarCtrEx* toolbar;
@@ -56,10 +58,14 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg LRESULT OnToolBarSize(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
+	CWnd* InitReBar();
+	void ReLayout(CWnd* pwndToolbarX);
 	void Init();
+	BOOL m_bUseReBar;
 };
 
 //{{AFX_INSERT_LOCATION}}

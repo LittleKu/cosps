@@ -19,6 +19,7 @@ public:
 // Attributes
 public:
 	CImageList m_normalIL;
+	CImageList m_hotIL;
 // Operations
 public:
 // Overrides
@@ -26,8 +27,8 @@ public:
 	//{{AFX_VIRTUAL(CToolBarCtrEx)
 	//}}AFX_VIRTUAL
 	virtual BOOL Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, COLORREF crMask, UINT nFirstButtonID, UINT nLastButtonID);
-	void AutoAdjust();
 	BOOL CreateFromStatic(UINT nID, CWnd* pParent);
+	BOOL GetMaxSize(LPSIZE pSize) const;
 // Implementation
 public:
 	virtual ~CToolBarCtrEx();
@@ -37,6 +38,8 @@ protected:
 	//{{AFX_MSG(CToolBarCtrEx)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg LRESULT OnAutoSize(WPARAM wParam, LPARAM lParam);
+		afx_msg BOOL OnTbnEndAdjust(NMHDR* pNMHDR, LRESULT* pResult);
+		afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

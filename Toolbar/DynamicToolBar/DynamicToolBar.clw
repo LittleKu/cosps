@@ -21,10 +21,10 @@ Resource5=IDD_DYNAMICTOOLBAR_DIALOG
 Class5=CDlg2
 Class6=CMyReBar
 Resource6=IDR_MENU1
-Resource7=IDD_DIALOG1 (English (U.S.))
+Resource7=IDD_ABOUTBOX (English (U.S.))
 Resource8=IDD_DIALOG2 (English (U.S.))
-Resource9=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
-Resource10=IDD_ABOUTBOX (English (U.S.))
+Resource9=IDD_DIALOG1 (English (U.S.))
+Resource10=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class4=CDlg1
 Resource11=IDR_MENU1 (English (U.S.))
 
