@@ -50,7 +50,7 @@ BOOL CMyReBar::OnEraseBkgnd(CDC* pDC)
 
 void CMyReBar::UpdateBackground()
 {
-	HBITMAP hbmp = (HBITMAP)::LoadImage(NULL, _T("abc.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	HBITMAP hbmp = (HBITMAP)::LoadImage(NULL, _T(".\\res\\background.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if (hbmp)
 	{
 		REBARBANDINFO rbbi = {0};

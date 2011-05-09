@@ -2,31 +2,33 @@
 
 [General Info]
 Version=1
-LastClass=CDynamicToolBarDlg
-LastTemplate=CStatic
+LastClass=CMyToolBarCtrl
+LastTemplate=CToolBarCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "DynamicToolBar.h"
 
-ClassCount=6
+ClassCount=8
 Class1=CDynamicToolBarApp
 Class2=CDynamicToolBarDlg
 Class3=CAboutDlg
 
 ResourceCount=11
-Resource1=IDD_DIALOG2
+Resource1=IDD_DYNAMICTOOLBAR_DIALOG
 Resource2=IDR_MAINFRAME
-Resource3=IDD_ABOUTBOX
-Resource4=IDD_DIALOG1
-Resource5=IDD_DYNAMICTOOLBAR_DIALOG
+Resource3=IDD_DIALOG2
+Resource4=IDD_ABOUTBOX
+Resource5=IDR_MENU1 (English (U.S.))
 Class5=CDlg2
 Class6=CMyReBar
-Resource6=IDR_MENU1
+Resource6=IDD_DIALOG1
 Resource7=IDD_ABOUTBOX (English (U.S.))
 Resource8=IDD_DIALOG2 (English (U.S.))
 Resource9=IDD_DIALOG1 (English (U.S.))
 Resource10=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class4=CDlg1
-Resource11=IDR_MENU1 (English (U.S.))
+Class7=CToolBarCtrlX
+Class8=CMyToolBarCtrl
+Resource11=IDR_MENU1
 
 [CLS:CDynamicToolBarApp]
 Type=0
@@ -113,7 +115,7 @@ LastObject=CMyReBar
 
 [DLG:IDD_DIALOG1 (English (U.S.))]
 Type=1
-Class=?
+Class=CDlg1
 ControlCount=6
 Control1=IDC_FRAME1,button,1342177287
 Control2=IDC_BUTTON1,button,1342242816
@@ -124,7 +126,7 @@ Control6=IDC_BUTTON5,button,1342242816
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=?
+Class=CAboutDlg
 ControlCount=4
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_STATIC,static,1342308480
@@ -133,13 +135,13 @@ Control4=IDOK,button,1342373889
 
 [DLG:IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))]
 Type=1
-Class=?
+Class=CDynamicToolBarDlg
 ControlCount=1
 Control1=IDC_STATUSBAR,msctls_statusbar32,1342242816
 
 [DLG:IDD_DIALOG2 (English (U.S.))]
 Type=1
-Class=?
+Class=CDlg2
 ControlCount=3
 Control1=ID_OK2,button,1342242817
 Control2=ID_CANCEL2,button,1342242816
@@ -150,4 +152,19 @@ Type=1
 Class=?
 Command1=IDM_TEST1
 CommandCount=1
+
+[CLS:CToolBarCtrlX]
+Type=0
+HeaderFile=ToolBarCtrlX.h
+ImplementationFile=ToolBarCtrlX.cpp
+BaseClass=CToolBarCtrl
+Filter=W
+
+[CLS:CMyToolBarCtrl]
+Type=0
+HeaderFile=MyToolBarCtrl.h
+ImplementationFile=MyToolBarCtrl.cpp
+BaseClass=CToolBarCtrlX
+Filter=W
+VirtualFilter=YWC
 

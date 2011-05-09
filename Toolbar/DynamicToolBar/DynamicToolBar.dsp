@@ -115,12 +115,16 @@ SOURCE=.\MyReBar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MyToolBarCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToolBarCtrEx.cpp
+SOURCE=.\ToolBarCtrlEx.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -148,6 +152,10 @@ SOURCE=.\MyReBar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MyToolBarCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
@@ -156,7 +164,7 @@ SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToolBarCtrEx.h
+SOURCE=.\ToolBarCtrlEx.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

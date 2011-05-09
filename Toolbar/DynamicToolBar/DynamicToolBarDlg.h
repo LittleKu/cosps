@@ -11,10 +11,11 @@
 #include "ResizableDialog.h"
 #include "Dlg1.h"
 #include "Dlg2.h"
-#include "ToolBarCtrEx.h"
+//#include "ToolBarCtrEx.h"
+#include "MyToolBarCtrl.h"
 #include "MyReBar.h"
 
-#define IDC_TOOLBAR			16127
+#define IDC_TOOLBAR			18880
 
 /////////////////////////////////////////////////////////////////////////////
 // CDynamicToolBarDlg dialog
@@ -27,7 +28,8 @@ public:
 	BOOL IsUseReBar();
 	CDynamicToolBarDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CDynamicToolBarDlg();
-	CToolBarCtrEx* toolbar;
+//	CToolBarCtrEx* toolbar;
+	CMyToolBarCtrl* toolbar;
 	CStatusBarCtrl* statusbar;
 	CDlg1* pDlg1;
 	CDlg2* pDlg2;
@@ -58,7 +60,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg LRESULT OnToolBarSize(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToolBarRefresh(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

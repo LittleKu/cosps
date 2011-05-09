@@ -83,7 +83,7 @@ CDynamicToolBarDlg::CDynamicToolBarDlg(CWnd* pParent /*=NULL*/)
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
-	toolbar = new CToolBarCtrEx();
+	toolbar = new CMyToolBarCtrl();
 	statusbar = new CStatusBarCtrl();
 	pDlg1 = new CDlg1();
 	pDlg2 = new CDlg2();
@@ -114,30 +114,66 @@ BEGIN_MESSAGE_MAP(CDynamicToolBarDlg, CResizableDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_MESSAGE(48297, OnToolBarSize)
+	ON_REGISTERED_MESSAGE(UM_TOOLBARCTRLX_REFRESH, OnToolBarRefresh)
 //	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CDynamicToolBarDlg message handlers
-LRESULT CDynamicToolBarDlg::OnToolBarSize(WPARAM wParam, LPARAM lParam)
-{
-	if(toolbar == NULL || !::IsWindow(toolbar->m_hWnd) || !::IsWindow(m_ctlMainTopReBar.m_hWnd))
+LRESULT CDynamicToolBarDlg::OnToolBarRefresh(WPARAM wParam, LPARAM lParam)
+{	
+	if(m_ctlMainTopReBar.m_hWnd)
 	{
-		return FALSE;
+		RemoveAnchor(m_ctlMainTopReBar.m_hWnd);
+		
+		REBARBANDINFO rbbi = {0};
+		CSize sizeBar;
+		toolbar->GetMaxSize(&sizeBar);
+		ASSERT( sizeBar.cx != 0 && sizeBar.cy != 0 );
+		rbbi.cbSize = sizeof(rbbi);
+		rbbi.fMask = RBBIM_CHILDSIZE | RBBIM_IDEALSIZE;
+		rbbi.cxMinChild = sizeBar.cy;
+		rbbi.cyMinChild = sizeBar.cy;
+		rbbi.cxIdeal = sizeBar.cx;
+		VERIFY( m_ctlMainTopReBar.SetBandInfo(0, &rbbi) );
+		
+		AddAnchor(m_ctlMainTopReBar.m_hWnd, TOP_LEFT, TOP_RIGHT);
 	}
-	CSize sizeBar;
-	toolbar->GetMaxSize(&sizeBar);
-	VERIFY( sizeBar.cx != 0 && sizeBar.cy != 0 );
+	else
+	{
+		RemoveAnchor(toolbar->m_hWnd);
+		AddAnchor(toolbar->m_hWnd, TOP_LEFT, TOP_RIGHT);
+	}
 	
-	REBARBANDINFO rbbi = {0};
-	rbbi.cbSize = sizeof(rbbi);
-	rbbi.fMask = RBBIM_IDEALSIZE;
-	rbbi.cxIdeal = sizeBar.cx;
- 	VERIFY( m_ctlMainTopReBar.SetBandInfo(0, &rbbi) );
-	m_ctlMainTopReBar.Invalidate();
-	m_ctlMainTopReBar.UpdateWindow();
+	CRect rToolbarRect;
+	toolbar->GetWindowRect(&rToolbarRect);
+	
+	CRect rClientRect;
+	GetClientRect(&rClientRect);
+	
+	CRect rStatusbarRect;
+	statusbar->GetWindowRect(&rStatusbarRect);
+	
+	rClientRect.top += rToolbarRect.Height();
+	rClientRect.bottom -= rStatusbarRect.Height();
+	
+	CRect rcClient = rClientRect;
+	CWnd* apWnds[] =
+	{
+		pDlg1,
+		pDlg2
+	};
+	int count = sizeof(apWnds) / sizeof(apWnds[0]);
+	for (int i = 0; i < count; i++)
+	{
+		apWnds[i]->SetWindowPos(NULL, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_NOZORDER);
+		RemoveAnchor(apWnds[i]->m_hWnd);
+		AddAnchor(apWnds[i]->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
+	}
+	Invalidate();
+	RedrawWindow();
+
 	return TRUE;
 }
 BOOL CDynamicToolBarDlg::OnInitDialog()
@@ -190,7 +226,7 @@ void CDynamicToolBarDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  this is automatically done for you by the framework.
 BOOL CDynamicToolBarDlg::OnEraseBkgnd(CDC* pDC)
 {
-	return TRUE;
+	return CResizableDialog::OnEraseBkgnd(pDC);
 // 	BOOL bRet = CResizableDialog::OnEraseBkgnd(pDC);
 // 
 // 	CRect dlgRect;
@@ -244,11 +280,16 @@ HCURSOR CDynamicToolBarDlg::OnQueryDragIcon()
 void CDynamicToolBarDlg::Init()
 {
 	CWnd* pwndToolbarX = toolbar;
-	if (toolbar->Create(/*WS_BORDER | */WS_VISIBLE | WS_CHILD | CCS_TOP | TBSTYLE_TOOLTIPS 
-		| TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | TBSTYLE_LIST | CCS_NODIVIDER | CCS_ADJUSTABLE,
-		CRect(0,0,0,0),this, IDB_TOOLBAR, RGB(255, 0, 255), 102, 109))
+	if (toolbar->Create(WS_VISIBLE | WS_CHILD | CCS_TOP | CCS_NODIVIDER | TBSTYLE_TOOLTIPS 
+		| TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | TBSTYLE_LIST,
+		CRect(0,0,0,0), this, IDC_TOOLBAR))
 	{
-		toolbar->AutoSize();
+		if(IsUseReBar())
+		{
+			toolbar->ModifyStyle(0, CCS_NORESIZE);
+			toolbar->SetExtendedStyle(toolbar->GetExtendedStyle() | TBSTYLE_EX_HIDECLIPPEDBUTTONS);
+		}
+		toolbar->Init();
 		pwndToolbarX = InitReBar();
 	}
 	// set statusbar
@@ -304,101 +345,27 @@ BOOL CDynamicToolBarDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	// TODO: Add your specialized code here and/or call the base class
 	switch(wParam)
 	{
-	case 102:
+	case TBBTN_DLG1:
 		SetActiveDialog(pDlg1);
 		break;
-	case 103:
+	case TBBTN_DLG2:
 		SetActiveDialog(pDlg2);
 		break;
-	case 104:
+	case TBBTN_CHANGESTYLE:
 		{
-			DWORD dwStyle = toolbar->GetStyle();
+			EToolbarLabelType eLabelType = toolbar->GetLabelType();
+			eLabelType = (EToolbarLabelType)((eLabelType + 1) % (LabelsRight + 1));
 
-			if(dwStyle & TBSTYLE_LIST)
-			{
-				toolbar->ModifyStyle(TBSTYLE_LIST, 0);
-			}
-			else
-			{
-				toolbar->ModifyStyle(0, TBSTYLE_LIST);
-			}
-			toolbar->SetMaxTextRows(1);
-			int iTextRows = toolbar->GetMaxTextRows();
-			toolbar->SetRedraw(FALSE);
-			toolbar->SetMaxTextRows(iTextRows+1);
-			toolbar->SetMaxTextRows(iTextRows);
-			toolbar->SetRedraw(TRUE);
-			ReLayout(&m_ctlMainTopReBar);
+			toolbar->ChangeTextLabelStyle(eLabelType, true);
 		}
-//		AfxMessageBox("104");
 		break;
-	case 105:
+	case TBBTN_REFRESH:
 		{
-			toolbar->ModifyStyle(TBSTYLE_LIST, 0);
-			toolbar->SetMaxTextRows(0);
-			int iTextRows = toolbar->GetMaxTextRows();
-			toolbar->SetRedraw(FALSE);
-			toolbar->SetMaxTextRows(iTextRows+1);
-			toolbar->SetMaxTextRows(iTextRows);
-			toolbar->SetRedraw(TRUE);
-			ReLayout(&m_ctlMainTopReBar);
-
-			toolbar->Invalidate();
+			toolbar->Refresh();
 		}
 		break;
 	}
 	return CResizableDialog::OnCommand(wParam, lParam);
-}
-
-void CDynamicToolBarDlg::ReLayout(CWnd* pwndToolbarX)
-{
-	toolbar->AutoSize();
-	
-	if (pwndToolbarX->m_hWnd)
-	{
-		RemoveAnchor(pwndToolbarX->m_hWnd);
-		
-		REBARBANDINFO rbbi = {0};
-		CSize sizeBar;
-		toolbar->GetMaxSize(&sizeBar);
-		ASSERT( sizeBar.cx != 0 && sizeBar.cy != 0 );
-		rbbi.cbSize = sizeof(rbbi);
-		rbbi.fMask = RBBIM_CHILDSIZE | RBBIM_IDEALSIZE;
-		rbbi.cxMinChild = sizeBar.cy;
-		rbbi.cyMinChild = sizeBar.cy;
-		rbbi.cxIdeal = sizeBar.cx;
-		VERIFY( m_ctlMainTopReBar.SetBandInfo(0, &rbbi) );
-		
-		AddAnchor(pwndToolbarX->m_hWnd, TOP_LEFT, TOP_RIGHT);
-	}
-	
-	CRect rToolbarRect;
-	toolbar->GetWindowRect(&rToolbarRect);
-	
-	CRect rClientRect;
-	GetClientRect(&rClientRect);
-	
-	CRect rStatusbarRect;
-	statusbar->GetWindowRect(&rStatusbarRect);
-	
-	rClientRect.top += rToolbarRect.Height();
-	rClientRect.bottom -= rStatusbarRect.Height();
-	
-	CRect rcClient = rClientRect;
-	CWnd* apWnds[] =
-	{
-		pDlg1,
-		pDlg2
-	};
-	int count = sizeof(apWnds) / sizeof(apWnds[0]);
-	for (int i = 0; i < count; i++)
-	{
-		apWnds[i]->SetWindowPos(NULL, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_NOZORDER);
-		RemoveAnchor(apWnds[i]->m_hWnd);
-		AddAnchor(apWnds[i]->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
-	}
-	Invalidate();
-	RedrawWindow();
 }
 
 CWnd* CDynamicToolBarDlg::InitReBar()
@@ -408,8 +375,6 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 		return toolbar;
 	}
 
-	toolbar->ModifyStyle(0, CCS_NORESIZE);
-// 	toolbar->SetExtendedStyle(toolbar->GetExtendedStyle() | TBSTYLE_EX_HIDECLIPPEDBUTTONS);
 	if (m_ctlMainTopReBar.Create(WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | RBS_BANDBORDERS 
 		| RBS_AUTOSIZE | CCS_NODIVIDER, CRect(0, 0, 0, 0), this, AFX_IDW_REBAR))
 	{
@@ -427,6 +392,9 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 		rbbi.wID = 0;
 		VERIFY( m_ctlMainTopReBar.InsertBand((UINT)-1, &rbbi) );
 		m_ctlMainTopReBar.UpdateBackground();
+
+		toolbar->SetParentReBarWnd(m_ctlMainTopReBar.m_hWnd);
+
 		return &m_ctlMainTopReBar;
 	}
 	return toolbar;
@@ -434,7 +402,6 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 
 BOOL CDynamicToolBarDlg::IsUseReBar()
 {
-//	m_bUseReBar = FALSE;
 	return m_bUseReBar;
 }
 
