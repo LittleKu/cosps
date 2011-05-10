@@ -17,18 +17,18 @@ Resource1=IDD_DYNAMICTOOLBAR_DIALOG
 Resource2=IDR_MAINFRAME
 Resource3=IDD_DIALOG2
 Resource4=IDD_ABOUTBOX
-Resource5=IDR_MENU1 (English (U.S.))
+Resource5=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class5=CDlg2
 Class6=CMyReBar
 Resource6=IDD_DIALOG1
-Resource7=IDD_ABOUTBOX (English (U.S.))
-Resource8=IDD_DIALOG2 (English (U.S.))
-Resource9=IDD_DIALOG1 (English (U.S.))
-Resource10=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
+Resource7=IDR_MENU1
+Resource8=IDD_ABOUTBOX (English (U.S.))
+Resource9=IDD_DIALOG2 (English (U.S.))
+Resource10=IDD_DIALOG1 (English (U.S.))
 Class4=CDlg1
 Class7=CToolBarCtrlX
 Class8=CMyToolBarCtrl
-Resource11=IDR_MENU1
+Resource11=IDR_MENU1 (English (U.S.))
 
 [CLS:CDynamicToolBarApp]
 Type=0

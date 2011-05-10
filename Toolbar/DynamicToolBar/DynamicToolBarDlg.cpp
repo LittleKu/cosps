@@ -115,7 +115,7 @@ BEGIN_MESSAGE_MAP(CDynamicToolBarDlg, CResizableDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_REGISTERED_MESSAGE(UM_TOOLBARCTRLX_REFRESH, OnToolBarRefresh)
-//	ON_WM_ERASEBKGND()
+	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -204,6 +204,26 @@ BOOL CDynamicToolBarDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
+	CBitmap* bitmap = new CBitmap();
+	bitmap->LoadBitmap(IDB_BKG);
+	CBrush* NewBrush;
+	NewBrush = new CBrush;
+//	NewBrush->CreateSolidBrush(RGB(255, 128, 0));
+	NewBrush->CreatePatternBrush(bitmap);
+	
+	
+	MENUINFO MenuInfo = {0};
+	MenuInfo.cbSize = sizeof(MenuInfo);
+	MenuInfo.hbrBack = *NewBrush; // Brush you want to draw
+	MenuInfo.fMask = MIM_BACKGROUND;
+	MenuInfo.dwStyle = MNS_AUTODISMISS;
+	
+	CMenu* pMenu = this->GetMenu();
+	
+	if(IsMenu(pMenu->m_hMenu))
+	{
+		SetMenuInfo(pMenu->m_hMenu, &MenuInfo);
+	}
 	Init();
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -231,7 +251,7 @@ BOOL CDynamicToolBarDlg::OnEraseBkgnd(CDC* pDC)
 // 
 // 	CRect dlgRect;
 // 	GetWindowRect(&dlgRect);
-// 
+
 // 	CRect toolbarRect;
 // 	toolbar->GetWindowRect(&toolbarRect);
 // 
@@ -241,9 +261,9 @@ BOOL CDynamicToolBarDlg::OnEraseBkgnd(CDC* pDC)
 // 	ScreenToClient(&rect);
 // 
 // 	CBrush brush(RGB(255, 128, 0));
-// 	pDC->FillRect(&rect, &brush);
-
-//	return bRet;
+// 	pDC->FillRect(&dlgRect, &brush);
+// 
+// 	return bRet;
 }
 void CDynamicToolBarDlg::OnPaint() 
 {
@@ -280,7 +300,7 @@ HCURSOR CDynamicToolBarDlg::OnQueryDragIcon()
 void CDynamicToolBarDlg::Init()
 {
 	CWnd* pwndToolbarX = toolbar;
-	if (toolbar->Create(WS_VISIBLE | WS_CHILD | CCS_TOP | CCS_NODIVIDER | TBSTYLE_TOOLTIPS 
+	if (toolbar->Create(WS_VISIBLE | WS_CHILD | CCS_TOP | CCS_NODIVIDER |  0x00000010L |TBSTYLE_TOOLTIPS 
 		| TBSTYLE_FLAT | TBSTYLE_TRANSPARENT | TBSTYLE_LIST,
 		CRect(0,0,0,0), this, IDC_TOOLBAR))
 	{
@@ -376,7 +396,7 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 	}
 
 	if (m_ctlMainTopReBar.Create(WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | RBS_BANDBORDERS 
-		| RBS_AUTOSIZE | CCS_NODIVIDER, CRect(0, 0, 0, 0), this, AFX_IDW_REBAR))
+		| RBS_AUTOSIZE | CCS_NODIVIDER | 0x00000010L, CRect(0, 0, 0, 0), this, AFX_IDW_REBAR))
 	{
 		CSize sizeBar;
 		VERIFY( toolbar->GetMaxSize(&sizeBar) );
