@@ -2,8 +2,10 @@
 //
 
 #include "stdafx.h"
+#include <Shlwapi.h>
 #include "DynamicToolBar.h"
 #include "DynamicToolBarDlg.h"
+#include "VersionUtil.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,6 +56,9 @@ BOOL CDynamicToolBarApp::InitInstance()
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
+	InitCommonControls();
+	CheckDllVersion(_T("comctl32.dll"), &m_ullComCtrlVer);
+
 	CDynamicToolBarDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
@@ -71,4 +76,9 @@ BOOL CDynamicToolBarApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+BOOL CDynamicToolBarApp::IsCommCtrlMeetLowestReq() const
+{
+	return m_ullComCtrlVer > MAKEDLLVERULL(5, 8, 0, 0);
 }

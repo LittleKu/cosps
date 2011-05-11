@@ -23,7 +23,8 @@ class CDynamicToolBarApp : public CWinApp
 {
 public:
 	CDynamicToolBarApp();
-
+	
+	ULONGLONG			m_ullComCtrlVer;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CDynamicToolBarApp)
@@ -32,7 +33,7 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
-
+	BOOL IsCommCtrlMeetLowestReq() const;
 	//{{AFX_MSG(CDynamicToolBarApp)
 		// NOTE - the ClassWizard will add and remove member functions here.
 		//    DO NOT EDIT what you see in these blocks of generated code !

@@ -422,7 +422,9 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 
 BOOL CDynamicToolBarDlg::IsUseReBar()
 {
-	return m_bUseReBar;
+	CDynamicToolBarApp* pApp = (CDynamicToolBarApp*)AfxGetApp();
+	
+	return m_bUseReBar && (pApp->IsCommCtrlMeetLowestReq());
 }
 
 CWnd* CDynamicToolBarDlg::GetActualToolBar()

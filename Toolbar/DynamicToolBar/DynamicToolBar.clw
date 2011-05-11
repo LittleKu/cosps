@@ -13,22 +13,22 @@ Class2=CDynamicToolBarDlg
 Class3=CAboutDlg
 
 ResourceCount=11
-Resource1=IDD_DYNAMICTOOLBAR_DIALOG
+Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
-Resource3=IDD_DIALOG2
-Resource4=IDD_ABOUTBOX
+Resource3=IDD_DIALOG1
+Resource4=IDR_MENU1 (English (U.S.))
 Resource5=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class5=CDlg2
 Class6=CMyReBar
-Resource6=IDD_DIALOG1
-Resource7=IDR_MENU1
+Resource6=IDD_DYNAMICTOOLBAR_DIALOG
+Resource7=IDD_DIALOG2
 Resource8=IDD_ABOUTBOX (English (U.S.))
 Resource9=IDD_DIALOG2 (English (U.S.))
 Resource10=IDD_DIALOG1 (English (U.S.))
 Class4=CDlg1
 Class7=CToolBarCtrlX
 Class8=CMyToolBarCtrl
-Resource11=IDR_MENU1 (English (U.S.))
+Resource11=IDR_MENU1
 
 [CLS:CDynamicToolBarApp]
 Type=0
