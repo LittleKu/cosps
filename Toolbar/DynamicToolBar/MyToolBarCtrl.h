@@ -35,6 +35,8 @@ public:
 // Attributes
 public:
 	CImageList m_normalIL;
+	CImageList m_hotIL;
+	CImageList m_disableIL;
 // Operations
 public:
 

@@ -194,6 +194,18 @@ SOURCE=.\res\DynamicToolBar.rc2
 
 SOURCE=.\res\tb24.bmp
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\ToolBtnDisable.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\ToolBtnHot.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\ToolBtnNormal.bmp
+# End Source File
 # End Group
 # Begin Source File
 

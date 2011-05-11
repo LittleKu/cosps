@@ -46,6 +46,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDB_TOOLBAR             BITMAP  DISCARDABLE     "res\\tb24.bmp"
+IDB_TB_NORMAL           BITMAP  DISCARDABLE     "res\\ToolBtnNormal.bmp"
+IDB_TB_DISABLE          BITMAP  DISCARDABLE     "res\\ToolBtnDisable.bmp"
+IDB_TB_HOT              BITMAP  DISCARDABLE     "res\\ToolBtnHot.bmp"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
