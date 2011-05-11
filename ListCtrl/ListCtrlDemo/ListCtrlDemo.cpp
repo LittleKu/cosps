@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
-#include "ListCtrlDemoDlg.h"
+#include "MainDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,6 +29,24 @@ CListCtrlDemoApp::CListCtrlDemoApp()
 {
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
+	m_pSysBkBitmap = NULL;
+	m_pSysBkBrush  = NULL;
+}
+
+CListCtrlDemoApp::~CListCtrlDemoApp()
+{
+	if(m_pSysBkBrush != NULL)
+	{
+		m_pSysBkBrush->DeleteObject();
+		delete m_pSysBkBrush;
+		m_pSysBkBrush = NULL;
+	}
+	if(m_pSysBkBitmap != NULL)
+	{
+		m_pSysBkBitmap->DeleteObject();
+		delete m_pSysBkBitmap;
+		m_pSysBkBitmap = NULL;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -53,8 +71,13 @@ BOOL CListCtrlDemoApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
+	m_pSysBkBitmap = new CBitmap();
+	CommonUtils::LoadBitmapFromFile(_T(".\\res\\background.bmp"), m_pSysBkBitmap);
 
-	CListCtrlDemoDlg dlg;
+	m_pSysBkBrush = new CBrush();
+	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
+
+	CMainDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)

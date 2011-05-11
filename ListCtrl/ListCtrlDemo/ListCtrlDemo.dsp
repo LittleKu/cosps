@@ -116,6 +116,14 @@ SOURCE=.\ListCtrlDemoDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MainDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MainToolBarCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # End Source File
 # Begin Source File
@@ -134,6 +142,10 @@ SOURCE=.\ThirdParty\SortClass.cpp
 
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\ToolBarCtrlEx.cpp
 # End Source File
 # Begin Source File
 
@@ -165,6 +177,14 @@ SOURCE=.\ListCtrlDemoDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MainDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MainToolBarCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\MemDC.h
 # End Source File
 # Begin Source File
@@ -193,6 +213,10 @@ SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\ToolBarCtrlEx.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Util.h
 # End Source File
 # End Group
@@ -218,6 +242,10 @@ SOURCE=.\res\ListCtrlDemo.ico
 # Begin Source File
 
 SOURCE=.\res\ListCtrlDemo.rc2
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\MainToolBarHot.bmp
 # End Source File
 # Begin Source File
 

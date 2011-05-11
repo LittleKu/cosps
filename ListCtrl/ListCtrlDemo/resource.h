@@ -12,6 +12,8 @@
 #define IDB_ARROWDOWN                   130
 #define IDB_ARROWUP                     131
 #define IDD_PROGRESS                    132
+#define IDD_MAIN_DLG                    133
+#define IDB_MAIN_TOOLBAR_HOT            136
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -52,10 +54,14 @@
 #define IDC_COMMENT_P                   1038
 #define IDC_MIXED_P                     1039
 #define IDC_BLANK_P                     1040
+#define ID_TBBTN_ADD_SOURCE_DIR         16129
+#define ID_TBBTN_START_TO_COUNT         16130
+#define ID_TBBTN_CLEAR_RESULT           16131
 #define IDM_FILE_ADD                    32771
 #define IDM_FILE_DEL                    32772
 #define IDM_FILE_START                  32773
 #define IDM_FILE_STOP                   32774
+#define IDM_FILE_CLEAR                  32774
 #define IDM_FILE_EXPORT                 32775
 #define IDM_FILE_EXIT                   32776
 #define IDM_SETTING_FILTER              32777
@@ -65,7 +71,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
+#define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1042
 #define _APS_NEXT_SYMED_VALUE           107

@@ -84,6 +84,7 @@ BEGIN_NAMESPACE(CommonUtils)
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
+	void LoadBitmapFromFile(LPCTSTR lpszBmpFilePath, CBitmap* pBitmap);
 END_NAMESPACE()
 
 

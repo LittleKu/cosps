@@ -13,58 +13,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add",                        IDM_FILE_ADD
-        MENUITEM "&Del",                        IDM_FILE_DEL
-        MENUITEM "&Start",                      IDM_FILE_START
-        MENUITEM "S&top",                       IDM_FILE_STOP
-        MENUITEM SEPARATOR
-        MENUITEM "&Export",                     IDM_FILE_EXPORT
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Setting"
-    BEGIN
-        MENUITEM "&Filter",                     IDM_SETTING_FILTER
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add source directories."
-    IDM_FILE_DEL            "Delete the source directories"
-END
-
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -134,6 +82,65 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add",                        IDM_FILE_ADD
+        MENUITEM "&Del",                        IDM_FILE_DEL
+        MENUITEM "&Start",                      IDM_FILE_START
+        MENUITEM "&Clear",                      IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Export",                     IDM_FILE_EXPORT
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Setting"
+    BEGIN
+        MENUITEM "&Filter",                     IDM_SETTING_FILTER
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add source directories."
+    IDM_FILE_DEL            "Delete the source directories"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
+    ID_TBBTN_START_TO_COUNT "Start To Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -160,31 +167,23 @@ BEGIN
 END
 
 IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 436, 355
-STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
-    WS_SYSMENU | WS_THICKFRAME
+STYLE WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_APPWINDOW
-CAPTION "ListCtrlDemo"
-MENU IDR_RESULT_MENU
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "",IDC_MENU_SEP,"Static",SS_ETCHEDHORZ,0,0,440,1
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,7,5,410,135
-    PUSHBUTTON      "Add",IDC_BUTTON_ADD,354,16,50,14
-    PUSHBUTTON      "Del",IDC_BUTTON_DEL,354,42,50,14
-    COMBOBOX        IDC_FILTER_COMBO,14,97,317,77,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        IDC_FILTER_COMBO,14,97,394,77,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Recursive sub directories",IDC_RECURSIVE_SUB_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,123,122,10
     GROUPBOX        "Result",IDC_RESULT_FRAME,7,146,410,125
     CONTROL         "List4",IDC_RESULT_LIST,"SysListView32",LVS_REPORT | 
                     WS_BORDER | WS_TABSTOP,14,159,394,104
-    PUSHBUTTON      "Start",IDC_BUTTON_START,354,68,50,14
-    PUSHBUTTON      "Clear",IDC_BUTTON_CLEAR,354,94,50,14
     GROUPBOX        "Summary",IDC_SUMMARY_FRAME,7,275,410,68
     RTEXT           "Total:",IDC_TXT_TOTAL,17,286,45,12
     LTEXT           "Number",IDC_TXT_FILE_NUMBER,76,286,45,12
     LTEXT           "Lines",IDC_TXT_LINES,129,286,45,12
-    RTEXT           "#:",IDC_TXT_C,17,303,45,12
+    RTEXT           "#:",IDC_TXT_C,17,304,45,12
     LTEXT           "",IDC_NUMBER_C,76,304,45,12,SS_SUNKEN
     LTEXT           "",IDC_LINES_C,129,304,45,12,SS_SUNKEN
     LTEXT           "Code",IDC_TXT_CODE,182,286,45,12
@@ -195,7 +194,7 @@ BEGIN
     LTEXT           "",IDC_COMMENT_C,235,304,45,12,SS_SUNKEN
     LTEXT           "",IDC_MIXED_C,288,304,45,12,SS_SUNKEN
     LTEXT           "",IDC_BLANK_C,341,304,45,12,SS_SUNKEN
-    RTEXT           "%:",IDC_TXT_P,17,320,45,12
+    RTEXT           "%:",IDC_TXT_P,17,322,45,12
     LTEXT           "",IDC_NUMBER_P,76,322,45,12,SS_SUNKEN
     LTEXT           "",IDC_LINES_P,129,322,45,12,SS_SUNKEN
     LTEXT           "",IDC_CODE_P,182,322,45,12,SS_SUNKEN
@@ -203,7 +202,17 @@ BEGIN
     LTEXT           "",IDC_MIXED_P,288,322,45,12,SS_SUNKEN
     LTEXT           "",IDC_BLANK_P,341,322,45,12,SS_SUNKEN
     CONTROL         "List1",IDC_SOURCE_DIR_LIST,"SysListView32",LVS_REPORT | 
-                    WS_BORDER | WS_TABSTOP,14,15,317,72
+                    WS_BORDER | WS_TABSTOP,14,15,394,72
+END
+
+IDD_MAIN_DLG DIALOGEX 0, 0, 482, 385
+STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Main Dlg"
+MENU IDR_RESULT_MENU
+FONT 8, "MS Sans Serif"
+BEGIN
 END
 
 
@@ -221,6 +230,14 @@ BEGIN
         RIGHTMARGIN, 228
         TOPMARGIN, 7
         BOTTOMMARGIN, 48
+    END
+
+    IDD_MAIN_DLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 475
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 378
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -323,6 +340,7 @@ END
 
 IDB_ARROWDOWN           BITMAP  DISCARDABLE     "res\\HdrDownA.bmp"
 IDB_ARROWUP             BITMAP  DISCARDABLE     "res\\HdrUpA.bmp"
+IDB_MAIN_TOOLBAR_HOT    BITMAP  DISCARDABLE     "res\\MainToolBarHot.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

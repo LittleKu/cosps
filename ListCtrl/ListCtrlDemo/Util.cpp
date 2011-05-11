@@ -139,6 +139,16 @@ BOOL IsMatched(CStringArray& sFilterList, const char* sStr)
 	return FALSE;
 }
 
+void LoadBitmapFromFile(LPCTSTR lpszBmpFilePath, CBitmap* pBitmap)
+{
+	ASSERT(pBitmap && pBitmap->GetSafeHandle() == NULL);
+	HBITMAP hbmp = (HBITMAP)::LoadImage(NULL, lpszBmpFilePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if(hbmp)
+	{
+		pBitmap->Attach(hbmp);
+	}
+}
+
 int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker)
 {
 	ASSERT(lpszDirName);

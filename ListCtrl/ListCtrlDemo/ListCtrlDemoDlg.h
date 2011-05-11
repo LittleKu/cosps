@@ -17,9 +17,11 @@
 
 class CListCtrlDemoDlg : public CResizableDialog
 {
+	friend class CMainDlg;
 // Construction
 public:
 	CListCtrlDemoDlg(CWnd* pParent = NULL);	// standard constructor
+	virtual ~CListCtrlDemoDlg();
 
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
@@ -29,13 +31,15 @@ public:
 	CCheckListCtrl m_srcDirListCtrl;
 	CMultiColumnSortListCtrl m_resultListCtrl;
 	//}}AFX_DATA
-
+	afx_msg void OnButtonAdd();
+	afx_msg void OnButtonDel();
+	afx_msg void OnButtonStart();
+	afx_msg void OnButtonClear();
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CListCtrlDemoDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-
 // Implementation
 protected:
 	void ResetResult();
@@ -48,15 +52,12 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnButtonAdd();
-	afx_msg void OnButtonDel();
-	afx_msg void OnButtonStart();
+
 	afx_msg LRESULT OnStartCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSummaryUpdate(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnButtonClear();
-	afx_msg void OnClose();
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

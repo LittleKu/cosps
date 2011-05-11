@@ -104,6 +104,10 @@ CListCtrlDemoDlg::CListCtrlDemoDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
+CListCtrlDemoDlg::~CListCtrlDemoDlg()
+{
+}
+
 void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
@@ -121,11 +125,11 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
 	ON_WM_QUERYDRAGICON()
-	ON_WM_CLOSE()
-	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
-	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
-	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
-	ON_BN_CLICKED(IDC_BUTTON_CLEAR, OnButtonClear)
+	ON_WM_DESTROY()
+// 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
+// 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
+// 	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
+// 	ON_BN_CLICKED(IDC_BUTTON_CLEAR, OnButtonClear)
 	ON_MESSAGE(WM_START_COUNT, OnStartCount)
 	ON_MESSAGE(WM_END_COUNT, OnEndCount)
 	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
@@ -181,18 +185,16 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {
-    AddAnchor(IDC_MENU_SEP, TOP_LEFT, TOP_RIGHT);
-	
     AddAnchor(IDC_SOURCE_DIR_FRAME, TOP_LEFT, TOP_RIGHT);
 	
     AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
     AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
     AddAnchor(IDC_RECURSIVE_SUB_CHECK,		TOP_LEFT, TOP_LEFT);
 	
-    AddAnchor(IDC_BUTTON_ADD, TOP_RIGHT, TOP_RIGHT);
-	AddAnchor(IDC_BUTTON_DEL, TOP_RIGHT, TOP_RIGHT);
-	AddAnchor(IDC_BUTTON_START, TOP_RIGHT, TOP_RIGHT);
-	AddAnchor(IDC_BUTTON_CLEAR, TOP_RIGHT, TOP_RIGHT);
+//  AddAnchor(IDC_BUTTON_ADD, TOP_RIGHT, TOP_RIGHT);
+// 	AddAnchor(IDC_BUTTON_DEL, TOP_RIGHT, TOP_RIGHT);
+// 	AddAnchor(IDC_BUTTON_START, TOP_RIGHT, TOP_RIGHT);
+// 	AddAnchor(IDC_BUTTON_CLEAR, TOP_RIGHT, TOP_RIGHT);
 	
     AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_RESULT_LIST, TOP_LEFT, BOTTOM_RIGHT);
@@ -223,8 +225,9 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
 	AddAnchor(IDC_COMMENT_P, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_MIXED_P, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_BLANK_P, BOTTOM_LEFT, BOTTOM_LEFT);
-	
-    EnableSaveRestore("ListCtrlDemoDlg");
+
+	SetSizeGripVisibility(FALSE);
+	UpdateSizeGrip();
 }
 
 void CListCtrlDemoDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -239,21 +242,24 @@ void CListCtrlDemoDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		CResizableDialog::OnSysCommand(nID, lParam);
 	}
 }
+BOOL CListCtrlDemoDlg::OnEraseBkgnd(CDC* pDC)
+{
+//	return CResizableDialog::OnEraseBkgnd(pDC);
 
+	CRect rect;
+	GetClientRect(&rect);
+
+	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
+	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
+
+// 	CBrush brush(RGB(255, 128, 0));
+// 	pDC->FillRect(&rect, &brush);
+
+	return TRUE;
+}
 // If you add a minimize button to your dialog, you will need the code below
 //  to draw the icon.  For MFC applications using the document/view model,
 //  this is automatically done for you by the framework.
-BOOL CListCtrlDemoDlg::OnEraseBkgnd(CDC* pDC)
-{
-	CBrush brush(RGB(255, 128, 0));
-	
-	CRect rect;
-	GetClientRect(&rect);
-	
-	pDC->FillRect(&rect, &brush);
-	
-	return TRUE;
-}
 void CListCtrlDemoDlg::OnPaint() 
 {
 	if (IsIconic())
@@ -322,10 +328,13 @@ void CListCtrlDemoDlg::InitResultListCtrl()
 }
 
 
-void CListCtrlDemoDlg::OnClose() 
+void CListCtrlDemoDlg::OnDestroy() 
 {
+	m_sFilterArray.RemoveAll();
+	m_srcDirListCtrl.DeleteAllItems();
+
 	DeleteAllListItems();
-	CResizableDialog::OnClose();
+	CResizableDialog::OnDestroy();
 }
 
 void CListCtrlDemoDlg::DeleteAllListItems()
@@ -646,14 +655,14 @@ void CListCtrlDemoDlg::InitSrcDirListCtrl()
 		m_srcDirListCtrl.GetHeaderCtrl()->SetItem(i, &hditem);
 	}
 
-#ifdef _DEBUG
-	CString sDir;
-	for(i = 0; i < 10; i++)
-	{
-		sDir.Format("E:\\temp\\long\\%d", i);
-		AddSrcDir(sDir);
-	}
-#endif
+// #ifdef _DEBUG
+// 	CString sDir;
+// 	for(i = 0; i < 10; i++)
+// 	{
+// 		sDir.Format("E:\\temp\\long\\%d", i);
+// 		AddSrcDir(sDir);
+// 	}
+// #endif
 }
 
 void CListCtrlDemoDlg::AddSrcDir(LPCTSTR lpszDir)

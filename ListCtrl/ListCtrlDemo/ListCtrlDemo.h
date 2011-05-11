@@ -23,7 +23,9 @@ class CListCtrlDemoApp : public CWinApp
 {
 public:
 	CListCtrlDemoApp();
-
+	virtual ~CListCtrlDemoApp();
+	CBitmap* m_pSysBkBitmap;
+	CBrush*  m_pSysBkBrush;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CListCtrlDemoApp)
