@@ -29,8 +29,6 @@ public:
 
 // Implementation
 public:
-	HBITMAP m_bmpBack;
-	void UpdateBackground();
 	virtual ~CMyReBar();
 
 	// Generated message map functions

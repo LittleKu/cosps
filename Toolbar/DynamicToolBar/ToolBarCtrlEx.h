@@ -27,7 +27,7 @@ public:
 	void SetMaxTextRows(int iMaxRows);
 	void Refresh();
 	void SetParentReBarWnd(HWND hReBarWnd);
-	void UpdateBackground();
+	void UpdateBackground(HBITMAP hbmp);
 	BOOL GetMaxSize(LPSIZE pSize) const;
 	void ChangeTextLabelStyle(EToolbarLabelType eLabelType, bool bRefresh, bool bForceUpdateButtons = false);
 

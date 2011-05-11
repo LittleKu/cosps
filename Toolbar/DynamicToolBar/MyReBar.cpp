@@ -17,13 +17,10 @@ static char THIS_FILE[] = __FILE__;
 
 CMyReBar::CMyReBar()
 {
-	m_bmpBack = NULL;
 }
 
 CMyReBar::~CMyReBar()
 {
-	if (m_bmpBack)
-		VERIFY( ::DeleteObject(m_bmpBack) );
 }
 
 
@@ -43,51 +40,7 @@ BOOL CMyReBar::OnEraseBkgnd(CDC* pDC)
 // 	CRect rect;
 // 	GetClientRect(&rect);
 // 	pDC->FillRect(&rect, &brush);
-	
-//	return TRUE;
+// 	
+// 	return TRUE;
 	return CReBarCtrl::OnEraseBkgnd(pDC);
-}
-
-void CMyReBar::UpdateBackground()
-{
-	HBITMAP hbmp = (HBITMAP)::LoadImage(NULL, _T(".\\res\\background.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	if (hbmp)
-	{
-		REBARBANDINFO rbbi = {0};
-		rbbi.cbSize = sizeof(rbbi);
-		rbbi.fMask = RBBIM_STYLE;
-		if (GetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
-		{
-			rbbi.fMask = RBBIM_STYLE | RBBIM_BACKGROUND;
-			rbbi.fStyle |= RBBS_FIXEDBMP;
-			rbbi.hbmBack = hbmp;
-			if (SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
-			{
-				if (m_bmpBack)
-					VERIFY(::DeleteObject(m_bmpBack));
-				m_bmpBack = hbmp;
-				hbmp = NULL;
-			}
-		}
-		if (hbmp)
-			VERIFY( ::DeleteObject(hbmp) );
-	}
-	else
-	{
-		REBARBANDINFO rbbi = {0};
-		rbbi.cbSize = sizeof(rbbi);
-		rbbi.fMask = RBBIM_STYLE;
-		if (GetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
-		{
-			rbbi.fMask = RBBIM_STYLE | RBBIM_BACKGROUND;
-			rbbi.fStyle &= ~RBBS_FIXEDBMP;
-			rbbi.hbmBack = NULL;
-			if (SetBandInfo(MULE_TOOLBAR_BAND_NR, &rbbi))
-			{
-				if (m_bmpBack)
-					VERIFY(::DeleteObject(m_bmpBack));
-				m_bmpBack = NULL;
-			}
-		}
-	}
 }

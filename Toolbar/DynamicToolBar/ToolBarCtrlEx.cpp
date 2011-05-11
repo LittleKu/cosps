@@ -147,3 +147,34 @@ void CToolBarCtrlEx::SetMaxTextRows(int iMaxRows)
 		SetRedraw(TRUE);
 	}
 }
+
+void CToolBarCtrlEx::UpdateBackground(HBITMAP hbmp)
+{
+	if(m_hReBarWnd == NULL || !::IsWindow(m_hReBarWnd))
+	{
+		return;
+	}
+
+	REBARBANDINFO rbbi = {0};
+	rbbi.cbSize = sizeof(rbbi);
+	rbbi.fMask = RBBIM_STYLE;
+
+	//First get the band info of the rebar
+	if (::SendMessage(m_hReBarWnd, RB_GETBANDINFO, 0, (LPARAM)&rbbi))
+	{
+		rbbi.fMask = RBBIM_STYLE | RBBIM_BACKGROUND;
+		rbbi.hbmBack = hbmp;
+
+		if(hbmp)
+		{
+			rbbi.fStyle |= RBBS_FIXEDBMP;
+		}
+		else
+		{
+			rbbi.fStyle &= ~RBBS_FIXEDBMP;
+		}
+
+		//Set the band info
+		::SendMessage(m_hReBarWnd, RB_SETBANDINFO, 0, (LPARAM)&rbbi);
+	}
+}

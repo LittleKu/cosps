@@ -61,6 +61,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg LRESULT OnToolBarRefresh(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
@@ -68,6 +69,7 @@ private:
 	void ReLayout(CWnd* pwndToolbarX);
 	void Init();
 	BOOL m_bUseReBar;
+	HBITMAP m_hToolBarBkBmp;
 };
 
 //{{AFX_INSERT_LOCATION}}

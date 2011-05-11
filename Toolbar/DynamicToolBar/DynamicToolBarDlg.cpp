@@ -113,9 +113,10 @@ BEGIN_MESSAGE_MAP(CDynamicToolBarDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CDynamicToolBarDlg)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
 	ON_WM_QUERYDRAGICON()
 	ON_REGISTERED_MESSAGE(UM_TOOLBARCTRLX_REFRESH, OnToolBarRefresh)
-	ON_WM_ERASEBKGND()
+	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -204,6 +205,7 @@ BOOL CDynamicToolBarDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
+	m_hToolBarBkBmp = (HBITMAP)::LoadImage(NULL, _T(".\\res\\background.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	CBitmap* bitmap = new CBitmap();
 	bitmap->LoadBitmap(IDB_BKG);
 	CBrush* NewBrush;
@@ -374,14 +376,41 @@ BOOL CDynamicToolBarDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	case TBBTN_CHANGESTYLE:
 		{
 			EToolbarLabelType eLabelType = toolbar->GetLabelType();
-			eLabelType = (EToolbarLabelType)((eLabelType + 1) % (LabelsRight + 1));
 
+			if(eLabelType == NoLabels)
+			{
+				eLabelType = LabelsBelow;
+			}
+			else
+			{
+				eLabelType = (EToolbarLabelType)(3 - eLabelType);
+			}
 			toolbar->ChangeTextLabelStyle(eLabelType, true);
 		}
 		break;
-	case TBBTN_REFRESH:
+	case TBBTN_NO_LABEL:
 		{
-			toolbar->Refresh();
+			toolbar->ChangeTextLabelStyle(NoLabels, true);
+		}
+		break;
+	case TBBTN_CHANGE_TBBK:
+		{
+			REBARBANDINFO rbbi = {0};
+			rbbi.cbSize = sizeof(rbbi);
+			rbbi.fMask = RBBIM_BACKGROUND;
+
+			if(m_ctlMainTopReBar.GetBandInfo(0, &rbbi))
+			{
+				if(rbbi.hbmBack)
+				{
+					toolbar->UpdateBackground(NULL);
+				}
+				else
+				{
+					toolbar->UpdateBackground(m_hToolBarBkBmp);
+				}
+				toolbar->Invalidate();
+			}
 		}
 		break;
 	}
@@ -411,9 +440,9 @@ CWnd* CDynamicToolBarDlg::InitReBar()
 		rbbi.cx = rbbi.cxIdeal;
 		rbbi.wID = 0;
 		VERIFY( m_ctlMainTopReBar.InsertBand((UINT)-1, &rbbi) );
-		m_ctlMainTopReBar.UpdateBackground();
 
 		toolbar->SetParentReBarWnd(m_ctlMainTopReBar.m_hWnd);
+		toolbar->UpdateBackground(m_hToolBarBkBmp);
 
 		return &m_ctlMainTopReBar;
 	}
@@ -436,5 +465,15 @@ CWnd* CDynamicToolBarDlg::GetActualToolBar()
 	else
 	{
 		return toolbar;
+	}
+}
+
+void CDynamicToolBarDlg::OnDestroy() 
+{
+	CResizableDialog::OnDestroy();
+	if(m_hToolBarBkBmp)
+	{
+		::DeleteObject(m_hToolBarBkBmp);
+		m_hToolBarBkBmp = NULL;
 	}
 }
