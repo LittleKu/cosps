@@ -237,6 +237,7 @@ void CSplitterControl::DrawLine(CDC* pDC, int x, int y)
 	CRect rcWnd;
 	int d = 3;
 	GetWindowRect(rcWnd);
+	AfxTrace("W = %d, H = %d\n", rcWnd.Width(), rcWnd.Height());
 	CPen  pen;
 	pen.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
 	CPen *pOP = pDC->SelectObject(&pen);

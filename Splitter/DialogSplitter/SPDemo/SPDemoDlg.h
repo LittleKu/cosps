@@ -12,7 +12,8 @@
 // CSPDemoDlg dialog
 #include "SplitterControl.h"
 #include "MyListCtrl.h"
-class CSPDemoDlg : public CDialog
+#include "ResizableDialog.h"
+class CSPDemoDlg : public CResizableDialog
 {
 // Construction
 public:

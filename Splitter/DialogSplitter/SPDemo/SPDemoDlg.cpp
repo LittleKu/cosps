@@ -60,7 +60,7 @@ END_MESSAGE_MAP()
 // CSPDemoDlg dialog
 
 CSPDemoDlg::CSPDemoDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CSPDemoDlg::IDD, pParent)
+	: CResizableDialog(CSPDemoDlg::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CSPDemoDlg)
 		// NOTE: the ClassWizard will add member initialization here
@@ -71,7 +71,7 @@ CSPDemoDlg::CSPDemoDlg(CWnd* pParent /*=NULL*/)
 
 void CSPDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSPDemoDlg)
 	DDX_Control(pDX, IDC_EDIT, m_txtContent);
 	DDX_Control(pDX, IDC_LIST, m_lstItem);
@@ -79,7 +79,7 @@ void CSPDemoDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(CSPDemoDlg, CDialog)
+BEGIN_MESSAGE_MAP(CSPDemoDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CSPDemoDlg)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
@@ -94,7 +94,7 @@ END_MESSAGE_MAP()
 
 BOOL CSPDemoDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	CResizableDialog::OnInitDialog();
 
 	// Add "About..." menu item to system menu.
 
@@ -135,7 +135,16 @@ BOOL CSPDemoDlg::OnInitDialog()
 	m_wndSplitter2.Create(WS_CHILD | WS_VISIBLE, rc, this, IDC_SPLITTER2);
 	m_wndSplitter2.SetRange(50, 50, -1);
 
-	InitSampleData()	;
+	AddAnchor(IDC_STATIC, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(m_wndType.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(m_wndSplitter1, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LIST, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(m_wndSplitter2, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_EDIT, TOP_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDCANCEL, BOTTOM_RIGHT, BOTTOM_RIGHT);
+	AddAnchor(IDOK, BOTTOM_RIGHT, BOTTOM_RIGHT);
+
+	InitSampleData();
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -177,7 +186,7 @@ void CSPDemoDlg::OnPaint()
 	}
 	else
 	{
-		CDialog::OnPaint();
+		CResizableDialog::OnPaint();
 	}
 }
 
@@ -204,7 +213,7 @@ LRESULT CSPDemoDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		}
 	}
 	
-	return CDialog::DefWindowProc(message, wParam, lParam);
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
 }
 
 void CSPDemoDlg::DoResize1(int delta)
@@ -213,6 +222,24 @@ void CSPDemoDlg::DoResize1(int delta)
 	CSplitterControl::ChangeWidth(&m_lstItem, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_txtContent, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_wndSplitter2, -delta, CW_RIGHTALIGN);
+
+	RemoveAnchor(IDC_STATIC);
+	AddAnchor(IDC_STATIC, TOP_LEFT, TOP_RIGHT);
+	RemoveAnchor(m_wndType.m_hWnd);
+	AddAnchor(m_wndType.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	RemoveAnchor(m_wndSplitter1);
+	AddAnchor(m_wndSplitter1, TOP_LEFT, BOTTOM_LEFT);
+	RemoveAnchor(IDC_LIST);
+	AddAnchor(IDC_LIST, TOP_LEFT, TOP_RIGHT);
+	RemoveAnchor(m_wndSplitter2);
+	AddAnchor(m_wndSplitter2, TOP_LEFT, TOP_RIGHT);
+	RemoveAnchor(IDC_EDIT);
+	AddAnchor(IDC_EDIT, TOP_LEFT, BOTTOM_RIGHT);
+	RemoveAnchor(IDCANCEL);
+	AddAnchor(IDCANCEL, BOTTOM_RIGHT, BOTTOM_RIGHT);
+	RemoveAnchor(IDOK);
+	AddAnchor(IDOK, BOTTOM_RIGHT, BOTTOM_RIGHT);
+
 	Invalidate();
 	UpdateWindow();
 }
@@ -221,6 +248,19 @@ void CSPDemoDlg::DoResize2(int delta)
 {
 	CSplitterControl::ChangeHeight(&m_lstItem, delta);
 	CSplitterControl::ChangeHeight(&m_txtContent, -delta, CW_BOTTOMALIGN);
+
+
+	RemoveAnchor(IDC_LIST);
+	AddAnchor(IDC_LIST, TOP_LEFT, TOP_RIGHT);
+	RemoveAnchor(m_wndSplitter2);
+	AddAnchor(m_wndSplitter2, TOP_LEFT, TOP_RIGHT);
+	RemoveAnchor(IDC_EDIT);
+	AddAnchor(IDC_EDIT, TOP_LEFT, BOTTOM_RIGHT);
+// 	RemoveAnchor(IDCANCEL);
+// 	AddAnchor(IDCANCEL, BOTTOM_RIGHT, BOTTOM_RIGHT);
+// 	RemoveAnchor(IDOK);
+// 	AddAnchor(IDOK, BOTTOM_RIGHT, BOTTOM_RIGHT);
+
 	Invalidate();
 	UpdateWindow();
 }
