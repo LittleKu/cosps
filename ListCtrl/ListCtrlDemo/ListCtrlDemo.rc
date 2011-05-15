@@ -13,6 +13,65 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add",                        IDM_FILE_ADD
+        MENUITEM "&Del",                        IDM_FILE_DEL
+        MENUITEM "&Start",                      IDM_FILE_START
+        MENUITEM "&Clear",                      IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Export",                     IDM_FILE_EXPORT
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Setting"
+    BEGIN
+        MENUITEM "&Filter",                     IDM_SETTING_FILTER
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add source directories."
+    IDM_FILE_DEL            "Delete the source directories"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
+    ID_TBBTN_START_TO_COUNT "Start To Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -82,65 +141,6 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add",                        IDM_FILE_ADD
-        MENUITEM "&Del",                        IDM_FILE_DEL
-        MENUITEM "&Start",                      IDM_FILE_START
-        MENUITEM "&Clear",                      IDM_FILE_CLEAR
-        MENUITEM SEPARATOR
-        MENUITEM "&Export",                     IDM_FILE_EXPORT
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Setting"
-    BEGIN
-        MENUITEM "&Filter",                     IDM_SETTING_FILTER
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add source directories."
-    IDM_FILE_DEL            "Delete the source directories"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
-    ID_TBBTN_START_TO_COUNT "Start To Count"
-    ID_TBBTN_CLEAR_RESULT   "Clear Result"
-END
-
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -166,52 +166,58 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,14,WS_GROUP
 END
 
-IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 436, 355
+IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 623, 355
 STYLE WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,7,5,410,135
-    COMBOBOX        IDC_FILTER_COMBO,14,97,394,77,CBS_DROPDOWN | CBS_SORT | 
+    GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,201,4,410,135
+    COMBOBOX        IDC_FILTER_COMBO,208,96,394,77,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Recursive sub directories",IDC_RECURSIVE_SUB_CHECK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,123,122,10
-    GROUPBOX        "Result",IDC_RESULT_FRAME,7,146,410,125
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,208,122,122,10
+    GROUPBOX        "Result",IDC_RESULT_FRAME,201,150,410,126
     CONTROL         "List4",IDC_RESULT_LIST,"SysListView32",LVS_REPORT | 
-                    WS_BORDER | WS_TABSTOP,14,159,394,104
-    GROUPBOX        "Summary",IDC_SUMMARY_FRAME,7,275,410,68
-    RTEXT           "Total:",IDC_TXT_TOTAL,17,286,45,12
-    LTEXT           "Number",IDC_TXT_FILE_NUMBER,76,286,45,12
-    LTEXT           "Lines",IDC_TXT_LINES,129,286,45,12
-    RTEXT           "#:",IDC_TXT_C,17,304,45,12
-    LTEXT           "",IDC_NUMBER_C,76,304,45,12,SS_SUNKEN
-    LTEXT           "",IDC_LINES_C,129,304,45,12,SS_SUNKEN
-    LTEXT           "Code",IDC_TXT_CODE,182,286,45,12
-    LTEXT           "Comment",IDC_TXT_COMMENT,235,286,45,12
-    LTEXT           "Mixed",IDC_TXT_MIXED,288,286,45,12
-    LTEXT           "Blank",IDC_TXT_BLANK,341,286,45,12
-    LTEXT           "",IDC_CODE_C,182,304,45,12,SS_SUNKEN
-    LTEXT           "",IDC_COMMENT_C,235,304,45,12,SS_SUNKEN
-    LTEXT           "",IDC_MIXED_C,288,304,45,12,SS_SUNKEN
-    LTEXT           "",IDC_BLANK_C,341,304,45,12,SS_SUNKEN
-    RTEXT           "%:",IDC_TXT_P,17,322,45,12
-    LTEXT           "",IDC_NUMBER_P,76,322,45,12,SS_SUNKEN
-    LTEXT           "",IDC_LINES_P,129,322,45,12,SS_SUNKEN
-    LTEXT           "",IDC_CODE_P,182,322,45,12,SS_SUNKEN
-    LTEXT           "",IDC_COMMENT_P,235,322,45,12,SS_SUNKEN
-    LTEXT           "",IDC_MIXED_P,288,322,45,12,SS_SUNKEN
-    LTEXT           "",IDC_BLANK_P,341,322,45,12,SS_SUNKEN
+                    WS_BORDER | WS_TABSTOP,208,164,394,104
+    GROUPBOX        "Summary",IDC_SUMMARY_FRAME,201,280,410,68
+    RTEXT           "Total:",IDC_TXT_TOTAL,211,291,45,12
+    LTEXT           "Number",IDC_TXT_FILE_NUMBER,270,291,45,12
+    LTEXT           "Lines",IDC_TXT_LINES,323,291,45,12
+    RTEXT           "#:",IDC_TXT_C,211,309,45,12
+    LTEXT           "",IDC_NUMBER_C,270,309,45,12,SS_SUNKEN
+    LTEXT           "",IDC_LINES_C,323,309,45,12,SS_SUNKEN
+    LTEXT           "Code",IDC_TXT_CODE,376,291,45,12
+    LTEXT           "Comment",IDC_TXT_COMMENT,429,291,45,12
+    LTEXT           "Mixed",IDC_TXT_MIXED,482,291,45,12
+    LTEXT           "Blank",IDC_TXT_BLANK,535,291,45,12
+    LTEXT           "",IDC_CODE_C,376,309,45,12,SS_SUNKEN
+    LTEXT           "",IDC_COMMENT_C,429,309,45,12,SS_SUNKEN
+    LTEXT           "",IDC_MIXED_C,482,309,45,12,SS_SUNKEN
+    LTEXT           "",IDC_BLANK_C,535,309,45,12,SS_SUNKEN
+    RTEXT           "%:",IDC_TXT_P,211,327,45,12
+    LTEXT           "",IDC_NUMBER_P,270,327,45,12,SS_SUNKEN
+    LTEXT           "",IDC_LINES_P,323,327,45,12,SS_SUNKEN
+    LTEXT           "",IDC_CODE_P,376,327,45,12,SS_SUNKEN
+    LTEXT           "",IDC_COMMENT_P,429,327,45,12,SS_SUNKEN
+    LTEXT           "",IDC_MIXED_P,482,327,45,12,SS_SUNKEN
+    LTEXT           "",IDC_BLANK_P,535,327,45,12,SS_SUNKEN
     CONTROL         "List1",IDC_SOURCE_DIR_LIST,"SysListView32",LVS_REPORT | 
-                    WS_BORDER | WS_TABSTOP,14,15,394,72
+                    WS_BORDER | WS_TABSTOP,208,15,394,72
+    CONTROL         "",IDC_SPLITTER_VERTICAL,"Static",SS_BLACKFRAME,197,0,3,
+                    355
+    CONTROL         "Tree1",IDC_FILTER_TREE,"SysTreeView32",WS_BORDER | 
+                    WS_TABSTOP,7,4,186,347
+    CONTROL         "",IDC_SPLITTER_HORIZONTAL,"Static",SS_BLACKFRAME,201,
+                    144,410,3
 END
 
-IDD_MAIN_DLG DIALOGEX 0, 0, 484, 386
+IDD_MAIN_DLG DIALOGEX 0, 0, 623, 386
 STYLE WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
     WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_CLIENTEDGE | WS_EX_APPWINDOW
 CAPTION "Main Dlg"
 MENU IDR_RESULT_MENU
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
 END
 

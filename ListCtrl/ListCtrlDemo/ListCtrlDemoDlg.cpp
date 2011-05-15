@@ -76,18 +76,15 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CListCtrlDemoDlg)
 	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
+	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_WM_DESTROY()
-// 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
-// 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnButtonDel)
-// 	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStart)
-// 	ON_BN_CLICKED(IDC_BUTTON_CLEAR, OnButtonClear)
 	ON_MESSAGE(WM_START_COUNT, OnStartCount)
 	ON_MESSAGE(WM_END_COUNT, OnEndCount)
 	ON_MESSAGE(WM_PROGRESS_UPDATE, OnProgressUpdate)
 	ON_MESSAGE(WM_SUMMARY_UPDATE, OnSummaryUpdate)
+	ON_WM_DESTROY()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -122,6 +119,7 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
+	InitSplitters();
 
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
@@ -139,6 +137,11 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {
+	//Anchor for splitters
+	AddAnchor(m_splitterVertical.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(m_splitterHorizontal.m_hWnd, TOP_LEFT, TOP_RIGHT);
+
+	AddAnchor(IDC_FILTER_TREE, TOP_LEFT, BOTTOM_LEFT);
     AddAnchor(IDC_SOURCE_DIR_FRAME, TOP_LEFT, TOP_RIGHT);
 	
     AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
@@ -182,6 +185,26 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
 
 	SetSizeGripVisibility(FALSE);
 	UpdateSizeGrip();
+}
+
+void CListCtrlDemoDlg::InitSplitters()
+{
+	CRect rc;
+	CWnd* pWnd;
+	
+	pWnd = GetDlgItem(IDC_SPLITTER_VERTICAL);
+	pWnd->GetWindowRect(rc);
+	ScreenToClient(rc);
+	pWnd->DestroyWindow();
+	m_splitterVertical.Create(WS_CHILD | WS_VISIBLE, rc, this, IDC_SPLITTER_VERTICAL);
+	SetSplitterVRange();
+	
+	pWnd = GetDlgItem(IDC_SPLITTER_HORIZONTAL);
+	pWnd->GetWindowRect(rc);
+	ScreenToClient(rc);
+	pWnd->DestroyWindow();
+	m_splitterHorizontal.Create(WS_CHILD | WS_VISIBLE, rc, this, IDC_SPLITTER_HORIZONTAL);
+	SetSplitterHRange();
 }
 
 void CListCtrlDemoDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -629,4 +652,238 @@ void CListCtrlDemoDlg::AddSrcDir(LPCTSTR lpszDir)
 	m_srcDirListCtrl.SetItemText(nItem, 1, lpszDir);
 
 	m_srcDirListCtrl.ValidateCheck();
+}
+
+LRESULT CListCtrlDemoDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	if (message == WM_NOTIFY)
+	{
+		if (wParam == IDC_SPLITTER_VERTICAL)
+		{	
+			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+			DoSizeVertical(pHdr->delta);
+		}
+		else if (wParam == IDC_SPLITTER_HORIZONTAL)
+		{
+			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+			DoSizeHorizontal(pHdr->delta);
+		}
+	}
+	
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
+}
+
+void CListCtrlDemoDlg::DoSizeVertical(int delta)
+{
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_FILTER_TREE), delta, CW_LEFTALIGN);
+
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SOURCE_DIR_FRAME), -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(&m_srcDirListCtrl, -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(&m_filterComboBox, -delta, CW_RIGHTALIGN);
+
+	CSplitterControl::ChangePos(&m_recursiveSubBtn, -delta, 0);
+
+	CSplitterControl::ChangeWidth(&m_splitterHorizontal, -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(&m_resultListCtrl, -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SUMMARY_FRAME), -delta, CW_RIGHTALIGN);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_TOTAL), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_FILE_NUMBER), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_LINES), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_CODE), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_COMMENT), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_MIXED), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_BLANK), -delta, 0);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_C), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_C), -delta, 0);
+
+	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_P), -delta, 0);
+	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_P), -delta, 0);
+	
+	SetSplitterVRange();
+
+	UpdateResizableDlgAnchor();
+	
+	Invalidate();
+	UpdateWindow();
+}
+
+void CListCtrlDemoDlg::DoSizeHorizontal(int delta)
+{
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_SOURCE_DIR_FRAME), delta, CW_TOPALIGN);
+	CSplitterControl::ChangeHeight(&m_srcDirListCtrl, delta, CW_TOPALIGN);
+	CSplitterControl::ChangePos(&m_filterComboBox, 0, delta);
+	CSplitterControl::ChangePos(&m_recursiveSubBtn, 0, delta);
+
+	CSplitterControl::ChangeHeight(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_BOTTOMALIGN);
+	CSplitterControl::ChangeHeight(&m_resultListCtrl, -delta, CW_BOTTOMALIGN);
+
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_SUMMARY_FRAME), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_TOTAL), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_FILE_NUMBER), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_LINES), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_CODE), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_COMMENT), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_MIXED), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_BLANK), 0, delta);
+// 	
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_C), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_C), 0, delta);
+// 	
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_P), 0, delta);
+// 	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_P), 0, delta);
+
+	SetSplitterHRange();
+
+	UpdateResizableDlgAnchor();
+
+	Invalidate();
+	UpdateWindow();
+}
+
+void CListCtrlDemoDlg::UpdateResizableDlgAnchor()
+{
+	RemoveAnchor(m_splitterVertical.m_hWnd);
+	RemoveAnchor(m_splitterHorizontal.m_hWnd);
+	RemoveAnchor(IDC_FILTER_TREE);
+	RemoveAnchor(IDC_SOURCE_DIR_FRAME);
+	RemoveAnchor(IDC_SOURCE_DIR_LIST);
+	RemoveAnchor(IDC_FILTER_COMBO);
+	RemoveAnchor(IDC_RECURSIVE_SUB_CHECK);
+	RemoveAnchor(IDC_RESULT_FRAME);
+	RemoveAnchor(IDC_RESULT_LIST);
+
+	RemoveAnchor(IDC_SUMMARY_FRAME);
+	RemoveAnchor(IDC_TXT_TOTAL);
+	RemoveAnchor(IDC_TXT_FILE_NUMBER);
+	RemoveAnchor(IDC_TXT_LINES);
+	RemoveAnchor(IDC_TXT_CODE);
+	RemoveAnchor(IDC_TXT_COMMENT);
+	RemoveAnchor(IDC_TXT_MIXED);
+	RemoveAnchor(IDC_TXT_BLANK);
+
+	RemoveAnchor(IDC_TXT_C);
+	RemoveAnchor(IDC_NUMBER_C);
+	RemoveAnchor(IDC_LINES_C);
+	RemoveAnchor(IDC_CODE_C);
+	RemoveAnchor(IDC_COMMENT_C);
+	RemoveAnchor(IDC_MIXED_C);
+	RemoveAnchor(IDC_BLANK_C);
+	
+	
+	RemoveAnchor(IDC_TXT_P);
+	RemoveAnchor(IDC_NUMBER_P);
+	RemoveAnchor(IDC_LINES_P);
+	RemoveAnchor(IDC_CODE_P);
+	RemoveAnchor(IDC_COMMENT_P);
+	RemoveAnchor(IDC_MIXED_P);
+	RemoveAnchor(IDC_BLANK_P);
+
+	//Anchor for splitters
+	AddAnchor(m_splitterVertical.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(m_splitterHorizontal.m_hWnd, TOP_LEFT, TOP_RIGHT);
+	
+	AddAnchor(IDC_FILTER_TREE, TOP_LEFT, BOTTOM_LEFT);
+    AddAnchor(IDC_SOURCE_DIR_FRAME, TOP_LEFT, TOP_RIGHT);
+	
+    AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
+    AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
+    AddAnchor(IDC_RECURSIVE_SUB_CHECK,		TOP_LEFT, TOP_LEFT);
+	
+    AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_RESULT_LIST, TOP_LEFT, BOTTOM_RIGHT);
+	
+	AddAnchor(IDC_SUMMARY_FRAME, BOTTOM_LEFT, BOTTOM_RIGHT);
+	
+	AddAnchor(IDC_TXT_TOTAL, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_FILE_NUMBER, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_LINES, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_CODE, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_COMMENT, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_MIXED, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_TXT_BLANK, BOTTOM_LEFT, BOTTOM_LEFT);
+	
+	AddAnchor(IDC_TXT_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_NUMBER_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LINES_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_CODE_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_COMMENT_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_MIXED_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_BLANK_C, BOTTOM_LEFT, BOTTOM_LEFT);
+	
+	
+	AddAnchor(IDC_TXT_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_NUMBER_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LINES_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_CODE_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_COMMENT_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_MIXED_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_BLANK_P, BOTTOM_LEFT, BOTTOM_LEFT);
+}
+
+void CListCtrlDemoDlg::SetSplitterVRange()
+{	
+	if(!::IsWindow(m_hWnd))
+	{
+		return;
+	}
+	CWnd* pWnd;
+
+	pWnd = GetDlgItem(IDC_FILTER_TREE);
+	if(pWnd == NULL || !::IsWindow(pWnd->m_hWnd))
+	{
+		return;
+	}
+	CRect rcTree;
+	pWnd->GetWindowRect(&rcTree);
+	ScreenToClient(&rcTree);
+
+	CRect rcDlg;
+	GetClientRect(&rcDlg);
+
+	ASSERT((rcDlg.right - 610) > (rcTree.left));
+
+	m_splitterVertical.SetRange(rcTree.left, rcDlg.right - 610);	
+}
+
+void CListCtrlDemoDlg::SetSplitterHRange()
+{
+	if(!::IsWindow(m_hWnd))
+	{
+		return;
+	}
+	CRect rcDlg;
+	GetClientRect(&rcDlg);
+	
+	m_splitterHorizontal.SetRange(140, rcDlg.bottom - 200);
+}
+
+void CListCtrlDemoDlg::OnSize(UINT nType, int cx, int cy) 
+{
+	CResizableDialog::OnSize(nType, cx, cy);
+	
+	SetSplitterVRange();
+	SetSplitterHRange();
 }

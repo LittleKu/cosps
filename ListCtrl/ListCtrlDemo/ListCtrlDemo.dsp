@@ -140,6 +140,10 @@ SOURCE=.\ThirdParty\SortClass.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\SplitterControl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -206,6 +210,10 @@ SOURCE=.\ThirdParty\SortableHeaderCtrl.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\SortClass.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\SplitterControl.h
 # End Source File
 # Begin Source File
 

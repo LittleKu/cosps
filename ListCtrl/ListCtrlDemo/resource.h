@@ -54,6 +54,9 @@
 #define IDC_COMMENT_P                   1038
 #define IDC_MIXED_P                     1039
 #define IDC_BLANK_P                     1040
+#define IDC_FILTER_TREE                 1042
+#define IDC_SPLITTER_VERTICAL           1043
+#define IDC_SPLITTER_HORIZONTAL         1044
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
@@ -73,7 +76,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32779
-#define _APS_NEXT_CONTROL_VALUE         1042
+#define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

@@ -12,6 +12,7 @@
 // CListCtrlDemoDlg dialog
 #include "ThirdParty/MultiColumnSortListView.h"
 #include "ThirdParty/CheckListCtrl.h"
+#include "ThirdParty/SplitterControl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
 
@@ -30,6 +31,8 @@ public:
 	CComboBox	m_filterComboBox;
 	CCheckListCtrl m_srcDirListCtrl;
 	CMultiColumnSortListCtrl m_resultListCtrl;
+	CSplitterControl m_splitterVertical;
+	CSplitterControl m_splitterHorizontal;
 	//}}AFX_DATA
 	afx_msg void OnButtonAdd();
 	afx_msg void OnButtonDel();
@@ -39,6 +42,7 @@ public:
 	//{{AFX_VIRTUAL(CListCtrlDemoDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 // Implementation
 protected:
@@ -52,20 +56,26 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-
 	afx_msg LRESULT OnStartCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEndCount(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnProgressUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSummaryUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
 	void InitResultListCtrl();
 	void InitResizableDlgAnchor();
+	void InitSplitters();
 	void RefreshFilterArrays();
 	//Member variables
 protected:
+	void SetSplitterHRange();
+	void SetSplitterVRange();
+	void UpdateResizableDlgAnchor();
+	void DoSizeHorizontal(int delta);
+	void DoSizeVertical(int delta);
 	HICON m_hIcon;
 	CStringArray m_sFilterArray;
 private:

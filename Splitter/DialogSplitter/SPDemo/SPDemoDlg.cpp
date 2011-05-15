@@ -121,6 +121,7 @@ BOOL CSPDemoDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
+
 	CRect rc;
 	CWnd* pWnd;
 
@@ -128,8 +129,7 @@ BOOL CSPDemoDlg::OnInitDialog()
 	pWnd->GetWindowRect(rc);
 	ScreenToClient(rc);
 	m_wndSplitter1.Create(WS_CHILD | WS_VISIBLE, rc, this, IDC_SPLITTER1);
-	SetSplitterRange();
-//	m_wndSplitter1.SetRange(50, 50, -1);
+	m_wndSplitter1.SetRange(50, 50, -1);
 	
 	pWnd = GetDlgItem(IDC_SPLITTER2);
 	pWnd->GetWindowRect(rc);
@@ -409,4 +409,13 @@ void CSPDemoDlg::SetSplitterRange()
 		
 		m_wndSplitter1.SetRange(rectLeft.left + 20, rectRight.right - 20);
 	}
+}
+
+void CSPDemoDlg::PreSubclassWindow() 
+{
+	// TODO: Add your specialized code here and/or call the base class
+// 	CWnd* pWndSplitter1 = GetDlgItem(IDC_SPLITTER1);
+// 	ASSERT(pWndSplitter1);
+// 	VERIFY(m_wndSplitter1.SubclassWindow(pWndSplitter1->m_hWnd));
+	CResizableDialog::PreSubclassWindow();
 }

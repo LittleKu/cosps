@@ -32,6 +32,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 // Implementation
