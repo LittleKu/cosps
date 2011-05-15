@@ -101,8 +101,8 @@ BEGIN
                     57,WS_EX_CLIENTEDGE
     EDITTEXT        IDC_EDIT,102,77,210,86,ES_MULTILINE | ES_AUTOHSCROLL | 
                     NOT WS_BORDER,WS_EX_CLIENTEDGE
-    CONTROL         "",IDC_SPLITTER2,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
-                    102,74,210,1
+    LTEXT           "",IDC_SPLITTER2,102,74,210,1,NOT WS_VISIBLE | NOT 
+                    WS_GROUP
     CONTROL         129,IDC_STATIC,"Static",SS_BITMAP,2,1,311,21
 END
 

@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CSPDemoDlg, CResizableDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE, OnSelchangedTree)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST, OnItemchangedList)
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -127,7 +128,8 @@ BOOL CSPDemoDlg::OnInitDialog()
 	pWnd->GetWindowRect(rc);
 	ScreenToClient(rc);
 	m_wndSplitter1.Create(WS_CHILD | WS_VISIBLE, rc, this, IDC_SPLITTER1);
-	m_wndSplitter1.SetRange(50, 50, -1);
+	SetSplitterRange();
+//	m_wndSplitter1.SetRange(50, 50, -1);
 	
 	pWnd = GetDlgItem(IDC_SPLITTER2);
 	pWnd->GetWindowRect(rc);
@@ -223,22 +225,33 @@ void CSPDemoDlg::DoResize1(int delta)
 	CSplitterControl::ChangeWidth(&m_txtContent, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_wndSplitter2, -delta, CW_RIGHTALIGN);
 
-	RemoveAnchor(IDC_STATIC);
-	AddAnchor(IDC_STATIC, TOP_LEFT, TOP_RIGHT);
+//	RemoveAnchor(IDC_STATIC);
+	
 	RemoveAnchor(m_wndType.m_hWnd);
-	AddAnchor(m_wndType.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	
 	RemoveAnchor(m_wndSplitter1);
-	AddAnchor(m_wndSplitter1, TOP_LEFT, BOTTOM_LEFT);
+	
 	RemoveAnchor(IDC_LIST);
-	AddAnchor(IDC_LIST, TOP_LEFT, TOP_RIGHT);
+	
 	RemoveAnchor(m_wndSplitter2);
-	AddAnchor(m_wndSplitter2, TOP_LEFT, TOP_RIGHT);
+	
 	RemoveAnchor(IDC_EDIT);
-	AddAnchor(IDC_EDIT, TOP_LEFT, BOTTOM_RIGHT);
+	
 	RemoveAnchor(IDCANCEL);
-	AddAnchor(IDCANCEL, BOTTOM_RIGHT, BOTTOM_RIGHT);
+	
 	RemoveAnchor(IDOK);
+	
+
+//	AddAnchor(IDC_STATIC, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(m_wndType.m_hWnd, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(m_wndSplitter1, TOP_LEFT, BOTTOM_LEFT);
+	AddAnchor(IDC_LIST, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(m_wndSplitter2, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_EDIT, TOP_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDCANCEL, BOTTOM_RIGHT, BOTTOM_RIGHT);
 	AddAnchor(IDOK, BOTTOM_RIGHT, BOTTOM_RIGHT);
+
+	SetSplitterRange();
 
 	Invalidate();
 	UpdateWindow();
@@ -369,4 +382,31 @@ void CSPDemoDlg::OnItemchangedList(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 	}
 	m_txtContent.SetWindowText(strContent);
+}
+
+void CSPDemoDlg::OnSize(UINT nType, int cx, int cy) 
+{
+	CResizableDialog::OnSize(nType, cx, cy);
+	
+	// TODO: Add your message handler code here
+	if(m_hWnd != NULL && ::IsWindow(m_hWnd))
+	{
+		SetSplitterRange();
+	}	
+}
+
+void CSPDemoDlg::SetSplitterRange()
+{
+	if(m_wndType.m_hWnd != NULL && ::IsWindow(m_wndType.m_hWnd) && m_lstItem.m_hWnd != NULL && ::IsWindow(m_lstItem.m_hWnd))
+	{
+		CRect rectLeft;
+		m_wndType.GetWindowRect(&rectLeft);
+		ScreenToClient(&rectLeft);
+		
+		CRect rectRight;
+		m_lstItem.GetWindowRect(&rectRight);
+		ScreenToClient(&rectRight);
+		
+		m_wndSplitter1.SetRange(rectLeft.left + 20, rectRight.right - 20);
+	}
 }

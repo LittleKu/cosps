@@ -31,7 +31,7 @@ Type=0
 HeaderFile=SPDemoDlg.h
 ImplementationFile=SPDemoDlg.cpp
 Filter=D
-BaseClass=CDialog
+BaseClass=CResizableDialog
 VirtualFilter=dWC
 LastObject=IDC_LIST
 
@@ -81,7 +81,7 @@ Control3=IDC_SPLITTER1,static,1073741831
 Control4=IDC_TREE,SysTreeView32,1350631424
 Control5=IDC_LIST,SysListView32,1342242816
 Control6=IDC_EDIT,edit,1342242948
-Control7=IDC_SPLITTER2,static,1073741831
+Control7=IDC_SPLITTER2,static,1073741824
 Control8=IDC_STATIC,static,1342177294
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]

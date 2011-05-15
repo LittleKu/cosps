@@ -49,7 +49,6 @@ protected:
 	int			m_nMin, m_nMax;
 	int			m_nSavePos;		// Save point on the lbutton down 
 								// message
-	CBitmap m_bkBitmap;
 // Operations
 public:
 

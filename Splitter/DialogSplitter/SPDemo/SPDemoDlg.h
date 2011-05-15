@@ -36,6 +36,7 @@ public:
 
 // Implementation
 protected:
+	void SetSplitterRange();
 	void InitSampleData();
 	void DoResize1(int delta);
 	void DoResize2(int delta);
@@ -49,6 +50,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSelchangedTree(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedList(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

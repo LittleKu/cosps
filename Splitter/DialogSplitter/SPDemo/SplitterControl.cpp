@@ -26,8 +26,6 @@ CSplitterControl::CSplitterControl()
 
 	// Min and Max range of the splitter.
 	m_nMin = m_nMax = -1;
-
-	VERIFY(m_bkBitmap.LoadBitmap(IDB_BKG));
 }
 
 CSplitterControl::~CSplitterControl()
@@ -99,30 +97,7 @@ void CSplitterControl::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	CRect rcClient;
 	GetClientRect(rcClient);
-
-	CDC memDC;
-	memDC.CreateCompatibleDC(&dc);
-	CBitmap* pOldBitmap = memDC.SelectObject(&m_bkBitmap);
-	dc.StretchBlt(rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), &memDC, 0, 0, 75, 6, SRCCOPY);
-	
-	memDC.SelectObject(pOldBitmap);
-
-// 	CBrush br, *pOB;
-// 	CPen pen, *pOP;
-// 
-// 	dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));	
-// 	rcClient.DeflateRect(1,1,1,1);
-// 	
-// 	pen.CreatePen(0, 1, RGB(200, 200, 200));
-// 	br.CreateSolidBrush(RGB(200, 220, 220));
-// 	pOB = dc.SelectObject(&br);
-// 	pOP = dc.SelectObject(&pen);
-// 	
-// 	dc.Rectangle(rcClient);
-// 
-// 	// Restore pen and brush
-// 	DeleteObject(dc.SelectObject(pOB));
-// 	DeleteObject(dc.SelectObject(pOP));
+	dc.FillSolidRect(rcClient, RGB(214, 227, 243));
 }
 
 void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point) 
@@ -232,54 +207,20 @@ void CSplitterControl::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CSplitterControl::DrawLine(CDC* pDC, int x, int y)
 {
-	int nRop = pDC->SetROP2(R2_NOTXORPEN);
-
 	CRect rcWnd;
-	int d = 3;
 	GetWindowRect(rcWnd);
-	AfxTrace("W = %d, H = %d\n", rcWnd.Width(), rcWnd.Height());
-	CPen  pen;
-	pen.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
-	CPen *pOP = pDC->SelectObject(&pen);
 
-	CBrush brush(RGB(255, 255, 255));
-
-	CBrush* pBrush = CDC::GetHalftoneBrush();
-	pBrush = &brush;
-	int i;
+	CBrush brush(RGB(0xD2, 0xE3, 0xF3));
+	CBrush* pOldBrush = pDC->SelectObject(&brush);
 	if (m_nType == SPS_VERTICAL)
 	{
-		pDC->MoveTo(m_nX - d, rcWnd.top);
-		pDC->LineTo(m_nX - d, rcWnd.bottom);
-
-		pDC->MoveTo(m_nX + d, rcWnd.top);
-		pDC->LineTo(m_nX + d, rcWnd.bottom);
-
-		
+		pDC->PatBlt(x, rcWnd.top, rcWnd.Width(), rcWnd.Height(), PATINVERT);
 	}
 	else // m_nType == SPS_HORIZONTAL
-	{
-// 		pDC->MoveTo(rcWnd.left, m_nY - d);
-// 		pDC->LineTo(rcWnd.right, m_nY - d);
-// 		
-// 		pDC->MoveTo(rcWnd.left, m_nY + d);
-// 		pDC->LineTo(rcWnd.right, m_nY + d);
-// 
-// 		for(i = m_nY - d; i <= m_nY + d; i++)
-// 		{
-// 			pDC->MoveTo(rcWnd.left, i);
-// 			pDC->LineTo(rcWnd.right, i);
-// 		}
-
-		// pat-blt without clip children on
-		// invert the brush pattern (looks just like frame window sizing)
-
-		CBrush* pOldBrush = pDC->SelectObject(pBrush);
-		pDC->PatBlt(rcWnd.left, m_nY, rcWnd.Width(), rcWnd.Height(), PATINVERT);
-		pDC->SelectObject(pOldBrush);
+	{		
+		pDC->PatBlt(rcWnd.left, y, rcWnd.Width(), rcWnd.Height(), PATINVERT);
 	}
-	pDC->SetROP2(nRop);
-	pDC->SelectObject(pOP);
+	pDC->SelectObject(pOldBrush);
 }
 
 void CSplitterControl::MoveWindowTo(CPoint pt)
