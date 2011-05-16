@@ -13,65 +13,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add",                        IDM_FILE_ADD
-        MENUITEM "&Del",                        IDM_FILE_DEL
-        MENUITEM "&Start",                      IDM_FILE_START
-        MENUITEM "&Clear",                      IDM_FILE_CLEAR
-        MENUITEM SEPARATOR
-        MENUITEM "&Export",                     IDM_FILE_EXPORT
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Setting"
-    BEGIN
-        MENUITEM "&Filter",                     IDM_SETTING_FILTER
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add source directories."
-    IDM_FILE_DEL            "Delete the source directories"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
-    ID_TBBTN_START_TO_COUNT "Start To Count"
-    ID_TBBTN_CLEAR_RESULT   "Clear Result"
-END
-
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -141,6 +82,65 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add",                        IDM_FILE_ADD
+        MENUITEM "&Del",                        IDM_FILE_DEL
+        MENUITEM "&Start",                      IDM_FILE_START
+        MENUITEM "&Clear",                      IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Export",                     IDM_FILE_EXPORT
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Setting"
+    BEGIN
+        MENUITEM "&Filter",                     IDM_SETTING_FILTER
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add source directories."
+    IDM_FILE_DEL            "Delete the source directories"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
+    ID_TBBTN_START_TO_COUNT "Start To Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -205,8 +205,10 @@ BEGIN
                     WS_BORDER | WS_TABSTOP,208,15,394,72
     CONTROL         "",IDC_SPLITTER_VERTICAL,"Static",SS_BLACKFRAME,197,0,3,
                     355
-    CONTROL         "Tree1",IDC_FILTER_TREE,"SysTreeView32",WS_BORDER | 
-                    WS_TABSTOP,7,4,186,347
+    CONTROL         "Tree1",IDC_FILTER_TREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_CHECKBOXES | 
+                    TVS_INFOTIP | TVS_FULLROWSELECT | WS_BORDER | WS_TABSTOP,
+                    7,4,186,347
     CONTROL         "",IDC_SPLITTER_HORIZONTAL,"Static",SS_BLACKFRAME,201,
                     144,410,3
 END
@@ -347,6 +349,8 @@ END
 IDB_ARROWDOWN           BITMAP  DISCARDABLE     "res\\HdrDownA.bmp"
 IDB_ARROWUP             BITMAP  DISCARDABLE     "res\\HdrUpA.bmp"
 IDB_MAIN_TOOLBAR_HOT    BITMAP  DISCARDABLE     "res\\MainToolBarHot.bmp"
+IDB_FILTER_TREE_SEL_STATE BITMAP  DISCARDABLE     "res\\TreeItemSelState.bmp"
+IDB_FILTER_TREE_CHECK_BOX_STATE BITMAP  DISCARDABLE     "res\\TreeCheckBoxState.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

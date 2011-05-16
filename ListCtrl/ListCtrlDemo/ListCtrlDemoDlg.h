@@ -13,6 +13,7 @@
 #include "ThirdParty/MultiColumnSortListView.h"
 #include "ThirdParty/CheckListCtrl.h"
 #include "ThirdParty/SplitterControl.h"
+#include "ThirdParty/MutiTreeCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
 
@@ -27,6 +28,10 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
+	CMutiTreeCtrl	m_filterTree;
+	CImageList m_imgList;
+	CImageList m_imgState;
+
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
 	CCheckListCtrl m_srcDirListCtrl;
@@ -68,6 +73,7 @@ private:
 	void InitResultListCtrl();
 	void InitResizableDlgAnchor();
 	void InitSplitters();
+	void InitFilterTree();
 	void RefreshFilterArrays();
 	//Member variables
 protected:

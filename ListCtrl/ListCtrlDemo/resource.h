@@ -14,6 +14,8 @@
 #define IDD_PROGRESS                    132
 #define IDD_MAIN_DLG                    133
 #define IDB_MAIN_TOOLBAR_HOT            136
+#define IDB_FILTER_TREE_SEL_STATE       137
+#define IDB_FILTER_TREE_CHECK_BOX_STATE 138
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -74,7 +76,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        137
+#define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           107

@@ -128,6 +128,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\MutiTreeCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressDlg.cpp
 # End Source File
 # Begin Source File
@@ -197,6 +201,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\MutiTreeCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressDlg.h
 # End Source File
 # Begin Source File
@@ -258,6 +266,14 @@ SOURCE=.\res\MainToolBarHot.bmp
 # Begin Source File
 
 SOURCE=.\res\PurpleShell.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\TreeCheckBoxState.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\TreeItemSelState.bmp
 # End Source File
 # End Group
 # Begin Source File

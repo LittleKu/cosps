@@ -66,10 +66,11 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
+	DDX_Control(pDX, IDC_FILTER_TREE, m_filterTree);
 	DDX_Control(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
-	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
 	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListCtrl);
+	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
 	//}}AFX_DATA_MAP
 }
 
@@ -121,6 +122,8 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	InitSplitters();
 
+	InitFilterTree();
+
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
 	
@@ -135,6 +138,66 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
+void CListCtrlDemoDlg::InitFilterTree()
+{
+	m_imgState.Create(IDB_FILTER_TREE_CHECK_BOX_STATE,13, 1, RGB(255,255,255));
+	m_imgList.Create(IDB_FILTER_TREE_SEL_STATE,16, 1, RGB(255,255,255));
+	
+	m_filterTree.SetImageList(&m_imgList,TVSIL_NORMAL);
+	m_filterTree.SetImageList(&m_imgState,TVSIL_STATE);
+
+	TV_INSERTSTRUCT tvinsert;
+	tvinsert.hParent=NULL;
+	tvinsert.hInsertAfter=TVI_LAST;
+	tvinsert.item.mask=TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_TEXT|TVIF_STATE;
+	tvinsert.item.hItem=NULL;
+	tvinsert.item.state=INDEXTOSTATEIMAGEMASK( 1 );
+	tvinsert.item.stateMask=TVIS_STATEIMAGEMASK;
+	tvinsert.item.cchTextMax=6;
+	tvinsert.item.iSelectedImage=1;
+	tvinsert.item.cChildren=0;
+	tvinsert.item.lParam=0;
+	
+	tvinsert.item.pszText= _T("All (*)");
+	tvinsert.item.iImage=0;
+	HTREEITEM hRoot=m_filterTree.InsertItem(&tvinsert);
+	
+	//second level: C++
+	tvinsert.hParent=hRoot;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("C++");
+	HTREEITEM htiCpp = m_filterTree.InsertItem(&tvinsert);
+
+	tvinsert.hParent=htiCpp;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("*.cpp");
+	m_filterTree.InsertItem(&tvinsert);
+
+	tvinsert.hParent=htiCpp;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("*.cxx");
+	m_filterTree.InsertItem(&tvinsert);
+
+	tvinsert.hParent=htiCpp;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("*.h");
+	m_filterTree.InsertItem(&tvinsert);
+
+
+	//second level: Java
+	tvinsert.hParent=hRoot;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("Java");
+	HTREEITEM htiJava = m_filterTree.InsertItem(&tvinsert);
+	
+	tvinsert.hParent=htiJava;
+	tvinsert.item.iImage=0;
+	tvinsert.item.pszText= _T("*.java");
+	m_filterTree.InsertItem(&tvinsert);	
+
+	//Expand root item
+	m_filterTree.Expand(hRoot, TVE_EXPAND);
+}
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {
 	//Anchor for splitters

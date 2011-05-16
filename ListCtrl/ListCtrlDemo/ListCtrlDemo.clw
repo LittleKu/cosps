@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CMainToolBarCtrl
+LastClass=CListCtrlDemoDlg
 LastTemplate=CToolBarCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
@@ -20,14 +20,14 @@ Resource4=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_MAIN_DLG
-Resource8=IDD_LISTCTRLDEMO_DIALOG
+Resource7=IDD_LISTCTRLDEMO_DIALOG
+Resource8=IDD_MAIN_DLG (English (U.S.))
 Resource9=IDR_RESULT_MENU (Neutral)
 Resource10=IDD_ABOUTBOX
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_PROGRESS
-Resource12=IDD_MAIN_DLG (English (U.S.))
+Resource12=IDD_MAIN_DLG
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -40,7 +40,7 @@ Type=0
 HeaderFile=ListCtrlDemoDlg.h
 ImplementationFile=ListCtrlDemoDlg.cpp
 Filter=D
-LastObject=CListCtrlDemoDlg
+LastObject=IDC_FILTER_TREE
 BaseClass=CResizableDialog
 VirtualFilter=dWC
 
@@ -62,7 +62,7 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_LISTCTRLDEMO_DIALOG]
 Type=1
 Class=CListCtrlDemoDlg
-ControlCount=28
+ControlCount=31
 Control1=IDC_SOURCE_DIR_FRAME,button,1342177287
 Control2=IDC_FILTER_COMBO,combobox,1344340226
 Control3=IDC_RECURSIVE_SUB_CHECK,button,1342242819
@@ -91,6 +91,9 @@ Control25=IDC_COMMENT_P,static,1342312448
 Control26=IDC_MIXED_P,static,1342312448
 Control27=IDC_BLANK_P,static,1342312448
 Control28=IDC_SOURCE_DIR_LIST,SysListView32,1350631425
+Control29=IDC_SPLITTER_VERTICAL,static,1342177287
+Control30=IDC_FILTER_TREE,SysTreeView32,1350637831
+Control31=IDC_SPLITTER_HORIZONTAL,static,1342177287
 
 [MNU:IDR_RESULT_MENU (Neutral)]
 Type=1
