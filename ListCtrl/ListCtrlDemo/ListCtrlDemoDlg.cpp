@@ -147,11 +147,7 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
     AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
     AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
     AddAnchor(IDC_RECURSIVE_SUB_CHECK,		TOP_LEFT, TOP_LEFT);
-	
-//  AddAnchor(IDC_BUTTON_ADD, TOP_RIGHT, TOP_RIGHT);
-// 	AddAnchor(IDC_BUTTON_DEL, TOP_RIGHT, TOP_RIGHT);
-// 	AddAnchor(IDC_BUTTON_START, TOP_RIGHT, TOP_RIGHT);
-// 	AddAnchor(IDC_BUTTON_CLEAR, TOP_RIGHT, TOP_RIGHT);
+
 	
     AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_RESULT_LIST, TOP_LEFT, BOTTOM_RIGHT);
@@ -632,14 +628,14 @@ void CListCtrlDemoDlg::InitSrcDirListCtrl()
 		m_srcDirListCtrl.GetHeaderCtrl()->SetItem(i, &hditem);
 	}
 
-// #ifdef _DEBUG
-// 	CString sDir;
-// 	for(i = 0; i < 10; i++)
-// 	{
-// 		sDir.Format("E:\\temp\\long\\%d", i);
-// 		AddSrcDir(sDir);
-// 	}
-// #endif
+#ifdef _DEBUG
+	CString sDir;
+	for(i = 0; i < 30; i++)
+	{
+		sDir.Format("E:\\temp\\long\\%d", i);
+		AddSrcDir(sDir);
+	}
+#endif
 }
 
 void CListCtrlDemoDlg::AddSrcDir(LPCTSTR lpszDir)
@@ -765,6 +761,8 @@ void CListCtrlDemoDlg::DoSizeHorizontal(int delta)
 
 void CListCtrlDemoDlg::UpdateResizableDlgAnchor()
 {
+	RefreshAllAnchors();
+	/*
 	RemoveAnchor(m_splitterVertical.m_hWnd);
 	RemoveAnchor(m_splitterHorizontal.m_hWnd);
 	RemoveAnchor(IDC_FILTER_TREE);
@@ -841,21 +839,17 @@ void CListCtrlDemoDlg::UpdateResizableDlgAnchor()
 	AddAnchor(IDC_COMMENT_P, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_MIXED_P, BOTTOM_LEFT, BOTTOM_LEFT);
 	AddAnchor(IDC_BLANK_P, BOTTOM_LEFT, BOTTOM_LEFT);
+	*/
 }
 
 void CListCtrlDemoDlg::SetSplitterVRange()
 {	
-	if(!::IsWindow(m_hWnd))
+	if(!::IsWindow(m_splitterVertical.GetSafeHwnd()))
 	{
 		return;
 	}
 	CWnd* pWnd;
-
 	pWnd = GetDlgItem(IDC_FILTER_TREE);
-	if(pWnd == NULL || !::IsWindow(pWnd->m_hWnd))
-	{
-		return;
-	}
 	CRect rcTree;
 	pWnd->GetWindowRect(&rcTree);
 	ScreenToClient(&rcTree);
@@ -863,21 +857,19 @@ void CListCtrlDemoDlg::SetSplitterVRange()
 	CRect rcDlg;
 	GetClientRect(&rcDlg);
 
-	ASSERT((rcDlg.right - 610) > (rcTree.left));
-
-	m_splitterVertical.SetRange(rcTree.left, rcDlg.right - 610);	
+	m_splitterVertical.SetRange(rcTree.left, rcTree.left + 320);	
 }
 
 void CListCtrlDemoDlg::SetSplitterHRange()
 {
-	if(!::IsWindow(m_hWnd))
+	if(!::IsWindow(m_splitterHorizontal.GetSafeHwnd()))
 	{
 		return;
 	}
 	CRect rcDlg;
 	GetClientRect(&rcDlg);
 	
-	m_splitterHorizontal.SetRange(140, rcDlg.bottom - 200);
+	m_splitterHorizontal.SetRange(rcDlg.top + 150, rcDlg.top + 380);
 }
 
 void CListCtrlDemoDlg::OnSize(UINT nType, int cx, int cy) 
