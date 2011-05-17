@@ -3,24 +3,15 @@
 
 #if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// MutiTreeCtrl.h : header file
-//
+#endif
 
-/********************************************************************
-	created:	2003/05/06
-	created:	6:5:2003   12:08
-	filename: 	d:\w\mutitreectrl.h
-	file path:	d:\w
-	file base:	mutitreectrl
-	file ext:	h
-	author:		Íõ¼ÑºÀ
-	
-	purpose:	
-*********************************************************************/
+#define TVIS_IMAGE_STATE_NONE			0
+#define TVIS_IMAGE_STATE_UNCHECK		1
+#define TVIS_IMAGE_STATE_PARTIAL_CHECK	2
+#define TVIS_IMAGE_STATE_FULL_CHECK		3
 
-/////////////////////////////////////////////////////////////////////////////
-// CMutiTreeCtrl window
+extern UINT ID_TREE_ITEM_SELECTED_EVENT; 
+
 
 class CMutiTreeCtrl : public CTreeCtrl
 {
@@ -42,6 +33,8 @@ public:
 // Implementation
 public:
 	BOOL SetItemState( HTREEITEM hItem, UINT nState, UINT nStateMask, BOOL bSearch=TRUE);
+	UINT GetItemImageState(HTREEITEM hItem);
+	BOOL GetSelectedItems(CList<HTREEITEM, HTREEITEM>& hItemList);
 	virtual ~CMutiTreeCtrl();
 
 	// Generated message map functions

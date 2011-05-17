@@ -13,21 +13,21 @@ Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=12
-Resource1=IDD_PROGRESS (Chinese (P.R.C.))
+Resource1=IDD_LISTCTRLDEMO_DIALOG
 Resource2=IDR_MAINFRAME
 Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource4=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_PROGRESS (Chinese (P.R.C.))
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_LISTCTRLDEMO_DIALOG
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_MAIN_DLG (English (U.S.))
-Resource9=IDR_RESULT_MENU (Neutral)
-Resource10=IDD_ABOUTBOX
+Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource10=IDD_MAIN_DLG
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_PROGRESS
-Resource12=IDD_MAIN_DLG
+Resource12=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0

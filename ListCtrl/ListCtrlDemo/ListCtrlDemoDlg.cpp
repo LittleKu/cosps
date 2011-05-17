@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoDlg, CResizableDialog)
 	ON_MESSAGE(WM_SUMMARY_UPDATE, OnSummaryUpdate)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
+	ON_REGISTERED_MESSAGE(ID_TREE_ITEM_SELECTED_EVENT, OnTreeItemSelected)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -941,4 +942,25 @@ void CListCtrlDemoDlg::OnSize(UINT nType, int cx, int cy)
 	
 	SetSplitterVRange();
 	SetSplitterHRange();
+}
+
+LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam) 
+{
+	CList<HTREEITEM, HTREEITEM> htiSelectedList;
+	m_filterTree.GetSelectedItems(htiSelectedList);
+
+	CString sFilterStr;
+	POSITION pos = htiSelectedList.GetHeadPosition();
+	HTREEITEM hti;
+	while(pos != NULL)
+	{
+		hti = htiSelectedList.GetNext(pos);
+		
+		sFilterStr += m_filterTree.GetItemText(hti);
+		sFilterStr += _T(";");
+	}
+
+	m_filterComboBox.SetWindowText(sFilterStr);
+
+	return TRUE;
 }

@@ -31,7 +31,7 @@ public:
 	CMutiTreeCtrl	m_filterTree;
 	CImageList m_imgList;
 	CImageList m_imgState;
-
+	
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
 	CCheckListCtrl m_srcDirListCtrl;
@@ -67,6 +67,7 @@ protected:
 	afx_msg LRESULT OnSummaryUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnTreeItemSelected(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:

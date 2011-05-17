@@ -1,6 +1,3 @@
-// MutiTreeCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "MutiTreeCtrl.h"
 
@@ -10,20 +7,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-/********************************************************************
-	created:	2003/05/06
-	created:	6:5:2003   12:07
-	filename: 	d:\Project\mutitreectrl.cpp
-	file path:	d:\Project
-	file base:	mutitreectrl
-	file ext:	cpp
-	author:		王佳豪
-	
-	purpose:	
-*********************************************************************/
-
-/////////////////////////////////////////////////////////////////////////////
-// CMutiTreeCtrl
+UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELECTED_EVENT"));
 
 CMutiTreeCtrl::CMutiTreeCtrl()
 {
@@ -49,8 +33,17 @@ END_MESSAGE_MAP()
 
 void CMutiTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if(m_uFlags&TVHT_ONITEMSTATEICON) *pResult=1;
-	else *pResult = 0;
+	*pResult = 0;
+	if(m_uFlags & TVHT_ONITEMSTATEICON) 
+	{
+		*pResult = 1;
+		CWnd* pOwner = GetOwner();
+		
+		if(pOwner != NULL)
+		{
+			pOwner->SendMessage(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);
+		}
+	}
 }
 
 void CMutiTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
@@ -60,8 +53,12 @@ void CMutiTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		//nState: 0->无选择钮 1->没有选择 2->部分选择 3->全部选择
 		UINT nState = GetItemState( hItem, TVIS_STATEIMAGEMASK ) >> 12;
-		nState=(nState==3)?1:3;
+		nState = (nState == TVIS_IMAGE_STATE_FULL_CHECK) ? TVIS_IMAGE_STATE_UNCHECK : TVIS_IMAGE_STATE_FULL_CHECK;
 		SetItemState( hItem, INDEXTOSTATEIMAGEMASK(nState), TVIS_STATEIMAGEMASK );
+		Select(hItem, TVGN_CARET);
+
+		CList<HTREEITEM, HTREEITEM> hItemList;
+		GetSelectedItems(hItemList);
 	}
 	
 	CTreeCtrl::OnLButtonDown(nFlags, point);
@@ -190,4 +187,66 @@ void CMutiTreeCtrl::TravelSiblingAndParent(HTREEITEM hItem, int nState)
 			}
 		}
 	}	
+}
+
+UINT CMutiTreeCtrl::GetItemImageState(HTREEITEM hItem)
+{
+	UINT nState = GetItemState( hItem, TVIS_STATEIMAGEMASK ) >> 12;
+	return nState;
+}
+
+BOOL CMutiTreeCtrl::GetSelectedItems(CList<HTREEITEM, HTREEITEM>& hItemList)
+{
+	// Look at all of the root-level items
+	HTREEITEM hCurrent = /*GetNextItem(TVI_ROOT, TVGN_NEXT);*/GetRootItem();
+	if(hCurrent == NULL)
+	{
+		return FALSE;
+	}
+
+	//Iterator all the selected leaf nodes.
+	CList<HTREEITEM, HTREEITEM> htiParentList;
+	htiParentList.AddTail(hCurrent);
+	UINT nState;
+	while(!htiParentList.IsEmpty())
+	{
+		hCurrent = htiParentList.RemoveHead();
+		nState = GetItemImageState(hCurrent);
+		if(nState != TVIS_IMAGE_STATE_FULL_CHECK && nState != TVIS_IMAGE_STATE_PARTIAL_CHECK)
+		{
+			continue;
+		}
+		//Not a leaf node
+		if(ItemHasChildren(hCurrent))
+		{
+			HTREEITEM hChildItem = GetChildItem(hCurrent);
+			while (hChildItem != NULL)
+			{
+				htiParentList.AddTail(hChildItem);
+				hChildItem = GetNextItem(hChildItem, TVGN_NEXT);
+			}
+		}
+		//leaf node can't have a partial check state
+		else
+		{
+			hItemList.AddTail(hCurrent);
+// 			// Get the text for the item. Notice we use TVIF_TEXT because
+// 			// we want to retrieve only the text, but also specify TVIF_HANDLE
+// 			// because we're getting the item by its handle.
+// 			TVITEM item;
+// 			TCHAR szText[1024];
+// 			item.hItem = hCurrent;
+// 			item.mask = TVIF_TEXT | TVIF_HANDLE;
+// 			item.pszText = szText;
+// 			item.cchTextMax = 1024;
+// 			
+// 			BOOL bWorked = GetItem(&item);
+// 			if(bWorked)
+// 			{
+// 				hItemList.AddTail(hCurrent);
+// 				AfxTrace("Selected Item: %s\n", szText);
+// 			}
+		}
+	}
+	return TRUE;
 }
