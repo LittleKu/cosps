@@ -46,6 +46,16 @@ void CResultListCtrl::PreSubclassWindow()
 	ImageList_SetBkColor(hShellImageList, CLR_NONE);
 	
 	SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)hShellImageList);
+
+	IMalloc* pIface = NULL;
+	SHGetMalloc(&pIface);
+
+	if( SUCCEEDED(::SHGetMalloc(&pIface)) )
+	{
+		pIface->Free(pidl);
+		pIface->Release();
+		pIface = NULL;
+	}
 }
 
 int CResultListCtrl::AddRow(const CFileInfo& fi)
