@@ -136,6 +136,10 @@ SOURCE=.\ProgressDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ResultListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\SortableHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -214,6 +218,10 @@ SOURCE=.\ProgressDlg.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ResultListCtrl.h
 # End Source File
 # Begin Source File
 

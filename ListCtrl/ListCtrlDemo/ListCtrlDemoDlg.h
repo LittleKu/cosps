@@ -10,12 +10,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
-#include "ThirdParty/MultiColumnSortListView.h"
 #include "ThirdParty/SplitterControl.h"
 #include "ThirdParty/MutiTreeCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
 #include "SourceDirListCtrl.h"
+#include "ResultListCtrl.h"
 
 class CListCtrlDemoDlg : public CResizableDialog
 {
@@ -35,7 +35,7 @@ public:
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
 	CSourceDirListCtrl m_srcDirListCtrl;
-	CMultiColumnSortListCtrl m_resultListCtrl;
+	CResultListCtrl m_resultListCtrl;
 	CSplitterControl m_splitterVertical;
 	CSplitterControl m_splitterHorizontal;
 	//}}AFX_DATA

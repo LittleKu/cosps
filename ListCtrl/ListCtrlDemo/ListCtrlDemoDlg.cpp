@@ -599,7 +599,7 @@ LRESULT CListCtrlDemoDlg::OnEndCount(WPARAM wParam, LPARAM lParam)
 LRESULT CListCtrlDemoDlg::OnProgressUpdate(WPARAM wParam, LPARAM lParam)
 {
 	CFileInfo* pFi = (CFileInfo*)wParam;
-	AddRow(*pFi);
+	m_resultListCtrl.AddRow(*pFi);
 
 	return 0;
 }

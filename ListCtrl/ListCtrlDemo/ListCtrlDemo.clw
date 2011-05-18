@@ -2,32 +2,33 @@
 
 [General Info]
 Version=1
-LastClass=CSourceDirListCtrl
+LastClass=CResultListCtrl
 LastTemplate=CListCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=7
+ClassCount=8
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=12
-Resource1=IDD_ABOUTBOX
+Resource1=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource4=IDD_MAIN_DLG
+Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_MAIN_DLG (English (U.S.))
-Resource9=IDD_PROGRESS (Chinese (P.R.C.))
-Resource10=IDD_LISTCTRLDEMO_DIALOG
+Resource9=IDD_MAIN_DLG
+Resource10=IDD_ABOUTBOX
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_PROGRESS
 Class7=CSourceDirListCtrl
+Class8=CResultListCtrl
 Resource12=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -235,4 +236,12 @@ BaseClass=CCheckListCtrl
 Filter=W
 VirtualFilter=FWC
 LastObject=IDM_FILE_EXPORT
+
+[CLS:CResultListCtrl]
+Type=0
+HeaderFile=ResultListCtrl.h
+ImplementationFile=ResultListCtrl.cpp
+BaseClass=CMultiColumnSortListCtrl
+Filter=W
+VirtualFilter=FWC
 
