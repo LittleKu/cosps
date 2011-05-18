@@ -144,6 +144,10 @@ SOURCE=.\ThirdParty\SortClass.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SourceDirListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\SplitterControl.cpp
 # End Source File
 # Begin Source File
@@ -221,6 +225,10 @@ SOURCE=.\ThirdParty\SortClass.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\SourceDirListCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\SplitterControl.h
 # End Source File
 # Begin Source File
@@ -266,6 +274,18 @@ SOURCE=.\res\MainToolBarHot.bmp
 # Begin Source File
 
 SOURCE=.\res\PurpleShell.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\SplitterBkg.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\SplitterBkgH.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\SplitterBkgV.bmp
 # End Source File
 # Begin Source File
 

@@ -25,6 +25,8 @@ CSplitterControl::CSplitterControl()
 
 	// Min and Max range of the splitter.
 	m_nMin = m_nMax = -1;
+
+	m_pBkBitmap = NULL;
 }
 
 CSplitterControl::~CSplitterControl()
@@ -96,7 +98,22 @@ void CSplitterControl::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	CRect rcClient;
 	GetClientRect(rcClient);
-	dc.FillSolidRect(rcClient, RGB(214, 227, 243));
+
+	if(m_pBkBitmap == NULL)
+	{
+		dc.FillSolidRect(rcClient, RGB(178, 208, 245));
+	}
+	else
+	{
+		CDC memDC;
+		memDC.CreateCompatibleDC(&dc);
+
+		CBitmap* pOldBitmap = memDC.SelectObject(m_pBkBitmap);
+		BITMAP bmp;
+		m_pBkBitmap->GetBitmap(&bmp);
+		dc.StretchBlt(rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(),
+			&memDC, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+	}
 }
 
 void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point) 

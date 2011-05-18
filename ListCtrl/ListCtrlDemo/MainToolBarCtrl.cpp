@@ -12,7 +12,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define IDC_MAIN_TOOLBAR_BUTTON_FIRST		ID_TBBTN_ADD_SOURCE_DIR
-#define IDC_MAIN_TOOLBAR_BUTTON_LAST		ID_TBBTN_CLEAR_RESULT
+#define IDC_MAIN_TOOLBAR_BUTTON_LAST		ID_TBBTN_EXIT
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainToolBarCtrl

@@ -11,11 +11,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
 #include "ThirdParty/MultiColumnSortListView.h"
-#include "ThirdParty/CheckListCtrl.h"
 #include "ThirdParty/SplitterControl.h"
 #include "ThirdParty/MutiTreeCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
+#include "SourceDirListCtrl.h"
 
 class CListCtrlDemoDlg : public CResizableDialog
 {
@@ -34,7 +34,7 @@ public:
 	
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
-	CCheckListCtrl m_srcDirListCtrl;
+	CSourceDirListCtrl m_srcDirListCtrl;
 	CMultiColumnSortListCtrl m_resultListCtrl;
 	CSplitterControl m_splitterVertical;
 	CSplitterControl m_splitterHorizontal;
@@ -68,6 +68,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnTreeItemSelected(WPARAM wParam, LPARAM lParam);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
@@ -86,6 +87,8 @@ protected:
 	HICON m_hIcon;
 	CStringArray m_sFilterArray;
 private:
+	CBitmap m_splitterVBkBitmap;
+	CBitmap m_splitterHBkBitmap;
 	void AddSrcDir(LPCTSTR lpszDir);
 	void InitSrcDirListCtrl();
 	void SetPair(int idc, int idp, int count, int total = 0);

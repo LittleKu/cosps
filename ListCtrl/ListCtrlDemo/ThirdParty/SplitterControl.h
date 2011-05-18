@@ -42,13 +42,14 @@ public:
 
 // Attributes
 public:
+	CBitmap*    m_pBkBitmap;
 protected:
 	BOOL		m_bIsPressed;
 	int			m_nType;
 	int			m_nX, m_nY;
 	int			m_nMin, m_nMax;
 	int			m_nSavePos;		// Save point on the lbutton down 
-								// message
+								// message	
 // Operations
 public:
 

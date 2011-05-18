@@ -16,6 +16,9 @@
 #define IDB_MAIN_TOOLBAR_HOT            136
 #define IDB_FILTER_TREE_SEL_STATE       137
 #define IDB_FILTER_TREE_CHECK_BOX_STATE 138
+#define IDB_SPLITTER_BKG                139
+#define IDB_SPLITTER_V_BKG              139
+#define IDB_SPLITTER_H_BKG              140
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -62,6 +65,9 @@
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
+#define ID_TBBTN_EXPORT                 16132
+#define ID_TBBTN_SETTING                16133
+#define ID_TBBTN_EXIT                   16134
 #define IDM_FILE_ADD                    32771
 #define IDM_FILE_DEL                    32772
 #define IDM_FILE_START                  32773
@@ -76,7 +82,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           107

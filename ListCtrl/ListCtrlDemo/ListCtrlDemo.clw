@@ -2,31 +2,32 @@
 
 [General Info]
 Version=1
-LastClass=CListCtrlDemoDlg
-LastTemplate=CToolBarCtrl
+LastClass=CSourceDirListCtrl
+LastTemplate=CListCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=6
+ClassCount=7
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=12
-Resource1=IDD_LISTCTRLDEMO_DIALOG
+Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource4=IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_MAIN_DLG
 Resource5=IDD_ABOUTBOX (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_ABOUTBOX
+Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_MAIN_DLG (English (U.S.))
-Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
-Resource10=IDD_MAIN_DLG
+Resource9=IDD_PROGRESS (Chinese (P.R.C.))
+Resource10=IDD_LISTCTRLDEMO_DIALOG
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_PROGRESS
+Class7=CSourceDirListCtrl
 Resource12=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -223,6 +224,15 @@ Filter=W
 
 [DLG:IDD_MAIN_DLG (English (U.S.))]
 Type=1
-Class=?
+Class=CMainDlg
 ControlCount=0
+
+[CLS:CSourceDirListCtrl]
+Type=0
+HeaderFile=SourceDirListCtrl.h
+ImplementationFile=SourceDirListCtrl.cpp
+BaseClass=CCheckListCtrl
+Filter=W
+VirtualFilter=FWC
+LastObject=IDM_FILE_EXPORT
 

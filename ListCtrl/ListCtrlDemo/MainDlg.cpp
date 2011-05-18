@@ -223,6 +223,7 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case IDM_FILE_EXIT:
+	case ID_TBBTN_EXIT:
 		{
 			ASSERT(AfxGetMainWnd());
 			AfxGetMainWnd()->SendMessage(WM_CLOSE);

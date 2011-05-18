@@ -99,10 +99,10 @@ IDR_RESULT_MENU MENU DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "&Add",                        IDM_FILE_ADD
-        MENUITEM "&Del",                        IDM_FILE_DEL
-        MENUITEM "&Start",                      IDM_FILE_START
-        MENUITEM "&Clear",                      IDM_FILE_CLEAR
+        MENUITEM "&Add Source Directories...",  IDM_FILE_ADD
+        MENUITEM "&Delete Source Directories",  IDM_FILE_DEL
+        MENUITEM "&Start to Count",             IDM_FILE_START
+        MENUITEM "&Clear the Current Result",   IDM_FILE_CLEAR
         MENUITEM SEPARATOR
         MENUITEM "&Export",                     IDM_FILE_EXPORT
         MENUITEM "E&xit",                       IDM_FILE_EXIT
@@ -134,6 +134,9 @@ BEGIN
     ID_TBBTN_ADD_SOURCE_DIR "Add Source Directory"
     ID_TBBTN_START_TO_COUNT "Start To Count"
     ID_TBBTN_CLEAR_RESULT   "Clear Result"
+    ID_TBBTN_EXPORT         "Export"
+    ID_TBBTN_SETTING        "Setting"
+    ID_TBBTN_EXIT           "Exit"
 END
 
 #endif    // Neutral resources
@@ -169,7 +172,7 @@ END
 IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 623, 356
 STYLE WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,201,4,410,135
     COMBOBOX        IDC_FILTER_COMBO,208,96,394,77,CBS_DROPDOWN | CBS_SORT | 
@@ -208,9 +211,9 @@ BEGIN
     CONTROL         "Tree1",IDC_FILTER_TREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_CHECKBOXES | 
                     TVS_INFOTIP | TVS_FULLROWSELECT | WS_BORDER | WS_TABSTOP,
-                    7,4,189,347
+                    1,0,196,356
     CONTROL         "",IDC_SPLITTER_HORIZONTAL,"Static",SS_BLACKFRAME,201,
-                    144,410,3
+                    144,423,3
 END
 
 IDD_MAIN_DLG DIALOGEX 0, 0, 623, 386
@@ -351,6 +354,8 @@ IDB_ARROWUP             BITMAP  DISCARDABLE     "res\\HdrUpA.bmp"
 IDB_MAIN_TOOLBAR_HOT    BITMAP  DISCARDABLE     "res\\MainToolBarHot.bmp"
 IDB_FILTER_TREE_SEL_STATE BITMAP  DISCARDABLE     "res\\TreeItemSelState.bmp"
 IDB_FILTER_TREE_CHECK_BOX_STATE BITMAP  DISCARDABLE     "res\\TreeCheckBoxState.bmp"
+IDB_SPLITTER_V_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgV.bmp"
+IDB_SPLITTER_H_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgH.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

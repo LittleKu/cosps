@@ -75,7 +75,8 @@ BOOL CListCtrlDemoApp::InitInstance()
 	CommonUtils::LoadBitmapFromFile(_T(".\\res\\background.bmp"), m_pSysBkBitmap);
 
 	m_pSysBkBrush = new CBrush();
-	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
+//	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
+	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;
