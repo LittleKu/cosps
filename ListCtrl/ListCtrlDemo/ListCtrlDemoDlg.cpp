@@ -481,22 +481,28 @@ void CListCtrlDemoDlg::OnButtonAdd()
 	char szPath[MAX_PATH];
 	ZeroMemory(szPath, sizeof(szPath)); 
 
-	LPITEMIDLIST pidlSelected = NULL;
-    BROWSEINFO bi = {0};
-
+    BROWSEINFO bi;
+	ZeroMemory(&bi, sizeof(BROWSEINFO));
 	bi.hwndOwner = m_hWnd;
-    bi.pidlRoot = NULL;
     bi.pszDisplayName = szPath;
     bi.lpszTitle = "Choose a folder";
-    bi.ulFlags = 0;
-    bi.lpfn = NULL;
-    bi.lParam = 0;
 
-	pidlSelected = SHBrowseForFolder(&bi);
+	LPITEMIDLIST pidlSelected = SHBrowseForFolder(&bi);
+
 	//Got a valid path
-	if(pidlSelected && SHGetPathFromIDList(pidlSelected, szPath))
+	if(pidlSelected != NULL)
 	{
-		AddSrcDir(szPath);
+		if(SHGetPathFromIDList(pidlSelected, szPath))
+		{
+			AddSrcDir(szPath);
+		}
+		//Free it
+		LPMALLOC pMalloc = NULL;
+		if(SUCCEEDED(SHGetMalloc(&pMalloc)))
+        {
+            pMalloc->Free(pidlSelected);
+            pMalloc->Release();
+        }
 	}
 }
 

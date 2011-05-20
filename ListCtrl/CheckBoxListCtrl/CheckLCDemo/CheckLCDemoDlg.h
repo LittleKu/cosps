@@ -9,6 +9,9 @@
 #endif // _MSC_VER > 1000
 
 #include "CheckListCtrl.h"
+#include "CMyDC.h"
+#include "MyComboBox.h"
+#include "MyGroupBox.h"
 /////////////////////////////////////////////////////////////////////////////
 // CCheckLCDemoDlg dialog
 
@@ -21,6 +24,8 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CCheckLCDemoDlg)
 	enum { IDD = IDD_CHECKLCDEMO_DIALOG };
+	CMyGroupBox	m_gb1;
+	CMyComboBox	m_combobox;
 	CCheckListCtrl	m_listCtrl;
 	//}}AFX_DATA
 
@@ -29,7 +34,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
-
+	void wxDrawLine(HDC hdc, int x1, int y1, int x2, int y2);
 // Implementation
 protected:
 	HICON m_hIcon;
@@ -40,6 +45,7 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

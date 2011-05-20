@@ -2,12 +2,12 @@
 
 [General Info]
 Version=1
-LastClass=CCheckListCtrl
-LastTemplate=CHeaderCtrl
+LastClass=CCheckLCDemoDlg
+LastTemplate=CStatic
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "CheckLCDemo.h"
 
-ClassCount=5
+ClassCount=7
 Class1=CCheckLCDemoApp
 Class2=CCheckLCDemoDlg
 Class3=CAboutDlg
@@ -17,6 +17,8 @@ Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Class4=CCheckListCtrl
 Class5=CCheckHeadCtrl
+Class6=CMyComboBox
+Class7=CMyGroupBox
 Resource3=IDD_CHECKLCDEMO_DIALOG
 
 [CLS:CCheckLCDemoApp]
@@ -32,6 +34,7 @@ ImplementationFile=CheckLCDemoDlg.cpp
 Filter=D
 BaseClass=CDialog
 VirtualFilter=dWC
+LastObject=IDC_GROUPBOX1
 
 [CLS:CAboutDlg]
 Type=0
@@ -51,10 +54,13 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_CHECKLCDEMO_DIALOG]
 Type=1
 Class=CCheckLCDemoDlg
-ControlCount=3
+ControlCount=6
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_LIST1,SysListView32,1350631425
+Control4=IDC_COMBO1,combobox,1344340226
+Control5=IDC_COMBO2,combobox,1344340226
+Control6=IDC_GROUPBOX1,button,1342177287
 
 [CLS:CCheckListCtrl]
 Type=0
@@ -71,4 +77,20 @@ HeaderFile=CheckHeadCtrl.h
 ImplementationFile=CheckHeadCtrl.cpp
 BaseClass=CHeaderCtrl
 Filter=W
+
+[CLS:CMyComboBox]
+Type=0
+HeaderFile=MyComboBox.h
+ImplementationFile=MyComboBox.cpp
+BaseClass=CComboBox
+Filter=W
+VirtualFilter=cWC
+
+[CLS:CMyGroupBox]
+Type=0
+HeaderFile=MyGroupBox.h
+ImplementationFile=MyGroupBox.cpp
+BaseClass=CStatic
+Filter=W
+VirtualFilter=WC
 

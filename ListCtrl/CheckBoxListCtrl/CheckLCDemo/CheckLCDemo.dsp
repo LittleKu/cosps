@@ -66,8 +66,8 @@ LINK32=link.exe
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ   /c
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -110,6 +110,18 @@ SOURCE=.\CheckListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CMyDC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MyComboBox.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MyGroupBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -132,6 +144,18 @@ SOURCE=.\CheckLCDemoDlg.h
 # Begin Source File
 
 SOURCE=.\CheckListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CMyDC.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MyComboBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MyGroupBox.h
 # End Source File
 # Begin Source File
 
