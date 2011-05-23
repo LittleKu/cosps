@@ -56,8 +56,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ABOUTBOX            "關於 eMule..."
-    IDS_TEST1               "選擇您想要使用的網路"
+    IDS_ABOUTBOX            "基本的選項"
+    IDS_TEST1               "繁體字的測試"
 END
 
 #endif    // Chinese (Taiwan) resources

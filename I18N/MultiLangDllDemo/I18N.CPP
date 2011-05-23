@@ -49,6 +49,11 @@ void CI18N::LoadLangDlls()
 
 void CI18N::SetCurLang(WORD langID)
 {
+	if(langID < 0 || langID >= m_hLangDlls.GetSize())
+	{
+		m_hCurLang = NULL;
+		return;
+	}
 	m_hCurLang = m_hLangDlls.GetAt(langID);
 }
 
@@ -57,32 +62,40 @@ void CI18N::SetCurLang(WORD langID)
 #else
 #define CHAR_FUDGE 2    // two BYTES unused for case of DBC last char
 #endif
+
+#define TEMP_BUFFER_SIZE 256
+
 CString CI18N::GetString(UINT uID)
 {
 	CString str;
-
-	// try fixed buffer first (to avoid wasting space in the heap)
-	TCHAR szTemp[256];
-	int nLen = ::LoadString(m_hCurLang, uID, szTemp, 256);
-	if (256 - nLen > CHAR_FUDGE)
+	if(m_hCurLang == NULL)
 	{
-		if(nLen == 0)
-		{
-			::LoadString(GetModuleHandle(NULL), uID, szTemp, 256);
-		}
+		str.LoadString(uID);
+		return str;
+	}
+	// try fixed buffer first (to avoid wasting space in the heap)
+	TCHAR szTemp[TEMP_BUFFER_SIZE];
+	int nLen = ::LoadString(m_hCurLang, uID, szTemp, TEMP_BUFFER_SIZE);
+	if(nLen == 0)
+	{
+		str.LoadString(uID);
+		return str;
+	}
+	if(TEMP_BUFFER_SIZE - nLen > CHAR_FUDGE)
+	{
 		str = szTemp;
 		return str;
 	}
 	
 	// try buffer size of 512, then larger size until entire string is retrieved
-	int nSize = 256;
+	int nSize = TEMP_BUFFER_SIZE;
 	do
 	{
-		nSize += 256;
+		nSize += TEMP_BUFFER_SIZE;
 		nLen = ::LoadString(m_hCurLang, uID, str.GetBuffer(nSize-1), nSize);
 	} while (nSize - nLen <= CHAR_FUDGE);
 	str.ReleaseBuffer();
 	if (nLen == 0)
-		str = "";
+		str = _T("");
 	return str;
 }

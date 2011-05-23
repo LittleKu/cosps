@@ -175,7 +175,7 @@ void CMultiLangDllDemoDlg::OnOK()
 {
 	static int curLang = 0;
 	curLang++;
-	CI18N::GetInstance()->SetCurLang((curLang + 1) % 2);
+	CI18N::GetInstance()->SetCurLang((curLang) % 3);
 
 	Localize();
 }
@@ -190,7 +190,6 @@ void CMultiLangDllDemoDlg::Localize()
 void CMultiLangDllDemoDlg::OnDestroy() 
 {
 	CDialog::OnDestroy();
-	
 	delete CI18N::GetInstance();
 	
 }
