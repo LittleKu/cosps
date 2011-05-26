@@ -2,9 +2,11 @@
 //
 
 #include "stdafx.h"
+#include "ThirdParty/Gradient.h"
 #include "ListCtrlDemo.h"
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -294,6 +296,7 @@ BOOL CListCtrlDemoDlg::OnEraseBkgnd(CDC* pDC)
 	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
 	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
 
+//	CGradient::Draw(pDC, rect, RGB(255, 255, 255), /*RGB(255, 255, 0), */RGB(229, 244, 248), (BOOL)FALSE, (UINT)64);
 // 	CBrush brush(RGB(255, 128, 0));
 // 	pDC->FillRect(&rect, &brush);
 

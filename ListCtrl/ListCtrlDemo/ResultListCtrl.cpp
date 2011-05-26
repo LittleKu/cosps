@@ -13,6 +13,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 // CResultListCtrl
+#define IDM_RESULT_LIST_FIRST				48297
+
+#define IDM_RESULT_LIST_OPEN				(IDM_RESULT_LIST_FIRST + 0)
+#define IDM_RESULT_LIST_OPEN_DIR			(IDM_RESULT_LIST_FIRST + 1)
+
+#define IDM_RESULT_LIST_LAST				IDM_RESULT_LIST_OPEN_DIR
 
 CResultListCtrl::CResultListCtrl()
 {
@@ -25,7 +31,8 @@ CResultListCtrl::~CResultListCtrl()
 
 BEGIN_MESSAGE_MAP(CResultListCtrl, CMultiColumnSortListCtrl)
 	//{{AFX_MSG_MAP(CResultListCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
+	ON_WM_CONTEXTMENU()
+	ON_WM_LBUTTONDBLCLK()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -89,4 +96,76 @@ int CResultListCtrl::AddRow(const CFileInfo& fi)
     SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nBlankLines));
 	
 	return nRes;
+}
+
+void CResultListCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
+{
+	CMenu ctMenu;
+	ctMenu.CreatePopupMenu();
+	ctMenu.AppendMenu(MF_STRING, IDM_RESULT_LIST_OPEN,		_T("Open"));
+	ctMenu.AppendMenu(MF_STRING, IDM_RESULT_LIST_OPEN_DIR,	_T("Open Folder"));
+
+	//Set menu enable status
+	int nCount = GetSelectedCount();
+	if(nCount != 1)
+	{
+		ctMenu.EnableMenuItem(IDM_RESULT_LIST_OPEN,		MF_BYCOMMAND | MF_GRAYED);
+		ctMenu.EnableMenuItem(IDM_RESULT_LIST_OPEN_DIR, MF_BYCOMMAND | MF_GRAYED);
+	}
+
+	ctMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
+}
+
+BOOL CResultListCtrl::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	switch(wParam)
+	{
+	case IDM_RESULT_LIST_OPEN:
+		{
+			OpenFile();
+		}
+		break;
+	case IDM_RESULT_LIST_OPEN_DIR:
+		{
+			OpenFolder();
+		}
+		break;
+	}
+	
+	return CMultiColumnSortListCtrl::OnCommand(wParam, lParam);
+}
+
+void CResultListCtrl::OpenFolder()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	if(pos == NULL)
+	{
+		return;
+	}
+	int nItem = GetNextSelectedItem(pos);
+	CFileInfo* pFileInfo = (CFileInfo*)GetItemData(nItem);
+	ShellExecute(NULL, _T("open"), _T("explorer"), _T("/select,\"") + pFileInfo->m_sFullFileName + _T("\""), NULL, SW_SHOW);
+}
+
+void CResultListCtrl::OpenFile()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	if(pos == NULL)
+	{
+		return;
+	}
+	int nItem = GetNextSelectedItem(pos);
+	CFileInfo* pFileInfo = (CFileInfo*)GetItemData(nItem);
+	HINSTANCE hInst = ::ShellExecute(NULL, _T("open"), pFileInfo->m_sFullFileName, NULL, NULL, SW_SHOW);
+
+	//Failed to Open
+	if((int)hInst < 32)
+	{
+		AfxTrace("Failed to open file %s\n", pFileInfo->m_sFullFileName);
+	}
+}
+
+void CResultListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
+{
+	OpenFile();
 }

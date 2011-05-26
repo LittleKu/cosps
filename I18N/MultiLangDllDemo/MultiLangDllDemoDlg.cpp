@@ -190,6 +190,5 @@ void CMultiLangDllDemoDlg::Localize()
 void CMultiLangDllDemoDlg::OnDestroy() 
 {
 	CDialog::OnDestroy();
-	delete CI18N::GetInstance();
-	
+//	delete CI18N::GetInstance();	
 }

@@ -31,16 +31,20 @@ public:
 	//{{AFX_VIRTUAL(CResultListCtrl)
 	protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
 // Implementation
 public:
+	void OpenFile();
+	void OpenFolder();
 	virtual ~CResultListCtrl();
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CResultListCtrl)
-		// NOTE - the ClassWizard will add and remove member functions here.
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

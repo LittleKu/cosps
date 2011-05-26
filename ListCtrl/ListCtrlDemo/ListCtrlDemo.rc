@@ -172,7 +172,7 @@ END
 IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 623, 356
 STYLE WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,201,4,410,135
     COMBOBOX        IDC_FILTER_COMBO,208,96,394,77,CBS_DROPDOWN | CBS_SORT | 
@@ -356,6 +356,7 @@ IDB_FILTER_TREE_SEL_STATE BITMAP  DISCARDABLE     "res\\TreeItemSelState.bmp"
 IDB_FILTER_TREE_CHECK_BOX_STATE BITMAP  DISCARDABLE     "res\\TreeCheckBoxState.bmp"
 IDB_SPLITTER_V_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgV.bmp"
 IDB_SPLITTER_H_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgH.bmp"
+IDB_MAIN_TOOLBAR_BKG    BITMAP  DISCARDABLE     "res\\MainToolBarBkg.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

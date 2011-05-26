@@ -104,6 +104,10 @@ SOURCE=.\Counter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\Gradient.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.cpp
 # End Source File
 # Begin Source File
@@ -117,6 +121,10 @@ SOURCE=.\ListCtrlDemoDlg.cpp
 # Begin Source File
 
 SOURCE=.\MainDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MainReBar.cpp
 # End Source File
 # Begin Source File
 
@@ -185,6 +193,10 @@ SOURCE=.\Counter.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\Gradient.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.h
 # End Source File
 # Begin Source File
@@ -194,6 +206,10 @@ SOURCE=.\ListCtrlDemoDlg.h
 # Begin Source File
 
 SOURCE=.\MainDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MainReBar.h
 # End Source File
 # Begin Source File
 
@@ -274,6 +290,10 @@ SOURCE=.\res\ListCtrlDemo.ico
 # Begin Source File
 
 SOURCE=.\res\ListCtrlDemo.rc2
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\MainToolBarBkg.bmp
 # End Source File
 # Begin Source File
 

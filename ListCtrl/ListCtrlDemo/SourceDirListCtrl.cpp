@@ -162,7 +162,7 @@ void CSourceDirListCtrl::CheckSelectedItems(BOOL bChecked)
 
 void CSourceDirListCtrl::OpenFolder()
 {
-	POSITION pos = GetFirstSelectedItemPosition();	
+	POSITION pos = GetFirstSelectedItemPosition();
 	if(pos == NULL)
 	{
 		return;

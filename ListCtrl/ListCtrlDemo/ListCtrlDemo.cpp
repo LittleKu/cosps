@@ -76,7 +76,8 @@ BOOL CListCtrlDemoApp::InitInstance()
 
 	m_pSysBkBrush = new CBrush();
 //	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
-	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
+//	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
+	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;

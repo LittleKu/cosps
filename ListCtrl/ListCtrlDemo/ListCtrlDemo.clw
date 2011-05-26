@@ -2,33 +2,34 @@
 
 [General Info]
 Version=1
-LastClass=CResultListCtrl
-LastTemplate=CListCtrl
+LastClass=CMainReBar
+LastTemplate=generic CWnd
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=8
+ClassCount=9
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=12
-Resource1=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_LISTCTRLDEMO_DIALOG
+Resource4=IDD_MAIN_DLG
 Resource5=CG_IDD_PROGRESS
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource9=IDD_MAIN_DLG
-Resource10=IDD_ABOUTBOX
+Resource9=IDD_LISTCTRLDEMO_DIALOG
+Resource10=IDD_PROGRESS (Chinese (P.R.C.))
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_ABOUTBOX (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
+Class9=CMainReBar
 Resource12=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -244,4 +245,11 @@ ImplementationFile=ResultListCtrl.cpp
 BaseClass=CMultiColumnSortListCtrl
 Filter=W
 VirtualFilter=FWC
+
+[CLS:CMainReBar]
+Type=0
+HeaderFile=MainReBar.h
+ImplementationFile=MainReBar.cpp
+BaseClass=CReBar
+Filter=W
 

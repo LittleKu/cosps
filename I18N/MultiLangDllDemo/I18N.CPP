@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "I18N.H"
+#include <memory>
+
 
 CString GetResString(RESSTRIDTYPE StringID)
 {
@@ -10,11 +12,13 @@ CI18N* CI18N::m_singletonInst = NULL;
 
 CI18N* CI18N::GetInstance()
 {
-	if(m_singletonInst == NULL)
-	{
-		m_singletonInst = new CI18N();
-	}
-	return m_singletonInst;
+// 	if(m_singletonInst == NULL)
+// 	{
+// 		m_singletonInst = new CI18N();
+// 	}
+//	return m_singletonInst;
+ 	static std::auto_ptr<CI18N> ptr(new CI18N());	
+ 	return ptr.get();
 }
 
 CI18N::CI18N()

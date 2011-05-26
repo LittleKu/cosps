@@ -8,6 +8,7 @@
 //
 #include "ListCtrlDemoDlg.h"
 #include "MainToolBarCtrl.h"
+#include "MainReBar.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMainDlg dialog
 #define IDC_TOOLBAR			18880
@@ -20,7 +21,7 @@ public:
 	virtual ~CMainDlg();
 	CListCtrlDemoDlg* m_pCounterDlg;
 	CMainToolBarCtrl* m_pMainToolBarCtrl;
-	CReBarCtrl m_MainReBarCtrl;
+	CMainReBarCtrl m_MainReBarCtrl;
 // Dialog Data
 	//{{AFX_DATA(CMainDlg)
 	enum { IDD = IDD_MAIN_DLG };

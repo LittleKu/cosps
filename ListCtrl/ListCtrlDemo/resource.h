@@ -19,6 +19,7 @@
 #define IDB_SPLITTER_BKG                139
 #define IDB_SPLITTER_V_BKG              139
 #define IDB_SPLITTER_H_BKG              140
+#define IDB_MAIN_TOOLBAR_BKG            141
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -82,7 +83,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        141
+#define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32779
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           107
