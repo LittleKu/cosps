@@ -53,7 +53,6 @@ public:
 protected:
 	void ResetResult();
 	void DeleteAllListItems();
-	int AddRow(const CFileInfo& fi);
 	// Generated message map functions
 	//{{AFX_MSG(CListCtrlDemoDlg)
 	virtual BOOL OnInitDialog();

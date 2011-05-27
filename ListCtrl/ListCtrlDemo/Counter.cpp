@@ -1,5 +1,7 @@
 #include "StdAfx.h"
 #include "Counter.h"
+#include "FileParser.h"
+#include "CFileParser.h"
 
 UINT CCounter::CountThreadProc(LPVOID lpvData)
 {
@@ -66,7 +68,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	::SendMessage(hProgWnd, WM_PROGRESS_SET_RANGE, 0, cAllFiles);
 	
 	//Do the works
-	pVisitor = new CFilePrintVisitor(lpThreadParam->hwndMain, hProgWnd);
+	pVisitor = new CFileParserVisitor(lpThreadParam->hwndMain, hProgWnd);
 	progChecker.Reset();
 	prev = 0;
 	timeCost.Reset();
@@ -147,10 +149,10 @@ int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
 	return m_nCount;
 }
 
-CFilePrintVisitor::CFilePrintVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMainWnd(hMainWnd), m_hProgWnd(hProgressWnd), m_nCount(0)
+CFileParserVisitor::CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMainWnd(hMainWnd), m_hProgWnd(hProgressWnd), m_nCount(0)
 {
 }
-int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
+int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName)
 {
 	m_nCount++;
 
@@ -165,6 +167,9 @@ int CFilePrintVisitor::VisitFile(LPCTSTR lpszFileName)
 
 	CFileInfo* pFi = new CFileInfo();
 	pFi->SetFileName(lpszFileName);
+
+	CCFileParser cppFileParser(pFi);
+	cppFileParser.ParseFile();
 
 	::SendMessage(m_hMainWnd, WM_PROGRESS_UPDATE, (WPARAM)(pFi), 0);
 

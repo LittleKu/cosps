@@ -6,6 +6,7 @@
 #include "ListCtrlDemo.h"
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
+#include "FileParser.h"
 
 
 #ifdef _DEBUG
@@ -449,33 +450,6 @@ void CListCtrlDemoDlg::RefreshFilterArrays()
 		AfxTrace("Filer(%d): [%s]\n", i + 1, m_sFilterArray.GetAt(i));
 	}
 #endif
-}
-
-int CListCtrlDemoDlg::AddRow(const CFileInfo& fi)
-{
-	int nRes = -1;
-	
-    LV_ITEM lvi;
-	
-    lvi.mask = LVIF_TEXT | LVIF_PARAM;
-    lvi.iItem = m_resultListCtrl.GetItemCount();
-    lvi.lParam = (LPARAM)&fi;
-	
-    lvi.iSubItem = 0;
-    lvi.pszText = (LPTSTR)(LPCTSTR)fi.m_sFileName;
-    nRes = m_resultListCtrl.InsertItem(&lvi);
-	
-    int iSubItem = 0;
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFileExt);
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
-
-	m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nTotalLines));
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCodeLines));
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCommentLines));
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.GetMixedLines()));
-    m_resultListCtrl.SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nBlankLines));
-
-	return nRes;
 }
 
 void CListCtrlDemoDlg::OnButtonAdd() 

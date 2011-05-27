@@ -38,42 +38,6 @@ void CTimeCost::Reset()
 	m_clockCurr = clock();
 }
 
-CFileInfo::CFileInfo() : m_nTotalLines(0), m_nCodeLines(0), m_nCommentLines(0), m_nBlankLines(0)
-{
-}
-
-void CFileInfo::SetFileName(LPCTSTR lpszFullFileName)
-{
-    TCHAR drive[MAX_PATH];
-    TCHAR dir[MAX_PATH];
-    TCHAR fname[MAX_PATH];
-    TCHAR ext[MAX_PATH];
-
-    m_sFullFileName = lpszFullFileName;
-
-    _tsplitpath(m_sFullFileName, drive, dir, fname, ext);
-
-    m_sFilePath = drive;
-    m_sFilePath += dir;
-
-	m_sFileExt = ext;
-
-    m_sFileName = fname;
-	m_sFileName += ext;
-}
-
-UINT CFileInfo::GetMixedLines() const
-{
-	return (m_nCodeLines + m_nCommentLines) - (m_nTotalLines - m_nBlankLines);
-}
-
-CString CFileInfo::ToString(UINT n) const
-{
-	CString str;
-	str.Format("%d", n);
-	return str;
-}
-
 #ifdef _DEBUG
 #define TRACE_LONG_NAME(x) \
 	if(x.GetLength() > MAX_PATH) \
@@ -83,6 +47,12 @@ CString CFileInfo::ToString(UINT n) const
 #endif
 
 BEGIN_NAMESPACE(CommonUtils)
+CString ToString(UINT n)
+{
+	CString str;
+	str.Format("%d", n);
+	return str;
+}
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
 int CommonUtils::wildcmp(const char *wild, const char *string) {

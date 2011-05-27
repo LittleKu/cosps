@@ -58,27 +58,8 @@ private:
 	clock_t m_clockLast;
 };
 
-class CFileInfo
-{
-public:
-	CFileInfo();
-	void SetFileName(LPCTSTR lpszFullFileName);
-	UINT GetMixedLines() const;
-	CString ToString(UINT n) const;
-public:
-	CString m_sFullFileName;
-	
-    CString m_sFilePath;
-    CString m_sFileName;
-    CString m_sFileExt;
-
-	UINT m_nTotalLines;
-	UINT m_nCodeLines;
-	UINT m_nCommentLines;
-	UINT m_nBlankLines;
-};
-
 BEGIN_NAMESPACE(CommonUtils)
+	CString ToString(UINT n);
 	int wildcmp(const char *wild, const char *string);
 	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);

@@ -30,10 +30,10 @@ private:
 	CTimeCost m_timeCost;
 };
 
-class CFilePrintVisitor : public CFileVisitor
+class CFileParserVisitor : public CFileVisitor
 {
 public:
-	CFilePrintVisitor(HWND hMainWnd, HWND hProgressWnd);
+	CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd);
 	virtual int VisitFile(LPCTSTR lpszFileName);
 	virtual UINT GetResult() { return m_nCount; }
 private:

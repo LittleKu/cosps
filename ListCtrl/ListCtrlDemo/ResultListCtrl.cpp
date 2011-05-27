@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ResultListCtrl.h"
 #include <Shellapi.h>
+#include "FileParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -89,11 +90,11 @@ int CResultListCtrl::AddRow(const CFileInfo& fi)
     SetItemText(lvi.iItem, ++iSubItem, fi.m_sFileExt);
     SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
 	
-	SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nTotalLines));
-    SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCodeLines));
-    SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nCommentLines));
-    SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.GetMixedLines()));
-    SetItemText(lvi.iItem, ++iSubItem, fi.ToString(fi.m_nBlankLines));
+	SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nTotalLines));
+    SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nCodeLines));
+    SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nCommentLines));
+    SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.GetMixedLines()));
+    SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nBlankLines));
 	
 	return nRes;
 }
