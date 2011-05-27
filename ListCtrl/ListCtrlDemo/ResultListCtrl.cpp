@@ -21,6 +21,27 @@ static char THIS_FILE[] = __FILE__;
 
 #define IDM_RESULT_LIST_LAST				IDM_RESULT_LIST_OPEN_DIR
 
+struct ColumnInfo
+{
+    LPCTSTR     name;
+    SORT_TYPE   sortType;
+    SORT_STATE  sortState;
+    int         lengthExtension;
+    int         fmt;
+};
+
+static ColumnInfo columns[] =
+{
+    { _T("File Name"),  				TYPE_TEXT,    DESCENDING,   40 },
+    { _T("Extension"),  				TYPE_TEXT,    DESCENDING,   0  },
+    { _T("Path"),       				TYPE_TEXT,    DESCENDING,   25 },
+    { _T("Lines"),						TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT },
+    { _T("Code"),						TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
+    { _T("Comment"),					TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
+    { _T("Mixed"),						TYPE_NUMERIC, DESCENDING,  -75, LVCFMT_RIGHT },
+    { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
+};
+
 CResultListCtrl::CResultListCtrl()
 {
 }
@@ -169,4 +190,39 @@ void CResultListCtrl::OpenFile()
 void CResultListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
 	OpenFile();
+}
+
+void CResultListCtrl::Init()
+{
+    SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, (LPARAM) 
+        LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT |
+		SendMessage(LVM_GETEXTENDEDLISTVIEWSTYLE));
+	
+	int         i;
+    LVCOLUMN    lvc;
+	
+    lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
+	
+	int size = sizeof(columns)/sizeof(columns[0]);
+	
+    for(i = 0; i < size; i++)
+    {
+        lvc.iSubItem = i;
+        lvc.pszText = (char *)columns[i].name;
+        lvc.cx = GetStringWidth(lvc.pszText) + 
+            columns[i].lengthExtension + 15;
+        if (lvc.cx < 40) lvc.cx = 40;
+        lvc.fmt = columns[i].fmt;
+        InsertColumn(i, columns[i].sortType, columns[i].sortState, 
+            &lvc);
+    }
+	
+	SortColumn( 2, false );
+	SortColumn( 1, true );
+	SortColumn( 0, true );
+	
+	SetUniqueName( "ResultsListCtrl" );
+	LoadColumnWidths();
+    LoadColumnOrder();
+    LoadColumnSort();
 }

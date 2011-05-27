@@ -42,6 +42,8 @@ public:
 
 // Implementation
 public:
+	void AddSrcDir(LPCTSTR lpszDir);
+	void Init();
 	void OpenFolder();
 	void CheckSelectedItems(BOOL bChecked);
 	void SelectAllItems();

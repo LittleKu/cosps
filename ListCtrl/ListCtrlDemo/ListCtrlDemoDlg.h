@@ -88,7 +88,6 @@ protected:
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
-	void AddSrcDir(LPCTSTR lpszDir);
 	void InitSrcDirListCtrl();
 	void SetPair(int idc, int idp, int count, int total = 0);
 	CProgressDlg* m_pProgressDlg;

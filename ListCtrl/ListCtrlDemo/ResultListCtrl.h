@@ -36,6 +36,7 @@ public:
 
 // Implementation
 public:
+	void Init();
 	void OpenFile();
 	void OpenFolder();
 	virtual ~CResultListCtrl();

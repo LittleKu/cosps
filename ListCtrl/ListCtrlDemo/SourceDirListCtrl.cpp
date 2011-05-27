@@ -11,6 +11,19 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+struct SrcDirColumnInfo
+{
+	LPCTSTR     lpszName;
+	int         nType;
+	int         nWidth;
+};
+
+static SrcDirColumnInfo srcDirColumns[] =
+{
+    { _T(""),				CL_UNCHECKED,         50   },
+    { _T("Directory"),		CL_NONE_CHECK_BOX,    400  }
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CSourceDirListCtrl
 
@@ -170,4 +183,52 @@ void CSourceDirListCtrl::OpenFolder()
 	int nItem = GetNextSelectedItem(pos);
 	CString szFolderPath = GetItemText(nItem, 1);
 	ShellExecute(NULL, _T("open"), _T("explorer"), _T("/select,\"") + szFolderPath + _T("\""), NULL, SW_SHOW);
+}
+
+void CSourceDirListCtrl::Init()
+{
+	//1. Set Extended Style
+	DWORD dwExtendedStyle = GetExtendedStyle();
+	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
+	SetExtendedStyle(dwExtendedStyle);
+	
+	//2. Insert Columns
+    LVCOLUMN    lvc;
+    lvc.mask = LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
+	
+	int size = sizeof(srcDirColumns)/sizeof(srcDirColumns[0]);
+	int i;
+    for(i = 0; i < size; i++)
+    {
+        lvc.iSubItem = i;
+        lvc.pszText = (LPTSTR)srcDirColumns[i].lpszName;
+		lvc.cx = srcDirColumns[i].nWidth;
+		
+        InsertColumn(i, &lvc);
+    }
+	
+	//3. Init CheckBox Header Ctrl
+	HDITEM hditem;
+	
+	size = GetHeaderCtrl()->GetItemCount();
+	for(i = 0; i < size; i++)
+	{
+		hditem.mask = HDI_IMAGE | HDI_FORMAT;
+		GetHeaderCtrl()->GetItem(i, &hditem);
+		hditem.fmt |=  HDF_IMAGE;
+		hditem.iImage = srcDirColumns[i].nType;
+		GetHeaderCtrl()->SetItem(i, &hditem);
+	}
+}
+
+void CSourceDirListCtrl::AddSrcDir(LPCTSTR lpszDir)
+{
+	int nItem = GetItemCount();
+	
+	InsertItem(nItem, _T(""));
+	SetItemCheckedState(nItem, 0, CL_CHECKED, FALSE);
+	
+	SetItemText(nItem, 1, lpszDir);
+	
+	ValidateCheck();
 }

@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "ThirdParty/Gradient.h"
 #include "ListCtrlDemo.h"
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
@@ -14,40 +13,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-struct ColumnInfo
-{
-    LPCTSTR     name;
-    SORT_TYPE   sortType;
-    SORT_STATE  sortState;
-    int         lengthExtension;
-    int         fmt;
-};
-
-static ColumnInfo columns[] =
-{
-    { _T("File Name"),  				TYPE_TEXT,    DESCENDING,   40 },
-    { _T("Extension"),  				TYPE_TEXT,    DESCENDING,   0  },
-    { _T("Path"),       				TYPE_TEXT,    DESCENDING,   25 },
-    { _T("Lines"),						TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT },
-    { _T("Code Only"),					TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
-    { _T("Comments Only"),				TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
-    { _T("Both (Code /w Comments)"),	TYPE_NUMERIC, DESCENDING,  -75, LVCFMT_RIGHT },
-    { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
-};
-
-struct SrcDirColumnInfo
-{
-	LPCTSTR     lpszName;
-	int         nType;
-	int         nWidth;
-};
-
-static SrcDirColumnInfo srcDirColumns[] =
-{
-    { _T(""),				CL_UNCHECKED,         50   },
-    { _T("Directory"),		CL_NONE_CHECK_BOX,    400  }
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
@@ -340,37 +305,7 @@ HCURSOR CListCtrlDemoDlg::OnQueryDragIcon()
 
 void CListCtrlDemoDlg::InitResultListCtrl()
 {
-    m_resultListCtrl.SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, (LPARAM) 
-        LVS_EX_GRIDLINES | LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT |
-        m_resultListCtrl.SendMessage(LVM_GETEXTENDEDLISTVIEWSTYLE));
-
-	int         i;
-    LVCOLUMN    lvc;
-	
-    lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-	
-	int size = sizeof(columns)/sizeof(columns[0]);
-
-    for(i = 0; i < size; i++)
-    {
-        lvc.iSubItem = i;
-        lvc.pszText = (char *)columns[i].name;
-        lvc.cx = m_resultListCtrl.GetStringWidth(lvc.pszText) + 
-            columns[i].lengthExtension + 15;
-        if (lvc.cx < 40) lvc.cx = 40;
-        lvc.fmt = columns[i].fmt;
-        m_resultListCtrl.InsertColumn(i, columns[i].sortType, columns[i].sortState, 
-            &lvc);
-    }
-	
-	m_resultListCtrl.SortColumn( 2, false );
-	m_resultListCtrl.SortColumn( 1, true );
-	m_resultListCtrl.SortColumn( 0, true );
-	
-	m_resultListCtrl.SetUniqueName( "ResultsListCtrl" );
-	m_resultListCtrl.LoadColumnWidths();
-    m_resultListCtrl.LoadColumnOrder();
-    m_resultListCtrl.LoadColumnSort();
+	m_resultListCtrl.Init();
 }
 
 
@@ -471,7 +406,7 @@ void CListCtrlDemoDlg::OnButtonAdd()
 	{
 		if(SHGetPathFromIDList(pidlSelected, szPath))
 		{
-			AddSrcDir(szPath);
+			m_srcDirListCtrl.AddSrcDir(szPath);
 		}
 		//Free it
 		LPMALLOC pMalloc = NULL;
@@ -647,59 +582,16 @@ void CListCtrlDemoDlg::SetPair(int idc, int idp, int count, int total)
 
 void CListCtrlDemoDlg::InitSrcDirListCtrl()
 {
-	//1. Set Extended Style
-	DWORD dwExtendedStyle = m_srcDirListCtrl.GetExtendedStyle();
-	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
-	m_srcDirListCtrl.SetExtendedStyle(dwExtendedStyle);
-	
-	//2. Insert Columns
-    LVCOLUMN    lvc;
-    lvc.mask = LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
-	
-	int size = sizeof(srcDirColumns)/sizeof(srcDirColumns[0]);
-	int i;
-    for(i = 0; i < size; i++)
-    {
-        lvc.iSubItem = i;
-        lvc.pszText = (LPTSTR)srcDirColumns[i].lpszName;
-		lvc.cx = srcDirColumns[i].nWidth;
-
-        m_srcDirListCtrl.InsertColumn(i, &lvc);
-    }
-
-	//3. Init CheckBox Header Ctrl
-	HDITEM hditem;
-
-	size = m_srcDirListCtrl.GetHeaderCtrl()->GetItemCount();
-	for(i = 0; i < size; i++)
-	{
-		hditem.mask = HDI_IMAGE | HDI_FORMAT;
-		m_srcDirListCtrl.GetHeaderCtrl()->GetItem(i, &hditem);
-		hditem.fmt |=  HDF_IMAGE;
-		hditem.iImage = srcDirColumns[i].nType;
-		m_srcDirListCtrl.GetHeaderCtrl()->SetItem(i, &hditem);
-	}
-
+	m_srcDirListCtrl.Init();
 #ifdef _DEBUG
 	CString sDir;
+	int i;
 	for(i = 0; i < 30; i++)
 	{
 		sDir.Format("E:\\temp\\long\\%d", i);
-		AddSrcDir(sDir);
+		m_srcDirListCtrl.AddSrcDir(sDir);
 	}
 #endif
-}
-
-void CListCtrlDemoDlg::AddSrcDir(LPCTSTR lpszDir)
-{
-	int nItem = m_srcDirListCtrl.GetItemCount();
-
-	m_srcDirListCtrl.InsertItem(nItem, _T(""));
-	m_srcDirListCtrl.SetItemCheckedState(nItem, 0, CL_CHECKED, FALSE);
-
-	m_srcDirListCtrl.SetItemText(nItem, 1, lpszDir);
-
-	m_srcDirListCtrl.ValidateCheck();
 }
 
 LRESULT CListCtrlDemoDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 

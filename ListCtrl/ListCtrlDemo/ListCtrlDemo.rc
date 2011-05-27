@@ -186,7 +186,7 @@ BEGIN
     RTEXT           "Total:",IDC_TXT_TOTAL,211,291,45,12
     LTEXT           "Number",IDC_TXT_FILE_NUMBER,270,291,45,12
     LTEXT           "Lines",IDC_TXT_LINES,323,291,45,12
-    RTEXT           "Count:",IDC_TXT_C,211,309,45,12
+    RTEXT           "#:",IDC_TXT_C,211,309,45,12
     LTEXT           "",IDC_NUMBER_C,270,309,45,12,SS_SUNKEN
     LTEXT           "",IDC_LINES_C,323,309,45,12,SS_SUNKEN
     LTEXT           "Code",IDC_TXT_CODE,376,291,45,12
@@ -197,7 +197,7 @@ BEGIN
     LTEXT           "",IDC_COMMENT_C,429,309,45,12,SS_SUNKEN
     LTEXT           "",IDC_MIXED_C,482,309,45,12,SS_SUNKEN
     LTEXT           "",IDC_BLANK_C,535,309,45,12,SS_SUNKEN
-    RTEXT           "Percent:",IDC_TXT_P,211,327,45,12
+    RTEXT           "%:",IDC_TXT_P,211,327,45,12
     LTEXT           "",IDC_NUMBER_P,270,327,45,12,SS_SUNKEN
     LTEXT           "",IDC_LINES_P,323,327,45,12,SS_SUNKEN
     LTEXT           "",IDC_CODE_P,376,327,45,12,SS_SUNKEN
