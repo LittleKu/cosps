@@ -22,6 +22,7 @@ class CListCtrlDemoDlg : public CResizableDialog
 	friend class CMainDlg;
 // Construction
 public:
+	void OnExport();
 	CListCtrlDemoDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CListCtrlDemoDlg();
 

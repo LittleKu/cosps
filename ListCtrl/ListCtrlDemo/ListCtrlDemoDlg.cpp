@@ -6,7 +6,7 @@
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
 #include "FileParser.h"
-
+#include "Export.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -780,4 +780,29 @@ HBRUSH CListCtrlDemoDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)pApp->m_pSysBkBrush->GetSafeHandle();
     }
 	return hbr;
+}
+
+static const TCHAR *FILTERS =
+        _T("Comma Separated Values (*.csv)|*.csv|")
+        _T("XML Data (*.xml)|*.xml|")
+        _T("|");
+const int NUM_FILTERS = 2;
+
+void CListCtrlDemoDlg::OnExport()
+{
+	CFileDialog dlg(FALSE, "", NULL, 
+        OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
+    dlg.m_ofn.nFilterIndex = 1;
+
+	BOOL bSuccess = FALSE;
+    if (dlg.DoModal() == IDOK  &&  !dlg.GetPathName().IsEmpty())
+	{
+		CCSVExporter exporter(&m_resultListCtrl);
+		bSuccess = exporter.DoExport(dlg.GetPathName());
+	}
+
+	if(bSuccess)
+	{
+		AfxMessageBox(_T("The data was successfully exported."), MB_OK | MB_ICONINFORMATION);
+	}	
 }

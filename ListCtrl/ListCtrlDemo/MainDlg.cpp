@@ -222,6 +222,12 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pCounterDlg->OnButtonClear();
 		}
 		break;
+	case IDM_FILE_EXPORT:
+	case ID_TBBTN_EXPORT:
+		{
+			m_pCounterDlg->OnExport();
+		}
+		break;
 	case IDM_FILE_EXIT:
 	case ID_TBBTN_EXIT:
 		{
