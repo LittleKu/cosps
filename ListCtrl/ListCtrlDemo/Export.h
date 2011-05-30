@@ -4,12 +4,12 @@
 class IExporter
 {
 public:
-	virtual BOOL PreExport()  {}
 	virtual BOOL DoExport(LPCTSTR lpFileName)   = 0;
-	virtual BOOL PostExport() {}
 };
 
-class CCSVExporter
+class CResultListCtrl;
+
+class CCSVExporter : public IExporter
 {
 public:
 	CCSVExporter(CListCtrl* pListCtrl);
@@ -18,5 +18,15 @@ public:
 private:
 	CListCtrl* m_pListCtrl;
 };
+
+class CXLSExporter : public IExporter
+{
+public:
+	CXLSExporter(CResultListCtrl* pListCtrl);
+	virtual BOOL DoExport(LPCTSTR lpFileName);
+private:
+	CResultListCtrl* m_pListCtrl;
+};
+
 
 #endif

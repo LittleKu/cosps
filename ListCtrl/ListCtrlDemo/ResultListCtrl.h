@@ -36,6 +36,7 @@ public:
 
 // Implementation
 public:
+	void ExportAsExcel(CDatabase& database);
 	void Init();
 	void OpenFile();
 	void OpenFolder();
@@ -47,7 +48,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	//}}AFX_MSG
-
+	CString QMColumnName(LPCTSTR lpStr);
 	DECLARE_MESSAGE_MAP()
 };
 

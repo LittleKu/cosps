@@ -782,27 +782,39 @@ HBRUSH CListCtrlDemoDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-static const TCHAR *FILTERS =
-        _T("Comma Separated Values (*.csv)|*.csv|")
-        _T("XML Data (*.xml)|*.xml|")
-        _T("|");
-const int NUM_FILTERS = 2;
-
 void CListCtrlDemoDlg::OnExport()
 {
+	static const TCHAR *FILTERS =
+        _T("Comma Separated Values (*.csv)|*.csv|")
+		_T("Excel Workbook (*.xls)|*.xls|")
+        _T("XML Data (*.xml)|*.xml|")
+        _T("|");
 	CFileDialog dlg(FALSE, "", NULL, 
         OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
     dlg.m_ofn.nFilterIndex = 1;
-
+	
 	BOOL bSuccess = FALSE;
-    if (dlg.DoModal() == IDOK  &&  !dlg.GetPathName().IsEmpty())
+	IExporter* pExporter = NULL;
+	if (dlg.DoModal() == IDOK  &&  !dlg.GetPathName().IsEmpty())
 	{
-		CCSVExporter exporter(&m_resultListCtrl);
-		bSuccess = exporter.DoExport(dlg.GetPathName());
-	}
+		if(dlg.m_ofn.nFilterIndex == 1)
+		{
+			pExporter = new CCSVExporter(&m_resultListCtrl);
+		}
+		else if(dlg.m_ofn.nFilterIndex == 2)
+		{
+			pExporter = new CXLSExporter(&m_resultListCtrl);
+		}
+		//TODO: Other types
 
-	if(bSuccess)
+		bSuccess = pExporter->DoExport(dlg.GetPathName());
+
+		delete pExporter;
+		pExporter = NULL;
+	}
+	
+    if(bSuccess)
 	{
 		AfxMessageBox(_T("The data was successfully exported."), MB_OK | MB_ICONINFORMATION);
-	}	
+	}
 }

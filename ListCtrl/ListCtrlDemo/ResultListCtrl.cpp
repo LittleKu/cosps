@@ -226,3 +226,84 @@ void CResultListCtrl::Init()
     LoadColumnOrder();
     LoadColumnSort();
 }
+
+void CResultListCtrl::ExportAsExcel(CDatabase& database)
+{
+	int i, j;
+	CString sSQL;
+
+	//0. Create Table
+	int size = sizeof(columns)/sizeof(columns[0]);	
+	sSQL = "CREATE TABLE StatResult (";
+    for(i = 0; i < size; i++)
+	{
+		sSQL += QMColumnName(columns[i].name);
+		sSQL += " ";
+		if(columns[i].sortType == TYPE_TEXT)
+		{
+			sSQL += "TEXT";
+		}
+		else if(columns[i].sortType == TYPE_NUMERIC)
+		{
+			sSQL += "NUMBER";
+		}
+
+		if(i < (size - 1))
+		{
+			sSQL += ", ";
+		}
+	}
+	sSQL += ")";
+	database.ExecuteSQL(sSQL);
+	
+	//1. Insert values to TABLE
+	CString sPrefix = "INSERT INTO StatResult (";
+	for(i = 0; i < size; i++)
+	{
+		sPrefix += QMColumnName(columns[i].name);
+		if(i < (size - 1))
+		{
+			sPrefix += ", ";
+		}
+	}
+	sPrefix += ") VALUES (";
+
+	int nRowCount = GetItemCount();
+	for(i = 0; i < nRowCount; i++)
+	{
+		sSQL = sPrefix;
+		for(j = 0; j < size; j++)
+		{
+			if(columns[j].sortType == TYPE_TEXT)
+			{
+				sSQL += "\'";
+				sSQL += GetItemText(i, j);
+				sSQL += "\'";
+			}
+			else if(columns[j].sortType == TYPE_NUMERIC)
+			{
+				sSQL += GetItemText(i, j);
+			}
+			if(j < (size - 1))
+			{
+				sSQL += ", ";
+			}
+		}
+		sSQL += ")";
+		database.ExecuteSQL(sSQL);
+	}
+}
+
+CString CResultListCtrl::QMColumnName(LPCTSTR lpStr)
+{
+	CString str;
+	if(strchr(lpStr, ' '))
+	{
+		str.Format("`%s`", lpStr);
+	}
+	else
+	{
+		str = lpStr;
+	}
+	return str;
+}

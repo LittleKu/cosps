@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Export.h"
+#include "ResultListCtrl.h"
 
 CCSVExporter::CCSVExporter(CListCtrl* pListCtrl) : m_pListCtrl(pListCtrl)
 {
@@ -37,6 +38,10 @@ BOOL CCSVExporter::DoExport(LPCTSTR lpFileName)
 			
 			cFile.WriteString(szText);
 		}
+
+		//Total Statistic
+
+
 		cFile.Close();
 		
 		bResult = TRUE;
@@ -81,3 +86,51 @@ void CCSVExporter::LoadHeaderString(CString& str)
 		}
 	}
 }
+
+
+
+CXLSExporter::CXLSExporter(CResultListCtrl* pListCtrl) : m_pListCtrl(pListCtrl)
+{
+
+}
+
+BOOL CXLSExporter::DoExport(LPCTSTR lpFileName)
+{
+	BOOL bResult = FALSE;
+	
+	CDatabase database;
+	//Excel driver
+	CString sDriver = "MICROSOFT EXCEL DRIVER (*.XLS)";
+	CString sSql;
+	
+	TRY
+	{
+		//Specifies an ODBC connect string
+		sSql.Format("DRIVER={%s};DSN='';FIRSTROWHASNAMES=1;READONLY=FALSE;CREATE_DB=\"%s\";DBQ=%s",
+			sDriver, lpFileName, lpFileName);
+		
+		//Create Excel database
+		if( database.OpenEx(sSql, CDatabase::noOdbcDialog) )
+		{
+			m_pListCtrl->ExportAsExcel(database);
+		}      
+		
+		//Close Database
+		database.Close();
+
+		bResult = TRUE;
+	}
+	CATCH_ALL(e)
+	{
+		TCHAR szCause[4096];
+		CString msg;
+		
+		e->GetErrorMessage(szCause, 4096);	   
+		AfxMessageBox(szCause, MB_OK | MB_ICONEXCLAMATION);
+	}
+	END_CATCH_ALL
+	
+	return bResult;
+}
+
+
