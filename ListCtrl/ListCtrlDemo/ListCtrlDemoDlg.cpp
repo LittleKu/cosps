@@ -788,6 +788,7 @@ void CListCtrlDemoDlg::OnExport()
         _T("Comma Separated Values (*.csv)|*.csv|")
 		_T("Excel Workbook (*.xls)|*.xls|")
         _T("XML Data (*.xml)|*.xml|")
+		_T("HTML files (*.html)|*.html|")
         _T("|");
 	CFileDialog dlg(FALSE, "", NULL, 
         OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
@@ -805,16 +806,31 @@ void CListCtrlDemoDlg::OnExport()
 		{
 			pExporter = new CXLSExporter(&m_resultListCtrl);
 		}
-		//TODO: Other types
-
+		else if(dlg.m_ofn.nFilterIndex == 3)
+		{
+			pExporter = new CXMLExporter(&m_resultListCtrl);
+		}
+		else if(dlg.m_ofn.nFilterIndex == 4)
+		{
+			pExporter = new CHTMLExporter(&m_resultListCtrl);
+		}
+		else
+		{
+			AfxMessageBox(_T("Unsupported file format"), MB_OK | MB_ICONERROR);
+		}
+	}
+	if(pExporter)
+	{
 		bSuccess = pExporter->DoExport(dlg.GetPathName());
-
+		
 		delete pExporter;
 		pExporter = NULL;
-	}
-	
-    if(bSuccess)
-	{
-		AfxMessageBox(_T("The data was successfully exported."), MB_OK | MB_ICONINFORMATION);
+
+		if(bSuccess)
+		{
+			CString sPrompt;
+			sPrompt.Format(_T("The data was successfully exported to: %s"), dlg.GetPathName());
+			AfxMessageBox(sPrompt, MB_OK | MB_ICONINFORMATION);
+		}
 	}
 }

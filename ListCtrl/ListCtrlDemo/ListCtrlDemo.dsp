@@ -275,6 +275,10 @@ SOURCE=.\ThirdParty\ToolBarCtrlEx.h
 
 SOURCE=.\Util.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\Version.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

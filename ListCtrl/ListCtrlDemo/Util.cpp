@@ -53,6 +53,20 @@ CString ToString(UINT n)
 	str.Format("%d", n);
 	return str;
 }
+
+CString GetPercentStr(UINT nCount, UINT nTotal)
+{
+	CString str;
+	if(nTotal <= 0)
+	{
+		str = "0%";
+	}
+	else
+	{
+		str.Format("%d%c", (nCount * 100) / nTotal, '%');
+	}
+	return str;
+}
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
 int CommonUtils::wildcmp(const char *wild, const char *string) {

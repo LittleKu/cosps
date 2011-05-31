@@ -28,5 +28,24 @@ private:
 	CResultListCtrl* m_pListCtrl;
 };
 
+class CXMLExporter : public IExporter
+{
+public:
+	CXMLExporter(CResultListCtrl* pListCtrl);
+	virtual BOOL DoExport(LPCTSTR lpFileName);
+private:
+	CResultListCtrl* m_pListCtrl;
+};
+
+class CHTMLExporter : public IExporter
+{
+public:
+	CHTMLExporter(CResultListCtrl* pListCtrl);
+	virtual BOOL DoExport(LPCTSTR lpFileName);
+private:
+	CResultListCtrl* m_pListCtrl;
+	CString GetHtmlColorStr(COLORREF cr = RGB(255, 255, 0));
+};
+
 
 #endif
