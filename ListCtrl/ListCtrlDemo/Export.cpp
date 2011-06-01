@@ -248,32 +248,19 @@ BOOL CHTMLExporter::DoExport(LPCTSTR lpFileName)
     {
         CStdioFile cFile(lpFileName, CFile::modeCreate | CFile::modeWrite);     
         
-        // the header
-        s.Format(
-			"<HTML>\n"
-			"<HEAD>\n"
-			"\t<META HTTP-EQUIV=\"CONTENT-TYPE\" CONTENT=\"TEXT/HTML; CHARSET=UTF-8\" />\n"
-			"\t<TITLE>Statistics Result - %s</TITLE>\n"
-			"</HEAD>\n"
-			"<BODY>\n"
-			"\n"
-			"<TABLE NOSAVE=\"\"  BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" WIDTH=\"100%%\"><TBODY><TR NOSAVE=\"\">\n"
-			"\t<TD COLSPAN=\"2\" ROWSPAN=\"2\" NOSAVE=\"\"><FONT SIZE=5 COLOR=\"#336666\"><B>Statistics Result</B></FONT></TD>\n"
-			"\t<TD ALIGN=\"RIGHT\"><FONT SIZE=2 COLOR=\"#336666\">Powered by Colin</FONT><BR><FONT SIZE=2 COLOR=\"#336666\">%s</FONT></TD>\n"
-			"</TR></TBODY></TABLE>\n\n<HR>\n\n",
-            SZ_VERSION_NAME, SZ_VERSION_NAME);
+        // the header: title
+		FormatHtmlHeader(s, "Statistics Result", SZ_VERSION_NAME);
         cFile.WriteString(s);
 		
-		//Summary
-		s.Format(
-			"<P></P>\n"
-			"<FONT SIZE=\"4\" COLOR=\"%s\"><B>SOURCE CODE LINES</B></FONT><BR>\n\n"
-			"<FONT SIZE=2>\n"
-			"<TABLE BORDER=\"1\" CELLSPACING=\"0\" COLS=\"3\" WIDTH=100%%>\n\n"
-			"<TR BGCOLOR=\"#E5E5E5\"><TH ALIGN=\"LEFT\" WIDTH=\"30%%\">TYPE</TH><TH WIDTH=\"20%%\">LINES</TH><TH>PERCENTAGE(%%)</TH></TR>\n\n",
-			GetHtmlColorStr());
+		//the content header
+		FormatContentHeader(s, "Statistics Result", "Source Code Counter Tool");
 		cFile.WriteString(s);
 
+		//Summary Header
+		FormatSummuryHeader(s, "Summary");
+		cFile.WriteString(s);
+
+		//Summary info
 		//Code
 		s.Format(
 			"<TR><TD>%s</TD><TD ALIGN=\"RIGHT\">%d</TD>\n"
@@ -296,34 +283,15 @@ BOOL CHTMLExporter::DoExport(LPCTSTR lpFileName)
 			);
 		cFile.WriteString(s);
 
-		//Format tail
-		s.Format(
-			"</TABLE>\n"
-			"</FONT>\n"
-			"<P></P>\n"
-			"<P></P>\n");
+		//Summary tail
+		FormatSummuryTail(s);
 		cFile.WriteString(s);
 
-		s.Format(
-			"<BR />\n"
-			"<TABLE BORDER=\"0\">\n"
-			"<TR>\n"
-			"<TD>\n"
-			"<TABLE BORDER=\"1\" CELLPADDING=\"2\" CELLSPACING=\"0\" CLASS=\"FILESTATS\">\n"
-			"<TR CLASS=\"FILESTATS-HEADING\">\n"
-			"<TD ROWSPAN=\"2\">FILE NAME</TD>\n"
-			"<TD COLSPAN=\"5\">LINES</TD>\n"
-			"<TD ROWSPAN=\"2\">PATH</TD>\n"
-			"</TR>\n\n"
-			"<TR CLASS=\"FILESTATS-HEADING\">\n"
-				"<TD>TOTAL</TD>\n"
-				"<TD>CODE<BR />ONLY</TD>\n"
-				"<TD>COMMENTS<BR />ONLY</TD>\n"
-				"<TD>CODE WITH<BR />COMMENTS</TD>\n"
-				"<TD>BLANK</TD>\n"
-			"</TR>\n");
+		//Detail header
+		FormatDetailHeader(s, "Detailed Information");
 		cFile.WriteString(s);
 
+		//Detail Info
 		int nRowCount = m_pListCtrl->GetItemCount();
 		for(int i = 0; i < nRowCount; i++)
 		{
@@ -341,20 +309,15 @@ BOOL CHTMLExporter::DoExport(LPCTSTR lpFileName)
 				);
 			cFile.WriteString(s);
 		}
-		s.Format(
-			"</TABLE>\n</TD>\n</TR>\n<TR>\n<TD>&nbsp;</TD>\n</TR>\n</TABLE>\n\n<BR/>\n"
-			);
+
+		//Detailed Table tail
+		FormatDetailTail(s);
 		cFile.WriteString(s);
-		//Tail
-		s.Format(
-			"<TABLE NOSAVE=\"\" BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" COLS=\"1\" WIDTH=100%%>\n"
-			"<TR><TD><FONT SIZE=2>2011-05-31 14:35:16</FONT><HR></TD></TR>\n"
-			"<TR ALIGN=RIGHT><TD><FONT SIZE=2>(C) %s, SINCE 1999. ALL RIGHTS RESERVED.</FONT></TD></TR>\n"
-			"</TABLE>\n\n"
-			"</BODY>\n"
-			"</HTML>\n",
-			"Colin Conger77");
+
+		//Content Tail
+		FormatHtmlTail(s, "e2usoft");
 		cFile.WriteString(s);
+
 		cFile.Close();
 		bResult = TRUE;
     }
@@ -378,3 +341,143 @@ CString CHTMLExporter::GetHtmlColorStr(COLORREF cr)
 	return str;
 }
 
+
+void CHTMLExporter::FormatHtmlHeader(CString& s, LPCTSTR lpTitle, LPCTSTR lpVersionInfo)
+{
+	// the header
+	s.Format(
+		"<HTML>\n"
+		"\t<HEAD>\n"
+		"\t\t<META HTTP-EQUIV=\"CONTENT-TYPE\" CONTENT=\"TEXT/HTML; CHARSET=UTF-8\" />\n"
+		"\t\t<TITLE>%s - %s</TITLE>\n"
+		"\t<style type=\"text/css\">\n"
+		"\t\t.content-header {\n"
+		"\t\t\tcolor: #000000;\n"
+		"\t\t\tfont-size: 24pt;\n"
+		"\t\t\tfont-weight: bold;\n"
+		"\t\t}\n"
+		"\t\t.filestats { \n"
+		"\t\t\tcolor: #000090;\n"
+		"\t\t}\n"
+		"\t\t.filestats-heading { \n"
+		"\t\t\tfont-family: Helvetica;\n"
+		"\t\t\tfont-size: 12pt;\n"
+		"\t\t\tfont-weight: bold;\n"
+		"\t\t\ttext-align: center;\n"
+		"\t\t\tcolor: #000040;\n"
+		"\t\t\tbackground-color: #A8B4D8;\n"
+		"\t\t}\n"
+		"\t\t.filestats-total { \n"
+		"\t\t\tfont-weight: bold;\n"
+		"\t\t\tcolor: #002020;\n"
+		"\t\t\tbackground-color: #90B498;\n"
+		"\t\t}\n"
+		"\t\t.repeated-file { \n"
+		"\t\t\tfont-style: italic; \n"
+		"\t\t\tcolor: #000060;\n"
+		"\t\t}\n"
+		"\t\t.project-title {\n"
+		"\t\t\tcolor: #900000;\n"
+		"\t\t\tfont-size: 14pt;\n"
+		"\t\t\tfont-weight: bold;\n"
+		"\t\t}\n"
+		"\t\t.project-name {\n"
+		"\t\t\tfont-size: 12pt;\n"
+		"\t\t\tfont-weight: bold;\n"
+		"\t\t}\n"
+		"\t</style>\n"
+		"\t</HEAD>\n"
+		"\n"
+		,
+		lpTitle, lpVersionInfo
+		);
+}
+
+void CHTMLExporter::FormatHtmlTail(CString& s, LPCTSTR lpCompany)
+{
+	s.Format(
+		"\t\t<TABLE NOSAVE=\"\" BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" COLS=\"1\" WIDTH=100%%>\n"
+		"\t\t\t<TR><TD><HR></TD></TR>\n"
+		"\t\t\t<TR ALIGN=RIGHT><TD><FONT SIZE=2>(C) %s, Since 2011. All Rights Reserved.</FONT></TD></TR>\n"
+		"\t\t</TABLE>\n\n"
+		"\t</BODY>\n"
+		"</HTML>\n",
+		lpCompany);
+}
+
+void CHTMLExporter::FormatContentHeader(CString& s, LPCTSTR lpContentHeader, LPCTSTR lpProduct)
+{
+	s.Format(
+		"<BODY>\n"
+		"<TABLE NOSAVE=\"\"  BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" WIDTH=\"100%%\"><TBODY><TR NOSAVE=\"\">\n"
+		"\t<TD COLSPAN=\"2\" ROWSPAN=\"2\" NOSAVE=\"\" CLASS=content-header><B>%s</B></FONT></TD>\n"
+		"\t<TD ALIGN=\"RIGHT\">Genrated by <i>%s %s</i><BR>%s</TD>\n"
+		"</TR></TBODY>\n"
+		"</TABLE>\n"
+		"<HR>\n"
+		,
+		lpContentHeader, lpProduct, SZ_VERSION_NAME,
+		CTime::GetCurrentTime().Format("%A, %B %d, %Y")
+		);
+}
+
+void CHTMLExporter::FormatSummuryHeader(CString& s, LPCTSTR lpSummuryTitle)
+{
+	s.Format(
+		"<TABLE border=\"0\" WIDTH=100%%>\n"
+		"\t<TR><TD>\n"
+		"\t\t<TABLE border=\"0\" WIDTH=100%%>\n"
+		"\t\t\t<TR><TD class=\"project-title\">%s</TD><TD class=\"project-name\"></TD></TR></TABLE>\n"
+		"\t</TD></TR>\n"
+		"\t<TR><TD>\n"
+		"\t\t<TABLE BORDER=\"1\" CELLSPACING=\"0\" COLS=\"3\" WIDTH=100%%>\n"
+		"\t\t\t<TR BGCOLOR=\"#E5E5E5\">"
+		"<TH ALIGN=\"LEFT\" WIDTH=\"30%%\">TYPE</TH>"
+		"<TH WIDTH=\"20%%\">LINES</TH>"
+		"<TH>PERCENTAGE(%%)</TH>"
+		"\t\t\t</TR>\n"
+		,
+		lpSummuryTitle);
+}
+
+void CHTMLExporter::FormatSummuryTail(CString& s)
+{
+	s.Format(
+		"\t\t</TABLE>\n"
+		"\t</TD></TR>\n"
+		"</TABLE>\n"
+		"<BR /><HR>\n");
+}
+
+void CHTMLExporter::FormatDetailHeader(CString& s, LPCTSTR lpTitle)
+{
+	s.Format(
+		"<TABLE border=\"0\" WIDTH=100%%>\n"
+		"\t<TR><TD>\n"
+		"\t\t<TABLE border=\"0\" WIDTH=100%%>\n"
+		"\t\t\t<TR><TD class=\"project-title\">%s</TD><TD class=\"project-name\"></TD></TR></TABLE>\n"
+		"\t</TD></TR>\n"
+		"\t<TR><TD>\t\n"
+		"\t<TABLE BORDER=\"0\" WIDTH=100%%>\n"
+		"\t\t<TR>\n"
+		"\t\t<TD>\n"
+		"\t\t<TABLE BORDER=\"1\" CELLPADDING=\"2\" CELLSPACING=\"0\" CLASS=\"filestats\" WIDTH=100%%>\n"
+		"\t\t<TR CLASS=\"filestats-heading\">\n"
+		"\t\t<TD ROWSPAN=\"2\">File Name</TD>\n"
+		"\t\t<TD COLSPAN=\"5\">Lines</TD>\n"
+		"\t\t<TD ROWSPAN=\"2\">Path</TD>\n"
+		"\t\t</TR>\n\n"
+		"\t\t<TR CLASS=\"filestats-heading\">\n"
+		"\t\t\t<TD>Total</TD>\n"
+		"\t\t\t<TD>Code<BR />Only</TD>\n"
+		"\t\t\t<TD>Comment<BR />Only</TD>\n"
+		"\t\t\t<TD>Code <BR />with Comments</TD>\n"
+		"\t\t\t<TD>Blank</TD>\n"
+		"\t\t</TR>\n"
+		,
+		lpTitle);
+}
+void CHTMLExporter::FormatDetailTail(CString& s)
+{
+	s.Format("</TABLE>\n</TD>\n</TR>\n</TABLE>\n<BR /><BR/>\n");
+}
