@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
+#include "FileParser.h"
 #include "ThirdParty/SplitterControl.h"
 #include "ThirdParty/MutiTreeCtrl.h"
 #include "ProgressDlg.h"
@@ -25,7 +26,7 @@ public:
 	void OnExport();
 	CListCtrlDemoDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CListCtrlDemoDlg();
-
+	CTotalInfo* GetTotalInfo();
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
@@ -86,6 +87,7 @@ protected:
 	void DoSizeVertical(int delta);
 	HICON m_hIcon;
 	CStringArray m_sFilterArray;
+	CTotalInfo m_totalInfo;
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;

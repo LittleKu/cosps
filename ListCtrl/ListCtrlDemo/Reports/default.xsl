@@ -27,10 +27,10 @@
 <title>Statistics Result</title>
 
 <style type="text/css">
-	.filestats { 
+	.detail-item { 
 		color: #000090;
 	}
-	.filestats-heading { 
+	.detail-header { 
 		font-family: Helvetica;
 		font-size: 12pt;
 		font-weight: bold;
@@ -38,21 +38,17 @@
 		color: #000040;
 		background-color: #A8B4D8;
 	}
-	.filestats-total { 
+	.detail-total { 
 		font-weight: bold;
 		color: #002020;
 		background-color: #90B498;
 	}
-	.repeated-file { 
-		font-style: italic; 
-		color: #000060;
-	}
-	.project-title {
+	.summary-title {
 		color: #900000;
 		font-size: 14pt;
 		font-weight: bold;
 	}
-	.project-name {
+	.summary-info {
 		font-size: 12pt;
 		font-weight: bold;
 	}
@@ -78,14 +74,14 @@
 	<table border="0">
 		<tr>
 			<td>
-				<table border="1" cellpadding="2" cellspacing="0" class="filestats">
+				<table border="1" cellpadding="2" cellspacing="0" class="detail-item">
 					<!-- headings -->
-					<tr class="filestats-heading">
+					<tr class="detail-header">
 						<td rowspan="2">File Name</td>
 						<td colspan="5">Lines</td>
 						<td rowspan="2">Path</td>
 					</tr>
-					<tr class="filestats-heading">
+					<tr class="detail-header">
 						<td>Total</td>
 						<td>Code<br />Only</td>
 						<td>Comments<br />Only</td>
@@ -94,12 +90,6 @@
 					</tr>
 					<xsl:for-each select="file">
 						<tr>
-							<!-- repeated file? (will have more than one bucket at this id) -->
-							<xsl:if test="key('file-ids', @id)[2]"> 
-								<xsl:attribute name="class">
-									repeated-file
-								</xsl:attribute>
-							</xsl:if>
 							<td><xsl:value-of select="name"/></td>
 							<td><xsl:value-of select="lines-total"/></td>
 							<xsl:variable name="total" select="lines-total"/>
@@ -112,7 +102,7 @@
 					</xsl:for-each>
 
 					<!-- summary -->
-						<tr class="filestats-total">
+						<tr class="detail-total">
 							<td>Total:</td>
 							<xsl:variable name="total" select="sum(file/lines-total)"/>
 							<td><xsl:value-of select="$total"/></td>

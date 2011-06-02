@@ -5,7 +5,6 @@
 #include "ListCtrlDemo.h"
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
-#include "FileParser.h"
 #include "Export.h"
 
 #ifdef _DEBUG
@@ -337,6 +336,8 @@ void CListCtrlDemoDlg::ResetResult()
 	DeleteAllListItems();
 	
 	//2. Summray info
+	m_totalInfo.Reset();
+
 	SetPair(IDC_NUMBER_C, IDC_NUMBER_P, -1);
 	
 	SetPair(IDC_LINES_C, IDC_LINES_P, -1);
@@ -531,27 +532,28 @@ LRESULT CListCtrlDemoDlg::OnSummaryUpdate(WPARAM wParam, LPARAM lParam)
 	{
 		nTotalCount = nCount;
 	}
+	m_totalInfo.m_nTotalCount = nTotalCount;
 
-	int nTotalLines = 0, nCodeLines = 0, nCommentLines = 0, nMixedLines = 0, nBlankLines = 0;
+//	int nTotalLines = 0, nCodeLines = 0, nCommentLines = 0, nMixedLines = 0, nBlankLines = 0;
 	CFileInfo* pFi = NULL;
 	for(i = 0; i < nCount; i++)
 	{
 		pFi = (CFileInfo*)m_resultListCtrl.GetItemData(i);
 		ASSERT(pFi);
-		nTotalLines += pFi->m_nTotalLines;
-		nCodeLines += pFi->m_nCodeLines;
-		nCommentLines += pFi->m_nCommentLines;
-		nMixedLines += pFi->GetMixedLines();
-		nBlankLines += pFi->m_nBlankLines;
+		m_totalInfo.m_nTotalLines += pFi->m_nTotalLines;
+		m_totalInfo.m_nTotalCodeLines += pFi->m_nCodeLines;
+		m_totalInfo.m_nTotalCommentLines += pFi->m_nCommentLines;
+		m_totalInfo.m_nTotalMixedLines += pFi->GetMixedLines();
+		m_totalInfo.m_nTotalBlankLines += pFi->m_nBlankLines;
 	}
 
-	SetPair(IDC_NUMBER_C, IDC_NUMBER_P, nTotalCount, nTotalCount);
+	SetPair(IDC_NUMBER_C, IDC_NUMBER_P, m_totalInfo.m_nTotalCount, m_totalInfo.m_nTotalCount);
 
-	SetPair(IDC_LINES_C, IDC_LINES_P, nTotalLines, nTotalLines);
-	SetPair(IDC_CODE_C, IDC_CODE_P, nCodeLines, nTotalLines);
-	SetPair(IDC_COMMENT_C, IDC_COMMENT_P, nCommentLines, nTotalLines);
-	SetPair(IDC_MIXED_C, IDC_MIXED_P, nMixedLines, nTotalLines);
-	SetPair(IDC_BLANK_C, IDC_BLANK_P, nBlankLines, nTotalLines);
+	SetPair(IDC_LINES_C, IDC_LINES_P, m_totalInfo.m_nTotalLines, m_totalInfo.m_nTotalLines);
+	SetPair(IDC_CODE_C, IDC_CODE_P, m_totalInfo.m_nTotalCodeLines, m_totalInfo.m_nTotalLines);
+	SetPair(IDC_COMMENT_C, IDC_COMMENT_P, m_totalInfo.m_nTotalCommentLines, m_totalInfo.m_nTotalLines);
+	SetPair(IDC_MIXED_C, IDC_MIXED_P, m_totalInfo.m_nTotalMixedLines, m_totalInfo.m_nTotalLines);
+	SetPair(IDC_BLANK_C, IDC_BLANK_P, m_totalInfo.m_nTotalBlankLines, m_totalInfo.m_nTotalLines);
 
 	return 0;
 }
@@ -800,19 +802,19 @@ void CListCtrlDemoDlg::OnExport()
 	{
 		if(dlg.m_ofn.nFilterIndex == 1)
 		{
-			pExporter = new CCSVExporter(&m_resultListCtrl);
+			pExporter = new CCSVExporter(&m_resultListCtrl, &m_totalInfo);
 		}
 		else if(dlg.m_ofn.nFilterIndex == 2)
 		{
-			pExporter = new CXLSExporter(&m_resultListCtrl);
+			pExporter = new CXLSExporter(&m_resultListCtrl, &m_totalInfo);
 		}
 		else if(dlg.m_ofn.nFilterIndex == 3)
 		{
-			pExporter = new CXMLExporter(&m_resultListCtrl);
+			pExporter = new CXMLExporter(&m_resultListCtrl, &m_totalInfo);
 		}
 		else if(dlg.m_ofn.nFilterIndex == 4)
 		{
-			pExporter = new CHTMLExporter(&m_resultListCtrl);
+			pExporter = new CHTMLExporter(&m_resultListCtrl, &m_totalInfo);
 		}
 		else
 		{
@@ -834,3 +836,8 @@ void CListCtrlDemoDlg::OnExport()
 		}
 	}
 }
+CTotalInfo* CListCtrlDemoDlg::GetTotalInfo()
+{
+	return &m_totalInfo;
+}
+
