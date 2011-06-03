@@ -222,10 +222,30 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pCounterDlg->OnButtonClear();
 		}
 		break;
-	case IDM_FILE_EXPORT:
+	case IDM_REPORT_EXPORT:
 	case ID_TBBTN_EXPORT:
 		{
 			m_pCounterDlg->OnExport();
+		}
+		break;
+	case IDM_REPORT_EXPORT_CSV:
+		{
+			m_pCounterDlg->OnExport(EXPORT_TYPE_CSV);
+		}
+		break;
+	case IDM_REPORT_EXPORT_XLS:
+		{
+			m_pCounterDlg->OnExport(EXPORT_TYPE_EXCEL);
+		}
+		break;
+	case IDM_REPORT_EXPORT_XML:
+		{
+			m_pCounterDlg->OnExport(EXPORT_TYPE_XML);
+		}
+		break;
+	case IDM_REPORT_EXPORT_HTML:
+		{
+			m_pCounterDlg->OnExport(EXPORT_TYPE_HTML);
 		}
 		break;
 	case IDM_FILE_EXIT:

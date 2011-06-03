@@ -18,15 +18,20 @@
 #include "SourceDirListCtrl.h"
 #include "ResultListCtrl.h"
 
+#define EXPORT_TYPE_CSV		1
+#define EXPORT_TYPE_EXCEL	2
+#define EXPORT_TYPE_XML		3
+#define EXPORT_TYPE_HTML	4
+
 class CListCtrlDemoDlg : public CResizableDialog
 {
 	friend class CMainDlg;
 // Construction
 public:
-	void OnExport();
 	CListCtrlDemoDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CListCtrlDemoDlg();
 	CTotalInfo* GetTotalInfo();
+	void OnExport(DWORD nTypeIndex = EXPORT_TYPE_CSV);
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };

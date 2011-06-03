@@ -36,4 +36,7 @@
 // NOTE: This version string is also used by the language DLLs!
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(".") chSTR(VERSION_BUILD)
 
+#define SZ_PRODUCT_NAME		chSTR(Easy Counter)
+#define SZ_ORGNIZATION_NAME	chSTR(CenaSoft)
+
 #endif /* !__VERSION_H__ */

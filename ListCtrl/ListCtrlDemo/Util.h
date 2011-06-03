@@ -61,6 +61,7 @@ private:
 BEGIN_NAMESPACE(CommonUtils)
 	CString ToString(UINT n);
 	CString GetPercentStr(UINT nCount, UINT nTotal);
+	CString GetCurrentTime();
 	int wildcmp(const char *wild, const char *string);
 	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);

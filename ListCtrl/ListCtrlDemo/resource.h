@@ -75,16 +75,21 @@
 #define IDM_FILE_STOP                   32774
 #define IDM_FILE_CLEAR                  32774
 #define IDM_FILE_EXPORT                 32775
+#define IDM_REPORT_EXPORT               32775
 #define IDM_FILE_EXIT                   32776
 #define IDM_SETTING_FILTER              32777
 #define IDM_HELP_ABOUT                  32778
+#define IDM_REPORT_EXPORT_CSV           32779
+#define IDM_REPORT_EXPORT_XLS           32780
+#define IDM_REPORT_EXPORT_XML           32781
+#define IDM_REPORT_EXPORT_HTML          32782
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        142
-#define _APS_NEXT_COMMAND_VALUE         32779
+#define _APS_NEXT_COMMAND_VALUE         32783
 #define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           107
 #endif

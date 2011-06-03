@@ -570,15 +570,7 @@ void CListCtrlDemoDlg::SetPair(int idc, int idp, int count, int total)
 
 	SetDlgItemInt(idc, count);
 
-	CString sPercent;
-	if(total > 0)
-	{
-		sPercent.Format(_T("%d%c"), (count * 100) / total, '%');
-	}
-	else
-	{
-		sPercent = "0%";
-	}
+	CString sPercent = CommonUtils::GetPercentStr(count, total);
 	SetDlgItemText(idp, sPercent);
 }
 
@@ -784,7 +776,7 @@ HBRUSH CListCtrlDemoDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	return hbr;
 }
 
-void CListCtrlDemoDlg::OnExport()
+void CListCtrlDemoDlg::OnExport(DWORD nTypeIndex)
 {
 	static const TCHAR *FILTERS =
         _T("Comma Separated Values (*.csv)|*.csv|")
@@ -794,25 +786,25 @@ void CListCtrlDemoDlg::OnExport()
         _T("|");
 	CFileDialog dlg(FALSE, "", NULL, 
         OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
-    dlg.m_ofn.nFilterIndex = 1;
+    dlg.m_ofn.nFilterIndex = nTypeIndex;
 	
 	BOOL bSuccess = FALSE;
 	IExporter* pExporter = NULL;
 	if (dlg.DoModal() == IDOK  &&  !dlg.GetPathName().IsEmpty())
 	{
-		if(dlg.m_ofn.nFilterIndex == 1)
+		if(dlg.m_ofn.nFilterIndex == EXPORT_TYPE_CSV)
 		{
 			pExporter = new CCSVExporter(&m_resultListCtrl, &m_totalInfo);
 		}
-		else if(dlg.m_ofn.nFilterIndex == 2)
+		else if(dlg.m_ofn.nFilterIndex == EXPORT_TYPE_EXCEL)
 		{
 			pExporter = new CXLSExporter(&m_resultListCtrl, &m_totalInfo);
 		}
-		else if(dlg.m_ofn.nFilterIndex == 3)
+		else if(dlg.m_ofn.nFilterIndex == EXPORT_TYPE_XML)
 		{
 			pExporter = new CXMLExporter(&m_resultListCtrl, &m_totalInfo);
 		}
-		else if(dlg.m_ofn.nFilterIndex == 4)
+		else if(dlg.m_ofn.nFilterIndex == EXPORT_TYPE_HTML)
 		{
 			pExporter = new CHTMLExporter(&m_resultListCtrl, &m_totalInfo);
 		}

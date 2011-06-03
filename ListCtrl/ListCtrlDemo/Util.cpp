@@ -57,15 +57,23 @@ CString ToString(UINT n)
 CString GetPercentStr(UINT nCount, UINT nTotal)
 {
 	CString str;
-	if(nTotal <= 0)
+	if(nCount == 0 || nTotal <= 0)
 	{
 		str = "0%";
 	}
+	else if(nCount == nTotal)
+	{
+		str = "100%";
+	}
 	else
 	{
-		str.Format("%d%c", (nCount * 100) / nTotal, '%');
+		str.Format("%2.2f%c", (100.0 * nCount) / nTotal, '%');
 	}
 	return str;
+}
+CString GetCurrentTime()
+{
+	return CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S");
 }
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
