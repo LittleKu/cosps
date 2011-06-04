@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MutiTreeCtrl.h"
+#include "tinyxml.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -30,7 +31,100 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMutiTreeCtrl message handlers
+BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
+{
+	BOOL bResult = FALSE;
+	TiXmlDocument doc( lpXMLFile );
+	
+	bool loadOkay = doc.LoadFile();	
+	if ( !loadOkay )
+	{
+		AfxTrace(_T("Failed to load file %s. Error=%s.\n"), lpXMLFile, doc.ErrorDesc());
+		return FALSE;
+	}
 
+	TiXmlNode *node = 0, *sub_node = 0;
+	TiXmlElement *pElement = 0, *sub_element = 0;
+	const char* lpcsValue = 0;
+
+	node = doc.FirstChild( "root" );
+	ASSERT( node );
+	pElement = node->ToElement();
+	ASSERT(pElement);
+
+	HTREEITEM hRoot = InsertSubItem(NULL, pElement);
+
+	CList<TiXmlElement*, TiXmlElement*&> xmlNodeList;
+	CList<HTREEITEM, HTREEITEM&> htiList;
+
+	xmlNodeList.AddTail(pElement);
+	htiList.AddTail(hRoot);
+
+	HTREEITEM hParent = NULL, hti = NULL;
+	while(!xmlNodeList.IsEmpty())
+	{
+		pElement = xmlNodeList.RemoveHead();
+		hParent = htiList.RemoveHead();
+
+		for(node = pElement->FirstChild(); node != NULL; node = node->NextSibling())
+		{
+			pElement = node->ToElement();
+			ASSERT(pElement);
+
+			hti = InsertSubItem(hParent, pElement);
+			xmlNodeList.AddTail(pElement);
+			htiList.AddTail(hti);
+		}
+	}
+
+	bResult = TRUE;
+
+	return bResult;
+}
+
+HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement)
+{
+	TVINSERTSTRUCT tvis;
+	ZeroMemory(&tvis, sizeof(TVINSERTSTRUCT));
+	tvis.hParent = hParent;
+	tvis.hInsertAfter = TVI_LAST;
+
+	// used fields
+	const UINT nTVIFlags = TVIF_TEXT | TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
+	tvis.item.mask = nTVIFlags;
+
+	//Text
+	// provide a buffer for the item text
+	TCHAR szText[MAX_PATH];
+	tvis.item.pszText = szText;
+	tvis.item.cchTextMax = MAX_PATH;
+
+	const char* sText = pElement->Attribute("text");
+	lstrcpyn(tvis.item.pszText, sText, tvis.item.cchTextMax);
+	
+	//State
+	int nCheckStatus = TVIS_IMAGE_STATE_UNCHECK;
+	pElement->Attribute("checked", &nCheckStatus);
+	tvis.item.state = INDEXTOSTATEIMAGEMASK( nCheckStatus ) | TVIS_EXPANDED;
+	tvis.item.stateMask = TVIS_STATEIMAGEMASK | TVIS_EXPANDED;
+
+	//Image
+	tvis.item.iImage = 0;
+
+	//Selected Image
+	tvis.item.iSelectedImage = 1;
+	
+	//TODO: lparam
+	tvis.item.lParam = (LPARAM)0;
+// 	// prepare item data
+// 	TVITEMDATA* pData = new TVITEMDATA;	
+// 	// set item data
+// 	tvis.item.lParam = (LPARAM)pData;
+	
+	// then insert new item
+	HTREEITEM hti = InsertItem(&tvis);
+	return hti;
+}
 void CMutiTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	*pResult = 0;

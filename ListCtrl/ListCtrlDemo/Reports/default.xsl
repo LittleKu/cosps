@@ -107,7 +107,7 @@
 				<TABLE border="0" width="100%" CLASS="detail-total">
 					<TR>
                         <TD WIDTH="80" ALIGN="RIGHT">100%</TD>
-                        <TD><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%"><TR class="summary-total-line"><TD>&nbsp;</TD></TR></TABLE></TD>
+                        <TD ALIGN="LEFT"><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="100%"><TR class="summary-total-line"><TD>&nbsp;</TD></TR></TABLE></TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -122,7 +122,7 @@
                             <xsl:call-template name="percent"><xsl:with-param name="val" select="sum(file/lines-code)"/><xsl:with-param name="total" select="$total_lines"/></xsl:call-template>
                         </xsl:variable>
                         <TD WIDTH="80" ALIGN="RIGHT"><xsl:value-of select="$percent_code"/></TD>
-                        <TD><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_code}"><TR class="summary-total-code"><TD>&nbsp;</TD></TR></TABLE></TD>
+                        <TD ALIGN="LEFT"><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_code}"><TR class="summary-total-code"><TD>&nbsp;</TD></TR></TABLE></TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -137,7 +137,7 @@
                             <xsl:call-template name="percent"><xsl:with-param name="val" select="sum(file/lines-comments)"/><xsl:with-param name="total" select="$total_lines"/></xsl:call-template>
                         </xsl:variable>
                         <TD WIDTH="80" ALIGN="RIGHT"><xsl:value-of select="$percent_comment"/></TD>
-                        <TD><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_comment}"><TR class="summary-total-comment"><TD>&nbsp;</TD></TR></TABLE></TD>
+                        <TD ALIGN="LEFT"><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_comment}"><TR class="summary-total-comment"><TD>&nbsp;</TD></TR></TABLE></TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -152,7 +152,7 @@
                             <xsl:call-template name="percent"><xsl:with-param name="val" select="sum(file/lines-mixed)"/><xsl:with-param name="total" select="$total_lines"/></xsl:call-template>
                         </xsl:variable>
                         <TD WIDTH="80" ALIGN="RIGHT"><xsl:value-of select="$percent_mixed"/></TD>
-                        <TD><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_mixed}"><TR class="summary-total-mixed"><TD>&nbsp;</TD></TR></TABLE></TD>
+                        <TD ALIGN="LEFT"><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_mixed}"><TR class="summary-total-mixed"><TD>&nbsp;</TD></TR></TABLE></TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -167,7 +167,7 @@
                             <xsl:call-template name="percent"><xsl:with-param name="val" select="sum(file/lines-blank)"/><xsl:with-param name="total" select="$total_lines"/></xsl:call-template>
                         </xsl:variable>
                         <TD WIDTH="80" ALIGN="RIGHT"><xsl:value-of select="$percent_blank"/></TD>
-                        <TD><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_blank}"><TR class="summary-total-blank"><TD>&nbsp;</TD></TR></TABLE></TD>
+                        <TD ALIGN="LEFT"><TABLE border="0" CELLSPACING="0" CELLPADDING="0" WIDTH="{$percent_blank}"><TR class="summary-total-blank"><TD>&nbsp;</TD></TR></TABLE></TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -251,33 +251,21 @@
 	<xsl:param name="val"/>
 	<xsl:param name="total"/>
 	<xsl:value-of select="$val"/>
-    <xsl:choose>
-      <xsl:when test="$val = 0 or $total = 0">
-        (0%)
-      </xsl:when>
-      <xsl:when test="$val = $total">
-        (100%)
-      </xsl:when>
-      <xsl:when test="$total > 0 and $val != $total">
-        (<xsl:value-of select="format-number(number(100.00 * $val div $total),'#0.00')"/>%)
-      </xsl:when>      
-    </xsl:choose>
+  <xsl:choose>
+    <xsl:when test="$val = 0 or $total = 0">(0%)</xsl:when>
+    <xsl:when test="$val = $total">(100%)</xsl:when>
+    <xsl:when test="$total > 0 and $val != $total">(<xsl:value-of select="format-number(number(100.00 * $val div $total),'#0.00')"/>%)</xsl:when>      
+  </xsl:choose>
 </xsl:template>
 
 <xsl:template name="percent">
 	<xsl:param name="val"/>
 	<xsl:param name="total"/>
-    <xsl:choose>
-      <xsl:when test="$val = 0 or $total = 0">
-        0%
-      </xsl:when>
-      <xsl:when test="$val = $total">
-        100%
-      </xsl:when>
-      <xsl:when test="$total > 0 and $val != $total">
-        <xsl:value-of select="format-number(number(100.00 * $val div $total),'#0.00')"/>%
-      </xsl:when>      
-    </xsl:choose>
+  <xsl:choose>
+    <xsl:when test="$val = 0 or $total = 0">0%</xsl:when>
+    <xsl:when test="$val = $total">100%</xsl:when>
+    <xsl:when test="$total > 0 and $val != $total"><xsl:value-of select="format-number(number(100.00 * $val div $total),'#0.00')"/>%</xsl:when>      
+  </xsl:choose>
 </xsl:template>
 
 </xsl:stylesheet>  

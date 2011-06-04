@@ -115,6 +115,9 @@ void CListCtrlDemoDlg::InitFilterTree()
 	m_filterTree.SetImageList(&m_imgList,TVSIL_NORMAL);
 	m_filterTree.SetImageList(&m_imgState,TVSIL_STATE);
 
+	m_filterTree.Init(".\\dat\\filter_tree.xml");
+	OnTreeItemSelected(0, 0);
+	/*
 	TV_INSERTSTRUCT tvinsert;
 	tvinsert.hParent=NULL;
 	tvinsert.hInsertAfter=TVI_LAST;
@@ -166,6 +169,7 @@ void CListCtrlDemoDlg::InitFilterTree()
 
 	//Expand root item
 	m_filterTree.Expand(hRoot, TVE_EXPAND);
+	*/
 }
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {

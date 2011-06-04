@@ -516,7 +516,7 @@ void CHTMLExporter::FormatSummaryItemInfo(CString& s, LPCTSTR lpType, int nCount
 		"\t\t\t\t<TABLE border=\"0\" WIDTH=\"100%%\" CLASS=\"detail-total\">\n"
 		"\t\t\t\t\t<TR>\n"
 		"\t\t\t\t\t\t<TD WIDTH=80 ALIGN=\"RIGHT\">%s</TD>\n"
-		"\t\t\t\t\t\t<TD>\n"
+		"\t\t\t\t\t\t<TD ALIGN=\"LEFT\">\n"
 		"\t\t\t\t\t\t\t<TABLE BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" WIDTH=\"%s\"><TR BGCOLOR=\"%s\"><TD>&nbsp;</TD></TR>\n"
 		"\t\t\t\t\t\t\t</TABLE>\n"
 		"\t\t\t\t\t\t</TD>\n"

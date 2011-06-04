@@ -12,19 +12,26 @@
 
 extern UINT ID_TREE_ITEM_SELECTED_EVENT; 
 
+class TiXmlElement;
 
 class CMutiTreeCtrl : public CTreeCtrl
 {
+private:
+	struct TVITEMDATA
+	{
+		CString type;
+		UINT nCheckStatus;
+	};
 // Construction
 public:
 	CMutiTreeCtrl();
-
 // Attributes
 public:
 
 // Operations
 public:
-
+	BOOL Init(LPCTSTR lpXMLFile);
+	HTREEITEM InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement);
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMutiTreeCtrl)
