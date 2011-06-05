@@ -10,6 +10,22 @@ static char THIS_FILE[] = __FILE__;
 
 UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELECTED_EVENT"));
 
+BOOL CALLBACK PrintProc(CMutiTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	CString sText = pTree->GetItemText(hTreeItem);
+	AfxTrace("%s\n", sText);
+	return TRUE;
+}
+BOOL CALLBACK ExpandProc(CMutiTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	UINT nCode = (UINT)lParam;
+	if(pTree->ItemHasChildren(hTreeItem))
+	{
+		return pTree->Expand(hTreeItem, nCode);
+	}
+	return TRUE;
+}
+
 CMutiTreeCtrl::CMutiTreeCtrl()
 {
 	m_uFlags=0;
@@ -26,6 +42,7 @@ BEGIN_MESSAGE_MAP(CMutiTreeCtrl, CTreeCtrl)
 	ON_NOTIFY_REFLECT(NM_CLICK, OnStateIconClick)
 	ON_NOTIFY_REFLECT(TVN_KEYDOWN, OnKeydown)
 	ON_WM_KEYDOWN()
+	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnDeleteItem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -34,8 +51,8 @@ END_MESSAGE_MAP()
 BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 {
 	BOOL bResult = FALSE;
+
 	TiXmlDocument doc( lpXMLFile );
-	
 	bool loadOkay = doc.LoadFile();	
 	if ( !loadOkay )
 	{
@@ -43,37 +60,36 @@ BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 		return FALSE;
 	}
 
-	TiXmlNode *node = 0, *sub_node = 0;
-	TiXmlElement *pElement = 0, *sub_element = 0;
-	const char* lpcsValue = 0;
+	TiXmlNode *pNode = NULL;
+	TiXmlElement *pElement = NULL;
 
-	node = doc.FirstChild( "root" );
-	ASSERT( node );
-	pElement = node->ToElement();
+	pNode = doc.FirstChild( "root" );
+	ASSERT( pNode );
+	pElement = pNode->ToElement();
 	ASSERT(pElement);
 
 	HTREEITEM hRoot = InsertSubItem(NULL, pElement);
 
-	CList<TiXmlElement*, TiXmlElement*&> xmlNodeList;
-	CList<HTREEITEM, HTREEITEM&> htiList;
+	CList<TiXmlElement*, TiXmlElement*&> pElementList;
+	CList<HTREEITEM, HTREEITEM&> hTreeItemList;
 
-	xmlNodeList.AddTail(pElement);
-	htiList.AddTail(hRoot);
+	pElementList.AddTail(pElement);
+	hTreeItemList.AddTail(hRoot);
 
 	HTREEITEM hParent = NULL, hti = NULL;
-	while(!xmlNodeList.IsEmpty())
+	while(!pElementList.IsEmpty())
 	{
-		pElement = xmlNodeList.RemoveHead();
-		hParent = htiList.RemoveHead();
+		pElement = pElementList.RemoveHead();
+		hParent = hTreeItemList.RemoveHead();
 
-		for(node = pElement->FirstChild(); node != NULL; node = node->NextSibling())
+		for(pNode = pElement->FirstChild(); pNode != NULL; pNode = pNode->NextSibling())
 		{
-			pElement = node->ToElement();
+			pElement = pNode->ToElement();
 			ASSERT(pElement);
 
 			hti = InsertSubItem(hParent, pElement);
-			xmlNodeList.AddTail(pElement);
-			htiList.AddTail(hti);
+			pElementList.AddTail(pElement);
+			hTreeItemList.AddTail(hti);
 		}
 	}
 
@@ -84,6 +100,8 @@ BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 
 HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement)
 {
+	const char* pBuffer = NULL;
+
 	TVINSERTSTRUCT tvis;
 	ZeroMemory(&tvis, sizeof(TVINSERTSTRUCT));
 	tvis.hParent = hParent;
@@ -98,15 +116,31 @@ HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement
 	TCHAR szText[MAX_PATH];
 	tvis.item.pszText = szText;
 	tvis.item.cchTextMax = MAX_PATH;
+	ZeroMemory(tvis.item.pszText, MAX_PATH);
 
-	const char* sText = pElement->Attribute("text");
-	lstrcpyn(tvis.item.pszText, sText, tvis.item.cchTextMax);
+	pBuffer = pElement->Attribute("text");
+	if(pBuffer != NULL)
+	{
+		lstrcpyn(tvis.item.pszText, pBuffer, tvis.item.cchTextMax);
+	}
 	
 	//State
+	pBuffer = pElement->Attribute("checked");
+
 	int nCheckStatus = TVIS_IMAGE_STATE_UNCHECK;
-	pElement->Attribute("checked", &nCheckStatus);
-	tvis.item.state = INDEXTOSTATEIMAGEMASK( nCheckStatus ) | TVIS_EXPANDED;
-	tvis.item.stateMask = TVIS_STATEIMAGEMASK | TVIS_EXPANDED;
+	if(pBuffer != NULL)
+	{
+		nCheckStatus = atoi(pBuffer);
+	}
+	tvis.item.state = INDEXTOSTATEIMAGEMASK( nCheckStatus );
+	tvis.item.stateMask = TVIS_STATEIMAGEMASK;
+
+	pBuffer = pElement->Value();
+	if(pBuffer != NULL && strcmp(pBuffer, "file") != 0)
+	{
+		tvis.item.state |= TVIS_EXPANDED;
+		tvis.item.stateMask |= TVIS_EXPANDED;
+	}
 
 	//Image
 	tvis.item.iImage = 0;
@@ -114,16 +148,114 @@ HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement
 	//Selected Image
 	tvis.item.iSelectedImage = 1;
 	
-	//TODO: lparam
-	tvis.item.lParam = (LPARAM)0;
-// 	// prepare item data
-// 	TVITEMDATA* pData = new TVITEMDATA;	
-// 	// set item data
-// 	tvis.item.lParam = (LPARAM)pData;
+	//lparam : prepare item data
+	tvis.item.lParam = (LPARAM)NULL;
+
+	pBuffer = pElement->Attribute("type");
+	if(pBuffer != NULL)
+	{
+		TVITEMDATA* pData = new TVITEMDATA;
+		pData->type = pBuffer;
+		tvis.item.lParam = (LPARAM)pData;
+	}
 	
 	// then insert new item
 	HTREEITEM hti = InsertItem(&tvis);
 	return hti;
+}
+
+void CMutiTreeCtrl::OnDeleteItem(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	TVITEM& item = ((LPNMTREEVIEW)pNMHDR)->itemOld;
+
+	// free item data, ignore invalid items
+	if (item.lParam != 0)
+		delete (TVITEMDATA*)item.lParam;
+	
+	*pResult = 0;
+}
+
+BOOL CMutiTreeCtrl::BFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam)
+{
+	if(hTreeItemRoot == NULL)
+	{
+		return TRUE;
+	}
+	CList<HTREEITEM, HTREEITEM> hTreeItemList;
+	hTreeItemList.AddTail(hTreeItemRoot);	
+
+	HTREEITEM hCurTreeItem = hTreeItemRoot;
+	HTREEITEM hTreeItem = NULL;
+
+	//Add all siblings to the list firstly
+	for(hTreeItem = GetNextItem(hCurTreeItem, TVGN_NEXT); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
+	{
+		hTreeItemList.AddTail(hTreeItem);
+	}
+	
+	while(!hTreeItemList.IsEmpty()) 
+	{
+		hCurTreeItem = hTreeItemList.RemoveHead();
+
+		//Add all the children items to the list
+		for(hTreeItem = GetChildItem(hCurTreeItem); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
+		{
+			hTreeItemList.AddTail(hTreeItem);
+		}
+		if(!enumProc(this, hCurTreeItem, lParam))
+		{
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+//This algorithm is similar to the way of pre-order visiting binary tree.
+//The first child   ==> left  child
+//The first sibling ==> right child
+BOOL CMutiTreeCtrl::DFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam)
+{
+	if(hTreeItemRoot == NULL)
+	{
+		return TRUE;
+	}
+	//This list mimic the stack
+	CList<HTREEITEM, HTREEITEM> hTreeItemList;
+
+	HTREEITEM hTreeItem = hTreeItemRoot;
+	while(hTreeItem != NULL || !hTreeItemList.IsEmpty())
+	{
+		while(hTreeItem != NULL)  
+		{  
+			if(!enumProc(this, hTreeItem, lParam))
+			{
+				return FALSE;
+			}
+			
+			hTreeItemList.AddTail(hTreeItem);
+
+			//The first child: mimic the left child of binary tree
+			hTreeItem = GetChildItem(hTreeItem);
+		}
+		//FILO, Remove from tail to mimic Stack
+		hTreeItem = hTreeItemList.RemoveTail();
+
+		//The first sibling: mimic the right child of binary tree
+		hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT);
+	}
+	return TRUE;
+}
+
+void CMutiTreeCtrl::ExpandAllItems(UINT nCode)
+{
+	SetRedraw(FALSE);
+	BOOL nResult = BFSEnumItems(GetRootItem(), ExpandProc, (LPARAM)nCode);
+	if(!nResult)
+	{
+		AfxTrace("Failed to ExpandAllItems\n");
+	}
+	SetRedraw(TRUE);
+	UpdateWindow();
 }
 void CMutiTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult) 
 {

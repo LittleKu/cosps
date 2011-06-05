@@ -116,60 +116,8 @@ void CListCtrlDemoDlg::InitFilterTree()
 	m_filterTree.SetImageList(&m_imgState,TVSIL_STATE);
 
 	m_filterTree.Init(".\\dat\\filter_tree.xml");
+//	m_filterTree.ExpandAllItems();
 	OnTreeItemSelected(0, 0);
-	/*
-	TV_INSERTSTRUCT tvinsert;
-	tvinsert.hParent=NULL;
-	tvinsert.hInsertAfter=TVI_LAST;
-	tvinsert.item.mask=TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_TEXT|TVIF_STATE;
-	tvinsert.item.hItem=NULL;
-	tvinsert.item.state=INDEXTOSTATEIMAGEMASK( 1 );
-	tvinsert.item.stateMask=TVIS_STATEIMAGEMASK;
-	tvinsert.item.cchTextMax=6;
-	tvinsert.item.iSelectedImage=1;
-	tvinsert.item.cChildren=0;
-	tvinsert.item.lParam=0;
-	
-	tvinsert.item.pszText= _T("All (*)");
-	tvinsert.item.iImage=0;
-	HTREEITEM hRoot=m_filterTree.InsertItem(&tvinsert);
-	
-	//second level: C++
-	tvinsert.hParent=hRoot;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("C++");
-	HTREEITEM htiCpp = m_filterTree.InsertItem(&tvinsert);
-
-	tvinsert.hParent=htiCpp;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("*.cpp");
-	m_filterTree.InsertItem(&tvinsert);
-
-	tvinsert.hParent=htiCpp;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("*.cxx");
-	m_filterTree.InsertItem(&tvinsert);
-
-	tvinsert.hParent=htiCpp;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("*.h");
-	m_filterTree.InsertItem(&tvinsert);
-
-
-	//second level: Java
-	tvinsert.hParent=hRoot;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("Java");
-	HTREEITEM htiJava = m_filterTree.InsertItem(&tvinsert);
-	
-	tvinsert.hParent=htiJava;
-	tvinsert.item.iImage=0;
-	tvinsert.item.pszText= _T("*.java");
-	m_filterTree.InsertItem(&tvinsert);	
-
-	//Expand root item
-	m_filterTree.Expand(hRoot, TVE_EXPAND);
-	*/
 }
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {
@@ -752,12 +700,17 @@ LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam)
 	CString sFilterStr;
 	POSITION pos = htiSelectedList.GetHeadPosition();
 	HTREEITEM hti;
+	CMutiTreeCtrl::TVITEMDATA* pTVIData = NULL;
 	while(pos != NULL)
 	{
 		hti = htiSelectedList.GetNext(pos);
 		
-		sFilterStr += m_filterTree.GetItemText(hti);
-		sFilterStr += _T(";");
+		pTVIData = (CMutiTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
+		if(pTVIData != NULL)
+		{
+			sFilterStr += pTVIData->type;
+			sFilterStr += _T(";");
+		}
 	}
 
 	m_filterComboBox.SetWindowText(sFilterStr);

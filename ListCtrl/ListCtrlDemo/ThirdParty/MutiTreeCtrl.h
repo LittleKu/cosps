@@ -13,14 +13,17 @@
 extern UINT ID_TREE_ITEM_SELECTED_EVENT; 
 
 class TiXmlElement;
+class CMutiTreeCtrl;
+
+// Definitions
+typedef BOOL (CALLBACK* ENUM_TREEITEMPROC)(CMutiTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam);
 
 class CMutiTreeCtrl : public CTreeCtrl
 {
-private:
+public:
 	struct TVITEMDATA
 	{
 		CString type;
-		UINT nCheckStatus;
 	};
 // Construction
 public:
@@ -42,6 +45,9 @@ public:
 	BOOL SetItemState( HTREEITEM hItem, UINT nState, UINT nStateMask, BOOL bSearch=TRUE);
 	UINT GetItemImageState(HTREEITEM hItem);
 	BOOL GetSelectedItems(CList<HTREEITEM, HTREEITEM>& hItemList);
+	void ExpandAllItems(UINT nCode = TVE_EXPAND);
+	BOOL BFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam);
+	BOOL DFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam);
 	virtual ~CMutiTreeCtrl();
 
 	// Generated message map functions
@@ -51,6 +57,7 @@ protected:
 	afx_msg void OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeydown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnDeleteItem(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
