@@ -50,8 +50,6 @@ END_MESSAGE_MAP()
 // CMutiTreeCtrl message handlers
 BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 {
-	BOOL bResult = FALSE;
-
 	TiXmlDocument doc( lpXMLFile );
 	bool loadOkay = doc.LoadFile();	
 	if ( !loadOkay )
@@ -76,7 +74,7 @@ BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 	pElementList.AddTail(pElement);
 	hTreeItemList.AddTail(hRoot);
 
-	HTREEITEM hParent = NULL, hti = NULL;
+	HTREEITEM hParent = NULL, hTreeItem = NULL;
 	while(!pElementList.IsEmpty())
 	{
 		pElement = pElementList.RemoveHead();
@@ -87,15 +85,13 @@ BOOL CMutiTreeCtrl::Init(LPCTSTR lpXMLFile)
 			pElement = pNode->ToElement();
 			ASSERT(pElement);
 
-			hti = InsertSubItem(hParent, pElement);
+			hTreeItem = InsertSubItem(hParent, pElement);
+
 			pElementList.AddTail(pElement);
-			hTreeItemList.AddTail(hti);
+			hTreeItemList.AddTail(hTreeItem);
 		}
 	}
-
-	bResult = TRUE;
-
-	return bResult;
+	return TRUE;
 }
 
 HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement)
@@ -114,9 +110,9 @@ HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement
 	//Text
 	// provide a buffer for the item text
 	TCHAR szText[MAX_PATH];
+	ZeroMemory(szText, MAX_PATH);
 	tvis.item.pszText = szText;
-	tvis.item.cchTextMax = MAX_PATH;
-	ZeroMemory(tvis.item.pszText, MAX_PATH);
+	tvis.item.cchTextMax = MAX_PATH;	
 
 	pBuffer = pElement->Attribute("text");
 	if(pBuffer != NULL)
@@ -160,8 +156,8 @@ HTREEITEM CMutiTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement
 	}
 	
 	// then insert new item
-	HTREEITEM hti = InsertItem(&tvis);
-	return hti;
+	HTREEITEM hTreeItem = InsertItem(&tvis);
+	return hTreeItem;
 }
 
 void CMutiTreeCtrl::OnDeleteItem(NMHDR* pNMHDR, LRESULT* pResult) 
