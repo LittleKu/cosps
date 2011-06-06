@@ -12,7 +12,7 @@
 // CListCtrlDemoDlg dialog
 #include "FileParser.h"
 #include "ThirdParty/SplitterControl.h"
-#include "ThirdParty/MutiTreeCtrl.h"
+#include "ThirdParty/MultiSelTreeCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"
 #include "SourceDirListCtrl.h"
@@ -35,9 +35,9 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };
-	CMutiTreeCtrl	m_filterTree;
-	CImageList m_imgList;
-	CImageList m_imgState;
+	CMultiSelTreeCtrl	m_filterTree;
+	CImageList m_selectedStateIL;
+	CImageList m_checkBoxStateIL;
 	
 	CButton	m_recursiveSubBtn;
 	CComboBox	m_filterComboBox;
