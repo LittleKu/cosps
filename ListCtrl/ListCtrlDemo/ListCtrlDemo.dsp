@@ -140,7 +140,7 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ThirdParty\MutiTreeCtrl.cpp
+SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -233,7 +233,7 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ThirdParty\MutiTreeCtrl.h
+SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
 # End Source File
 # Begin Source File
 

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "MutiTreeCtrl.h"
+#include "MultiSelTreeCtrl.h"
 #include "tinyxml.h"
 
 #ifdef _DEBUG
