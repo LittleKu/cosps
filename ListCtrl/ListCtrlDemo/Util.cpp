@@ -75,6 +75,39 @@ CString GetCurrentTime()
 {
 	return CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S");
 }
+
+int GetIconIndex(LPCTSTR lpszPath, DWORD dwFileAttributes, UINT uFlags)
+{
+	SHFILEINFO sfi;
+	ZeroMemory(&sfi, sizeof(SHFILEINFO));
+	uFlags |= SHGFI_USEFILEATTRIBUTES | SHGFI_SMALLICON | SHGFI_SYSICONINDEX;
+	DWORD dwResult = ::SHGetFileInfo(lpszPath, dwFileAttributes, &sfi, sizeof(SHFILEINFO), uFlags);
+	return sfi.iIcon;
+}
+int GetWindowsDirIconIndex()
+{
+	static int iWindowsDirIconIndex = -1;
+
+	if(iWindowsDirIconIndex == -1)
+	{
+		TCHAR szWinDir[MAX_PATH + 1];
+		GetWindowsDirectory(szWinDir, MAX_PATH);
+		iWindowsDirIconIndex = GetIconIndex(szWinDir, FILE_ATTRIBUTE_DIRECTORY, 0);
+	}
+	return iWindowsDirIconIndex;
+}
+int GetWindowsDirOpenIconIndex()
+{
+	static int iWindowsDirOpenIconIndex = -1;
+	
+	if(iWindowsDirOpenIconIndex == -1)
+	{
+		TCHAR szWinDir[MAX_PATH + 1];
+		GetWindowsDirectory(szWinDir, MAX_PATH);
+		iWindowsDirOpenIconIndex = GetIconIndex(szWinDir, FILE_ATTRIBUTE_DIRECTORY, SHGFI_OPENICON);
+	}
+	return iWindowsDirOpenIconIndex;
+}
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
 int CommonUtils::wildcmp(const char *wild, const char *string) {

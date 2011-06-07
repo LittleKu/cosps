@@ -112,7 +112,7 @@ void CListCtrlDemoDlg::InitFilterTree()
 	m_checkBoxStateIL.Create(IDB_FILTER_TREE_CHECK_BOX_STATE, 13, 1, RGB(255,255,255));
 	m_selectedStateIL.Create(IDB_FILTER_TREE_SEL_STATE, 16, 1, RGB(255,255,255));
 	
-	m_filterTree.SetImageList(&m_selectedStateIL, TVSIL_NORMAL);
+//	m_filterTree.SetImageList(&m_selectedStateIL, TVSIL_NORMAL);
 	m_filterTree.SetImageList(&m_checkBoxStateIL, TVSIL_STATE);
 
 	m_filterTree.Init(".\\dat\\filter_tree.xml");
@@ -708,7 +708,7 @@ LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam)
 		pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
 		if(pTVIData != NULL)
 		{
-			sFilterStr += pTVIData->type;
+			sFilterStr += pTVIData->szType;
 			sFilterStr += _T(";");
 		}
 	}

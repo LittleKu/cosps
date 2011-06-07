@@ -10,6 +10,14 @@ static char THIS_FILE[] = __FILE__;
 
 UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELECTED_EVENT"));
 
+#define XML_NM_ROOT			"root"
+#define XML_NM_LANG			"language"
+#define XML_NM_FILE			"file"
+
+#define XML_ATTRIB_TEXT		"text"
+#define XML_ATTRIB_TYPE		"type"
+#define XML_ATTRIB_CHECKED	"checked"
+
 BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
 	CString sText = pTree->GetItemText(hTreeItem);
@@ -50,6 +58,23 @@ BOOL CALLBACK GetSelectedItemProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem,
 	return TRUE;
 }
 
+typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNodePtr;
+
+BOOL CALLBACK SaveTreeProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	CMapHTreeItem2XmlNodePtr* pMap = (CMapHTreeItem2XmlNodePtr*)lParam;
+
+	HTREEITEM hParent = pTree->GetParentItem(hTreeItem);
+	TiXmlNode* pParent = NULL;
+	BOOL bExist = pMap->Lookup(hParent, pParent);
+	ASSERT(bExist);
+
+	TiXmlNode* pChild = pTree->InsertXMLChild(pParent, hTreeItem);
+	pMap->SetAt(hTreeItem, pChild);
+
+	return TRUE;
+}
+
 CMultiSelTreeCtrl::CMultiSelTreeCtrl()
 {
 	m_uFlags = 0;
@@ -62,6 +87,7 @@ CMultiSelTreeCtrl::~CMultiSelTreeCtrl()
 
 BEGIN_MESSAGE_MAP(CMultiSelTreeCtrl, CTreeCtrl)
 	//{{AFX_MSG_MAP(CMutiTreeCtrl)
+	ON_WM_DESTROY()
 	ON_WM_KEYDOWN()
 	ON_WM_LBUTTONDOWN()
 	ON_NOTIFY_REFLECT(TVN_KEYDOWN, OnKeydown)
@@ -72,6 +98,31 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMutiTreeCtrl message handlers
+void CMultiSelTreeCtrl::PreSubclassWindow() 
+{
+	CTreeCtrl::PreSubclassWindow();
+
+	LPITEMIDLIST  pidl = NULL;
+	SHGetSpecialFolderLocation(GetSafeHwnd(), (UINT)CSIDL_DESKTOP, &pidl);
+	
+    SHFILEINFO sfi;
+	ZeroMemory(&sfi, sizeof(SHFILEINFO));
+	HIMAGELIST hShellImageList = (HIMAGELIST) SHGetFileInfo((LPCTSTR)(LPCITEMIDLIST)pidl,
+		0, &sfi, sizeof(SHFILEINFO), SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+	ImageList_SetBkColor(hShellImageList, CLR_NONE);
+	
+	SendMessage(TVM_SETIMAGELIST, TVSIL_NORMAL, (LPARAM)hShellImageList);
+	
+	IMalloc* pIface = NULL;
+	SHGetMalloc(&pIface);
+	
+	if( SUCCEEDED(::SHGetMalloc(&pIface)) )
+	{
+		pIface->Free(pidl);
+		pIface->Release();
+		pIface = NULL;
+	}
+}
 BOOL CMultiSelTreeCtrl::Init(LPCTSTR lpXMLFile)
 {
 	TiXmlDocument doc( lpXMLFile );
@@ -85,7 +136,7 @@ BOOL CMultiSelTreeCtrl::Init(LPCTSTR lpXMLFile)
 	TiXmlNode *pNode = NULL;
 	TiXmlElement *pElement = NULL;
 
-	pNode = doc.FirstChild( "root" );
+	pNode = doc.FirstChild( XML_NM_ROOT );
 	ASSERT( pNode );
 	pElement = pNode->ToElement();
 	ASSERT(pElement);
@@ -139,14 +190,14 @@ HTREEITEM CMultiSelTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pEle
 	tvis.item.pszText = szText;
 	tvis.item.cchTextMax = MAX_PATH;	
 
-	pBuffer = pElement->Attribute("text");
+	pBuffer = pElement->Attribute(XML_ATTRIB_TEXT);
 	if(pBuffer != NULL)
 	{
 		lstrcpyn(tvis.item.pszText, pBuffer, tvis.item.cchTextMax);
 	}
 	
 	//State
-	pBuffer = pElement->Attribute("checked");
+	pBuffer = pElement->Attribute(XML_ATTRIB_CHECKED);
 
 	int nCheckStatus = TVIS_IMAGE_STATE_UNCHECK;
 	if(pBuffer != NULL)
@@ -157,31 +208,138 @@ HTREEITEM CMultiSelTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pEle
 	tvis.item.stateMask = TVIS_STATEIMAGEMASK;
 
 	pBuffer = pElement->Value();
-	if(pBuffer != NULL && strcmp(pBuffer, "file") != 0)
+	if(pBuffer != NULL && strcmp(pBuffer, XML_NM_FILE) != 0)
 	{
 		tvis.item.state |= TVIS_EXPANDED;
 		tvis.item.stateMask |= TVIS_EXPANDED;
 	}
-
-	//non-selected state image
-	tvis.item.iImage = 0;
-	//selected image
-	tvis.item.iSelectedImage = 1;
 	
 	//lparam : prepare item data
-	tvis.item.lParam = (LPARAM)NULL;
-
-	pBuffer = pElement->Attribute("type");
+	TVITEMDATA* pData = new TVITEMDATA;
+	pData->szName = pElement->Value();
+	pBuffer = pElement->Attribute(XML_ATTRIB_TYPE);
 	if(pBuffer != NULL)
 	{
-		TVITEMDATA* pData = new TVITEMDATA;
-		pData->type = pBuffer;
-		tvis.item.lParam = (LPARAM)pData;
+		pData->szType = pBuffer;	
+	}
+	tvis.item.lParam = (LPARAM)pData;
+
+	//Branch node
+	if(pData->szType.IsEmpty())
+	{
+		//non-selected state image
+		tvis.item.iImage = CommonUtils::GetWindowsDirIconIndex();
+		//selected image
+		tvis.item.iSelectedImage = CommonUtils::GetWindowsDirOpenIconIndex();
+	}
+	//Leaf node
+	else
+	{
+		//non-selected state image
+		tvis.item.iImage = CommonUtils::GetIconIndex(pData->szType);
+		//selected image
+		tvis.item.iSelectedImage = tvis.item.iImage;
 	}
 	
 	// then insert new item
 	HTREEITEM hTreeItem = InsertItem(&tvis);
 	return hTreeItem;
+}
+
+BOOL CMultiSelTreeCtrl::SaveTree(const char * filename, HTREEITEM hTreeItemRoot)
+{
+	if(hTreeItemRoot == NULL)
+	{
+		return FALSE;
+	}
+
+	BOOL bResult = FALSE;
+
+	TiXmlDocument doc(filename);
+	
+	TiXmlDeclaration declaration("1.0", "UTF-8", "yes");
+	doc.InsertEndChild(declaration);
+
+	CMapHTreeItem2XmlNodePtr map;
+	map.SetAt((HTREEITEM)NULL, &doc);
+	BFSEnumItems(hTreeItemRoot, SaveTreeProc, (LPARAM)&map);
+	map.RemoveAll();
+
+	//Validation
+	if(doc.Error())
+	{
+		AfxTrace("Error in %s: %s\n", doc.Value(), doc.ErrorDesc());
+		return FALSE;
+	}
+	doc.SaveFile();
+	return bResult;
+
+	/*
+	TiXmlNode* pParentNode = &doc;
+	TiXmlNode* pChildNode = NULL;
+	do 
+	{
+		//Start a BFS enumeration for the tree to write xml file
+		CList<HTREEITEM, HTREEITEM> hTreeItemList;
+		CList<TiXmlNode*, TiXmlNode*> pXmlElementList;
+		
+		hTreeItemList.AddTail(hTreeItemRoot);
+		pChildNode = InsertXMLChild(pParentNode, hTreeItemRoot);
+		pXmlElementList.AddTail(pChildNode);
+		
+		HTREEITEM hCurTreeItem = hTreeItemRoot;
+		HTREEITEM hTreeItem = NULL;
+		
+		//Add all siblings to the list firstly
+		for(hTreeItem = GetNextItem(hCurTreeItem, TVGN_NEXT); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
+		{
+			hTreeItemList.AddTail(hTreeItem);
+			pXmlElementList.AddTail(InsertXMLChild(pParentNode, hTreeItem));
+		}
+		
+		while(!hTreeItemList.IsEmpty()) 
+		{
+			hCurTreeItem = hTreeItemList.RemoveHead();
+			pParentNode = pXmlElementList.RemoveHead();
+			
+			//Add all the children items to the list
+			for(hTreeItem = GetChildItem(hCurTreeItem); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
+			{
+				hTreeItemList.AddTail(hTreeItem);
+
+				pXmlElementList.AddTail(InsertXMLChild(pParentNode, hTreeItem));
+			}
+		}
+	} while (FALSE);
+	
+	//Validation
+	if(doc.Error())
+	{
+		AfxTrace("Error in %s: %s\n", doc.Value(), doc.ErrorDesc());
+		return FALSE;
+	}
+	doc.SaveFile();
+	return bResult;
+	*/
+}
+
+TiXmlNode* CMultiSelTreeCtrl::InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem)
+{
+	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+	ASSERT(pTVIData);
+
+	TiXmlElement element(pTVIData->szName);
+	element.SetAttribute(XML_ATTRIB_TEXT, GetItemText(hItem));
+	element.SetAttribute(XML_ATTRIB_TYPE, pTVIData->szType);
+	element.SetAttribute(XML_ATTRIB_CHECKED, GetItemStateImage(hItem));
+
+	return pParentNode->InsertEndChild(element);
+}
+
+void CMultiSelTreeCtrl::OnDestroy() 
+{
+	SaveTree(".\\dat\\user-tree.xml", GetRootItem());
+	CTreeCtrl::OnDestroy();
 }
 
 void CMultiSelTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult) 

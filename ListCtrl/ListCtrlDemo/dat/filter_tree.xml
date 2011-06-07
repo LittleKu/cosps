@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <root text="All (*)" checked="2">
-	<language text="C++" checked="2">
+	<language text="C/C++" checked="2">
+		<file text="C/C++ Header File (*.h)" type="*.h" checked="3"/>
+		<file text="C/C++ Inline File (*.inl)" type="*.inl" checked="1"/>
+		<file text="C Source File (*.c)" type="*.c" checked="3"/>
 		<file text="C++ Source File (*.cpp)" type="*.cpp" checked="3"/>
 		<file text="C++ Source File (*.cxx)" type="*.cxx" checked="1"/>
-		<file text="C++ Source File (*.inl)" type="*.inl" checked="1"/>
-		<file text="C++ Header File (*.h)" type="*.h" checked="3"/>
 		<file text="C++ Header File (*.hpp)" type="*.hpp" checked="3"/>
 		<file text="Resource Script (*.rc)" type="*.rc" checked="3"/>
 		<file text="Resource Script (*.rc2)" type="*.rc2" checked="3"/>		

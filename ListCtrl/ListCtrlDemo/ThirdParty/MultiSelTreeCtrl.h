@@ -10,6 +10,7 @@
 
 extern UINT ID_TREE_ITEM_SELECTED_EVENT; 
 
+class TiXmlNode;
 class TiXmlElement;
 class CMultiSelTreeCtrl;
 
@@ -21,7 +22,8 @@ class CMultiSelTreeCtrl : public CTreeCtrl
 public:
 	struct TVITEMDATA
 	{
-		CString type;
+		CString szName;
+		CString szType;
 	};
 
 
@@ -40,9 +42,15 @@ public:
 
 	UINT GetItemStateImage(HTREEITEM hItem);
 	BOOL SetItemStateImage(HTREEITEM hItem, UINT nStateImage);
+
+	BOOL SaveTree(const char * filename, HTREEITEM hTreeItemRoot);
+	TiXmlNode* InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem);
+protected:
+	virtual void PreSubclassWindow();
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CMutiTreeCtrl)
+	afx_msg void OnDestroy();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeydown(NMHDR* pNMHDR, LRESULT* pResult);

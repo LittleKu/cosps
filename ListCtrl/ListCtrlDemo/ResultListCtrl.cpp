@@ -90,18 +90,12 @@ void CResultListCtrl::PreSubclassWindow()
 int CResultListCtrl::AddRow(const CFileInfo& fi)
 {
 	int nRes = -1;
-	
-	SHFILEINFO sfi;
-	ZeroMemory(&sfi, sizeof(SHFILEINFO));
-	UINT uFlags = SHGFI_USEFILEATTRIBUTES | SHGFI_SMALLICON | SHGFI_SYSICONINDEX;
-	::SHGetFileInfo(fi.m_sFullFileName, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(SHFILEINFO), uFlags);
 
-    LV_ITEM lvi;
-	
+    LV_ITEM lvi;	
     lvi.mask = LVIF_TEXT | LVIF_PARAM | LVIF_IMAGE;
     lvi.iItem = GetItemCount();
     lvi.lParam = (LPARAM)&fi;
-	lvi.iImage = sfi.iIcon;
+	lvi.iImage = CommonUtils::GetIconIndex(fi.m_sFullFileName);
 	
     lvi.iSubItem = 0;
     lvi.pszText = (LPTSTR)(LPCTSTR)fi.m_sFileName;

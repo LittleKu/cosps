@@ -248,6 +248,22 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pCounterDlg->OnExport(EXPORT_TYPE_HTML);
 		}
 		break;
+	case ID_TBBTN_SETTING:
+		{
+			//Test
+			const char* files[] = {
+				"*.c", "*.inl", ".hpp", "*.h", "*.exe", "*.bat", "*.com", "*.txt", "*.java", ".cxx"
+			};
+			int count = sizeof(files)/sizeof(files[0]);
+
+			for(int i = 0; i < count; i++)
+			{
+				CFileInfo* pFileInfo = new CFileInfo();
+				pFileInfo->SetFileName(files[i]);
+				m_pCounterDlg->OnProgressUpdate((WPARAM)pFileInfo, 0);
+			}
+		}
+		break;
 	case IDM_FILE_EXIT:
 	case ID_TBBTN_EXIT:
 		{
