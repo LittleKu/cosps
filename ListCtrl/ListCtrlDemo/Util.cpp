@@ -136,14 +136,16 @@ BOOL IsFileExist(LPCTSTR lpFileName)
 		FILE_ATTRIBUTE_NORMAL,     // normal file 
 		NULL);                     // no attr. template 
 	
+	BOOL bResult = TRUE;
 	if (hFile == INVALID_HANDLE_VALUE) 
 	{
 		CString szErrorText;
 		szErrorText.Format("IsFileExist(%s) = INVALID_HANDLE_VALUE", lpFileName);
 		LastErrorHandler(szErrorText, LEH_AFX_TRACE);
-        return FALSE;
-	} 
-	return TRUE;
+		bResult = FALSE;
+	}
+	CloseHandle(hFile);
+	return bResult;
 }
 
 CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
@@ -162,11 +164,11 @@ CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
 			szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
 		}
 	}
-	else if(uFlags & GCFP_USER)
+	else if(uFlags == GCFP_USER)
 	{
 		szFilePath.Format("%s\\dat\\user\\%s", szBaseDir, lpFileName);
 	}
-	else if(uFlags & GCFP_DEFAULT)
+	else if(uFlags == GCFP_DEFAULT)
 	{
 		szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
 	}

@@ -52,6 +52,7 @@ protected:
 	//{{AFX_MSG(CMutiTreeCtrl)
 	afx_msg void OnDestroy();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeydown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

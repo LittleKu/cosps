@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CMultiSelTreeCtrl, CTreeCtrl)
 	ON_WM_DESTROY()
 	ON_WM_KEYDOWN()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_NOTIFY_REFLECT(TVN_KEYDOWN, OnKeydown)
 	ON_NOTIFY_REFLECT(NM_CLICK, OnStateIconClick)	
 	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnDeleteItem)
@@ -254,8 +255,6 @@ BOOL CMultiSelTreeCtrl::SaveTree(const char * filename, HTREEITEM hTreeItemRoot)
 		return FALSE;
 	}
 
-	BOOL bResult = FALSE;
-
 	TiXmlDocument doc(filename);
 	
 	TiXmlDeclaration declaration("1.0", "UTF-8", "yes");
@@ -273,7 +272,7 @@ BOOL CMultiSelTreeCtrl::SaveTree(const char * filename, HTREEITEM hTreeItemRoot)
 		return FALSE;
 	}
 	doc.SaveFile();
-	return bResult;
+	return TRUE;
 }
 
 TiXmlNode* CMultiSelTreeCtrl::InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem)
@@ -326,6 +325,24 @@ void CMultiSelTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	
 	CTreeCtrl::OnLButtonDown(nFlags, point);
+}
+
+void CMultiSelTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	HTREEITEM hItem = HitTest(point, &m_uFlags);
+	if(hItem == NULL)
+	{
+		return;
+	}
+	if(!(m_uFlags & TVHT_ONITEM))
+	{
+		return;
+	}
+	if(!SelectItem(hItem))
+	{
+		return;
+	}
+	CTreeCtrl::OnRButtonDown(nFlags, point);
 }
 
 void CMultiSelTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
