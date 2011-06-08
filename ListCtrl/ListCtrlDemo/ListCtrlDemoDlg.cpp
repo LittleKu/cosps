@@ -115,7 +115,7 @@ void CListCtrlDemoDlg::InitFilterTree()
 //	m_filterTree.SetImageList(&m_selectedStateIL, TVSIL_NORMAL);
 	m_filterTree.SetImageList(&m_checkBoxStateIL, TVSIL_STATE);
 
-	m_filterTree.Init(".\\dat\\filter_tree.xml");
+	m_filterTree.Init();
 //	m_filterTree.ExpandAllItems();
 	OnTreeItemSelected(0, 0);
 }

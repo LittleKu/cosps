@@ -31,7 +31,7 @@ public:
 	CMultiSelTreeCtrl();
 	virtual ~CMultiSelTreeCtrl();
 
-	BOOL Init(LPCTSTR lpXMLFile);
+	BOOL Init();
 	HTREEITEM InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement);
 
 	BOOL BFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam);

@@ -47,6 +47,22 @@ void CTimeCost::Reset()
 #endif
 
 BEGIN_NAMESPACE(CommonUtils)
+void LastErrorHandler(LPCTSTR lpszMsg, UINT uFlags)
+{
+	TCHAR szBuf[1024]; 
+    DWORD dw = GetLastError(); 
+	
+    _stprintf(szBuf, "%s failed: GetLastError returned %u\n", lpszMsg, dw); 
+	
+	if(uFlags & LEH_AFX_TRACE)
+	{
+		AfxTrace("%s", szBuf);
+	}
+	if(uFlags & LEH_MESSAGE_BOX)
+	{
+		AfxMessageBox(szBuf);
+	}  
+}
 CString ToString(UINT n)
 {
 	CString str;
@@ -108,6 +124,55 @@ int GetWindowsDirOpenIconIndex()
 	}
 	return iWindowsDirOpenIconIndex;
 }
+
+BOOL IsFileExist(LPCTSTR lpFileName)
+{
+	HANDLE hFile;
+	hFile = CreateFile(lpFileName, // open lpFileName
+		GENERIC_READ,              // open for reading 
+		FILE_SHARE_READ,           // share for reading 
+		NULL,                      // no security 
+		OPEN_EXISTING,             // existing file only 
+		FILE_ATTRIBUTE_NORMAL,     // normal file 
+		NULL);                     // no attr. template 
+	
+	if (hFile == INVALID_HANDLE_VALUE) 
+	{
+		CString szErrorText;
+		szErrorText.Format("IsFileExist(%s) = INVALID_HANDLE_VALUE", lpFileName);
+		LastErrorHandler(szErrorText, LEH_AFX_TRACE);
+        return FALSE;
+	} 
+	return TRUE;
+}
+
+CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
+{
+	CString szBaseDir = lpBaseDir;
+	if(szBaseDir.IsEmpty())
+	{
+		szBaseDir = _T(".");
+	}
+	CString szFilePath;
+	if(uFlags == GCFP_AUTO)
+	{
+		szFilePath.Format("%s\\dat\\user\\%s", szBaseDir, lpFileName);
+		if(!IsFileExist(szFilePath))
+		{
+			szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
+		}
+	}
+	else if(uFlags & GCFP_USER)
+	{
+		szFilePath.Format("%s\\dat\\user\\%s", szBaseDir, lpFileName);
+	}
+	else if(uFlags & GCFP_DEFAULT)
+	{
+		szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
+	}
+	return szFilePath;
+}
+
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
 int CommonUtils::wildcmp(const char *wild, const char *string) {

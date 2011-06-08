@@ -18,6 +18,8 @@ UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELE
 #define XML_ATTRIB_TYPE		"type"
 #define XML_ATTRIB_CHECKED	"checked"
 
+typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNodePtr;
+
 BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
 	CString sText = pTree->GetItemText(hTreeItem);
@@ -57,8 +59,6 @@ BOOL CALLBACK GetSelectedItemProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem,
 	}	
 	return TRUE;
 }
-
-typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNodePtr;
 
 BOOL CALLBACK SaveTreeProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
@@ -123,9 +123,10 @@ void CMultiSelTreeCtrl::PreSubclassWindow()
 		pIface = NULL;
 	}
 }
-BOOL CMultiSelTreeCtrl::Init(LPCTSTR lpXMLFile)
+BOOL CMultiSelTreeCtrl::Init()
 {
-	TiXmlDocument doc( lpXMLFile );
+	const TCHAR* lpXMLFile = _T("filter_tree.xml");
+	TiXmlDocument doc( CommonUtils::GetConfFilePath(lpXMLFile) );
 	bool loadOkay = doc.LoadFile();	
 	if ( !loadOkay )
 	{
@@ -273,54 +274,6 @@ BOOL CMultiSelTreeCtrl::SaveTree(const char * filename, HTREEITEM hTreeItemRoot)
 	}
 	doc.SaveFile();
 	return bResult;
-
-	/*
-	TiXmlNode* pParentNode = &doc;
-	TiXmlNode* pChildNode = NULL;
-	do 
-	{
-		//Start a BFS enumeration for the tree to write xml file
-		CList<HTREEITEM, HTREEITEM> hTreeItemList;
-		CList<TiXmlNode*, TiXmlNode*> pXmlElementList;
-		
-		hTreeItemList.AddTail(hTreeItemRoot);
-		pChildNode = InsertXMLChild(pParentNode, hTreeItemRoot);
-		pXmlElementList.AddTail(pChildNode);
-		
-		HTREEITEM hCurTreeItem = hTreeItemRoot;
-		HTREEITEM hTreeItem = NULL;
-		
-		//Add all siblings to the list firstly
-		for(hTreeItem = GetNextItem(hCurTreeItem, TVGN_NEXT); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
-		{
-			hTreeItemList.AddTail(hTreeItem);
-			pXmlElementList.AddTail(InsertXMLChild(pParentNode, hTreeItem));
-		}
-		
-		while(!hTreeItemList.IsEmpty()) 
-		{
-			hCurTreeItem = hTreeItemList.RemoveHead();
-			pParentNode = pXmlElementList.RemoveHead();
-			
-			//Add all the children items to the list
-			for(hTreeItem = GetChildItem(hCurTreeItem); hTreeItem != NULL; hTreeItem = GetNextItem(hTreeItem, TVGN_NEXT))
-			{
-				hTreeItemList.AddTail(hTreeItem);
-
-				pXmlElementList.AddTail(InsertXMLChild(pParentNode, hTreeItem));
-			}
-		}
-	} while (FALSE);
-	
-	//Validation
-	if(doc.Error())
-	{
-		AfxTrace("Error in %s: %s\n", doc.Value(), doc.ErrorDesc());
-		return FALSE;
-	}
-	doc.SaveFile();
-	return bResult;
-	*/
 }
 
 TiXmlNode* CMultiSelTreeCtrl::InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem)
@@ -338,7 +291,7 @@ TiXmlNode* CMultiSelTreeCtrl::InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM h
 
 void CMultiSelTreeCtrl::OnDestroy() 
 {
-	SaveTree(".\\dat\\user-tree.xml", GetRootItem());
+	SaveTree(CommonUtils::GetConfFilePath(_T("filter_tree.xml"), GCFP_USER), GetRootItem());
 	CTreeCtrl::OnDestroy();
 }
 

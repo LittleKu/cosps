@@ -223,7 +223,7 @@ BOOL CXMLExporter::DoExport(LPCTSTR lpFileName)
 		int nPos = sPath.ReverseFind(_T('\\'));
 		sPath = sPath.Left(nPos);
 
-		CString sXSLFileName = sPath + "\\Reports\\default.xsl";
+		CString sXSLFileName = CommonUtils::GetConfFilePath(_T("report_stylesheet.xsl"), GCFP_AUTO, sPath);
 
 		CString sXSLT;
 		sXSLT.Format("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>\n", sXSLFileName);
