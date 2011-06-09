@@ -47,6 +47,9 @@ CListCtrlDemoApp::~CListCtrlDemoApp()
 		delete m_pSysBkBitmap;
 		m_pSysBkBitmap = NULL;
 	}
+
+	free((void*)m_pszAppName);
+	m_pszAppName = NULL;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -78,6 +81,13 @@ BOOL CListCtrlDemoApp::InitInstance()
 //	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
 //	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
 	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
+
+	//Set App's name
+	if(m_pszAppName != NULL)
+	{
+		free((void*)m_pszAppName);
+		m_pszAppName = _tcsdup(SZ_PRODUCT_NAME);
+	}
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;

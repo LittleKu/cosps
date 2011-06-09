@@ -45,12 +45,19 @@ public:
 
 	BOOL SaveTree(const char * filename, HTREEITEM hTreeItemRoot);
 	TiXmlNode* InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem);
+
+	void Remove();
+	void Modify();
+	void AddNewLanguage();
+	void AddNewFileType();
 protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CMutiTreeCtrl)
 	afx_msg void OnDestroy();
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult);

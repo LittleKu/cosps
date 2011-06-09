@@ -20,6 +20,13 @@ UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELE
 
 typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNodePtr;
 
+#define IDM_FILTER_TREE_FIRST				48297
+
+#define IDM_FILTER_TREE_MODIFY				(IDM_FILTER_TREE_FIRST + 0)
+#define IDM_FILTER_TREE_REMOVE				(IDM_FILTER_TREE_FIRST + 1)
+#define IDM_FILTER_TREE_ADD_LANGUAGE		(IDM_FILTER_TREE_FIRST + 2)
+#define IDM_FILTER_TREE_ADD_FILE_TYPE		(IDM_FILTER_TREE_FIRST + 3)
+
 BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
 	CString sText = pTree->GetItemText(hTreeItem);
@@ -91,6 +98,7 @@ BEGIN_MESSAGE_MAP(CMultiSelTreeCtrl, CTreeCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT(TVN_KEYDOWN, OnKeydown)
 	ON_NOTIFY_REFLECT(NM_CLICK, OnStateIconClick)	
 	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnDeleteItem)
@@ -296,6 +304,7 @@ void CMultiSelTreeCtrl::OnDestroy()
 
 void CMultiSelTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult) 
 {
+//	AfxTrace("OnClick\n");
 	*pResult = 0;
 	if(m_uFlags & TVHT_ONITEMSTATEICON) 
 	{
@@ -311,6 +320,7 @@ void CMultiSelTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CMultiSelTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
+//	AfxTrace("OnLButtonDown\n");
 	HTREEITEM hItem = HitTest(point, &m_uFlags);
 	if ( (m_uFlags & TVHT_ONITEMSTATEICON) != 0 )
 	{
@@ -327,26 +337,144 @@ void CMultiSelTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CTreeCtrl::OnLButtonDown(nFlags, point);
 }
 
-void CMultiSelTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
+void CMultiSelTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	HTREEITEM hItem = HitTest(point, &m_uFlags);
-	if(hItem == NULL)
+//	AfxTrace("OnContextMenu: m_hWnd=%u, pWnd->GetSafeHwnd()=%u\n", m_hWnd, pWnd->GetSafeHwnd());
+	if (pWnd->GetSafeHwnd() != m_hWnd)
+	{
+		Default();
+		return;
+	}
+	CPoint pointClient = point;
+	// get clicked item
+	UINT nFlags = 0;
+	ScreenToClient(&pointClient);
+	HTREEITEM hItem = HitTest(pointClient, &nFlags);
+	
+	//Doesn't click on a tree item
+	if(!(nFlags & TVHT_ONITEM))
 	{
 		return;
 	}
-	if(!(m_uFlags & TVHT_ONITEM))
+
+	//Check if the tree is the current focused Wnd.
+	//If the tree doesn't get the focus, the SelectedItem won't work even it returned success.
+	if(GetSafeHwnd() != ::GetFocus())
 	{
-		return;
+		::SetFocus(GetSafeHwnd());
 	}
+	ASSERT(GetSafeHwnd() == ::GetFocus());
+
+	//Select the item
 	if(!SelectItem(hItem))
 	{
 		return;
 	}
-	CTreeCtrl::OnRButtonDown(nFlags, point);
+
+	CMenu ctMenu;
+	ctMenu.CreatePopupMenu();
+	ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_MODIFY,		_T("Modify.."));
+	ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_REMOVE,		_T("Remove.."));
+	
+	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+	ASSERT(pTVIData);
+	//Root Item
+	if(pTVIData->szName.Compare(XML_NM_ROOT) == 0)
+	{
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,	_T("Add New Language.."));
+		ctMenu.EnableMenuItem(IDM_FILTER_TREE_REMOVE, MF_BYCOMMAND | MF_GRAYED);
+	}
+	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
+	{
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_FILE_TYPE, _T("Add New File Type.."));
+	}
+	
+	ctMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
+}
+
+void CMultiSelTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
+{
+//	must be trapped to get WM_CONTEXTMENU messages
+//	AfxTrace("OnRButtonDown, nFlags=%u, point=(%d,%d)\n", nFlags, point.x, point.y);
+//	CTreeCtrl::OnRButtonDown(nFlags, point);
+}
+
+BOOL CMultiSelTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	BOOL bResult = TRUE;
+	switch(wParam)
+	{
+	case IDM_FILTER_TREE_MODIFY:
+		{
+			Modify();
+		}
+		break;
+	case IDM_FILTER_TREE_REMOVE:
+		{
+			Remove();
+		}
+		break;
+	case IDM_FILTER_TREE_ADD_LANGUAGE:
+		{
+			AddNewLanguage();
+		}
+		break;
+	case IDM_FILTER_TREE_ADD_FILE_TYPE:
+		{
+			AddNewFileType();
+		}
+		break;
+	default:
+		{
+			bResult = FALSE;
+		}
+		break;
+	}
+	if(bResult)
+	{
+		return TRUE;
+	}
+	return CTreeCtrl::OnCommand(wParam, lParam);
+}
+void CMultiSelTreeCtrl::Modify()
+{
+	
+}
+void CMultiSelTreeCtrl::Remove()
+{
+	CString szPromptText;
+	szPromptText.Format(_T(
+		"Are you sure to remove this item?\n"
+		"If you click \"Yes\", this item and all of its children items will be removed."));
+	
+	int nResult = AfxMessageBox(szPromptText, MB_YESNO | MB_ICONQUESTION);
+	if(nResult != IDYES)
+	{
+		return;
+	}
+	//Remove item
+	HTREEITEM hItem = GetSelectedItem();
+	ASSERT(hItem);
+
+	BOOL bResult = DeleteItem(hItem);
+	if(!bResult)
+	{
+		AfxMessageBox(_T("Failed to delete this item."), MB_OK);
+	}
+}
+
+void CMultiSelTreeCtrl::AddNewLanguage()
+{
+
+}
+void CMultiSelTreeCtrl::AddNewFileType()
+{
+
 }
 
 void CMultiSelTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 {
+//	AfxTrace("WM: OnKeydown\n");
 	//CHAR space
 	if(nChar == VK_SPACE)
 	{
@@ -367,6 +495,7 @@ void CMultiSelTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CMultiSelTreeCtrl::OnKeydown(NMHDR* pNMHDR, LRESULT* pResult) 
 {
+//	AfxTrace("NOTIFY: OnKeydown\n");
 	TV_KEYDOWN* pTVKeyDown = (TV_KEYDOWN*)pNMHDR;
 	
 	*pResult = 0;
