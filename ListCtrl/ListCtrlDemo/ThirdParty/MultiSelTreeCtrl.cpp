@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "MultiSelTreeCtrl.h"
 #include "tinyxml.h"
+#include "../EditPropDlg.h"
+#include "../FilterTreeModifyFileTypeDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -438,7 +440,34 @@ BOOL CMultiSelTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 }
 void CMultiSelTreeCtrl::Modify()
 {
-	
+	HTREEITEM hItem = GetSelectedItem();
+	ASSERT(hItem);
+
+	if(ItemHasChildren(hItem))
+	{
+		CEditPropDlg dlg;
+		dlg.m_sTitle = _T("Modify");
+		dlg.m_NewNameStr = GetItemText(hItem);
+		int nResponse = dlg.DoModal();
+		if(nResponse == IDOK)
+		{
+			SetItemText(hItem, dlg.m_NewNameStr);
+		}
+	}
+	else
+	{
+		CFilterTreeModifyFileTypeDlg dlg;
+		TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+		dlg.m_NewNameStr = GetItemText(hItem);
+		dlg.m_FilterFileTypeStr = pTVIData->szType;
+
+		int nResponse = dlg.DoModal();
+		if(nResponse == IDOK)
+		{
+			SetItemText(hItem, dlg.m_NewNameStr);		
+			pTVIData->szType = dlg.m_FilterFileTypeStr;
+		}
+	}
 }
 void CMultiSelTreeCtrl::Remove()
 {
@@ -465,11 +494,39 @@ void CMultiSelTreeCtrl::Remove()
 
 void CMultiSelTreeCtrl::AddNewLanguage()
 {
+	CEditPropDlg dlg;
+	dlg.m_sTitle = _T("Add New Language");
+	dlg.m_LabelText = _T("New Language:");
+	int nResponse = dlg.DoModal();
+	if(nResponse == IDOK)
+	{
+		HTREEITEM hItem = GetSelectedItem();
+		ASSERT(hItem);
 
+		TiXmlElement element(XML_NM_LANG);
+		element.SetAttribute(XML_ATTRIB_TEXT, dlg.m_NewNameStr);
+		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
+
+		InsertSubItem(hItem, &element);
+	}
 }
 void CMultiSelTreeCtrl::AddNewFileType()
 {
+	CFilterTreeModifyFileTypeDlg dlg;
+	dlg.m_sTitle = _T("Add New File Type");
+	int nResponse = dlg.DoModal();
+	if(nResponse == IDOK)
+	{
+		HTREEITEM hItem = GetSelectedItem();
+		ASSERT(hItem);
+		
+		TiXmlElement element(XML_NM_FILE);
+		element.SetAttribute(XML_ATTRIB_TEXT, dlg.m_NewNameStr);
+		element.SetAttribute(XML_ATTRIB_TYPE, dlg.m_FilterFileTypeStr);
+		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
 
+		InsertSubItem(hItem, &element);
+	}
 }
 
 void CMultiSelTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 

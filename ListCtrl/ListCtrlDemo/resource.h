@@ -20,6 +20,9 @@
 #define IDB_SPLITTER_V_BKG              139
 #define IDB_SPLITTER_H_BKG              140
 #define IDB_MAIN_TOOLBAR_BKG            141
+#define IDD_FILTER_TREE_MODIFY          142
+#define IDD_EDIT_PROP_DLG               142
+#define IDD_FILTER_TREE_MODIFY_FILE_TYPE 143
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -63,6 +66,15 @@
 #define IDC_FILTER_TREE                 1042
 #define IDC_SPLITTER_VERTICAL           1043
 #define IDC_SPLITTER_HORIZONTAL         1044
+#define IDC_PRODUCT_VERSION             1045
+#define IDC_COPYRIGHT                   1046
+#define IDC_REG_INFO                    1047
+#define IDC_TXT_HOMEPAGE                1048
+#define IDC_HOMEPAGE                    1049
+#define IDC_NEW_NAME                    1051
+#define IDC_TXT_NEW_NAME                1052
+#define IDC_TXT_FILTER_TYPE             1053
+#define IDC_FILTER_FILE_TYPE            1054
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
@@ -88,9 +100,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        142
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32783
-#define _APS_NEXT_CONTROL_VALUE         1045
+#define _APS_NEXT_CONTROL_VALUE         1053
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

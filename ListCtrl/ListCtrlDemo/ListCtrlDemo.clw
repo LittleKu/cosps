@@ -2,35 +2,39 @@
 
 [General Info]
 Version=1
-LastClass=CMainReBar
-LastTemplate=generic CWnd
+LastClass=CFilterTreeModifyDlg
+LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=9
+ClassCount=11
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=12
+ResourceCount=14
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=CG_IDD_PROGRESS
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_MAIN_DLG
+Resource7=IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource9=IDD_LISTCTRLDEMO_DIALOG
-Resource10=IDD_PROGRESS (Chinese (P.R.C.))
+Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource10=IDD_MAIN_DLG
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_ABOUTBOX (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDR_RESULT_MENU (Neutral)
+Resource12=IDD_FILTER_TREE_MODIFY_FILE_TYPE
+Class10=CFilterTreeModifyDlg
+Resource13=IDD_EDIT_PROP_DLG (Neutral)
+Class11=CFilterTreeModifyFileTypeDlg
+Resource14=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -47,20 +51,18 @@ LastObject=IDC_FILTER_TREE
 BaseClass=CResizableDialog
 VirtualFilter=dWC
 
-[CLS:CAboutDlg]
-Type=0
-HeaderFile=ListCtrlDemoDlg.h
-ImplementationFile=ListCtrlDemoDlg.cpp
-Filter=D
-
 [DLG:IDD_ABOUTBOX]
 Type=1
 Class=CAboutDlg
-ControlCount=4
+ControlCount=8
 Control1=IDC_STATIC,static,1342177283
-Control2=IDC_STATIC,static,1342308480
-Control3=IDC_STATIC,static,1342308352
+Control2=IDC_PRODUCT_VERSION,static,1342308480
+Control3=IDC_COPYRIGHT,static,1342308352
 Control4=IDOK,button,1342373889
+Control5=IDC_STATIC,static,1342177296
+Control6=IDC_REG_INFO,edit,1353713860
+Control7=IDC_TXT_HOMEPAGE,static,1342308354
+Control8=IDC_HOMEPAGE,static,1342308352
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG]
 Type=1
@@ -256,4 +258,43 @@ HeaderFile=MainReBar.h
 ImplementationFile=MainReBar.cpp
 BaseClass=CReBar
 Filter=W
+LastObject=CMainReBar
+
+[CLS:CFilterTreeModifyDlg]
+Type=0
+HeaderFile=FilterTreeModifyDlg.h
+ImplementationFile=FilterTreeModifyDlg.cpp
+BaseClass=CDialog
+Filter=D
+VirtualFilter=dWC
+LastObject=IDC_NEW_NAME
+
+[DLG:IDD_FILTER_TREE_MODIFY_FILE_TYPE]
+Type=1
+Class=CFilterTreeModifyFileTypeDlg
+ControlCount=6
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_NEW_NAME,edit,1350631552
+Control4=IDC_TXT_NEW_NAME,static,1342308354
+Control5=IDC_TXT_FILTER_TYPE,static,1342308354
+Control6=IDC_FILTER_FILE_TYPE,edit,1350631552
+
+[CLS:CFilterTreeModifyFileTypeDlg]
+Type=0
+HeaderFile=FilterTreeModifyFileTypeDlg.h
+ImplementationFile=FilterTreeModifyFileTypeDlg.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=IDOK
+VirtualFilter=dWC
+
+[DLG:IDD_EDIT_PROP_DLG (Neutral)]
+Type=1
+Class=CFilterTreeModifyDlg
+ControlCount=4
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_NEW_NAME,edit,1350631552
+Control4=IDC_TXT_NEW_NAME,static,1342308354
 

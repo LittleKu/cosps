@@ -92,6 +92,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\AboutDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\CheckHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -108,7 +112,19 @@ SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\EditPropDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\FilterTreeModifyFileTypeDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\Gradient.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\HyperLink.cpp
 # End Source File
 # Begin Source File
 
@@ -185,6 +201,10 @@ SOURCE=.\Util.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\AboutDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\CheckHeaderCtrl.h
 # End Source File
 # Begin Source File
@@ -201,7 +221,19 @@ SOURCE=.\Export.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\EditPropDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FilterTreeModifyFileTypeDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\Gradient.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\HyperLink.h
 # End Source File
 # Begin Source File
 

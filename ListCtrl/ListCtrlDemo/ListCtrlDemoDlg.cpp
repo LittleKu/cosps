@@ -450,8 +450,8 @@ LRESULT CListCtrlDemoDlg::OnStartCount(WPARAM wParam, LPARAM lParam)
 	}
 	m_pProgressDlg = new CProgressDlg();
 	m_pProgressDlg->Create(this);
-	m_pProgressDlg->SetWindowText("Changed Caption");
-	m_pProgressDlg->SetStatus("Empty Status");
+	m_pProgressDlg->SetWindowText(_T("Please Wait..."));
+	m_pProgressDlg->SetStatus(_T("Start To Count..."));
 	m_pProgressDlg->UpdateWindow();
 	m_pProgressDlg->ShowWindow(SW_NORMAL);
 	return (LRESULT)m_pProgressDlg->GetSafeHwnd();

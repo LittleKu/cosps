@@ -86,8 +86,9 @@ BOOL CListCtrlDemoApp::InitInstance()
 	if(m_pszAppName != NULL)
 	{
 		free((void*)m_pszAppName);
-		m_pszAppName = _tcsdup(SZ_PRODUCT_NAME);
+		m_pszAppName = NULL;
 	}
+	m_pszAppName = _tcsdup(SZ_PRODUCT_NAME);
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;

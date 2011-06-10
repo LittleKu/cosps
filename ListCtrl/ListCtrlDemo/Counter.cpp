@@ -16,7 +16,6 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	//Set current progress status
 	LPUpdateProgressParam lpProgressParam = new UpdateProgressParam;
 	lpProgressParam->nPos = 0;
-	lpProgressParam->sTitle.Format(_T("%s"), "Waiting...."); 
 	lpProgressParam->sStatus.Format(_T("Found %d files"), 0);
 	lpProgressParam->sFile.Empty();
 	::SendMessage(hProgWnd, WM_PROGRESS_UPDATE, (WPARAM)lpProgressParam, 0);
