@@ -12,21 +12,21 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=14
+ResourceCount=15
 Resource1=IDD_PROP_DLG
 Resource2=IDR_MAINFRAME
-Resource3=IDD_MAIN_DLG (English (U.S.))
+Resource3=IDD_PROGRESS
 Resource4=IDD_MAIN_DLG
-Resource5=CG_IDD_PROGRESS
-Resource6=IDD_PROGRESS
+Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
 Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
-Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=IDD_PROGRESS (Chinese (P.R.C.))
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_ABOUTBOX (English (U.S.))
+Resource11=IDD_MAIN_DLG (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
@@ -35,7 +35,8 @@ Class10=CFilterTreeModifyDlg
 Resource13=IDD_LISTCTRLDEMO_DIALOG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
-Resource14=IDR_RESULT_MENU (Neutral)
+Resource14=IDD_ABOUTBOX (English (U.S.))
+Resource15=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -157,11 +158,15 @@ Control31=IDC_SPLITTER_HORIZONTAL,static,1342177287
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
 Class=CAboutDlg
-ControlCount=4
+ControlCount=8
 Control1=IDC_STATIC,static,1342177283
-Control2=IDC_STATIC,static,1342308480
-Control3=IDC_STATIC,static,1342308352
+Control2=IDC_PRODUCT_VERSION,static,1342308480
+Control3=IDC_COPYRIGHT,static,1342308352
 Control4=IDOK,button,1342373889
+Control5=IDC_STATIC,static,1342177296
+Control6=IDC_TXT_HOMEPAGE,static,1342308354
+Control7=IDC_HOMEPAGE,static,1342308352
+Control8=IDC_REG_INFO,edit,1342244868
 
 [DLG:IDD_PROGRESS]
 Type=1
@@ -302,4 +307,11 @@ ImplementationFile=PropDlg.cpp
 BaseClass=CDialog
 Filter=D
 VirtualFilter=dWC
+
+[DLG:IDD_PROP_DLG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=2
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
 

@@ -96,8 +96,8 @@ BOOL CAboutDlg::OnInitDialog()
 	CString szLicenceInfo;
 	szLicenceInfo.Format(_T("%s\r\n%s\r\n%s\r\n"), 
 		"This software is licensed to:",
-		"User:\tTester 1",
-		"License:\t2596-9748-0000-0000-YYYY-ZZZZ-AAAA-WXYZ");
+		"Tester User 1",
+		"2596-9748-0000-0000-YYYY-ZZZZ-AAAA-WXYZ");
 	m_RegInfo.SetWindowText(szLicenceInfo);
 	
 	return TRUE;

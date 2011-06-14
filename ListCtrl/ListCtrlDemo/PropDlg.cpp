@@ -103,6 +103,7 @@ BOOL CPropDlg::OnInitDialog()
 			szMax = sz;
 		}
 	}
+	szMax.cx += 2;
 	szMax.cy += 2;
 	ReleaseDC(pDC);
 
