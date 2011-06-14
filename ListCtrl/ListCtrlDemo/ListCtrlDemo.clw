@@ -2,38 +2,39 @@
 
 [General Info]
 Version=1
-LastClass=CFilterTreeModifyDlg
+LastClass=CFilterTreeModifyFileTypeDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=11
+ClassCount=12
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=14
-Resource1=IDD_ABOUTBOX
+Resource1=IDD_PROP_DLG
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_LISTCTRLDEMO_DIALOG
+Resource4=IDD_MAIN_DLG
 Resource5=CG_IDD_PROGRESS
 Resource6=IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
-Resource10=IDD_MAIN_DLG
+Resource9=IDD_PROGRESS (Chinese (P.R.C.))
+Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
 Resource11=IDD_ABOUTBOX (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_FILTER_TREE_MODIFY_FILE_TYPE
+Resource12=IDD_ABOUTBOX
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_EDIT_PROP_DLG (Neutral)
+Resource13=IDD_LISTCTRLDEMO_DIALOG
 Class11=CFilterTreeModifyFileTypeDlg
+Class12=CPropDlg
 Resource14=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -60,9 +61,9 @@ Control2=IDC_PRODUCT_VERSION,static,1342308480
 Control3=IDC_COPYRIGHT,static,1342308352
 Control4=IDOK,button,1342373889
 Control5=IDC_STATIC,static,1342177296
-Control6=IDC_REG_INFO,edit,1353713860
-Control7=IDC_TXT_HOMEPAGE,static,1342308354
-Control8=IDC_HOMEPAGE,static,1342308352
+Control6=IDC_TXT_HOMEPAGE,static,1342308354
+Control7=IDC_HOMEPAGE,static,1342308352
+Control8=IDC_REG_INFO,edit,1342244868
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG]
 Type=1
@@ -269,24 +270,13 @@ Filter=D
 VirtualFilter=dWC
 LastObject=IDC_NEW_NAME
 
-[DLG:IDD_FILTER_TREE_MODIFY_FILE_TYPE]
-Type=1
-Class=CFilterTreeModifyFileTypeDlg
-ControlCount=6
-Control1=IDOK,button,1342242817
-Control2=IDCANCEL,button,1342242816
-Control3=IDC_NEW_NAME,edit,1350631552
-Control4=IDC_TXT_NEW_NAME,static,1342308354
-Control5=IDC_TXT_FILTER_TYPE,static,1342308354
-Control6=IDC_FILTER_FILE_TYPE,edit,1350631552
-
 [CLS:CFilterTreeModifyFileTypeDlg]
 Type=0
 HeaderFile=FilterTreeModifyFileTypeDlg.h
 ImplementationFile=FilterTreeModifyFileTypeDlg.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=IDOK
+LastObject=IDC_NEW_NAME
 VirtualFilter=dWC
 
 [DLG:IDD_EDIT_PROP_DLG (Neutral)]
@@ -297,4 +287,19 @@ Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_NEW_NAME,edit,1350631552
 Control4=IDC_TXT_NEW_NAME,static,1342308354
+
+[DLG:IDD_PROP_DLG]
+Type=1
+Class=CPropDlg
+ControlCount=2
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+
+[CLS:CPropDlg]
+Type=0
+HeaderFile=PropDlg.h
+ImplementationFile=PropDlg.cpp
+BaseClass=CDialog
+Filter=D
+VirtualFilter=dWC
 

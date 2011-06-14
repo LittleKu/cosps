@@ -706,7 +706,7 @@ LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam)
 		hti = htiSelectedList.GetNext(pos);
 		
 		pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
-		if(pTVIData != NULL)
+		if(pTVIData != NULL && !pTVIData->szType.IsEmpty())
 		{
 			sFilterStr += pTVIData->szType;
 			sFilterStr += _T(";");

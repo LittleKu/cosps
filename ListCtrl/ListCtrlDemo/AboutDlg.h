@@ -9,9 +9,16 @@
 
 #include "./ThirdParty/HyperLink.h"
 
+class CBkgEdit : public CEdit
+{
+public:
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	DECLARE_MESSAGE_MAP()	
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDialog dialog
-
 class CAboutDlg : public CDialog
 {
 	// Construction
@@ -21,7 +28,7 @@ public:
 	// Dialog Data
 	//{{AFX_DATA(CAboutDialog)
 	CStatic	m_ProductVersion;
-	CEdit	m_RegInfo;
+	CBkgEdit	m_RegInfo;
 	CHyperLink	m_HomePage;
 	//}}AFX_DATA
 	

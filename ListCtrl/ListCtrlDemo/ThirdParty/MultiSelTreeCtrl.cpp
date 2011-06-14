@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "MultiSelTreeCtrl.h"
 #include "tinyxml.h"
-#include "../EditPropDlg.h"
-#include "../FilterTreeModifyFileTypeDlg.h"
+#include "../PropDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -81,6 +80,86 @@ BOOL CALLBACK SaveTreeProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM
 	TiXmlNode* pChild = pTree->InsertXMLChild(pParent, hTreeItem);
 	pMap->SetAt(hTreeItem, pChild);
 
+	return TRUE;
+}
+
+BOOL CALLBACK ValidateLeafNodeProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	if(pTree->ItemHasChildren(hTreeItem))
+	{
+		return TRUE;
+	}
+	UINT nStateImage = pTree->GetItemStateImage(hTreeItem);
+	if(nStateImage != TVIS_IMAGE_STATE_UNCHECK && nStateImage != TVIS_IMAGE_STATE_FULL_CHECK)
+	{
+		nStateImage = TVIS_IMAGE_STATE_UNCHECK;
+		pTree->SetItemState(hTreeItem, INDEXTOSTATEIMAGEMASK(nStateImage), TVIS_STATEIMAGEMASK);
+	}
+	return TRUE;
+}
+
+BOOL CALLBACK ValidateCheckProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	HTREEITEM* pHFirstLeafParent = (HTREEITEM*)lParam;
+	
+	CMultiSelTreeCtrl::TVITEMDATA* pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)pTree->GetItemData(hTreeItem);
+	if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
+	{
+		if(*pHFirstLeafParent == NULL)
+		{
+			*pHFirstLeafParent = hTreeItem;
+		}
+
+		BOOL bAllChildrenSame = TRUE;
+		UINT nFirstChildStateImage = TVIS_IMAGE_STATE_NONE;
+		UINT nStateImage;
+		//Iterate all the children items
+		HTREEITEM hChildItem = pTree->GetChildItem(hTreeItem);
+		while(hChildItem != NULL)
+		{
+			nStateImage = pTree->GetItemStateImage(hChildItem);
+			if(nFirstChildStateImage == TVIS_IMAGE_STATE_NONE)
+			{
+				nFirstChildStateImage = nStateImage;
+			}
+			else
+			{
+				if(nFirstChildStateImage != nStateImage)
+				{
+					bAllChildrenSame = FALSE;
+					break;
+				}
+			}
+			hChildItem = pTree->GetNextItem(hChildItem, TVGN_NEXT);
+		}
+
+		UINT nCurrItemStateImage;
+		if(bAllChildrenSame)
+		{
+			if(nFirstChildStateImage != TVIS_IMAGE_STATE_NONE)
+			{
+				nCurrItemStateImage = nFirstChildStateImage;
+			}
+			else
+			{
+				nCurrItemStateImage = pTree->GetItemStateImage(hTreeItem);
+				if(nCurrItemStateImage != TVIS_IMAGE_STATE_UNCHECK && nCurrItemStateImage != TVIS_IMAGE_STATE_FULL_CHECK)
+				{
+					nCurrItemStateImage = TVIS_IMAGE_STATE_UNCHECK;
+				}
+			}
+		}
+		else
+		{
+			nCurrItemStateImage = TVIS_IMAGE_STATE_PARTIAL_CHECK;
+		}
+		pTree->SetItemState(hTreeItem, INDEXTOSTATEIMAGEMASK(nCurrItemStateImage), TVIS_STATEIMAGEMASK);
+	}
+	//Reach the "file", stop loop
+	else if(pTVIData->szName.Compare(XML_NM_FILE) == 0)
+	{
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -179,6 +258,7 @@ BOOL CMultiSelTreeCtrl::Init()
 			hTreeItemList.AddTail(hTreeItem);
 		}
 	}
+	ValidateCheck(TRUE);
 	return TRUE;
 }
 
@@ -311,12 +391,7 @@ void CMultiSelTreeCtrl::OnStateIconClick(NMHDR* pNMHDR, LRESULT* pResult)
 	if(m_uFlags & TVHT_ONITEMSTATEICON) 
 	{
 		*pResult = 1;
-		CWnd* pOwner = GetOwner();
-		
-		if(pOwner != NULL)
-		{
-			pOwner->SendMessage(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);
-		}
+		SendMessageToOwner(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);
 	}
 }
 
@@ -443,60 +518,85 @@ void CMultiSelTreeCtrl::Modify()
 	HTREEITEM hItem = GetSelectedItem();
 	ASSERT(hItem);
 
-	if(ItemHasChildren(hItem))
+	CPropDlg dlg;
+	dlg.SetTitle(_T("Modify"));
+
+	LPCTSTR lpPropName = _T("Name:");
+	dlg.AddProperty(lpPropName, GetItemText(hItem));
+
+	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+	if(pTVIData->szName.Compare(XML_NM_FILE) != 0)
 	{
-		CEditPropDlg dlg;
-		dlg.m_sTitle = _T("Modify");
-		dlg.m_NewNameStr = GetItemText(hItem);
 		int nResponse = dlg.DoModal();
 		if(nResponse == IDOK)
 		{
-			SetItemText(hItem, dlg.m_NewNameStr);
+			SetItemText(hItem, dlg.GetProperty(lpPropName));
 		}
 	}
 	else
-	{
-		CFilterTreeModifyFileTypeDlg dlg;
-		TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
-		dlg.m_NewNameStr = GetItemText(hItem);
-		dlg.m_FilterFileTypeStr = pTVIData->szType;
+	{	
+		LPCTSTR lpFileType = _T("File Type Filter:");
+		dlg.AddProperty(lpFileType, pTVIData->szType);
 
 		int nResponse = dlg.DoModal();
 		if(nResponse == IDOK)
 		{
-			SetItemText(hItem, dlg.m_NewNameStr);		
-			pTVIData->szType = dlg.m_FilterFileTypeStr;
+			SetItemText(hItem, dlg.GetProperty(lpPropName));
+
+			CString szValue;
+			dlg.GetProperty(lpFileType, szValue);
+
+			//File Type Changed
+			if(szValue.Compare(pTVIData->szType) != 0)
+			{
+				SetItemDataFileType(hItem, dlg.GetProperty(lpFileType));
+				
+				UINT nStateImage = GetItemStateImage(hItem);
+				BOOL bChecked = (nStateImage == TVIS_IMAGE_STATE_FULL_CHECK);
+				if(bChecked)
+				{
+					SendMessageToOwner(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);	
+				}	
+			}
 		}
 	}
 }
 void CMultiSelTreeCtrl::Remove()
 {
+	//Remove item
+	HTREEITEM hItem = GetSelectedItem();
+	ASSERT(hItem);
+
 	CString szPromptText;
-	szPromptText.Format(_T(
-		"Are you sure to remove this item?\n"
-		"If you click \"Yes\", this item and all of its children items will be removed."));
+	szPromptText.Format(_T("Are you sure to remove this item?"));
+	if(ItemHasChildren(hItem))
+	{
+		szPromptText += _T("\nIf you click \"Yes\", this item and all of its children items will be removed.");
+	}
 	
 	int nResult = AfxMessageBox(szPromptText, MB_YESNO | MB_ICONQUESTION);
 	if(nResult != IDYES)
 	{
 		return;
 	}
-	//Remove item
-	HTREEITEM hItem = GetSelectedItem();
-	ASSERT(hItem);
 
 	BOOL bResult = DeleteItem(hItem);
 	if(!bResult)
 	{
 		AfxMessageBox(_T("Failed to delete this item."), MB_OK);
 	}
+	ValidateCheck();
+	SendMessageToOwner(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);
 }
 
 void CMultiSelTreeCtrl::AddNewLanguage()
 {
-	CEditPropDlg dlg;
-	dlg.m_sTitle = _T("Add New Language");
-	dlg.m_LabelText = _T("New Language:");
+	CPropDlg dlg;
+	dlg.SetTitle(_T("Add New Language"));
+	
+	LPCTSTR lpPropName = _T("Language Name:");
+	dlg.AddProperty(lpPropName);
+
 	int nResponse = dlg.DoModal();
 	if(nResponse == IDOK)
 	{
@@ -504,28 +604,39 @@ void CMultiSelTreeCtrl::AddNewLanguage()
 		ASSERT(hItem);
 
 		TiXmlElement element(XML_NM_LANG);
-		element.SetAttribute(XML_ATTRIB_TEXT, dlg.m_NewNameStr);
+		element.SetAttribute(XML_ATTRIB_TEXT, dlg.GetProperty(lpPropName));
 		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
 
 		InsertSubItem(hItem, &element);
+
+		ValidateCheck();
 	}
 }
 void CMultiSelTreeCtrl::AddNewFileType()
 {
-	CFilterTreeModifyFileTypeDlg dlg;
-	dlg.m_sTitle = _T("Add New File Type");
+	CPropDlg dlg;
+	dlg.SetTitle( _T("Add New File Type"));
+	
+	LPCTSTR lpPropName = _T("Name:");
+	dlg.AddProperty(lpPropName);
+	LPCTSTR lpFileType = _T("File Type Filter:");
+	dlg.AddProperty(lpFileType);
+
 	int nResponse = dlg.DoModal();
 	if(nResponse == IDOK)
 	{
 		HTREEITEM hItem = GetSelectedItem();
 		ASSERT(hItem);
-		
+
 		TiXmlElement element(XML_NM_FILE);
-		element.SetAttribute(XML_ATTRIB_TEXT, dlg.m_NewNameStr);
-		element.SetAttribute(XML_ATTRIB_TYPE, dlg.m_FilterFileTypeStr);
-		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
+
+		element.SetAttribute(XML_ATTRIB_TEXT, dlg.GetProperty(lpPropName));
+		element.SetAttribute(XML_ATTRIB_TYPE, dlg.GetProperty(lpFileType));
+		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_FULL_CHECK);
 
 		InsertSubItem(hItem, &element);
+
+		ValidateCheck();
 	}
 }
 
@@ -730,4 +841,41 @@ BOOL CMultiSelTreeCtrl::IsSameStateImageWithOtherSiblings(HTREEITEM hItem, int n
 	}
 	
 	return TRUE;
+}
+
+void CMultiSelTreeCtrl::SetItemDataFileType(HTREEITEM hItem, LPCTSTR lpFileType)
+{
+	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+	ASSERT(hItem);
+
+	pTVIData->szType = lpFileType;
+	if(!(pTVIData->szType.IsEmpty()))
+	{
+		int nIconIndex = CommonUtils::GetIconIndex(pTVIData->szType);
+		SetItemImage(hItem, nIconIndex, nIconIndex);
+	}
+}
+
+void CMultiSelTreeCtrl::ValidateCheck(BOOL bCheckLeafNode)
+{
+	if(bCheckLeafNode)
+	{
+		BFSEnumItems(GetRootItem(), ValidateLeafNodeProc, (LPARAM)NULL);
+	}
+
+	HTREEITEM hFirstLeafParent = NULL;
+	BFSEnumItems(GetRootItem(), ValidateCheckProc, (LPARAM)(&hFirstLeafParent));
+
+	if(hFirstLeafParent != NULL)
+	{
+		UINT nStateImage = GetItemStateImage(hFirstLeafParent);
+		SetSiblingAndParentStateImage(hFirstLeafParent, nStateImage);
+	}
+}
+
+LRESULT CMultiSelTreeCtrl::SendMessageToOwner(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	CWnd* pOwner = GetOwner();
+	ASSERT(pOwner);
+	return pOwner->SendMessage(message, wParam, lParam);
 }

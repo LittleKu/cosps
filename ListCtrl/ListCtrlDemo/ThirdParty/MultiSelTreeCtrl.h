@@ -46,6 +46,8 @@ public:
 	BOOL SaveTree(const char * filename, HTREEITEM hTreeItemRoot);
 	TiXmlNode* InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM hItem);
 
+	void ValidateCheck(BOOL bCheckLeafNode = FALSE);
+
 	void Remove();
 	void Modify();
 	void AddNewLanguage();
@@ -68,6 +70,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 private:
+	LRESULT SendMessageToOwner(UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
+	void SetItemDataFileType(HTREEITEM hItem, LPCTSTR lpFileType);
 	UINT m_uFlags;
 	BOOL IsSameStateImageWithOtherSiblings(HTREEITEM hItem, int nState);
 	void SetSiblingAndParentStateImage(HTREEITEM hItem, int nState);

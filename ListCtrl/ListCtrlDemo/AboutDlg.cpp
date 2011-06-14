@@ -9,9 +9,34 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+BEGIN_MESSAGE_MAP(CBkgEdit, CEdit)
+	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDOWN()
+END_MESSAGE_MAP()
+
+BOOL CBkgEdit::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rect;
+	GetClientRect(&rect);
+	
+	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
+	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
+	
+	COLORREF colorStart = RGB(229, 244, 248);
+	COLORREF colorEnd = RGB(251, 252, 249);
+	CGradient::Draw(pDC, &rect, colorStart, colorEnd, FALSE);
+	
+	return TRUE;
+}
+void CBkgEdit::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+	SetSel(-1, -1);
+	Invalidate();
+	CEdit::OnLButtonDown(nFlags, point);
+}
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDialog dialog
-
 
 CAboutDlg::CAboutDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_ABOUTBOX, pParent)
@@ -57,6 +82,7 @@ BOOL CAboutDlg::OnInitDialog()
 	LOGFONT lf;
 	pFontTTL->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
+	lf.lfHeight *= 2;
 	m_fontBold.CreateFontIndirect(&lf);
 	m_ProductVersion.SetFont(&m_fontBold);
 	
@@ -68,10 +94,10 @@ BOOL CAboutDlg::OnInitDialog()
 	//Set licenced info
 	//TODO:
 	CString szLicenceInfo;
-	szLicenceInfo.Format(_T("%s\r\n\t%s\r\n\t%s\r\n"), 
+	szLicenceInfo.Format(_T("%s\r\n%s\r\n%s\r\n"), 
 		"This software is licensed to:",
-		"User Tester",
-		"2596-9748-0000-0000-YYYY-ZZZZ-AAAA-WXYZ");
+		"User:\tTester 1",
+		"License:\t2596-9748-0000-0000-YYYY-ZZZZ-AAAA-WXYZ");
 	m_RegInfo.SetWindowText(szLicenceInfo);
 	
 	return TRUE;
@@ -80,7 +106,7 @@ BOOL CAboutDlg::OnInitDialog()
 HBRUSH CAboutDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
-	if(nCtlColor == CTLCOLOR_STATIC && pWnd->GetDlgCtrlID() != IDC_REG_INFO)
+	if(nCtlColor == CTLCOLOR_STATIC /*&& pWnd->GetDlgCtrlID() != IDC_REG_INFO*/)
     {
 		pDC->SetBkMode(TRANSPARENT);
 		return (HBRUSH)::GetStockObject(NULL_BRUSH);

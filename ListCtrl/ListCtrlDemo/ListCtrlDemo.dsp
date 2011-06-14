@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\ResizableLib\1.3\ResizableLib" /I ".\Include" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\ResizableLib\1.3\ResizableLib" /I ".\Include" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /FR /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -109,14 +109,6 @@ SOURCE=.\Counter.cpp
 # Begin Source File
 
 SOURCE=.\Export.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\EditPropDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\FilterTreeModifyFileTypeDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -161,6 +153,10 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
 # Begin Source File
 
 SOURCE=.\ProgressDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PropDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -221,14 +217,6 @@ SOURCE=.\Export.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\EditPropDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\FilterTreeModifyFileTypeDlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ThirdParty\Gradient.h
 # End Source File
 # Begin Source File
@@ -270,6 +258,10 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
 # Begin Source File
 
 SOURCE=.\ProgressDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PropDlg.h
 # End Source File
 # Begin Source File
 
