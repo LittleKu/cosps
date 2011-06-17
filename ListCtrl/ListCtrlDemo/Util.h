@@ -65,7 +65,7 @@ BEGIN_NAMESPACE(CommonUtils)
 #define GCFP_AUTO			0x0000
 #define GCFP_USER			0x0001
 #define GCFP_DEFAULT		0x0002
-
+	void Trim(CString& str, TCHAR chTarget);
 	void LastErrorHandler(LPCTSTR lpszMsg, UINT uFlags = LEH_MESSAGE_BOX);
 	CString ToString(UINT n);
 	CString GetPercentStr(UINT nCount, UINT nTotal);

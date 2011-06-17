@@ -17,6 +17,7 @@
 #include "Counter.h"
 #include "SourceDirListCtrl.h"
 #include "ResultListCtrl.h"
+#include "HistoryComboBox.h"
 
 #define EXPORT_TYPE_CSV		1
 #define EXPORT_TYPE_EXCEL	2
@@ -40,7 +41,7 @@ public:
 	CImageList m_checkBoxStateIL;
 	
 	CButton	m_recursiveSubBtn;
-	CComboBox	m_filterComboBox;
+	CHistoryComboBox	m_filterComboBox;
 	CSourceDirListCtrl m_srcDirListCtrl;
 	CResultListCtrl m_resultListCtrl;
 	CSplitterControl m_splitterVertical;

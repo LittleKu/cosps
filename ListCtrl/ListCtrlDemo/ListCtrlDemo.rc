@@ -115,9 +115,9 @@ BEGIN
         MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
         MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
     END
-    POPUP "&Setting"
+    POPUP "&Tools"
     BEGIN
-        MENUITEM "&Filter",                     IDM_SETTING_FILTER
+        MENUITEM "&Options",                    IDM_TOOLS_OPTIONS
     END
     POPUP "&Help"
     BEGIN
@@ -143,7 +143,7 @@ BEGIN
     ID_TBBTN_START_TO_COUNT "Start To Count"
     ID_TBBTN_CLEAR_RESULT   "Clear Result"
     ID_TBBTN_EXPORT         "Export"
-    ID_TBBTN_SETTING        "Setting"
+    ID_TBBTN_SETTING        "Options"
     ID_TBBTN_EXIT           "Exit"
 END
 
@@ -184,10 +184,10 @@ END
 IDD_LISTCTRLDEMO_DIALOG DIALOGEX 0, 0, 623, 356
 STYLE WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_APPWINDOW
-FONT 8, "MS Sans Serif", 0, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,201,4,410,135
-    COMBOBOX        IDC_FILTER_COMBO,208,96,394,77,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        IDC_FILTER_COMBO,208,96,394,141,CBS_DROPDOWN | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Recursive sub directories",IDC_RECURSIVE_SUB_CHECK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,208,122,122,10

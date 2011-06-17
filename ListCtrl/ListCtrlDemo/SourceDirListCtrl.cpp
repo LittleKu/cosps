@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "SourceDirListCtrl.h"
+#include "./ThirdParty/IniFileReadWrite.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,6 +25,9 @@ static SrcDirColumnInfo srcDirColumns[] =
     { _T("Directory"),		CL_NONE_CHECK_BOX,    400  }
 };
 
+#define SDLC_SECTION_NAME			_T("SRC_DIR_LIST")
+#define SDLC_KEY_BASE_NAME_DIR		_T("Dir")
+#define SDLC_KEY_BASE_NAME_CHECKED	_T("Checked")
 /////////////////////////////////////////////////////////////////////////////
 // CSourceDirListCtrl
 
@@ -38,13 +42,18 @@ CSourceDirListCtrl::~CSourceDirListCtrl()
 
 BEGIN_MESSAGE_MAP(CSourceDirListCtrl, CCheckListCtrl)
 	//{{AFX_MSG_MAP(CSourceDirListCtrl)
+	ON_WM_DESTROY()
 	ON_WM_CONTEXTMENU()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CSourceDirListCtrl message handlers
-
+void CSourceDirListCtrl::OnDestroy()
+{
+	SaveHistory();
+	CCheckListCtrl::OnDestroy();
+}
 void CSourceDirListCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
 	CMenu srcDirMenu;
@@ -219,16 +228,72 @@ void CSourceDirListCtrl::Init()
 		hditem.iImage = srcDirColumns[i].nType;
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
+
+	LoadHistory();
 }
 
-void CSourceDirListCtrl::AddSrcDir(LPCTSTR lpszDir)
+void CSourceDirListCtrl::AddSrcDir(LPCTSTR lpszDir, int nCheckedState)
 {
 	int nItem = GetItemCount();
 	
 	InsertItem(nItem, _T(""));
-	SetItemCheckedState(nItem, 0, CL_CHECKED, FALSE);
+	SetItemCheckedState(nItem, 0, nCheckedState, FALSE);
 	
 	SetItemText(nItem, 1, lpszDir);
 	
 	ValidateCheck();
+}
+
+void CSourceDirListCtrl::LoadHistory()
+{
+	if(!CommonUtils::IsFileExist(SYS_PREF_INI_FILE()))
+	{
+		return;
+	}
+	//Load history items	
+	CString sKey;
+	CString sDir;
+	CString sChecked;
+	int n = 0;
+	do
+	{
+		sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_DIR, n);
+		sDir = IniFile::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
+		if (!sDir.IsEmpty())
+		{
+			sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_CHECKED, n);
+			sChecked = IniFile::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
+			if(sChecked.IsEmpty())
+			{
+				sChecked.Format("%d", CL_CHECKED);
+			}
+			int nCheckedState = atoi(sChecked);
+			AddSrcDir(sDir, nCheckedState);
+		}
+		n++;
+	}while(!sDir.IsEmpty());
+}
+
+void CSourceDirListCtrl::SaveHistory()
+{
+	//Save all the items
+	//Clear the old items
+	::WritePrivateProfileSection(SDLC_SECTION_NAME, "", SYS_PREF_INI_FILE());
+	
+	CString sKey;
+	CString sDir;
+	CString sChecked;
+	
+	int i, nCheckStatus, nCount = GetItemCount();
+	for(i = 0; i < nCount; i++)
+	{
+		sDir = GetItemText(i, 1);
+		sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_DIR, i);
+		::WritePrivateProfileString(SDLC_SECTION_NAME, sKey, sDir, SYS_PREF_INI_FILE());
+		
+		nCheckStatus = GetItemCheckedState(i, 0);
+		sChecked.Format("%d", nCheckStatus);
+		sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_CHECKED, i);
+		::WritePrivateProfileString(SDLC_SECTION_NAME, sKey, sChecked, SYS_PREF_INI_FILE());
+	}
 }

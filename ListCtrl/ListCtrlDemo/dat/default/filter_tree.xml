@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<root text="All (*)" checked="2">
+<root text="All" checked="2">
 	<language text="C/C++" checked="2">
 		<file text="C/C++ Header File (*.h)" type="*.h" checked="3"/>
 		<file text="C/C++ Inline File (*.inl)" type="*.inl" checked="3"/>
@@ -10,7 +10,10 @@
 		<file text="Resource Script (*.rc)" type="*.rc" checked="3"/>
 		<file text="Resource Script (*.rc2)" type="*.rc2" checked="3"/>		
 	</language>
+	<language text="C#" checked="3">
+		<file text="C Sharp Source File (*.cs)" type="*.cs" checked="3"/>
+	</language>
 	<language text="Java" checked="1">
 		<file text="Java Source File (*.java)" type="*.java" checked="1"/>
-	</language>		
+	</language>
 </root>

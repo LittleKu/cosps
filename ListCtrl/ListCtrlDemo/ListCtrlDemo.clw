@@ -2,27 +2,27 @@
 
 [General Info]
 Version=1
-LastClass=CFilterTreeModifyFileTypeDlg
-LastTemplate=CDialog
+LastClass=CHistoryComboBox
+LastTemplate=CComboBox
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=12
+ClassCount=13
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=15
-Resource1=IDD_PROP_DLG
+Resource1=IDD_MAIN_DLG
 Resource2=IDR_MAINFRAME
 Resource3=IDD_PROGRESS
-Resource4=IDD_MAIN_DLG
+Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=IDD_PROGRESS (Chinese (P.R.C.))
+Resource9=IDD_ABOUTBOX
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
@@ -30,12 +30,13 @@ Resource11=IDD_MAIN_DLG (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_ABOUTBOX
+Resource12=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_LISTCTRLDEMO_DIALOG
+Resource13=IDD_PROP_DLG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Resource14=IDD_ABOUTBOX (English (U.S.))
+Class13=CHistoryComboBox
 Resource15=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -71,7 +72,7 @@ Type=1
 Class=CListCtrlDemoDlg
 ControlCount=31
 Control1=IDC_SOURCE_DIR_FRAME,button,1342177287
-Control2=IDC_FILTER_COMBO,combobox,1344340226
+Control2=IDC_FILTER_COMBO,combobox,1344339970
 Control3=IDC_RECURSIVE_SUB_CHECK,button,1342242819
 Control4=IDC_RESULT_FRAME,button,1342177287
 Control5=IDC_RESULT_LIST,SysListView32,1350631425
@@ -115,7 +116,7 @@ Command7=IDM_REPORT_EXPORT_CSV
 Command8=IDM_REPORT_EXPORT_XLS
 Command9=IDM_REPORT_EXPORT_XML
 Command10=IDM_REPORT_EXPORT_HTML
-Command11=IDM_SETTING_FILTER
+Command11=IDM_TOOLS_OPTIONS
 Command12=IDM_HELP_ABOUT
 CommandCount=12
 
@@ -310,8 +311,15 @@ VirtualFilter=dWC
 
 [DLG:IDD_PROP_DLG (English (U.S.))]
 Type=1
-Class=?
+Class=CPropDlg
 ControlCount=2
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
+
+[CLS:CHistoryComboBox]
+Type=0
+HeaderFile=HistoryComboBox.h
+ImplementationFile=HistoryComboBox.cpp
+BaseClass=CComboBox
+Filter=W
 

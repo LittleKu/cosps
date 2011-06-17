@@ -47,6 +47,11 @@ void CTimeCost::Reset()
 #endif
 
 BEGIN_NAMESPACE(CommonUtils)
+void Trim(CString& str, TCHAR chTarget)
+{
+	str.TrimLeft(chTarget);
+	str.TrimRight(chTarget);
+}
 void LastErrorHandler(LPCTSTR lpszMsg, UINT uFlags)
 {
 	TCHAR szBuf[1024]; 

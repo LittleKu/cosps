@@ -26,6 +26,7 @@ public:
 	virtual ~CListCtrlDemoApp();
 	CBitmap* m_pSysBkBitmap;
 	CBrush*  m_pSysBkBrush;
+	CString  m_szPrefIniFile;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CListCtrlDemoApp)
@@ -47,5 +48,8 @@ public:
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
+CString& SYS_PREF_INI_FILE();
+CListCtrlDemoApp* SYS_APP();
 
 #endif // !defined(AFX_LISTCTRLDEMO_H__8AD279F6_DEE8_461E_81C2_49319D058BF3__INCLUDED_)

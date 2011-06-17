@@ -91,6 +91,8 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	InitSplitters();
 
+	m_filterComboBox.Init();
+
 	InitFilterTree();
 
 	//ResizableDialog Init
@@ -263,7 +265,6 @@ void CListCtrlDemoDlg::InitResultListCtrl()
 void CListCtrlDemoDlg::OnDestroy() 
 {
 	m_sFilterArray.RemoveAll();
-	m_srcDirListCtrl.DeleteAllItems();
 
 	DeleteAllListItems();
 	CResizableDialog::OnDestroy();
@@ -312,6 +313,11 @@ void CListCtrlDemoDlg::RefreshFilterArrays()
 	if(sFilter.IsEmpty())
 	{
 		return;
+	}
+
+	if(m_filterComboBox.AddString(sFilter) >= 0)
+	{
+		m_filterComboBox.SetWindowText(sFilter);
 	}
 
 	char cSep = ';';
@@ -397,7 +403,7 @@ void CListCtrlDemoDlg::OnButtonStart()
 		AfxMessageBox(_T("Please select at least one directory."));
 		return;
 	}
-	
+
 	//Remove existing data
 	ResetResult();
 	
@@ -529,15 +535,6 @@ void CListCtrlDemoDlg::SetPair(int idc, int idp, int count, int total)
 void CListCtrlDemoDlg::InitSrcDirListCtrl()
 {
 	m_srcDirListCtrl.Init();
-#ifdef _DEBUG
-	CString sDir;
-	int i;
-	for(i = 0; i < 30; i++)
-	{
-		sDir.Format("E:\\temp\\long\\%d", i);
-		m_srcDirListCtrl.AddSrcDir(sDir);
-	}
-#endif
 }
 
 LRESULT CListCtrlDemoDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 

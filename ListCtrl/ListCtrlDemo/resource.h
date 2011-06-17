@@ -91,6 +91,7 @@
 #define IDM_REPORT_EXPORT               32775
 #define IDM_FILE_EXIT                   32776
 #define IDM_SETTING_FILTER              32777
+#define IDM_TOOLS_OPTIONS               32777
 #define IDM_HELP_ABOUT                  32778
 #define IDM_REPORT_EXPORT_CSV           32779
 #define IDM_REPORT_EXPORT_XLS           32780

@@ -82,6 +82,7 @@ BOOL CListCtrlDemoApp::InitInstance()
 //	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
 	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
 
+	m_szPrefIniFile.Format(_T("%s"), CommonUtils::GetConfFilePath(_T("preferences.ini"), GCFP_USER));
 	//Set App's name
 	if(m_pszAppName != NULL)
 	{
@@ -107,4 +108,16 @@ BOOL CListCtrlDemoApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+CString& SYS_PREF_INI_FILE() 
+{
+	return SYS_APP()->m_szPrefIniFile;
+}
+
+CListCtrlDemoApp* SYS_APP()
+{
+	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
+	ASSERT(pApp);
+	return pApp;
 }

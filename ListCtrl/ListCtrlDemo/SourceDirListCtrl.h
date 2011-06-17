@@ -42,7 +42,9 @@ public:
 
 // Implementation
 public:
-	void AddSrcDir(LPCTSTR lpszDir);
+	void SaveHistory();
+	void LoadHistory();
+	void AddSrcDir(LPCTSTR lpszDir, int nCheckedState = CL_CHECKED);
 	void Init();
 	void OpenFolder();
 	void CheckSelectedItems(BOOL bChecked);
@@ -53,6 +55,7 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CSourceDirListCtrl)
+	afx_msg void OnDestroy();
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	//}}AFX_MSG
 

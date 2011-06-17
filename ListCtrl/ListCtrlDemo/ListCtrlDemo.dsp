@@ -116,7 +116,15 @@ SOURCE=.\ThirdParty\Gradient.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\HistoryComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\HyperLink.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\IniFileReadWrite.cpp
 # End Source File
 # Begin Source File
 
@@ -221,7 +229,15 @@ SOURCE=.\ThirdParty\Gradient.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\HistoryComboBox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\HyperLink.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\IniFileReadWrite.h
 # End Source File
 # Begin Source File
 
