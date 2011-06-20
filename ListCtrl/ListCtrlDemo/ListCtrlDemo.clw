@@ -13,14 +13,14 @@ Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
 ResourceCount=15
-Resource1=IDD_MAIN_DLG
+Resource1=IDD_PROGRESS (Chinese (P.R.C.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_PROGRESS
 Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=IDD_MAIN_DLG
 Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=IDD_ABOUTBOX
 Resource10=IDD_EDIT_PROP_DLG (Neutral)

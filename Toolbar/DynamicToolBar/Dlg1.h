@@ -36,6 +36,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CDlg1)
 	virtual BOOL OnInitDialog();
+	afx_msg void OnButton1();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

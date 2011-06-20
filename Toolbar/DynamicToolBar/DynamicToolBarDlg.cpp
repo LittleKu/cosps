@@ -84,13 +84,16 @@ CDynamicToolBarDlg::CDynamicToolBarDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 	toolbar = new CMyToolBarCtrl();
-	statusbar = new CStatusBarCtrl();
+	statusbar = new CMainStatusBarCtrl();
 	pDlg1 = new CDlg1();
 	pDlg2 = new CDlg2();
 
 	activewnd = NULL;
+	m_bkBrush = NULL;
 
 	m_bUseReBar = TRUE;
+
+	m_dwGripTempState = 1;
 }
 
 CDynamicToolBarDlg::~CDynamicToolBarDlg()
@@ -99,6 +102,17 @@ CDynamicToolBarDlg::~CDynamicToolBarDlg()
 	delete statusbar;
 	delete pDlg1;
 	delete pDlg2;
+	if(m_bkBrush != NULL)
+	{
+		m_bkBrush->DeleteObject();
+		delete m_bkBrush;
+		m_bkBrush = NULL;
+	}
+	if(bitmap != NULL)
+	{
+		delete bitmap;
+		bitmap = NULL;
+	}
 }
 
 void CDynamicToolBarDlg::DoDataExchange(CDataExchange* pDX)
@@ -117,6 +131,7 @@ BEGIN_MESSAGE_MAP(CDynamicToolBarDlg, CResizableDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_REGISTERED_MESSAGE(UM_TOOLBARCTRLX_REFRESH, OnToolBarRefresh)
 	ON_WM_DESTROY()
+	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -206,17 +221,15 @@ BOOL CDynamicToolBarDlg::OnInitDialog()
 	
 	// TODO: Add extra initialization here
 	m_hToolBarBkBmp = (HBITMAP)::LoadImage(NULL, _T(".\\res\\background.bmp"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	CBitmap* bitmap = new CBitmap();
+	bitmap = new CBitmap();
 	bitmap->LoadBitmap(IDB_BKG);
-	CBrush* NewBrush;
-	NewBrush = new CBrush;
-//	NewBrush->CreateSolidBrush(RGB(255, 128, 0));
-	NewBrush->CreatePatternBrush(bitmap);
+	m_bkBrush = new CBrush;
+	m_bkBrush->CreatePatternBrush(bitmap);
 	
 	
 	MENUINFO MenuInfo = {0};
 	MenuInfo.cbSize = sizeof(MenuInfo);
-	MenuInfo.hbrBack = *NewBrush; // Brush you want to draw
+	MenuInfo.hbrBack = *m_bkBrush; // Brush you want to draw
 	MenuInfo.fMask = MIM_BACKGROUND;
 	MenuInfo.dwStyle = MNS_AUTODISMISS;
 	
@@ -318,7 +331,9 @@ void CDynamicToolBarDlg::Init()
 	// the statusbar control is created as a custom control in the dialog resource,
 	// this solves font and sizing problems when using large system fonts
 	statusbar->SubclassWindow(GetDlgItem(IDC_STATUSBAR)->m_hWnd);
-	statusbar->EnableToolTips(true);
+	statusbar->SetFont(GetFont(), TRUE);
+	SetStatusBarPartsSize();
+	statusbar->SetWindowText(_T("DynamicToolBar Status Bar Version v0.50a DEBUG"));
 
 	DialogCreateIndirect(pDlg1, IDD_DIALOG1);
 	DialogCreateIndirect(pDlg2, IDD_DIALOG2);
@@ -349,6 +364,9 @@ void CDynamicToolBarDlg::Init()
 	AddAnchor(*pDlg2,		TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*pwndToolbarX,	TOP_LEFT, TOP_RIGHT);
 	AddAnchor(*statusbar,		BOTTOM_LEFT, BOTTOM_RIGHT);
+
+	HideSizeGrip(&m_dwGripTempState);
+	UpdateSizeGrip();
 }
 
 void CDynamicToolBarDlg::SetActiveDialog(CWnd* dlg)
@@ -476,4 +494,53 @@ void CDynamicToolBarDlg::OnDestroy()
 		::DeleteObject(m_hToolBarBkBmp);
 		m_hToolBarBkBmp = NULL;
 	}
+}
+
+void CDynamicToolBarDlg::OnSize(UINT nType, int cx, int cy) 
+{
+	AfxTrace(_T("::IsWindows(m_hWnd)=%d"), ::IsWindow(m_hWnd));
+	if(::IsWindow(m_hWnd))
+	{
+		HideSizeGrip(&m_dwGripTempState);
+	}
+	CResizableDialog::OnSize(nType, cx, cy);
+	
+	SetStatusBarPartsSize();
+	
+	HideSizeGrip(&m_dwGripTempState);
+	UpdateSizeGrip();
+}
+
+void CDynamicToolBarDlg::SetStatusBarPartsSize()
+{
+	if(statusbar == NULL || !::IsWindow(statusbar->GetSafeHwnd()))
+	{
+		return;
+	}
+	CRect rect;
+	statusbar->GetClientRect(&rect);
+	int ussShift = 0;
+	
+	int aiWidths[3] =
+	{ 
+		rect.right - 300 - ussShift,
+		rect.right - 200 - ussShift,
+		-1
+	};
+	statusbar->SetParts(3, aiWidths);
+
+	statusbar->SetText(_T("logn name test aaaa.......123"), 2, 0);
+}
+
+void CDynamicToolBarDlg::SetShowSizeGrip(BOOL bShow)
+{
+	if(bShow)
+	{
+		ShowSizeGrip(&m_dwGripTempState);
+	}
+	else
+	{
+		HideSizeGrip(&m_dwGripTempState);
+	}
+	UpdateSizeGrip();
 }

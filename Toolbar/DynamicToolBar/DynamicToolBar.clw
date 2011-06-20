@@ -13,15 +13,15 @@ Class2=CDynamicToolBarDlg
 Class3=CAboutDlg
 
 ResourceCount=11
-Resource1=IDD_ABOUTBOX
+Resource1=IDD_DIALOG2
 Resource2=IDR_MAINFRAME
-Resource3=IDD_DIALOG1
+Resource3=IDD_ABOUTBOX
 Resource4=IDR_MENU1 (English (U.S.))
 Resource5=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class5=CDlg2
 Class6=CMyReBar
-Resource6=IDD_DYNAMICTOOLBAR_DIALOG
-Resource7=IDD_DIALOG2
+Resource6=IDD_DIALOG1
+Resource7=IDD_DYNAMICTOOLBAR_DIALOG
 Resource8=IDD_ABOUTBOX (English (U.S.))
 Resource9=IDD_DIALOG2 (English (U.S.))
 Resource10=IDD_DIALOG1 (English (U.S.))
@@ -63,8 +63,9 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_DYNAMICTOOLBAR_DIALOG]
 Type=1
 Class=CDynamicToolBarDlg
-ControlCount=1
+ControlCount=2
 Control1=IDC_STATUSBAR,msctls_statusbar32,1342242816
+Control2=IDC_STATIC,button,1342177287
 
 [MNU:IDR_MENU1]
 Type=1

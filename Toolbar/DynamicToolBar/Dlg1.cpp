@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "DynamicToolBar.h"
 #include "Dlg1.h"
+#include "DynamicToolBarDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +36,7 @@ void CDlg1::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlg1, CResizableDialog)
 	//{{AFX_MSG_MAP(CDlg1)
+	ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -55,4 +57,10 @@ BOOL CDlg1::OnInitDialog()
 	AddAnchor(IDC_BUTTON5, BOTTOM_CENTER, BOTTOM_CENTER);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CDlg1::OnButton1() 
+{
+	CDynamicToolBarDlg* pParent = (CDynamicToolBarDlg*)GetParent();
+	pParent->SetShowSizeGrip(FALSE);
 }

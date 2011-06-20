@@ -103,6 +103,10 @@ SOURCE=.\DynamicToolBar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MainStatusBarCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DynamicToolBar.rc
 # End Source File
 # Begin Source File
@@ -145,6 +149,10 @@ SOURCE=.\Dlg2.h
 # Begin Source File
 
 SOURCE=.\DynamicToolBar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MainStatusBarCtrl.h
 # End Source File
 # Begin Source File
 

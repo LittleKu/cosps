@@ -14,6 +14,7 @@
 //#include "ToolBarCtrEx.h"
 #include "MyToolBarCtrl.h"
 #include "MyReBar.h"
+#include "MainStatusBarCtrl.h"
 
 #define IDC_TOOLBAR			18880
 
@@ -24,13 +25,15 @@ class CDynamicToolBarDlg : public CResizableDialog
 {
 // Construction
 public:
+	void SetShowSizeGrip(BOOL bShow = TRUE);
+	void SetStatusBarPartsSize();
 	CWnd* GetActualToolBar();
 	BOOL IsUseReBar();
 	CDynamicToolBarDlg(CWnd* pParent = NULL);	// standard constructor
 	virtual ~CDynamicToolBarDlg();
 //	CToolBarCtrEx* toolbar;
 	CMyToolBarCtrl* toolbar;
-	CStatusBarCtrl* statusbar;
+	CMainStatusBarCtrl* statusbar;
 	CDlg1* pDlg1;
 	CDlg2* pDlg2;
 	CWnd*			activewnd;
@@ -52,7 +55,9 @@ public:
 	void SetActiveDialog(CWnd* dlg);
 protected:
 	HICON m_hIcon;
-
+	DWORD m_dwGripTempState;
+	CBrush* m_bkBrush;
+	CBitmap* bitmap;
 	// Generated message map functions
 	//{{AFX_MSG(CDynamicToolBarDlg)
 	virtual BOOL OnInitDialog();
@@ -62,6 +67,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg LRESULT OnToolBarRefresh(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnDestroy();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
