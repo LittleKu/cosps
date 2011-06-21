@@ -14,7 +14,7 @@
 //#include "ToolBarCtrEx.h"
 #include "MyToolBarCtrl.h"
 #include "MyReBar.h"
-#include "MainStatusBarCtrl.h"
+#include "StaticStatusBar.h"
 
 #define IDC_TOOLBAR			18880
 
@@ -33,7 +33,7 @@ public:
 	virtual ~CDynamicToolBarDlg();
 //	CToolBarCtrEx* toolbar;
 	CMyToolBarCtrl* toolbar;
-	CMainStatusBarCtrl* statusbar;
+	CStatusBar m_bar;
 	CDlg1* pDlg1;
 	CDlg2* pDlg2;
 	CWnd*			activewnd;
@@ -42,7 +42,7 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CDynamicToolBarDlg)
 	enum { IDD = IDD_DYNAMICTOOLBAR_DIALOG };
-		// NOTE: the ClassWizard will add data members here
+	CStaticStatusBar	m_staticStatusBar;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides

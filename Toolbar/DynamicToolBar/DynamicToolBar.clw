@@ -2,12 +2,12 @@
 
 [General Info]
 Version=1
-LastClass=CMyToolBarCtrl
-LastTemplate=CToolBarCtrl
+LastClass=CStaticStatusBar
+LastTemplate=CStatic
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "DynamicToolBar.h"
 
-ClassCount=8
+ClassCount=9
 Class1=CDynamicToolBarApp
 Class2=CDynamicToolBarDlg
 Class3=CAboutDlg
@@ -15,12 +15,12 @@ Class3=CAboutDlg
 ResourceCount=11
 Resource1=IDD_DIALOG2
 Resource2=IDR_MAINFRAME
-Resource3=IDD_ABOUTBOX
+Resource3=IDD_DIALOG1
 Resource4=IDR_MENU1 (English (U.S.))
 Resource5=IDD_DYNAMICTOOLBAR_DIALOG (English (U.S.))
 Class5=CDlg2
 Class6=CMyReBar
-Resource6=IDD_DIALOG1
+Resource6=IDD_ABOUTBOX
 Resource7=IDD_DYNAMICTOOLBAR_DIALOG
 Resource8=IDD_ABOUTBOX (English (U.S.))
 Resource9=IDD_DIALOG2 (English (U.S.))
@@ -28,6 +28,7 @@ Resource10=IDD_DIALOG1 (English (U.S.))
 Class4=CDlg1
 Class7=CToolBarCtrlX
 Class8=CMyToolBarCtrl
+Class9=CStaticStatusBar
 Resource11=IDR_MENU1
 
 [CLS:CDynamicToolBarApp]
@@ -41,7 +42,7 @@ Type=0
 HeaderFile=DynamicToolBarDlg.h
 ImplementationFile=DynamicToolBarDlg.cpp
 Filter=D
-LastObject=CDynamicToolBarDlg
+LastObject=IDC_STATIC_STATUS_BAR
 BaseClass=CResizableDialog
 VirtualFilter=dWC
 
@@ -63,9 +64,8 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_DYNAMICTOOLBAR_DIALOG]
 Type=1
 Class=CDynamicToolBarDlg
-ControlCount=2
-Control1=IDC_STATUSBAR,msctls_statusbar32,1342242816
-Control2=IDC_STATIC,button,1342177287
+ControlCount=1
+Control1=IDC_STATIC_STATUS_BAR,static,1342308608
 
 [MNU:IDR_MENU1]
 Type=1
@@ -170,4 +170,12 @@ ImplementationFile=MyToolBarCtrl.cpp
 BaseClass=CToolBarCtrlX
 Filter=W
 VirtualFilter=YWC
+
+[CLS:CStaticStatusBar]
+Type=0
+HeaderFile=StaticStatusBar.h
+ImplementationFile=StaticStatusBar.cpp
+BaseClass=CStatic
+Filter=W
+VirtualFilter=WC
 

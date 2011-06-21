@@ -1,0 +1,1 @@
+httpwww.codeproject.comKBstaticBigClock.aspx 

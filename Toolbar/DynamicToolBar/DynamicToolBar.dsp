@@ -103,10 +103,6 @@ SOURCE=.\DynamicToolBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MainStatusBarCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\DynamicToolBar.rc
 # End Source File
 # Begin Source File
@@ -120,6 +116,10 @@ SOURCE=.\MyReBar.cpp
 # Begin Source File
 
 SOURCE=.\MyToolBarCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\StaticStatusBar.cpp
 # End Source File
 # Begin Source File
 
@@ -152,10 +152,6 @@ SOURCE=.\DynamicToolBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\MainStatusBarCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\DynamicToolBarDlg.h
 # End Source File
 # Begin Source File
@@ -169,6 +165,10 @@ SOURCE=.\MyToolBarCtrl.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\StaticStatusBar.h
 # End Source File
 # Begin Source File
 

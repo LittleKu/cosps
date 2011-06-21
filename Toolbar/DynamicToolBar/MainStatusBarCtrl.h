@@ -18,7 +18,9 @@ public:
 
 // Attributes
 public:
-
+	COLORREF m_crBk;
+	COLORREF m_crTopLeft;
+	COLORREF m_crBottomRight;
 // Operations
 public:
 

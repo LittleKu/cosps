@@ -37,6 +37,11 @@ protected:
 	//{{AFX_MSG(CDlg1)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnButton1();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnButton2();
+	afx_msg void OnButton3();
+	afx_msg void OnButton4();
+	afx_msg void OnButton5();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

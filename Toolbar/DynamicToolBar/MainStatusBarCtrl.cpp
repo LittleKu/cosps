@@ -16,6 +16,9 @@ static char THIS_FILE[] = __FILE__;
 
 CMainStatusBarCtrl::CMainStatusBarCtrl()
 {
+	m_crBk = RGB(236, 233, 216);
+	m_crTopLeft = RGB(172, 168, 153);
+	m_crBottomRight = RGB(255, 255, 255);
 }
 
 CMainStatusBarCtrl::~CMainStatusBarCtrl()
@@ -40,8 +43,8 @@ BOOL CMainStatusBarCtrl::OnEraseBkgnd(CDC* pDC)
 
 	int crOldBk = pDC->GetBkColor();
 
-	pDC->FillSolidRect(&rect, RGB(255, 128, 0));
-	pDC->Draw3dRect(&rect, RGB(127, 157, 185), RGB(127, 157, 185));
+	pDC->FillSolidRect(&rect, m_crBk);
+	pDC->Draw3dRect(&rect, m_crTopLeft, m_crBottomRight);
 
 	pDC->SetBkColor(crOldBk);
 

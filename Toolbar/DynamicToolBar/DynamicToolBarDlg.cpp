@@ -84,7 +84,6 @@ CDynamicToolBarDlg::CDynamicToolBarDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 	toolbar = new CMyToolBarCtrl();
-	statusbar = new CMainStatusBarCtrl();
 	pDlg1 = new CDlg1();
 	pDlg2 = new CDlg2();
 
@@ -99,7 +98,6 @@ CDynamicToolBarDlg::CDynamicToolBarDlg(CWnd* pParent /*=NULL*/)
 CDynamicToolBarDlg::~CDynamicToolBarDlg()
 {
 	delete toolbar;
-	delete statusbar;
 	delete pDlg1;
 	delete pDlg2;
 	if(m_bkBrush != NULL)
@@ -119,7 +117,7 @@ void CDynamicToolBarDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDynamicToolBarDlg)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
+	DDX_Control(pDX, IDC_STATIC_STATUS_BAR, m_staticStatusBar);
 	//}}AFX_DATA_MAP
 }
 
@@ -138,7 +136,8 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CDynamicToolBarDlg message handlers
 LRESULT CDynamicToolBarDlg::OnToolBarRefresh(WPARAM wParam, LPARAM lParam)
-{	
+{
+	
 	if(m_ctlMainTopReBar.m_hWnd)
 	{
 		RemoveAnchor(m_ctlMainTopReBar.m_hWnd);
@@ -161,7 +160,6 @@ LRESULT CDynamicToolBarDlg::OnToolBarRefresh(WPARAM wParam, LPARAM lParam)
 		RemoveAnchor(toolbar->m_hWnd);
 		AddAnchor(toolbar->m_hWnd, TOP_LEFT, TOP_RIGHT);
 	}
-	
 	CRect rToolbarRect;
 	toolbar->GetWindowRect(&rToolbarRect);
 	
@@ -169,12 +167,15 @@ LRESULT CDynamicToolBarDlg::OnToolBarRefresh(WPARAM wParam, LPARAM lParam)
 	GetClientRect(&rClientRect);
 	
 	CRect rStatusbarRect;
-	statusbar->GetWindowRect(&rStatusbarRect);
+//	statusbar->GetWindowRect(&rStatusbarRect);
+//	m_bar.GetWindowRect(&rStatusbarRect);
+	m_staticStatusBar.GetWindowRect(&rStatusbarRect);
 	
 	rClientRect.top += rToolbarRect.Height();
 	rClientRect.bottom -= rStatusbarRect.Height();
 	
 	CRect rcClient = rClientRect;
+	AfxTrace("rcClient(%d, %d, %d, %d)\n", rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height());
 	CWnd* apWnds[] =
 	{
 		pDlg1,
@@ -187,8 +188,6 @@ LRESULT CDynamicToolBarDlg::OnToolBarRefresh(WPARAM wParam, LPARAM lParam)
 		RemoveAnchor(apWnds[i]->m_hWnd);
 		AddAnchor(apWnds[i]->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
 	}
-	Invalidate();
-	RedrawWindow();
 
 	return TRUE;
 }
@@ -261,24 +260,8 @@ void CDynamicToolBarDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  this is automatically done for you by the framework.
 BOOL CDynamicToolBarDlg::OnEraseBkgnd(CDC* pDC)
 {
-	return CResizableDialog::OnEraseBkgnd(pDC);
-// 	BOOL bRet = CResizableDialog::OnEraseBkgnd(pDC);
-// 
-// 	CRect dlgRect;
-// 	GetWindowRect(&dlgRect);
-
-// 	CRect toolbarRect;
-// 	toolbar->GetWindowRect(&toolbarRect);
-// 
-// 	CRect rect;
-// 	rect.IntersectRect(&dlgRect, &toolbarRect);
-// 
-// 	ScreenToClient(&rect);
-// 
-// 	CBrush brush(RGB(255, 128, 0));
-// 	pDC->FillRect(&dlgRect, &brush);
-// 
-// 	return bRet;
+	BOOL bRet = CResizableDialog::OnEraseBkgnd(pDC);
+	return bRet;
 }
 void CDynamicToolBarDlg::OnPaint() 
 {
@@ -312,6 +295,12 @@ HCURSOR CDynamicToolBarDlg::OnQueryDragIcon()
 	return (HCURSOR) m_hIcon;
 }
 
+static UINT BASED_CODE indicators[] =
+{
+	ID_INDICATOR_NISH,
+		ID_INDICATOR_TIME
+};
+
 void CDynamicToolBarDlg::Init()
 {
 	CWnd* pwndToolbarX = toolbar;
@@ -330,10 +319,13 @@ void CDynamicToolBarDlg::Init()
 	// set statusbar
 	// the statusbar control is created as a custom control in the dialog resource,
 	// this solves font and sizing problems when using large system fonts
-	statusbar->SubclassWindow(GetDlgItem(IDC_STATUSBAR)->m_hWnd);
-	statusbar->SetFont(GetFont(), TRUE);
+// 	statusbar->SubclassWindow(GetDlgItem(IDC_STATUSBAR)->m_hWnd);
+// 	statusbar->ModifyStyle(SBARS_SIZEGRIP, 0);
+// 	statusbar->SetFont(GetFont(), TRUE);
+// 	SetStatusBarPartsSize();
+// 	statusbar->SetWindowText(_T("DynamicToolBar Status Bar Version v0.50a DEBUG"));
+	m_staticStatusBar.SetFont(GetFont(), TRUE);
 	SetStatusBarPartsSize();
-	statusbar->SetWindowText(_T("DynamicToolBar Status Bar Version v0.50a DEBUG"));
 
 	DialogCreateIndirect(pDlg1, IDD_DIALOG1);
 	DialogCreateIndirect(pDlg2, IDD_DIALOG2);
@@ -346,10 +338,10 @@ void CDynamicToolBarDlg::Init()
 	CRect rcClient, rcToolbar, rcStatusbar;
 	GetClientRect(&rcClient);
 	pwndToolbarX->GetWindowRect(&rcToolbar);
-	statusbar->GetWindowRect(&rcStatusbar);
+	rcStatusbar.SetRectEmpty();;
+	m_staticStatusBar.GetWindowRect(&rcStatusbar);
 	rcClient.top += rcToolbar.Height();
 	rcClient.bottom -= rcStatusbar.Height();
-	
 	CWnd* apWnds[] =
 	{
 		pDlg1,
@@ -363,7 +355,7 @@ void CDynamicToolBarDlg::Init()
 	AddAnchor(*pDlg1,		TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*pDlg2,		TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*pwndToolbarX,	TOP_LEFT, TOP_RIGHT);
-	AddAnchor(*statusbar,		BOTTOM_LEFT, BOTTOM_RIGHT);
+	AddAnchor(m_staticStatusBar.m_hWnd,	BOTTOM_LEFT, BOTTOM_RIGHT);
 
 	HideSizeGrip(&m_dwGripTempState);
 	UpdateSizeGrip();
@@ -498,38 +490,12 @@ void CDynamicToolBarDlg::OnDestroy()
 
 void CDynamicToolBarDlg::OnSize(UINT nType, int cx, int cy) 
 {
-	AfxTrace(_T("::IsWindows(m_hWnd)=%d"), ::IsWindow(m_hWnd));
-	if(::IsWindow(m_hWnd))
-	{
-		HideSizeGrip(&m_dwGripTempState);
-	}
 	CResizableDialog::OnSize(nType, cx, cy);
-	
 	SetStatusBarPartsSize();
-	
-	HideSizeGrip(&m_dwGripTempState);
-	UpdateSizeGrip();
-}
-
-void CDynamicToolBarDlg::SetStatusBarPartsSize()
-{
-	if(statusbar == NULL || !::IsWindow(statusbar->GetSafeHwnd()))
-	{
-		return;
-	}
-	CRect rect;
-	statusbar->GetClientRect(&rect);
-	int ussShift = 0;
-	
-	int aiWidths[3] =
-	{ 
-		rect.right - 300 - ussShift,
-		rect.right - 200 - ussShift,
-		-1
-	};
-	statusbar->SetParts(3, aiWidths);
-
-	statusbar->SetText(_T("logn name test aaaa.......123"), 2, 0);
+// 	if(::IsWindow(m_hWnd))
+// 	{
+// 		Invalidate();
+// 	}
 }
 
 void CDynamicToolBarDlg::SetShowSizeGrip(BOOL bShow)
@@ -543,4 +509,23 @@ void CDynamicToolBarDlg::SetShowSizeGrip(BOOL bShow)
 		HideSizeGrip(&m_dwGripTempState);
 	}
 	UpdateSizeGrip();
+}
+
+void CDynamicToolBarDlg::SetStatusBarPartsSize()
+{
+	if(!::IsWindow(m_staticStatusBar.m_hWnd))
+	{
+		return;
+	}
+	CRect rect;
+	m_staticStatusBar.GetClientRect(&rect);
+	int ussShift = 0;
+	
+	int aiWidths[3] =
+	{ 
+		rect.right - 300 - ussShift,
+		rect.right - 200 - ussShift,
+		-1
+	};
+	m_staticStatusBar.SetParts(3, aiWidths);
 }
