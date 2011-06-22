@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "DynamicToolBar.h"
 #include "StaticStatusBar.h"
 
 #ifdef _DEBUG
@@ -14,17 +13,53 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CStaticStatusBar
 
+void DrawGradient(CDC * pDC, CRect rect, COLORREF colorStart, COLORREF colorEnd, BOOL bHorz/* = TRUE*/, UINT nSteps/* = 64*/)
+{
+    for (UINT i = 0; i < nSteps; i++)
+    {
+        BYTE bR = (BYTE) ((GetRValue(colorStart) * (nSteps - i) + GetRValue(colorEnd) * i) / nSteps);
+        BYTE bG = (BYTE) ((GetGValue(colorStart) * (nSteps - i) + GetGValue(colorEnd) * i) / nSteps);
+        BYTE bB = (BYTE) ((GetBValue(colorStart) * (nSteps - i) + GetBValue(colorEnd) * i) / nSteps);
+		
+		CBrush br (RGB(bR, bG, bB));
+		
+        CRect r2 = rect;
+        if (!bHorz)
+        {
+            r2.top = rect.top + ((i * rect.Height()) / nSteps);
+            r2.bottom = rect.top + (((i + 1) * rect.Height()) / nSteps);
+            if (r2.Height() > 0)
+                pDC->FillRect(r2, &br);
+        }
+        else
+        {
+            r2.left = rect.left + ((i * rect.Width()) / nSteps);
+            r2.right = rect.left + (((i + 1) * rect.Width()) / nSteps);
+            if (r2.Width() > 0)
+                pDC->FillRect(r2, &br);
+        }
+    }
+}
+
 CStaticStatusBar::CStaticStatusBar()
 {
 	m_crBk = ::GetSysColor(COLOR_3DFACE);
+
+	m_crTopSep = ::GetSysColor(COLOR_3DDKSHADOW);
 	m_crTopLeft = ::GetSysColor(COLOR_3DSHADOW);
 	m_crBottomRight = ::GetSysColor(COLOR_3DLIGHT);
-	m_crSep = ::GetSysColor(COLOR_3DHIGHLIGHT);
-// 	m_crBk = RGB(192, 192, 192);
-// 	m_crTopLeft = RGB(127, 157, 185);
-// 	m_crBottomRight = RGB(127, 157, 185);
-// 	m_crSep = RGB(199, 197, 179);
-	m_bDrawBorder = TRUE;
+
+	m_crBorderSepStart = RGB(203, 199, 181);
+	m_crBorderSepEnd = RGB(199, 197, 179);
+
+	m_nSepWidth = 2;
+
+#ifdef _DEBUG
+	m_crBk = RGB(255, 128, 0);
+	m_crTopSep = RGB(0, 0, 255);
+	m_crTopLeft = RGB(0, 32, 255);
+	m_crBottomRight = RGB(0, 64, 64);
+#endif
 }
 
 CStaticStatusBar::~CStaticStatusBar()
@@ -48,29 +83,29 @@ void CStaticStatusBar::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	CDC* pDC = &dc;
 
+	//Change font to parent's font
 	CFont* pOldFont = NULL;
 	CWnd* pWndParent = GetParent();
 	if(pWndParent)
 	{
 		pOldFont = pDC->SelectObject (pWndParent->GetFont());
 	}
-	int nOldBkMode = pDC->SetBkMode(TRANSPARENT);	
+	//Change bk mode to transparent
+	int nOldBkMode = pDC->SetBkMode(TRANSPARENT);
 
+	//Draw Background first
 	DrawBk(pDC);
 
-	CRect rect;
-	GetClientRect(&rect);
-
-	CRect rcPart = rect;
-
-	int nIndex, nCount = m_mapParts.GetCount();
-	PartData* pPartData = NULL;
+	//Then draw the text info
 	DWORD dwFormat = DT_LEFT | DT_NOPREFIX | DT_SINGLELINE | DT_VCENTER;
-	for(nIndex = 0; nIndex < nCount; nIndex++)
-	{
-		m_mapParts.Lookup(nIndex, pPartData);
+	CRect rcPart;
+	PartData* pPartData = NULL;
 
-		GetRect(nIndex, &rcPart);
+	int nPane, nCount = m_mapParts.GetCount();		
+	for(nPane = 0; nPane < nCount; nPane++)
+	{
+		m_mapParts.Lookup(nPane, pPartData);
+		GetRect(nPane, &rcPart);
 
 		rcPart.left += 2;
 		if(rcPart.left >= rcPart.right)
@@ -81,6 +116,7 @@ void CStaticStatusBar::OnPaint()
 		pPartData->szText.ReleaseBuffer();
 	}
 
+	//Restore DC
 	pDC->SetBkMode(nOldBkMode);
 	if(pWndParent)
 	{
@@ -91,7 +127,6 @@ void CStaticStatusBar::OnPaint()
 BOOL CStaticStatusBar::OnEraseBkgnd(CDC* pDC) 
 {
 	DrawBk(pDC);
-	
 	return TRUE;
 }
 
@@ -102,27 +137,31 @@ void CStaticStatusBar::DrawBk(CDC *pDC)
 	CRect rect;
 	GetClientRect(&rect);
 
+	//Background
 	pDC->FillSolidRect(&rect, m_crBk);
 
-	pDC->Draw3dRect(&rect, m_crTopLeft, m_crBottomRight);
+	//Top line
+	pDC->FillSolidRect(rect.left, rect.top, rect.Width(), 1, m_crTopSep);
+	pDC->FillSolidRect(rect.left, rect.top + 1, rect.Width(), 1, m_crTopLeft);
+
+	//Bottom line
+	pDC->FillSolidRect(rect.left, rect.bottom, rect.Width(), 1, m_crBottomRight);
 
 	PartData* pPartData = NULL;
-	CRect rcPart = rect;
-	int nIndex, nCount = m_mapParts.GetCount();
-	for(nIndex = 0; nIndex < nCount; nIndex++)
-	{
-		GetRect(nIndex, &rcPart);
+	CRect rcPart;
 
-		m_mapParts.Lookup(nIndex, pPartData);
+	int nPane, nCount = m_mapParts.GetCount();
+	for(nPane = 0; nPane < nCount; nPane++)
+	{
+		GetRect(nPane, &rcPart);
+
+		m_mapParts.Lookup(nPane, pPartData);
 		if(pPartData->nDrawType != SBT_NOBORDERS)
 		{
-			rcPart.DeflateRect(0, 1);
-			pDC->Draw3dRect(&rcPart, m_crTopLeft, m_crBottomRight);
+			ASSERT((UINT)rcPart.Width() > m_nSepWidth);
+			rcPart.left = rcPart.right - m_nSepWidth;
+			DrawSep(pDC, &rcPart);
 		}
-
-		rcPart.left = rcPart.right;
-		rcPart.right = rcPart.left + 2;
-		DrawSep(pDC, &rcPart);
 	}
 	
 	pDC->SetBkColor(crOldBk);
@@ -161,23 +200,27 @@ BOOL CStaticStatusBar::SetParts( int nParts, int* pWidths )
 
 BOOL CStaticStatusBar::SetText( LPCTSTR lpszText, int nPane, int nType )
 {
-	ASSERT(nType >= 0 && nPane < m_mapParts.GetCount());
+	if(nPane < 0 || nPane >= m_mapParts.GetCount())
+	{
+		return FALSE;
+	}
 
 	PartData* pPartData = NULL;
-	if(m_mapParts.Lookup(nPane, pPartData))
+	if(!m_mapParts.Lookup(nPane, pPartData))
 	{
-		pPartData->szText = lpszText;
-		pPartData->nDrawType = nType;
-
-		CRect rcPart;
-		GetRect(nPane, &rcPart);
-
-		InvalidateRect(&rcPart);
+		return FALSE;
 	}
+
+	pPartData->szText = lpszText;
+	pPartData->nDrawType = nType;
+	
+	CRect rcPart;
+	GetRect(nPane, &rcPart);
+
+	InvalidateRect(&rcPart);
+
 	return TRUE;
 }
-
-
 
 void CStaticStatusBar::RemoveAllPartData()
 {
@@ -195,9 +238,13 @@ void CStaticStatusBar::RemoveAllPartData()
 	m_mapParts.RemoveAll();
 }
 
+//Get the Rectangle of the Pane, including the separator space
 BOOL CStaticStatusBar::GetRect( int nPane, LPRECT lpRect ) const
 {
-	ASSERT(nPane >= 0 && nPane < m_mapParts.GetCount());
+	if(nPane < 0 || nPane >= m_mapParts.GetCount())
+	{
+		return FALSE;
+	}
 	
 	CRect rcClient;
 	GetClientRect(&rcClient);
@@ -214,7 +261,7 @@ BOOL CStaticStatusBar::GetRect( int nPane, LPRECT lpRect ) const
 	else
 	{
 		m_mapParts.Lookup(nPane - 1, pPartData);
-		lpRect->left = pPartData->nRightEdge + 2;
+		lpRect->left = pPartData->nRightEdge + 1;
 	}
 
 	//Right
@@ -238,7 +285,18 @@ void CStaticStatusBar::DrawSep(CDC *pDC, LPCRECT lpRect)
 	int bottom = lpRect->bottom - 2;
 	ASSERT(bottom > top);
 
-	pDC->FillSolidRect(lpRect->left, top, 1, bottom - top, m_crSep);
+	if(bottom <= top)
+	{
+		return;
+	}
+
+	CRect rcSep;
+	rcSep.left = lpRect->left;
+	rcSep.top = top;
+	rcSep.right = rcSep.left + 1;
+	rcSep.bottom = bottom;
+	DrawGradient(pDC, rcSep, m_crBorderSepStart, m_crBorderSepEnd, FALSE, rcSep.Height());
+
 	pDC->FillSolidRect(lpRect->left + 1, top, 1, bottom - top, RGB(255, 255, 255));
 }
 

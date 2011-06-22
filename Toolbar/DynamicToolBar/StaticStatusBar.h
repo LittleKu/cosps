@@ -1,9 +1,8 @@
 #if !defined(AFX_STATICSTATUSBAR_H__C7B18C6B_6CD4_4653_8515_39E7F5D97615__INCLUDED_)
 #define AFX_STATICSTATUSBAR_H__C7B18C6B_6CD4_4653_8515_39E7F5D97615__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
+
 // StaticStatusBar.h : header file
 //
 
@@ -28,10 +27,12 @@ public:
 // Attributes
 public:
 	COLORREF m_crBk;
+	COLORREF m_crTopSep;
 	COLORREF m_crTopLeft;
 	COLORREF m_crBottomRight;
-	COLORREF m_crSep;
-	BOOL	 m_bDrawBorder;
+	COLORREF m_crBorderSepStart;
+	COLORREF m_crBorderSepEnd;
+	UINT	 m_nSepWidth;
 // Operations
 public:
 	BOOL SetParts( int nParts, int* pWidths );
@@ -45,11 +46,11 @@ public:
 
 // Implementation
 public:
-	void DrawSep(CDC* pDC, LPCRECT lpRect);
+	virtual void DrawSep(CDC* pDC, LPCRECT lpRect);
 	virtual void DrawBk(CDC* pDC);
+	virtual void RemoveAllPartData();
 	// Generated message map functions
 protected:
-	virtual void RemoveAllPartData();
 	CMapIndex2PartData m_mapParts;
 	//{{AFX_MSG(CStaticStatusBar)
 	afx_msg void OnPaint();

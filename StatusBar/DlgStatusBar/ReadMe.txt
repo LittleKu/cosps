@@ -1,0 +1,1 @@
+http://www.codeproject.com/KB/statusbar/dlgstatbar01.aspx

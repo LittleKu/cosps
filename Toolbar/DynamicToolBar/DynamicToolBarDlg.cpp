@@ -316,15 +316,6 @@ void CDynamicToolBarDlg::Init()
 		toolbar->Init();
 		pwndToolbarX = InitReBar();
 	}
-	// set statusbar
-	// the statusbar control is created as a custom control in the dialog resource,
-	// this solves font and sizing problems when using large system fonts
-// 	statusbar->SubclassWindow(GetDlgItem(IDC_STATUSBAR)->m_hWnd);
-// 	statusbar->ModifyStyle(SBARS_SIZEGRIP, 0);
-// 	statusbar->SetFont(GetFont(), TRUE);
-// 	SetStatusBarPartsSize();
-// 	statusbar->SetWindowText(_T("DynamicToolBar Status Bar Version v0.50a DEBUG"));
-	m_staticStatusBar.SetFont(GetFont(), TRUE);
 	SetStatusBarPartsSize();
 
 	DialogCreateIndirect(pDlg1, IDD_DIALOG1);
@@ -357,7 +348,7 @@ void CDynamicToolBarDlg::Init()
 	AddAnchor(*pwndToolbarX,	TOP_LEFT, TOP_RIGHT);
 	AddAnchor(m_staticStatusBar.m_hWnd,	BOTTOM_LEFT, BOTTOM_RIGHT);
 
-	HideSizeGrip(&m_dwGripTempState);
+	ShowSizeGrip(&m_dwGripTempState);
 	UpdateSizeGrip();
 }
 
