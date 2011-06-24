@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "AboutDlg.h"
-#include "ThirdParty/Gradient.h"
+#include "gtb.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,7 +25,7 @@ BOOL CBkgEdit::OnEraseBkgnd(CDC* pDC)
 	
 	COLORREF colorStart = RGB(229, 244, 248);
 	COLORREF colorEnd = RGB(251, 252, 249);
-	CGradient::Draw(pDC, &rect, colorStart, colorEnd, FALSE);
+	gtb::DrawGradient(pDC, &rect, colorStart, colorEnd, FALSE);
 	
 	return TRUE;
 }
@@ -124,7 +124,7 @@ BOOL CAboutDlg::OnEraseBkgnd(CDC* pDC)
 
 	COLORREF colorStart = RGB(251, 252, 249);
 	COLORREF colorEnd = RGB(229, 244, 248);
-	CGradient::Draw(pDC, &rect, colorStart, colorEnd, FALSE);
+	gtb::DrawGradient(pDC, &rect, colorStart, colorEnd, FALSE);
 
 	return TRUE;
 }

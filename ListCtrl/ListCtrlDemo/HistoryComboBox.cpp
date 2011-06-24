@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "HistoryComboBox.h"
-#include "./ThirdParty/IniFileReadWrite.h"
+#include "IniFileReadWrite.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -87,7 +87,7 @@ void CHistoryComboBox::LoadHistory()
 	do
 	{
 		sKey.Format(_T("%s%d"), m_sKeyBaseName, n);
-		sValue = IniFile::GetKeyValue(SYS_PREF_INI_FILE(), m_sSectionName, sKey);
+		sValue = gtb::GetKeyValue(SYS_PREF_INI_FILE(), m_sSectionName, sKey);
 		if (!sValue.IsEmpty())
 		{
 			AddString(sValue);

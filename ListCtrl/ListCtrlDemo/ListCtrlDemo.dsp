@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib /nologo /subsystem:windows /machine:I386 /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
+# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib /nologo /subsystem:windows /machine:I386 /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release" /libpath:".\Lib\Release"
 
 !ELSEIF  "$(CFG)" == "ListCtrlDemo - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtb.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug" /libpath:".\Lib\Debug"
 
 !ENDIF 
 
@@ -112,19 +112,11 @@ SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ThirdParty\Gradient.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\HistoryComboBox.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\ThirdParty\HyperLink.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ThirdParty\IniFileReadWrite.cpp
 # End Source File
 # Begin Source File
 
@@ -184,10 +176,6 @@ SOURCE=.\SourceDirListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ThirdParty\SplitterControl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -225,19 +213,11 @@ SOURCE=.\Export.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ThirdParty\Gradient.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\HistoryComboBox.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\ThirdParty\HyperLink.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ThirdParty\IniFileReadWrite.h
 # End Source File
 # Begin Source File
 
@@ -258,10 +238,6 @@ SOURCE=.\MainReBar.h
 # Begin Source File
 
 SOURCE=.\MainToolBarCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ThirdParty\MemDC.h
 # End Source File
 # Begin Source File
 
@@ -298,10 +274,6 @@ SOURCE=.\ThirdParty\SortClass.h
 # Begin Source File
 
 SOURCE=.\SourceDirListCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ThirdParty\SplitterControl.h
 # End Source File
 # Begin Source File
 

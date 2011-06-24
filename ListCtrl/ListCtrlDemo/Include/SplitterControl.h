@@ -34,7 +34,7 @@ typedef struct SPC_NMHDR
 	int delta;
 } SPC_NMHDR;
 
-class CSplitterControl : public CStatic
+class AFX_EXT_CLASS CSplitterControl : public CStatic
 {
 // Construction
 public:

@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
 #include "FileParser.h"
-#include "ThirdParty/SplitterControl.h"
+#include "SplitterControl.h"
 #include "ThirdParty/MultiSelTreeCtrl.h"
 #include "ProgressDlg.h"
 #include "Counter.h"

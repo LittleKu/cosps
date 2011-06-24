@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "SourceDirListCtrl.h"
-#include "./ThirdParty/IniFileReadWrite.h"
+#include "IniFileReadWrite.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -258,11 +258,11 @@ void CSourceDirListCtrl::LoadHistory()
 	do
 	{
 		sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_DIR, n);
-		sDir = IniFile::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
+		sDir = gtb::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
 		if (!sDir.IsEmpty())
 		{
 			sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_CHECKED, n);
-			sChecked = IniFile::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
+			sChecked = gtb::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
 			if(sChecked.IsEmpty())
 			{
 				sChecked.Format("%d", CL_CHECKED);
