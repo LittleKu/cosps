@@ -156,10 +156,6 @@ SOURCE=.\ProgressDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PropDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ResultListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -250,10 +246,6 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
 # Begin Source File
 
 SOURCE=.\ProgressDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\PropDlg.h
 # End Source File
 # Begin Source File
 

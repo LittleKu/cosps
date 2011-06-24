@@ -12,17 +12,17 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CAboutDlg
 
-ResourceCount=15
-Resource1=IDD_LISTCTRLDEMO_DIALOG
+ResourceCount=14
+Resource1=IDD_ABOUTBOX (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_PROGRESS
-Resource4=IDD_ABOUTBOX
+Resource4=IDD_MAIN_DLG
 Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource6=CG_IDD_PROGRESS
 Class4=CProgressDlg
-Resource7=IDD_PROP_DLG
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource9=IDD_LISTCTRLDEMO_DIALOG
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
@@ -30,14 +30,13 @@ Resource11=IDD_MAIN_DLG (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_PROGRESS (Chinese (P.R.C.))
+Resource12=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_MAIN_DLG
+Resource13=IDD_PROGRESS (Chinese (P.R.C.))
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
-Resource14=IDD_ABOUTBOX (English (U.S.))
 Class13=CHistoryComboBox
-Resource15=IDR_RESULT_MENU (Neutral)
+Resource14=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -293,13 +292,6 @@ Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_NEW_NAME,edit,1350631552
 Control4=IDC_TXT_NEW_NAME,static,1342308354
-
-[DLG:IDD_PROP_DLG]
-Type=1
-Class=CPropDlg
-ControlCount=2
-Control1=IDOK,button,1342242817
-Control2=IDCANCEL,button,1342242816
 
 [CLS:CPropDlg]
 Type=0

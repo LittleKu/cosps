@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MultiSelTreeCtrl.h"
 #include "tinyxml.h"
-#include "../PropDlg.h"
+#include "PropDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

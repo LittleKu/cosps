@@ -16,14 +16,9 @@
 #define IDB_MAIN_TOOLBAR_HOT            136
 #define IDB_FILTER_TREE_SEL_STATE       137
 #define IDB_FILTER_TREE_CHECK_BOX_STATE 138
-#define IDB_SPLITTER_BKG                139
 #define IDB_SPLITTER_V_BKG              139
 #define IDB_SPLITTER_H_BKG              140
 #define IDB_MAIN_TOOLBAR_BKG            141
-#define IDD_FILTER_TREE_MODIFY          142
-#define IDD_EDIT_PROP_DLG               142
-#define IDD_FILTER_TREE_MODIFY_FILE_TYPE 143
-#define IDD_PROP_DLG                    144
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -102,7 +97,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        146
+#define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32783
 #define _APS_NEXT_CONTROL_VALUE         1055
 #define _APS_NEXT_SYMED_VALUE           107
