@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ListCtrlDemo.h"
 #include "MainDlg.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -74,15 +75,6 @@ BOOL CListCtrlDemoApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-	m_pSysBkBitmap = new CBitmap();
-	CommonUtils::LoadBitmapFromFile(_T(".\\res\\background.bmp"), m_pSysBkBitmap);
-
-	m_pSysBkBrush = new CBrush();
-//	m_pSysBkBrush->CreatePatternBrush(m_pSysBkBitmap);
-//	m_pSysBkBrush->CreateSolidBrush(RGB(225, 239, 245));
-	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
-
-	m_szPrefIniFile.Format(_T("%s"), CommonUtils::GetConfFilePath(_T("preferences.ini"), GCFP_USER));
 	//Set App's name
 	if(m_pszAppName != NULL)
 	{
@@ -90,6 +82,16 @@ BOOL CListCtrlDemoApp::InitInstance()
 		m_pszAppName = NULL;
 	}
 	m_pszAppName = _tcsdup(SZ_PRODUCT_NAME);
+
+	m_szPrefIniFile.Format(_T("%s"), CommonUtils::GetConfFilePath(_T("preferences.ini"), GCFP_USER));
+
+	SYS_PREF()->Init();
+
+	m_pSysBkBitmap = new CBitmap();
+	CommonUtils::LoadBitmapFromFile(_T(".\\res\\background.bmp"), m_pSysBkBitmap);
+
+	m_pSysBkBrush = new CBrush();
+	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;

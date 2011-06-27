@@ -5,6 +5,8 @@
 #include "ListCtrlDemo.h"
 #include "MainDlg.h"
 #include "AboutDlg.h"
+#include "Preferences.h"
+#include "PreferencesDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +48,7 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CMainDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CMainDlg)
 	ON_WM_ERASEBKGND()
+	ON_WM_CLOSE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -206,20 +209,11 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pCounterDlg->OnExport(EXPORT_TYPE_HTML);
 		}
 		break;
+	case IDM_TOOLS_OPTIONS:
 	case ID_TBBTN_SETTING:
 		{
-			//Test
-			const char* files[] = {
-				"*.c", "*.inl", ".hpp", "*.h", "*.exe", "*.bat", "*.com", "*.txt", "*.java", ".cxx"
-			};
-			int count = sizeof(files)/sizeof(files[0]);
-
-			for(int i = 0; i < count; i++)
-			{
-				CFileInfo* pFileInfo = new CFileInfo();
-				pFileInfo->SetFileName(files[i]);
-				m_pCounterDlg->OnProgressUpdate((WPARAM)pFileInfo, 0);
-			}
+			CPreferencesDlg prefsDlg;
+			prefsDlg.DoModal();
 		}
 		break;
 	case IDM_FILE_EXIT:
@@ -243,4 +237,11 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 BOOL CMainDlg::OnEraseBkgnd(CDC* pDC)
 {	
 	return TRUE;
+}
+
+void CMainDlg::OnClose() 
+{
+	SYS_PREF()->Save();
+	
+	CResizableDialog::OnClose();
 }

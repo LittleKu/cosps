@@ -2,27 +2,27 @@
 
 [General Info]
 Version=1
-LastClass=CHistoryComboBox
-LastTemplate=CComboBox
+LastClass=CPPgGeneral
+LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
 ClassCount=13
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
-Class3=CAboutDlg
+Class3=CPPgGeneral
 
-ResourceCount=14
+ResourceCount=15
 Resource1=CG_IDD_PROGRESS
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_MAIN_DLG
+Resource4=IDD_PROGRESS (Chinese (P.R.C.))
 Resource5=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource6=IDD_ABOUTBOX (English (U.S.))
 Class4=CProgressDlg
-Resource7=IDD_ABOUTBOX
+Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=IDD_LISTCTRLDEMO_DIALOG
+Resource9=IDD_MAIN_DLG
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
@@ -30,13 +30,14 @@ Resource11=IDD_PROGRESS
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource12=IDD_ABOUTBOX
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_PROGRESS (Chinese (P.R.C.))
+Resource13=IDD_LISTCTRLDEMO_DIALOG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=IDR_RESULT_MENU (Neutral)
+Resource14=IDD_PROPPAGE_GENERAL
+Resource15=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -55,7 +56,7 @@ VirtualFilter=dWC
 
 [DLG:IDD_ABOUTBOX]
 Type=1
-Class=CAboutDlg
+Class=?
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -69,38 +70,37 @@ Control8=IDC_REG_INFO,edit,1342244868
 [DLG:IDD_LISTCTRLDEMO_DIALOG]
 Type=1
 Class=CListCtrlDemoDlg
-ControlCount=31
+ControlCount=30
 Control1=IDC_SOURCE_DIR_FRAME,button,1342177287
 Control2=IDC_FILTER_COMBO,combobox,1344339970
-Control3=IDC_RECURSIVE_SUB_CHECK,button,1342242819
-Control4=IDC_RESULT_FRAME,button,1342177287
-Control5=IDC_RESULT_LIST,SysListView32,1350631425
-Control6=IDC_SUMMARY_FRAME,button,1342177287
-Control7=IDC_TXT_TOTAL,static,1342308354
-Control8=IDC_TXT_FILE_NUMBER,static,1342308352
-Control9=IDC_TXT_LINES,static,1342308352
-Control10=IDC_TXT_C,static,1342308354
-Control11=IDC_NUMBER_C,static,1342312448
-Control12=IDC_LINES_C,static,1342312448
-Control13=IDC_TXT_CODE,static,1342308352
-Control14=IDC_TXT_COMMENT,static,1342308352
-Control15=IDC_TXT_MIXED,static,1342308352
-Control16=IDC_TXT_BLANK,static,1342308352
-Control17=IDC_CODE_C,static,1342312448
-Control18=IDC_COMMENT_C,static,1342312448
-Control19=IDC_MIXED_C,static,1342312448
-Control20=IDC_BLANK_C,static,1342312448
-Control21=IDC_TXT_P,static,1342308354
-Control22=IDC_NUMBER_P,static,1342312448
-Control23=IDC_LINES_P,static,1342312448
-Control24=IDC_CODE_P,static,1342312448
-Control25=IDC_COMMENT_P,static,1342312448
-Control26=IDC_MIXED_P,static,1342312448
-Control27=IDC_BLANK_P,static,1342312448
-Control28=IDC_SOURCE_DIR_LIST,SysListView32,1350631425
-Control29=IDC_SPLITTER_VERTICAL,static,1342177287
-Control30=IDC_FILTER_TREE,SysTreeView32,1350637831
-Control31=IDC_SPLITTER_HORIZONTAL,static,1342177287
+Control3=IDC_RESULT_FRAME,button,1342177287
+Control4=IDC_RESULT_LIST,SysListView32,1350631425
+Control5=IDC_SUMMARY_FRAME,button,1342177287
+Control6=IDC_TXT_TOTAL,static,1342308354
+Control7=IDC_TXT_FILE_NUMBER,static,1342308352
+Control8=IDC_TXT_LINES,static,1342308352
+Control9=IDC_TXT_C,static,1342308354
+Control10=IDC_NUMBER_C,static,1342312448
+Control11=IDC_LINES_C,static,1342312448
+Control12=IDC_TXT_CODE,static,1342308352
+Control13=IDC_TXT_COMMENT,static,1342308352
+Control14=IDC_TXT_MIXED,static,1342308352
+Control15=IDC_TXT_BLANK,static,1342308352
+Control16=IDC_CODE_C,static,1342312448
+Control17=IDC_COMMENT_C,static,1342312448
+Control18=IDC_MIXED_C,static,1342312448
+Control19=IDC_BLANK_C,static,1342312448
+Control20=IDC_TXT_P,static,1342308354
+Control21=IDC_NUMBER_P,static,1342312448
+Control22=IDC_LINES_P,static,1342312448
+Control23=IDC_CODE_P,static,1342312448
+Control24=IDC_COMMENT_P,static,1342312448
+Control25=IDC_MIXED_P,static,1342312448
+Control26=IDC_BLANK_P,static,1342312448
+Control27=IDC_SOURCE_DIR_LIST,SysListView32,1350631425
+Control28=IDC_SPLITTER_VERTICAL,static,1342177287
+Control29=IDC_FILTER_TREE,SysTreeView32,1350637831
+Control30=IDC_SPLITTER_HORIZONTAL,static,1342177287
 
 [MNU:IDR_RESULT_MENU (Neutral)]
 Type=1
@@ -157,7 +157,7 @@ Control31=IDC_SPLITTER_HORIZONTAL,static,1342177287
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=CAboutDlg
+Class=?
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -314,4 +314,20 @@ HeaderFile=HistoryComboBox.h
 ImplementationFile=HistoryComboBox.cpp
 BaseClass=CComboBox
 Filter=W
+
+[DLG:IDD_PROPPAGE_GENERAL]
+Type=1
+Class=CPPgGeneral
+ControlCount=3
+Control1=IDC_CHECK_INCLUDE_SUB_FOLDER,button,1342242819
+Control2=IDC_TXT_MAX_HISTORY_ITEMS,static,1342308876
+Control3=IDC_MAX_HISTORY_ITEMS,edit,1350639616
+
+[CLS:CPPgGeneral]
+Type=0
+HeaderFile=PPgGeneral.h
+ImplementationFile=PPgGeneral.cpp
+BaseClass=CPropertyPage
+Filter=D
+VirtualFilter=idWC
 

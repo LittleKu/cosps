@@ -5,6 +5,7 @@
 #include "ListCtrlDemo.h"
 #include "HistoryComboBox.h"
 #include "IniFileReadWrite.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,7 +18,6 @@ static char THIS_FILE[] = __FILE__;
 
 CHistoryComboBox::CHistoryComboBox()
 {
-	m_nMaxHistoryItems = 10;
 }
 
 CHistoryComboBox::~CHistoryComboBox()
@@ -70,6 +70,15 @@ int CHistoryComboBox::AddString( LPCTSTR lpszString )
 		DeleteString(nIndex);
 	}
 
+	if((UINT)GetCount() >= SYS_PREF()->m_nMaxItemsInFilterComboBox)
+	{
+		int diff = (GetCount() - SYS_PREF()->m_nMaxItemsInFilterComboBox) + 1;
+		for(int i = diff - 1; i >= 0; i--)
+		{
+			DeleteString(i);
+		}
+	}
+
 	nIndex = CComboBox::AddString(combostring);
 	return nIndex;
 }
@@ -103,11 +112,11 @@ void CHistoryComboBox::SaveHistory()
 	//Clear the old items
 	::WritePrivateProfileSection(m_sSectionName, "", m_sIniFile);
 	
-	int nMax = min(GetCount(), m_nMaxHistoryItems);
+	UINT nMax = min((UINT)GetCount(), SYS_PREF()->m_nMaxItemsInFilterComboBox);
 
 	CString sKey;
 	CString sValue;
-	int i;
+	UINT i;
 	for(i = 0; i < nMax; i++)
 	{
 		GetLBText(i, sValue);

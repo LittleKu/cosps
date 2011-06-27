@@ -46,6 +46,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CMainDlg)
 	virtual BOOL OnInitDialog();
+	afx_msg void OnClose();
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()

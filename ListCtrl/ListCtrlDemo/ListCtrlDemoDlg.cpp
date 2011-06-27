@@ -6,6 +6,7 @@
 #include "ListCtrlDemoDlg.h"
 #include "ProgressDlg.h"
 #include "Export.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -34,7 +35,6 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
 	DDX_Control(pDX, IDC_FILTER_TREE, m_filterTree);
-	DDX_Control(pDX, IDC_RECURSIVE_SUB_CHECK, m_recursiveSubBtn);
 	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
 	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListCtrl);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
@@ -103,8 +103,6 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 
 	//Result List
 	InitResultListCtrl();
-	
-	m_recursiveSubBtn.SetCheck(BST_CHECKED);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -132,7 +130,6 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
 	
     AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
     AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
-    AddAnchor(IDC_RECURSIVE_SUB_CHECK,		TOP_LEFT, TOP_LEFT);
 
 	
     AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
@@ -433,9 +430,8 @@ void CListCtrlDemoDlg::OnButtonStart()
 	}
 
 	//Is recursive?
-	int nChecked = m_recursiveSubBtn.GetCheck();
-	lpThreadParam->bRecursive = ((nChecked == BST_CHECKED) ? TRUE : FALSE);
-
+	lpThreadParam->bRecursive = SYS_PREF()->m_bSearchIncludeSubFolders;
+	
 	CWinThread* pThread = AfxBeginThread(CCounter::CountThreadProc, lpThreadParam);
 }
 
@@ -564,8 +560,6 @@ void CListCtrlDemoDlg::DoSizeVertical(int delta)
 	CSplitterControl::ChangeWidth(&m_srcDirListCtrl, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_filterComboBox, -delta, CW_RIGHTALIGN);
 
-	CSplitterControl::ChangePos(&m_recursiveSubBtn, -delta, 0);
-
 	CSplitterControl::ChangeWidth(&m_splitterHorizontal, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_resultListCtrl, -delta, CW_RIGHTALIGN);
@@ -608,7 +602,6 @@ void CListCtrlDemoDlg::DoSizeHorizontal(int delta)
 	CSplitterControl::ChangeHeight(GetDlgItem(IDC_SOURCE_DIR_FRAME), delta, CW_TOPALIGN);
 	CSplitterControl::ChangeHeight(&m_srcDirListCtrl, delta, CW_TOPALIGN);
 	CSplitterControl::ChangePos(&m_filterComboBox, 0, delta);
-	CSplitterControl::ChangePos(&m_recursiveSubBtn, 0, delta);
 
 	CSplitterControl::ChangeHeight(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_BOTTOMALIGN);
 	CSplitterControl::ChangeHeight(&m_resultListCtrl, -delta, CW_BOTTOMALIGN);

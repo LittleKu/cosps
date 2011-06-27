@@ -40,7 +40,6 @@ public:
 	CImageList m_selectedStateIL;
 	CImageList m_checkBoxStateIL;
 	
-	CButton	m_recursiveSubBtn;
 	CHistoryComboBox	m_filterComboBox;
 	CSourceDirListCtrl m_srcDirListCtrl;
 	CResultListCtrl m_resultListCtrl;

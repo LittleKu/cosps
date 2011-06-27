@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\ResizableLib\1.3\ResizableLib" /I ".\Include" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR- /GX /ZI /Od /I "..\..\ResizableLib\1.3\ResizableLib" /I ".\Include" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -153,7 +153,27 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PPgGeneral.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Preferences.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PreferencesDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.cpp
 # End Source File
 # Begin Source File
 
@@ -179,6 +199,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Source File
 
 SOURCE=.\ThirdParty\ToolBarCtrlEx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\TreePropSheet.cpp
 # End Source File
 # Begin Source File
 
@@ -246,7 +270,27 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\PPgGeneral.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Preferences.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PreferencesDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.h
 # End Source File
 # Begin Source File
 
@@ -278,6 +322,10 @@ SOURCE=.\ThirdParty\ToolBarCtrlEx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\TreePropSheet\TreePropSheet.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Util.h
 # End Source File
 # Begin Source File
@@ -302,6 +350,10 @@ SOURCE=.\res\HdrUpA.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\icon1.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\ListCtrlDemo.ico
 # End Source File
 # Begin Source File
@@ -315,6 +367,14 @@ SOURCE=.\res\MainToolBarBkg.bmp
 # Begin Source File
 
 SOURCE=.\res\MainToolBarHot.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\Options_General.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\Preferences.ico
 # End Source File
 # Begin Source File
 

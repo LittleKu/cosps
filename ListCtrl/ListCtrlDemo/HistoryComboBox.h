@@ -22,7 +22,6 @@ public:
 	int AddString( LPCTSTR lpszString );
 // Attributes
 public:
-	int m_nMaxHistoryItems;
 	CString m_sIniFile;
 	CString m_sSectionName;
 	CString m_sKeyBaseName;
