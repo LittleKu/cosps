@@ -24,7 +24,6 @@ class CListCtrlDemoApp : public CWinApp
 public:
 	CListCtrlDemoApp();
 	virtual ~CListCtrlDemoApp();
-	CBitmap* m_pSysBkBitmap;
 	CBrush*  m_pSysBkBrush;
 	CString  m_szPrefIniFile;
 // Overrides

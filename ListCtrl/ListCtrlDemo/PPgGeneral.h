@@ -33,6 +33,7 @@ public:
 
 // Implementation
 protected:
+	void RepositionComponents();
 	void LoadSettings();
 	// Generated message map functions
 	//{{AFX_MSG(CPPgGeneral)

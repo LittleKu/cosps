@@ -28,9 +28,6 @@ END_MESSAGE_MAP()
 
 CListCtrlDemoApp::CListCtrlDemoApp()
 {
-	// TODO: add construction code here,
-	// Place all significant initialization in InitInstance
-	m_pSysBkBitmap = NULL;
 	m_pSysBkBrush  = NULL;
 }
 
@@ -41,12 +38,6 @@ CListCtrlDemoApp::~CListCtrlDemoApp()
 		m_pSysBkBrush->DeleteObject();
 		delete m_pSysBkBrush;
 		m_pSysBkBrush = NULL;
-	}
-	if(m_pSysBkBitmap != NULL)
-	{
-		m_pSysBkBitmap->DeleteObject();
-		delete m_pSysBkBitmap;
-		m_pSysBkBitmap = NULL;
 	}
 
 	free((void*)m_pszAppName);
@@ -86,9 +77,6 @@ BOOL CListCtrlDemoApp::InitInstance()
 	m_szPrefIniFile.Format(_T("%s"), CommonUtils::GetConfFilePath(_T("preferences.ini"), GCFP_USER));
 
 	SYS_PREF()->Init();
-
-	m_pSysBkBitmap = new CBitmap();
-	CommonUtils::LoadBitmapFromFile(_T(".\\res\\background.bmp"), m_pSysBkBitmap);
 
 	m_pSysBkBrush = new CBrush();
 	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));

@@ -20,8 +20,7 @@ BOOL CBkgEdit::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(&rect);
 	
-	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
-	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
+	pDC->FillRect(&rect, SYS_APP()->m_pSysBkBrush);
 	
 	COLORREF colorStart = RGB(229, 244, 248);
 	COLORREF colorEnd = RGB(251, 252, 249);
@@ -119,8 +118,7 @@ BOOL CAboutDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rect;
 	GetClientRect(&rect);
 	
-	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
-	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
+	pDC->FillRect(&rect, SYS_APP()->m_pSysBkBrush);
 
 	COLORREF colorStart = RGB(251, 252, 249);
 	COLORREF colorEnd = RGB(229, 244, 248);

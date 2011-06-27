@@ -47,6 +47,8 @@ BOOL CPPgGeneral::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	
 	LoadSettings();
+
+	RepositionComponents();
 	
 	return TRUE;
 }
@@ -73,4 +75,35 @@ void CPPgGeneral::LoadSettings()
 		(SYS_PREF()->m_bSearchIncludeSubFolders ? BST_CHECKED : BST_UNCHECKED));
 
 	SetDlgItemInt(IDC_MAX_HISTORY_ITEMS, SYS_PREF()->m_nMaxItemsInFilterComboBox);
+}
+
+void CPPgGeneral::RepositionComponents()
+{
+	CWnd* pWnd = GetDlgItem(IDC_TXT_MAX_HISTORY_ITEMS);
+	ASSERT(pWnd);
+	CString szText;
+	pWnd->GetWindowText(szText);
+
+	CDC* pDC = GetDC();
+	CSize sz = pDC->GetTextExtent(szText);
+	ReleaseDC(pDC);
+	sz.cx += 2;
+
+	CRect rcLabelMaxHisItems;
+	pWnd->GetWindowRect(&rcLabelMaxHisItems);
+	ScreenToClient(&rcLabelMaxHisItems);
+	rcLabelMaxHisItems.right = rcLabelMaxHisItems.left + sz.cx;
+	pWnd->MoveWindow(&rcLabelMaxHisItems);
+
+
+	pWnd = GetDlgItem(IDC_MAX_HISTORY_ITEMS);
+	ASSERT(pWnd);
+
+	CRect rcMaxHisItems;
+	pWnd->GetWindowRect(&rcMaxHisItems);
+	ScreenToClient(&rcMaxHisItems);
+	int nWidth = rcMaxHisItems.Width();
+	rcMaxHisItems.left = rcLabelMaxHisItems.right;
+	rcMaxHisItems.right = rcMaxHisItems.left + nWidth;
+	pWnd->MoveWindow(&rcMaxHisItems);
 }

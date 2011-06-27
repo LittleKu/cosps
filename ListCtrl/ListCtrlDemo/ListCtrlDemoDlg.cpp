@@ -204,17 +204,10 @@ void CListCtrlDemoDlg::OnSysCommand(UINT nID, LPARAM lParam)
 }
 BOOL CListCtrlDemoDlg::OnEraseBkgnd(CDC* pDC)
 {
-//	return CResizableDialog::OnEraseBkgnd(pDC);
-
 	CRect rect;
 	GetClientRect(&rect);
 
-	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
-	pDC->FillRect(&rect, pApp->m_pSysBkBrush);
-
-//	CGradient::Draw(pDC, rect, RGB(255, 255, 255), /*RGB(255, 255, 0), */RGB(229, 244, 248), (BOOL)FALSE, (UINT)64);
-// 	CBrush brush(RGB(255, 128, 0));
-// 	pDC->FillRect(&rect, &brush);
+	pDC->FillRect(&rect, SYS_APP()->m_pSysBkBrush);
 
 	return TRUE;
 }
@@ -378,7 +371,11 @@ void CListCtrlDemoDlg::OnButtonDel()
 {
 	//Delete all selected items
 	POSITION pos = m_srcDirListCtrl.GetFirstSelectedItemPosition();
-
+	if(pos == NULL)
+	{
+		AfxMessageBox(_T("Please select at least one source folder to delete."));
+		return;
+	}
 	int nItem = -1;
 	while (pos != NULL)
 	{
@@ -717,8 +714,7 @@ HBRUSH CListCtrlDemoDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
     {
 		pDC->SetBkMode(TRANSPARENT);
 
-		CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
-		return (HBRUSH)pApp->m_pSysBkBrush->GetSafeHandle();
+		return (HBRUSH)(SYS_APP()->m_pSysBkBrush->GetSafeHandle());
     }
 	return hbr;
 }

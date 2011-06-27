@@ -77,10 +77,9 @@ BOOL CMainDlg::OnInitDialog()
 
 void CMainDlg::SetMenuBarBkg()
 {
-	CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
 	MENUINFO MenuInfo = {0};
 	MenuInfo.cbSize = sizeof(MenuInfo);
-	MenuInfo.hbrBack = *(pApp->m_pSysBkBrush); // Brush you want to draw
+	MenuInfo.hbrBack = *(SYS_APP()->m_pSysBkBrush); // Brush you want to draw
 	MenuInfo.fMask = MIM_BACKGROUND;
 	MenuInfo.dwStyle = MNS_AUTODISMISS;
 	
@@ -147,9 +146,6 @@ CWnd* CMainDlg::InitReBar()
 		VERIFY( m_MainReBarCtrl.InsertBand((UINT)-1, &rbbi) );
 		
 		pToolBarCtrl->SetParentReBarWnd(m_MainReBarCtrl.m_hWnd);
-
-		CListCtrlDemoApp* pApp = (CListCtrlDemoApp*)AfxGetApp();
-		pToolBarCtrl->UpdateBackground(*(pApp->m_pSysBkBitmap));
 		
 		return &m_MainReBarCtrl;
 	}
