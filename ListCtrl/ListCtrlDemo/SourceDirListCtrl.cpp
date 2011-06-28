@@ -242,6 +242,9 @@ void CSourceDirListCtrl::AddSrcDir(LPCTSTR lpszDir, int nCheckedState)
 	SetItemText(nItem, 1, lpszDir);
 	
 	ValidateCheck();
+
+	//Update the preferences
+	SYS_PREF()->m_szLastSelectedSrcFolder = lpszDir;
 }
 
 void CSourceDirListCtrl::LoadHistory()
@@ -272,6 +275,9 @@ void CSourceDirListCtrl::LoadHistory()
 		}
 		n++;
 	}while(!sDir.IsEmpty());
+
+	sKey = _T("LastSelectedSrcFolder");
+	SYS_PREF()->m_szLastSelectedSrcFolder = gtb::GetKeyValue(SYS_PREF_INI_FILE(), SDLC_SECTION_NAME, sKey);
 }
 
 void CSourceDirListCtrl::SaveHistory()
@@ -296,4 +302,7 @@ void CSourceDirListCtrl::SaveHistory()
 		sKey.Format(_T("%s%d"), SDLC_KEY_BASE_NAME_CHECKED, i);
 		::WritePrivateProfileString(SDLC_SECTION_NAME, sKey, sChecked, SYS_PREF_INI_FILE());
 	}
+
+	sKey = _T("LastSelectedSrcFolder");
+	::WritePrivateProfileString(SDLC_SECTION_NAME, sKey, SYS_PREF()->m_szLastSelectedSrcFolder, SYS_PREF_INI_FILE());
 }

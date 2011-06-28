@@ -11,6 +11,10 @@
 #define WM_PROGRESS_IS_CANCELLED  (WM_USER + 104)
 #define WM_SUMMARY_UPDATE         (WM_USER + 105)
 
+#if !defined(_countof)
+#define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#endif
+
 typedef struct tagCountThreadParam
 {
 	HWND hwndMain;

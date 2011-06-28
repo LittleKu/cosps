@@ -338,6 +338,7 @@ void CListCtrlDemoDlg::RefreshFilterArrays()
 
 void CListCtrlDemoDlg::OnButtonAdd() 
 {
+	/*
 	//Add selected directoy
 	char szPath[MAX_PATH];
 	ZeroMemory(szPath, sizeof(szPath)); 
@@ -364,6 +365,14 @@ void CListCtrlDemoDlg::OnButtonAdd()
             pMalloc->Free(pidlSelected);
             pMalloc->Release();
         }
+	}
+	*/
+	TCHAR szPath[MAX_PATH] = {0};
+	_sntprintf(szPath, _countof(szPath), _T("%s"), SYS_PREF()->m_szLastSelectedSrcFolder);
+	szPath[_countof(szPath) - 1] = _T('\0');
+	if( gtb::BrowseFolder(GetSafeHwnd(), szPath, _T("Select Source Code Folder")) )
+	{
+		m_srcDirListCtrl.AddSrcDir(szPath);
 	}
 }
 
