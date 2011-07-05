@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "Counter.h"
 #include "FileParser.h"
-#include "CFileParser.h"
 
 UINT CCounter::CountThreadProc(LPVOID lpvData)
 {
@@ -167,10 +166,12 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName)
 	CFileInfo* pFi = new CFileInfo();
 	pFi->SetFileName(lpszFileName);
 
-	CCFileParser cppFileParser(pFi);
-	cppFileParser.ParseFile();
+	IFileParser* pFileParser = CFileParserFactory::GetFileParser(LANG_TYPE_CPP, pFi);
+	pFileParser->ParseFile();
 
 	::SendMessage(m_hMainWnd, WM_PROGRESS_UPDATE, (WPARAM)(pFi), 0);
+
+	delete pFileParser;
 
 	return m_nCount;
 }

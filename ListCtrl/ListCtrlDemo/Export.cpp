@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "Export.h"
 #include "ResultListCtrl.h"
-#include "CFileParser.h"
+#include "FileParser.h"
 
 CCSVExporter::CCSVExporter(CResultListCtrl* pListCtrl, CTotalInfo* pTotalInfo) : 
 	m_pListCtrl(pListCtrl), m_pTotalInfo(pTotalInfo)
