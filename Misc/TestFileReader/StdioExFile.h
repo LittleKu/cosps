@@ -11,11 +11,11 @@ public:
 	CStdioExFile(LPCTSTR lpszFileName, UINT nOpenFlags);
 	virtual ~CStdioExFile();
 	void SetLineLimit(UINT nLimit);
-	UINT GetLineLimit() const;
+	int GetLineLimit() const;
 public:
-	virtual BOOL ReadLine(CString& rString);
+	virtual BOOL ReadLine(CString& rString, UINT* pDiscardedCount = 0);
 protected:
-	UINT m_nLineLimit;
+	int m_nLineLimit;
 };
 
 #endif // _STDIO_EX_FILE_H_

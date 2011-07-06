@@ -25,12 +25,12 @@ void CStdioExFile::SetLineLimit(UINT nLimit)
 {
 	m_nLineLimit = nLimit;
 }
-UINT CStdioExFile::GetLineLimit() const
+int CStdioExFile::GetLineLimit() const
 {
 	return m_nLineLimit;
 }
 
-BOOL CStdioExFile::ReadLine(CString& rString)
+BOOL CStdioExFile::ReadLine(CString& rString, UINT* pDiscardedCount)
 {	
 	rString = &afxChNil;    // empty string without deallocating
 
@@ -70,6 +70,10 @@ BOOL CStdioExFile::ReadLine(CString& rString)
 	{
 		return FALSE;
 	}
+	if(pDiscardedCount != NULL)
+	{
+		*pDiscardedCount = 0;
+	}
 	//1.2 if string is read completely or EOF
 	//[CAUTION]: use nLen other than rString.GetLength()
 	if( nLen < nMaxSize || lpsz[nLen-1] == '\n' )
@@ -103,8 +107,17 @@ BOOL CStdioExFile::ReadLine(CString& rString)
 		{
 			break;
 		}
+		if(pDiscardedCount != NULL)
+		{
+			*pDiscardedCount += nLen;
+		}
 	}
 	szTempStr.ReleaseBuffer();
+
+	if(pDiscardedCount != NULL && lpszResult != NULL && nLen > 0)
+	{
+		*pDiscardedCount += nLen;
+	}
 	
 	return TRUE;
 }

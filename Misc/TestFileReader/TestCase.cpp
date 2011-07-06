@@ -84,10 +84,16 @@ BOOL ReadFileInMFC(LPCTSTR lpFileName)
 	of.open(GetOutputFileName(lpFileName, RF_IN_MFC));
 
 	CString sLine;
+	UINT nLine = 0;
 	while(file.ReadString(sLine))
 	{
+		nLine++;
 		of<<(LPCTSTR)sLine<<std::endl;
 	}
+
+	sprintf(buf, "[INFO]: Total line = %d", nLine);
+	std::cout<<buf<<std::endl;
+
 	of.close();
 	file.Close();
 
@@ -105,11 +111,21 @@ BOOL ReadFileInMFC2(LPCTSTR lpFileName)
 	std::ofstream of;
 	of.open(GetOutputFileName(lpFileName, RF_IN_MFC2));
 	
+	UINT nDiscardedCount = 0; 
 	CString sLine;
-	while(file.ReadLine(sLine))
+	UINT nLine = 0;
+	while(file.ReadLine(sLine, &nDiscardedCount))
 	{
+		nLine++;
 		of<<(LPCTSTR)sLine<<std::endl;
+		if(nDiscardedCount > 0)
+		{
+			sprintf(buf, "[INFO]: Line(%d): Discard %d characters", nLine, nDiscardedCount);
+			std::cout<<buf<<std::endl;
+		}
 	}
+	sprintf(buf, "[INFO]: Total line = %d", nLine);
+	std::cout<<buf<<std::endl;
 	of.close();
 	file.Close();
 	
