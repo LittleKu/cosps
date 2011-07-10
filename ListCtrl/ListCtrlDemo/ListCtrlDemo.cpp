@@ -6,6 +6,7 @@
 #include "MainDlg.h"
 #include "Preferences.h"
 #include <log4cplus/configurator.h>
+#include <direct.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,14 +60,6 @@ CListCtrlDemoApp theApp;
 
 BOOL CListCtrlDemoApp::InitInstance()
 {
-	InitLog4cplus();
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
-	{
-		TIME_ZONE_INFORMATION tzi;
-		GetTimeZoneInformation(&tzi);	
-		LOG4CPLUS_INFO(THE_LOGGER, "System started. TimeZone="<<(-(tzi.Bias)))
-	}
-
 	AfxEnableControlContainer();
 
 	// Standard initialization
@@ -78,7 +71,19 @@ BOOL CListCtrlDemoApp::InitInstance()
 	Enable3dControls();			// Call this when using MFC in a shared DLL
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
-#endif	
+#endif
+	_tgetcwd(m_szWorkDir.GetBuffer(MAX_PATH), MAX_PATH);
+	m_szWorkDir.ReleaseBuffer();
+	//Remove the last backslash if exist
+	m_szWorkDir.TrimRight('\\');
+
+	InitLog4cplus();
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
+	{
+		TIME_ZONE_INFORMATION tzi;
+		GetTimeZoneInformation(&tzi);	
+		LOG4CPLUS_INFO(THE_LOGGER, "Application Initialized. TimeZone="<<(-(tzi.Bias)))
+	}
 	//Set App's name
 	if(m_pszAppName != NULL)
 	{
@@ -138,7 +143,7 @@ void InitLog4cplus()
 	_putenv(szValue);
 	
 	CString szConfigFile;
-	gtb::GetAbsolutePath(".\\dat\\config\\log4cplus.properties", szConfigFile);
+	szConfigFile.Format("%s\\dat\\config\\log4cplus.properties", SYS_APP()->m_szWorkDir);
 	try
 	{
 		//This will take effect in the configure process
@@ -156,4 +161,10 @@ void InitLog4cplus()
 	szValue.Format("%s=%s", pEnvName, szOldValue);
 	_putenv(szValue);
 #endif
+}
+
+int CListCtrlDemoApp::ExitInstance() 
+{
+	LOG4CPLUS_INFO(THE_LOGGER, "Application Exit.")
+	return CWinApp::ExitInstance();
 }

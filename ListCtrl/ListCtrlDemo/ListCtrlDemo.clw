@@ -13,12 +13,12 @@ Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
 ResourceCount=16
-Resource1=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource1=CG_IDD_PROGRESS
 Resource2=IDR_MAINFRAME
-Resource3=CG_IDD_PROGRESS
+Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource4=IDD_PROGRESS (Chinese (P.R.C.))
-Resource5=IDD_MAIN_DLG (English (U.S.))
-Resource6=IDD_PROGRESS
+Resource5=IDD_PROGRESS
+Resource6=IDD_ABOUTBOX (English (U.S.))
 Class4=CProgressDlg
 Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
@@ -26,7 +26,7 @@ Resource9=IDD_MAIN_DLG
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource11=IDD_PROPPAGE_GENERAL (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
@@ -37,7 +37,7 @@ Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=IDD_PROPPAGE_GENERAL
-Resource15=IDD_ABOUTBOX (English (U.S.))
+Resource15=IDD_MAIN_DLG (English (U.S.))
 Resource16=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -45,6 +45,8 @@ Type=0
 HeaderFile=ListCtrlDemo.h
 ImplementationFile=ListCtrlDemo.cpp
 Filter=N
+BaseClass=CWinApp
+VirtualFilter=AC
 
 [CLS:CListCtrlDemoDlg]
 Type=0

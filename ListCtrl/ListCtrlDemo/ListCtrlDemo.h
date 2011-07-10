@@ -26,11 +26,13 @@ public:
 	virtual ~CListCtrlDemoApp();
 	CBrush*  m_pSysBkBrush;
 	CString  m_szPrefIniFile;
+	CString  m_szWorkDir;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CListCtrlDemoApp)
 	public:
 	virtual BOOL InitInstance();
+	virtual int ExitInstance();
 	//}}AFX_VIRTUAL
 
 // Implementation

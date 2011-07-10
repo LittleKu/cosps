@@ -25,7 +25,7 @@ CPreferences::CPreferences()
 
 CPreferences::~CPreferences()
 {
-	AfxTrace("CPreferences::~CPreferences called\n");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, "CPreferences::~CPreferences called.")
 }
 
 BOOL CPreferences::Init()

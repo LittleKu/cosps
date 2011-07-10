@@ -2,6 +2,7 @@
 #include "Export.h"
 #include "ResultListCtrl.h"
 #include "FileParser.h"
+#include "ListCtrlDemo.h"
 
 CCSVExporter::CCSVExporter(CResultListCtrl* pListCtrl, CTotalInfo* pTotalInfo) : 
 	m_pListCtrl(pListCtrl), m_pTotalInfo(pTotalInfo)
@@ -216,14 +217,7 @@ BOOL CXMLExporter::DoExport(LPCTSTR lpFileName)
     {
         CStdioFile cFile(lpFileName, CFile::modeCreate | CFile::modeWrite);
 
-        //Get the app's path
-		CString sPath;
-		GetModuleFileName(NULL, sPath.GetBufferSetLength(MAX_PATH + 1), MAX_PATH);
-		sPath.ReleaseBuffer();
-		int nPos = sPath.ReverseFind(_T('\\'));
-		sPath = sPath.Left(nPos);
-
-		CString sXSLFileName = CommonUtils::GetConfFilePath(_T("report_stylesheet.xsl"), GCFP_AUTO, sPath);
+		CString sXSLFileName = CommonUtils::GetConfFilePath(_T("report_stylesheet.xsl"), GCFP_AUTO, SYS_APP()->m_szWorkDir);
 
 		CString sXSLT;
 		sXSLT.Format("<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>\n", sXSLFileName);
