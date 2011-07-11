@@ -13,12 +13,12 @@ Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
 ResourceCount=16
-Resource1=CG_IDD_PROGRESS
+Resource1=IDD_ABOUTBOX (English (U.S.))
 Resource2=IDR_MAINFRAME
-Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource3=IDD_MAIN_DLG (English (U.S.))
 Resource4=IDD_PROGRESS (Chinese (P.R.C.))
-Resource5=IDD_PROGRESS
-Resource6=IDD_ABOUTBOX (English (U.S.))
+Resource5=CG_IDD_PROGRESS
+Resource6=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Class4=CProgressDlg
 Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
@@ -26,7 +26,7 @@ Resource9=IDD_MAIN_DLG
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource11=IDD_PROGRESS
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
@@ -37,7 +37,7 @@ Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=IDD_PROPPAGE_GENERAL
-Resource15=IDD_MAIN_DLG (English (U.S.))
+Resource15=IDD_PROPPAGE_GENERAL (English (U.S.))
 Resource16=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
@@ -335,7 +335,7 @@ VirtualFilter=idWC
 
 [DLG:IDD_PROPPAGE_GENERAL (English (U.S.))]
 Type=1
-Class=?
+Class=CPPgGeneral
 ControlCount=3
 Control1=IDC_CHECK_INCLUDE_SUB_FOLDER,button,1342242819
 Control2=IDC_TXT_MAX_HISTORY_ITEMS,static,1342308876

@@ -121,6 +121,10 @@ SOURCE=.\ThirdParty\HyperLink.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\LangGrammarMap.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.cpp
 # End Source File
 # Begin Source File
@@ -239,6 +243,10 @@ SOURCE=.\HistoryComboBox.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\HyperLink.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\LangGrammarMap.h
 # End Source File
 # Begin Source File
 

@@ -7,6 +7,7 @@
 #include "Preferences.h"
 #include <log4cplus/configurator.h>
 #include <direct.h>
+#include "LangGrammarMap.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -95,6 +96,9 @@ BOOL CListCtrlDemoApp::InitInstance()
 	m_szPrefIniFile.Format(_T("%s"), CommonUtils::GetConfFilePath(_T("preferences.ini"), GCFP_USER));
 
 	SYS_PREF()->Init();
+
+	//Call GetInstance() to make sure the LangGrammar to be initialized.
+	CLangGrammarMap::GetInstance();
 
 	m_pSysBkBrush = new CBrush();
 	m_pSysBkBrush->CreateSolidBrush(RGB(251, 252, 249));
