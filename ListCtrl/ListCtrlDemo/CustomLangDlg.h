@@ -34,6 +34,7 @@ public:
 	virtual ~CCustomLangDlg();
 
 	void AddProperty(LPCTSTR lpszName, LPCTSTR lpszDefaultValue = NULL, int gridwidth = 1, int gridheight = 1);
+	void AddSeparator();
 // Dialog Data
 	//{{AFX_DATA(CCustomLangDlg)
 		// NOTE: the ClassWizard will add data members here
@@ -53,6 +54,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CCustomLangDlg)
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
@@ -66,6 +68,8 @@ private:
 
 	CPtrList m_listLabel;
 	CPtrList m_listEdit;
+	CButton* m_pOkButton;
+	CButton* m_pCancelButton;
 private:
 	static int nStartPosX;
 	static int nStartPosY;

@@ -216,6 +216,16 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	case IDM_TOOLS_CUSTOM_LANG:
 		{
 			CCustomLangDlg customLangDlg;
+			
+			customLangDlg.AddProperty("name", NULL, 2);
+			customLangDlg.AddProperty("line comment", NULL, 2);
+			customLangDlg.AddProperty("escape string", NULL, 2);
+			customLangDlg.AddProperty("block comment on", NULL, 1);
+			customLangDlg.AddProperty("block comment off", NULL, 1);
+			customLangDlg.AddProperty("string on", NULL, 1);
+			customLangDlg.AddProperty("string off", NULL, 1);
+			customLangDlg.AddProperty("character on", NULL, 1);
+			customLangDlg.AddProperty("character off", NULL, 1);
 			customLangDlg.DoModal();
 		}
 		break;

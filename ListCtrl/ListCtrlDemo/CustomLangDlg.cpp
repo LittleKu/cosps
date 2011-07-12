@@ -57,6 +57,12 @@ CCustomLangDlg::~CCustomLangDlg()
 	}
 	m_listEdit.RemoveAll();
 
+	delete m_pOkButton;
+	m_pOkButton = NULL;
+
+	delete m_pCancelButton;
+	m_pCancelButton = NULL;
+
 	//Remove dialog template
 	if(m_dlgTemplate != NULL)
 	{
@@ -86,6 +92,8 @@ END_MESSAGE_MAP()
 BOOL CCustomLangDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
+
+	CreateControls();
 	
 	return TRUE;
 }
@@ -101,6 +109,10 @@ void CCustomLangDlg::AddProperty(LPCTSTR lpszName, LPCTSTR lpszDefaultValue, int
 	// add to the list and the map
 	lpValue = m_listLayout.AddTail(layout);
 	m_mapLayout.SetAt(lpszName, lpValue);
+}
+
+void CCustomLangDlg::AddSeparator()
+{
 }
 
 BOOL CCustomLangDlg::CalcMaxLabelSize(CSize& szMax, int& nMaxGridWidth)
@@ -166,7 +178,57 @@ void CCustomLangDlg::CreateControls()
 		m_listLabel.AddTail(pStatic);
 
 		//Edit
+		CEdit* pEdit = new CEdit();
+		rect.left = rect.right + nSpaceX;
+		rect.right = rect.left + nGridWidthInPixel - szMax.cx - nSpaceX;
+		if(nMaxGridWidth == layout.nGridWidth)
+		{
+			rect.right = clientRect.right - nStartPosX;
+		}
+		pEdit->Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_LEFT | ES_AUTOHSCROLL, rect, this, ID_PROP_EDIT_FIRST + i);
+		pEdit->ModifyStyleEx(0,   WS_EX_CLIENTEDGE | WS_EX_NOPARENTNOTIFY, SWP_DRAWFRAME);
+		pEdit->SetFont(pDlgFont, TRUE);
+		pEdit->SetWindowText(layout.sPropValue);
+		m_listLabel.AddTail(pEdit);
+
+		nCol += layout.nGridWidth;
+		ASSERT(nCol <= nMaxGridWidth);
+		if(nCol == nMaxGridWidth)
+		{
+			nRow++;
+			nCol = 0;
+		}
+		i++;
 	}
+
+	short btnWidth = 75;
+	short btnHeight = 21;
+	short btnSpace = 14;
+	short btnNum = 2;
+	int   btnTotalWidth = btnWidth * btnNum + btnSpace * (btnNum - 1);
+	short btnFirstX = (short)((clientRect.Width() - btnTotalWidth) / btnNum);
+
+	m_pOkButton = new CButton();
+
+	rect.left = btnFirstX;
+	rect.top  = rect.bottom + btnHeight;
+	rect.right = rect.left + btnWidth;
+	rect.bottom = rect.top + btnHeight;
+	m_pOkButton->Create("OK", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_DEFPUSHBUTTON, rect, this, IDOK);
+	m_pOkButton->SetFont(pDlgFont, TRUE);
+
+	rect.left = rect.right + btnSpace;
+	rect.right = rect.left + btnWidth;
+
+	m_pCancelButton = new CButton();
+	m_pCancelButton->Create("Cancel", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rect, this, IDCANCEL);
+	m_pCancelButton->SetFont(pDlgFont, TRUE);
+
+	int nDlgHeight = rect.bottom + btnHeight;
+	CRect windowRect;
+	GetWindowRect(&windowRect);
+	nDlgHeight += windowRect.Height() - clientRect.Height();
+	SetWindowPos(NULL, 0, 0, windowRect.Width(), nDlgHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 void CCustomLangDlg::CalcLabelRect(LPRECT lpRect, int nRow, int nCol, CSize szMax, int nGridWidthInPixel)
@@ -178,4 +240,9 @@ void CCustomLangDlg::CalcLabelRect(LPRECT lpRect, int nRow, int nCol, CSize szMa
 	//Y
 	lpRect->top = nStartPosY + nRow * (szMax.cy + nSpaceY);
 	lpRect->bottom = lpRect->top + szMax.cy;
+}
+
+void CCustomLangDlg::OnOK()
+{
+	CDialog::OnOK();
 }
