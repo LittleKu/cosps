@@ -1,32 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <lang_grammars>
     <lang_grammar name="C" type="1">
         <line_comment content="//" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
-        <single_character start="&apos;" end="&apos;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
+        <single_character start="&apos;" end="&apos;" />
     </lang_grammar>
     <lang_grammar name="C++" type="2">
         <line_comment content="//" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
-        <single_character start="&apos;" end="&apos;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
+        <single_character start="&apos;" end="&apos;" />
     </lang_grammar>
     <lang_grammar name="C#" type="3">
         <line_comment content="//" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
-        <single_character start="&apos;" end="&apos;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
+        <single_character start="&apos;" end="&apos;" />
     </lang_grammar>
     <lang_grammar name="Java" type="4">
         <line_comment content="//" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
-        <single_character start="&apos;" end="&apos;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
+        <single_character start="&apos;" end="&apos;" />
     </lang_grammar>
     <lang_grammar name="Visual Basic" type="5">
         <line_comment content="&apos;" />
@@ -39,7 +39,7 @@
     </lang_grammar>
     <lang_grammar name="Perl" type="8">
         <line_comment content="#" />
-    </lang_grammar>    
+    </lang_grammar>
     <lang_grammar name="HTML" type="9">
         <block_comment start="&lt;!--" end="--&gt;" />
     </lang_grammar>
@@ -49,18 +49,18 @@
     <lang_grammar name="PHP" type="11">
         <line_comment content="//" />
         <line_comment content="#" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
     </lang_grammar>
     <lang_grammar name="JavaScript" type="12">
         <line_comment content="//" />
         <line_comment content="#" />
-        <block_comment start="/*" end="*/" />
-        <string start="&quot;" end="&quot;" />
         <escape content="\" />
+        <block_comment start="/*" end="*/" />
+        <string start='&quot;' end='&quot;' />
     </lang_grammar>
     <lang_grammar name="CSS" type="13">
         <block_comment start="/*" end="*/" />
-    </lang_grammar>    
+    </lang_grammar>
 </lang_grammars>

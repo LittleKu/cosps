@@ -2,12 +2,12 @@
 
 [General Info]
 Version=1
-LastClass=CPPgGeneral
+LastClass=CCustomLangDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=13
+ClassCount=14
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
@@ -16,13 +16,13 @@ ResourceCount=16
 Resource1=IDD_ABOUTBOX (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=CG_IDD_PROGRESS
 Resource6=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Class4=CProgressDlg
-Resource7=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource7=IDD_MAIN_DLG
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=IDD_MAIN_DLG
+Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
@@ -30,15 +30,16 @@ Resource11=IDD_PROGRESS
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_ABOUTBOX
+Resource12=IDR_RESULT_MENU (Neutral)
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_LISTCTRLDEMO_DIALOG
+Resource13=IDD_PROGRESS (Chinese (P.R.C.))
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=IDD_PROPPAGE_GENERAL
+Resource14=IDD_ABOUTBOX
 Resource15=IDD_PROPPAGE_GENERAL (English (U.S.))
-Resource16=IDR_RESULT_MENU (Neutral)
+Class14=CCustomLangDlg
+Resource16=IDD_PROPPAGE_GENERAL
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -59,7 +60,7 @@ VirtualFilter=dWC
 
 [DLG:IDD_ABOUTBOX]
 Type=1
-Class=?
+Class=CCustomLangDlg
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -119,8 +120,9 @@ Command8=IDM_REPORT_EXPORT_XLS
 Command9=IDM_REPORT_EXPORT_XML
 Command10=IDM_REPORT_EXPORT_HTML
 Command11=IDM_TOOLS_OPTIONS
-Command12=IDM_HELP_ABOUT
-CommandCount=12
+Command12=IDM_TOOLS_CUSTOM_LANG
+Command13=IDM_HELP_ABOUT
+CommandCount=13
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG (English (U.S.))]
 Type=1
@@ -159,7 +161,7 @@ Control30=IDC_SPLITTER_HORIZONTAL,static,1342177287
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=?
+Class=CCustomLangDlg
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -340,4 +342,12 @@ ControlCount=3
 Control1=IDC_CHECK_INCLUDE_SUB_FOLDER,button,1342242819
 Control2=IDC_TXT_MAX_HISTORY_ITEMS,static,1342308876
 Control3=IDC_MAX_HISTORY_ITEMS,edit,1350639616
+
+[CLS:CCustomLangDlg]
+Type=0
+HeaderFile=CustomLangDlg.h
+ImplementationFile=CustomLangDlg.cpp
+BaseClass=CDialog
+Filter=D
+VirtualFilter=dWC
 

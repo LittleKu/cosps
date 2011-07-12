@@ -78,7 +78,7 @@ BEGIN_NAMESPACE(CommonUtils)
 	int GetWindowsDirIconIndex();
 	int GetWindowsDirOpenIconIndex();
 	BOOL IsFileExist(LPCTSTR lpFileName);
-	CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags = GCFP_AUTO, LPCTSTR lpBaseDir = _T("."));
+	CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags = GCFP_AUTO, LPCTSTR lpBaseDir = NULL);
 	int wildcmp(const char *wild, const char *string);
 	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);

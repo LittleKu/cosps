@@ -85,7 +85,7 @@ int CHistoryComboBox::AddString( LPCTSTR lpszString )
 
 void CHistoryComboBox::LoadHistory()
 {
-	if(!CommonUtils::IsFileExist(m_sIniFile))
+	if(!::PathFileExists(m_sIniFile))
 	{
 		return;
 	}

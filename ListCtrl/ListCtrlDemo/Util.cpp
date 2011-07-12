@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include "ListCtrlDemo.h"
 
 CTimeCost::CTimeCost(UINT timeInMs) : m_nDiff(timeInMs), m_clockCurr(clock()), m_clockLast(clock())
 {
@@ -155,27 +156,27 @@ BOOL IsFileExist(LPCTSTR lpFileName)
 
 CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
 {
-	CString szBaseDir = lpBaseDir;
-	if(szBaseDir.IsEmpty())
+	if(lpBaseDir == NULL)
 	{
-		szBaseDir = _T(".");
+		lpBaseDir = SYS_APP()->m_szWorkDir;
 	}
+
 	CString szFilePath;
 	if(uFlags == GCFP_AUTO)
 	{
-		szFilePath.Format("%s\\dat\\user\\%s", szBaseDir, lpFileName);
-		if(!IsFileExist(szFilePath))
+		szFilePath.Format("%s\\dat\\user\\%s", lpBaseDir, lpFileName);
+		if(!::PathFileExists(szFilePath))
 		{
-			szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
+			szFilePath.Format("%s\\dat\\default\\%s", lpBaseDir, lpFileName);
 		}
 	}
 	else if(uFlags == GCFP_USER)
 	{
-		szFilePath.Format("%s\\dat\\user\\%s", szBaseDir, lpFileName);
+		szFilePath.Format("%s\\dat\\user\\%s", lpBaseDir, lpFileName);
 	}
 	else if(uFlags == GCFP_DEFAULT)
 	{
-		szFilePath.Format("%s\\dat\\default\\%s", szBaseDir, lpFileName);
+		szFilePath.Format("%s\\dat\\default\\%s", lpBaseDir, lpFileName);
 	}
 	return szFilePath;
 }

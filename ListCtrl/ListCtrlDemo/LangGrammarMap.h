@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "LangGrammar.h"
+#include <map>
 
 class CLangGrammarInfo
 {
@@ -30,7 +31,9 @@ private:
 	void Save(LPCTSTR lpXmlConfigFile);
 public:
 	virtual ~CLangGrammarMap();
-	CMap<int, int, CLangGrammarInfo*, CLangGrammarInfo*> m_mapLangGrammar;
+	typedef std::map<int, CLangGrammarInfo*> MapInt2LangGrammarInfoPtr;
+	MapInt2LangGrammarInfoPtr m_mapLangGrammar;
+//	CMap<int, int, CLangGrammarInfo*, CLangGrammarInfo*> m_mapLangGrammar;
 public:
 	static CLangGrammarMap* GetInstance();
 };

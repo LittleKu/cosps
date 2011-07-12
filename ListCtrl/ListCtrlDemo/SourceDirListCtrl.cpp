@@ -249,7 +249,7 @@ void CSourceDirListCtrl::AddSrcDir(LPCTSTR lpszDir, int nCheckedState)
 
 void CSourceDirListCtrl::LoadHistory()
 {
-	if(!CommonUtils::IsFileExist(SYS_PREF_INI_FILE()))
+	if(!::PathFileExists(SYS_PREF_INI_FILE()))
 	{
 		return;
 	}

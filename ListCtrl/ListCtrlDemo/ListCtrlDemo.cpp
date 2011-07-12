@@ -49,6 +49,8 @@ CListCtrlDemoApp::~CListCtrlDemoApp()
 
 	free((void*)m_pszAppName);
 	m_pszAppName = NULL;
+
+	LOG4CPLUS_INFO_STR(THE_LOGGER, "CListCtrlDemoApp::~CListCtrlDemoApp() called.")
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -109,6 +109,10 @@ SOURCE=.\Counter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CustomLangDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
@@ -231,6 +235,10 @@ SOURCE=.\ThirdParty\CheckListCtrl.h
 # Begin Source File
 
 SOURCE=.\Counter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CustomLangDlg.h
 # End Source File
 # Begin Source File
 

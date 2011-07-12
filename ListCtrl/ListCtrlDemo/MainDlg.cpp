@@ -7,6 +7,7 @@
 #include "AboutDlg.h"
 #include "Preferences.h"
 #include "PreferencesDlg.h"
+#include "CustomLangDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -210,6 +211,12 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 			CPreferencesDlg prefsDlg;
 			prefsDlg.DoModal();
+		}
+		break;
+	case IDM_TOOLS_CUSTOM_LANG:
+		{
+			CCustomLangDlg customLangDlg;
+			customLangDlg.DoModal();
 		}
 		break;
 	case IDM_FILE_EXIT:

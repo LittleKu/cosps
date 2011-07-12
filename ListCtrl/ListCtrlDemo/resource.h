@@ -96,13 +96,14 @@
 #define IDM_REPORT_EXPORT_XLS           32780
 #define IDM_REPORT_EXPORT_XML           32781
 #define IDM_REPORT_EXPORT_HTML          32782
+#define IDM_TOOLS_CUSTOM_LANG           32783
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        144
-#define _APS_NEXT_COMMAND_VALUE         32783
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         1058
 #define _APS_NEXT_SYMED_VALUE           107
 #endif

@@ -37,27 +37,24 @@ CLangGrammarMap* CLangGrammarMap::GetInstance()
 }
 CLangGrammarMap::CLangGrammarMap()
 {
-	Init(CommonUtils::GetConfFilePath(_T("lang_grammar.xml"), GCFP_AUTO, SYS_APP()->m_szWorkDir));
+	Init(CommonUtils::GetConfFilePath(_T("lang_grammar.xml")));
 }
 
 CLangGrammarMap::~CLangGrammarMap()
 {
-	Save(CommonUtils::GetConfFilePath(_T("lang_grammar.xml"), GCFP_USER, SYS_APP()->m_szWorkDir));
+	Save(CommonUtils::GetConfFilePath(_T("lang_grammar.xml"), GCFP_USER));
 
-	POSITION pos = m_mapLangGrammar.GetStartPosition();
+	MapInt2LangGrammarInfoPtr::iterator it;
 
-	int nType;
 	CLangGrammarInfo* pLangGrammarInfo;
-	while (pos != NULL)
+	for(it = m_mapLangGrammar.begin() ; it != m_mapLangGrammar.end(); it++)
 	{
-		m_mapLangGrammar.GetNextAssoc( pos, nType, pLangGrammarInfo );
+		pLangGrammarInfo = it->second;
 		ASSERT(pLangGrammarInfo);
 		delete pLangGrammarInfo;
 	}
 
-	m_mapLangGrammar.RemoveAll();
-
-	LOG4CPLUS_INFO(THE_LOGGER, "CLangGrammarMap::~CLangGrammarMap is called.")
+	LOG4CPLUS_INFO(THE_LOGGER, "CLangGrammarMap::~CLangGrammarMap() called.")
 }
 
 void CLangGrammarMap::Init(LPCTSTR lpXmlConfigFile)
@@ -172,7 +169,22 @@ void CLangGrammarMap::Init(LPCTSTR lpXmlConfigFile)
 		pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
 
 		//Add the LangGrammarInfo to the map
-		m_mapLangGrammar.SetAt(pLangGrammarInfo->m_nLangType, pLangGrammarInfo);
+		MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(pLangGrammarInfo->m_nLangType);
+		//A same type key already exists
+		if(it != m_mapLangGrammar.end())
+		{
+			TCHAR sLogBuffer[128];
+			_stprintf(sLogBuffer, "duplicate lang type [%d] exists for lang [%s] and [%s].", 
+				pLangGrammarInfo->m_nLangType, it->second->m_szLangName, pLangGrammarInfo->m_szLangName);
+			LOG4CPLUS_ERROR_STR(THE_LOGGER, sLogBuffer)
+
+			//Delete the latter one
+			delete pLangGrammarInfo;
+		}
+		else
+		{
+			m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
+		}
 	}
 }
 
@@ -189,15 +201,17 @@ void CLangGrammarMap::Save(LPCTSTR lpXmlConfigFile)
 	
 
 	//sub element: lang_grammar
-	POSITION pos = m_mapLangGrammar.GetStartPosition();	
+	MapInt2LangGrammarInfoPtr::iterator it;
+	
 	int nType;
 	CLangGrammarInfo* pLangGrammarInfo;
 
 	int i, size;
 	ILangGrammar* pLangGrammar;
-	while (pos != NULL)
+	for(it = m_mapLangGrammar.begin() ; it != m_mapLangGrammar.end(); it++)
 	{
-		m_mapLangGrammar.GetNextAssoc( pos, nType, pLangGrammarInfo );
+		nType = it->first;
+		pLangGrammarInfo = it->second;
 		ASSERT(pLangGrammarInfo);
 
 		TiXmlElement lang_grammar("lang_grammar");
@@ -207,10 +221,11 @@ void CLangGrammarMap::Save(LPCTSTR lpXmlConfigFile)
 		pLangGrammar = pLangGrammarInfo->m_pLangGrammar;
 		ASSERT(pLangGrammar);
 
-		//TODO: Single line comment
-		CSingleLineComment& singleLineComment = pLangGrammar->GetSingleLineComment(0);
-		if(GetLength(singleLineComment.m_szTag) > 0)
+		size = pLangGrammar->GetCountOfSingleLineComment();
+		for(i = 0; i < size; i++)
 		{
+			CSingleLineComment& singleLineComment = pLangGrammar->GetSingleLineComment(i);
+
 			TiXmlElement line_comment("line_comment");
 			line_comment.SetAttribute("content", singleLineComment.m_szTag);
 			if(singleLineComment.m_nStartCol != START_COLUMN_ANY)
@@ -221,7 +236,7 @@ void CLangGrammarMap::Save(LPCTSTR lpXmlConfigFile)
 			{
 				line_comment.SetAttribute("case_sensitive", "false");
 			}
-
+			
 			lang_grammar.InsertEndChild(line_comment);
 		}
 
