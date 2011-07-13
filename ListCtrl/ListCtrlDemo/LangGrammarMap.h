@@ -27,13 +27,13 @@ class CLangGrammarMap
 {
 private:
 	CLangGrammarMap();
-	void Init(LPCTSTR lpXmlConfigFile);
-	void Save(LPCTSTR lpXmlConfigFile);
-public:
-	virtual ~CLangGrammarMap();
 	typedef std::map<int, CLangGrammarInfo*> MapInt2LangGrammarInfoPtr;
 	MapInt2LangGrammarInfoPtr m_mapLangGrammar;
-//	CMap<int, int, CLangGrammarInfo*, CLangGrammarInfo*> m_mapLangGrammar;
+public:
+	void Init(LPCTSTR lpXmlConfigFile);
+	void Save(LPCTSTR lpXmlConfigFile);
+	void AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo);
+	virtual ~CLangGrammarMap();
 public:
 	static CLangGrammarMap* GetInstance();
 };

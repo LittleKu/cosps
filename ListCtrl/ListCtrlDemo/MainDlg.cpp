@@ -7,7 +7,8 @@
 #include "AboutDlg.h"
 #include "Preferences.h"
 #include "PreferencesDlg.h"
-#include "CustomLangDlg.h"
+#include "NewLangDlg.h"
+#include "ShowLangRuleDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -215,18 +216,20 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		break;
 	case IDM_TOOLS_CUSTOM_LANG:
 		{
-			CCustomLangDlg customLangDlg;
-			
-			customLangDlg.AddProperty("name", NULL, 2);
-			customLangDlg.AddProperty("line comment", NULL, 2);
-			customLangDlg.AddProperty("escape string", NULL, 2);
-			customLangDlg.AddProperty("block comment on", NULL, 1);
-			customLangDlg.AddProperty("block comment off", NULL, 1);
-			customLangDlg.AddProperty("string on", NULL, 1);
-			customLangDlg.AddProperty("string off", NULL, 1);
-			customLangDlg.AddProperty("character on", NULL, 1);
-			customLangDlg.AddProperty("character off", NULL, 1);
-			customLangDlg.DoModal();
+			CNewLangDlg customLangDlg;
+			int nResponse = customLangDlg.DoModal();
+			if(nResponse == IDOK)
+			{
+				CString sPrompt;
+				sPrompt.Format(_T("A new language type was successfully added."));
+				AfxMessageBox(sPrompt, MB_OK | MB_ICONINFORMATION);
+			}
+		}
+		break;
+	case IDM_TOOLS_SHOW_LANG_RULES:
+		{
+			CShowLangRuleDlg showLangRuleDlg;
+			showLangRuleDlg.DoModal();
 		}
 		break;
 	case IDM_FILE_EXIT:

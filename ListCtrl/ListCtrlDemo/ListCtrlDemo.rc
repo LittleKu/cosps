@@ -120,6 +120,7 @@ BEGIN
         MENUITEM "&Options",                    IDM_TOOLS_OPTIONS
         MENUITEM SEPARATOR
         MENUITEM "&Custom Language...",         IDM_TOOLS_CUSTOM_LANG
+        MENUITEM "&Show Language Rules...",     IDM_TOOLS_SHOW_LANG_RULES
     END
     POPUP "&Help"
     BEGIN

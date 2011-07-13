@@ -1,8 +1,8 @@
-// CustomLangDlg.cpp : implementation file
+// LangTemplateDlg.cpp : implementation file
 //
 
 #include "stdafx.h"
-#include "CustomLangDlg.h"
+#include "LangTemplateDlg.h"
 #include "DlgTemplate.h"
 
 #ifdef _DEBUG
@@ -12,30 +12,32 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomLangDlg dialog
+// CLangTemplateDlg dialog
 #define ID_TXT_LABEL_FIRST		1500
 #define ID_PROP_EDIT_FIRST		1700
 
-int CCustomLangDlg::nStartPosX = 7;
-int CCustomLangDlg::nStartPosY = 7;
-int CCustomLangDlg::nSpaceX = 5;
-int CCustomLangDlg::nSpaceY = 7;
+int CLangTemplateDlg::nStartPosX = 7;
+int CLangTemplateDlg::nStartPosY = 7;
+int CLangTemplateDlg::nSpaceX = 5;
+int CLangTemplateDlg::nSpaceY = 7;
 
-CCustomLangDlg::CCustomLangDlg(CWnd* pParent)  : CDialog(), m_dlgTemplate(NULL)
+CLangTemplateDlg::CLangTemplateDlg()  : CDialog(), m_dlgTemplate(NULL)
 {
-	//{{AFX_DATA_INIT(CCustomLangDlg)
+	//{{AFX_DATA_INIT(CLangTemplateDlg)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 	DWORD style = DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_VISIBLE | DS_SETFONT;
 	m_dlgTemplate = new CDlgTemplate(_T(""), style, 0, 0, 400, 35, _T("MS Sans Serif"), 8);
 
-	InitModalIndirect(*m_dlgTemplate, pParent);
+//	InitModalIndirect(*m_dlgTemplate, pParent);
 }
-CCustomLangDlg::~CCustomLangDlg()
+CLangTemplateDlg::~CLangTemplateDlg()
 {
 	//Remove all layout info
 	m_mapLayout.RemoveAll();
 	m_listLayout.RemoveAll();
+
+	m_mapPropOut.RemoveAll();
 
 	//Remove all static controls
 	CStatic* pStatic = NULL;
@@ -72,50 +74,61 @@ CCustomLangDlg::~CCustomLangDlg()
 }
 
 
-void CCustomLangDlg::DoDataExchange(CDataExchange* pDX)
+void CLangTemplateDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CCustomLangDlg)
+	//{{AFX_DATA_MAP(CLangTemplateDlg)
 		// NOTE: the ClassWizard will add DDX and DDV calls here
 	//}}AFX_DATA_MAP
 }
 
 
-BEGIN_MESSAGE_MAP(CCustomLangDlg, CDialog)
-	//{{AFX_MSG_MAP(CCustomLangDlg)
+BEGIN_MESSAGE_MAP(CLangTemplateDlg, CDialog)
+	//{{AFX_MSG_MAP(CLangTemplateDlg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomLangDlg message handlers
+// CLangTemplateDlg message handlers
 
-BOOL CCustomLangDlg::OnInitDialog() 
+BOOL CLangTemplateDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
 
+	SetWindowText(m_szTitle);
 	CreateControls();
 	
 	return TRUE;
 }
 
-void CCustomLangDlg::AddProperty(LPCTSTR lpszName, LPCTSTR lpszDefaultValue, int gridwidth, int gridheight)
+void CLangTemplateDlg::AddProperty(LPCTSTR lpszName, int gridwidth, LPCTSTR lpszDefaultValue, int type)
 {
+	LayoutInfo layout(type, lpszName, lpszDefaultValue, gridwidth);
+	if(type == LAYOUT_TYPE_SEPARATOR)
+	{
+		m_listLayout.AddTail(layout);
+		return;
+	}
 	// must not be already there!
 	void* lpValue = NULL;
 	ASSERT(!m_mapLayout.Lookup(lpszName, lpValue));
-
-	LayoutInfo layout(lpszName, lpszDefaultValue, gridwidth, gridheight);
 	
 	// add to the list and the map
 	lpValue = m_listLayout.AddTail(layout);
 	m_mapLayout.SetAt(lpszName, lpValue);
 }
 
-void CCustomLangDlg::AddSeparator()
+void CLangTemplateDlg::AddSeparator()
 {
+	AddProperty(NULL, 0, NULL, LAYOUT_TYPE_SEPARATOR);
 }
 
-BOOL CCustomLangDlg::CalcMaxLabelSize(CSize& szMax, int& nMaxGridWidth)
+void CLangTemplateDlg::SetTitle(LPCTSTR lpTitle)
+{
+	m_szTitle = lpTitle;
+}
+
+BOOL CLangTemplateDlg::CalcMaxLabelSize(CSize& szMax, int& nMaxGridWidth)
 {
 	//Init
 	szMax.cx = 0;
@@ -148,7 +161,7 @@ BOOL CCustomLangDlg::CalcMaxLabelSize(CSize& szMax, int& nMaxGridWidth)
 	return TRUE;
 }
 
-void CCustomLangDlg::CreateControls()
+void CLangTemplateDlg::CreateControls()
 {
 	CSize szMax;
 	int nMaxGridWidth = 1;
@@ -162,6 +175,7 @@ void CCustomLangDlg::CreateControls()
 	CFont* pDlgFont = GetFont();
 
 	CRect rect;
+	CRect lastRect(0, 0, 0, 0);
 	int i = 0;
 	int nRow = 0, nCol = 0;
 	POSITION pos = m_listLayout.GetHeadPosition();
@@ -170,35 +184,50 @@ void CCustomLangDlg::CreateControls()
 		// get layout info
 		LayoutInfo& layout = m_listLayout.GetNext(pos);
 
-		//Label
-		CStatic* pStatic = new CStatic();
-		CalcLabelRect(&rect, nRow, nCol, szMax, nGridWidthInPixel);
-		pStatic->Create(layout.sPropName, WS_CHILD | WS_VISIBLE | SS_RIGHT, rect, this, ID_TXT_LABEL_FIRST + i);
-		pStatic->SetFont(pDlgFont, TRUE);
-		m_listLabel.AddTail(pStatic);
-
-		//Edit
-		CEdit* pEdit = new CEdit();
-		rect.left = rect.right + nSpaceX;
-		rect.right = rect.left + nGridWidthInPixel - szMax.cx - nSpaceX;
-		if(nMaxGridWidth == layout.nGridWidth)
+		if(layout.nType == LAYOUT_TYPE_SEPARATOR)
 		{
-			rect.right = clientRect.right - nStartPosX;
-		}
-		pEdit->Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_LEFT | ES_AUTOHSCROLL, rect, this, ID_PROP_EDIT_FIRST + i);
-		pEdit->ModifyStyleEx(0,   WS_EX_CLIENTEDGE | WS_EX_NOPARENTNOTIFY, SWP_DRAWFRAME);
-		pEdit->SetFont(pDlgFont, TRUE);
-		pEdit->SetWindowText(layout.sPropValue);
-		m_listLabel.AddTail(pEdit);
+			ASSERT(nCol == 0);
+			CStatic* pStatic = new CStatic();
+			CalcSepRect(&rect, &lastRect, clientRect.Width());
+			pStatic->Create(layout.sPropName, WS_CHILD | WS_VISIBLE | SS_ETCHEDHORZ, rect, this, IDC_STATIC);
+			m_listLabel.AddTail(pStatic);
 
-		nCol += layout.nGridWidth;
-		ASSERT(nCol <= nMaxGridWidth);
-		if(nCol == nMaxGridWidth)
-		{
 			nRow++;
-			nCol = 0;
 		}
-		i++;
+		else
+		{
+			//Label
+			CStatic* pStatic = new CStatic();
+			CalcLabelRect(&rect, &lastRect, nRow, nCol, szMax, nGridWidthInPixel);
+			pStatic->Create(layout.sPropName, WS_CHILD | WS_VISIBLE | SS_RIGHT, rect, this, ID_TXT_LABEL_FIRST + i);
+			pStatic->SetFont(pDlgFont, TRUE);
+			m_listLabel.AddTail(pStatic);
+			
+			//Edit
+			CEdit* pEdit = new CEdit();
+			rect.left = rect.right + nSpaceX;
+			rect.right = rect.left + nGridWidthInPixel - szMax.cx - nSpaceX;
+			if(nMaxGridWidth == layout.nGridWidth)
+			{
+				rect.right = clientRect.right - nStartPosX;
+			}
+			pEdit->Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_LEFT | ES_AUTOHSCROLL, rect, this, ID_PROP_EDIT_FIRST + i);
+			pEdit->ModifyStyleEx(0,   WS_EX_CLIENTEDGE | WS_EX_NOPARENTNOTIFY, SWP_DRAWFRAME);
+			pEdit->SetFont(pDlgFont, TRUE);
+			pEdit->SetWindowText(layout.sPropValue);
+			m_listLabel.AddTail(pEdit);
+
+			nCol += layout.nGridWidth;
+			ASSERT(nCol <= nMaxGridWidth);
+			if(nCol == nMaxGridWidth)
+			{
+				nRow++;
+				nCol = 0;
+			}
+			i++;
+		}
+
+		lastRect = rect;	
 	}
 
 	short btnWidth = 75;
@@ -231,18 +260,63 @@ void CCustomLangDlg::CreateControls()
 	SetWindowPos(NULL, 0, 0, windowRect.Width(), nDlgHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
-void CCustomLangDlg::CalcLabelRect(LPRECT lpRect, int nRow, int nCol, CSize szMax, int nGridWidthInPixel)
+void CLangTemplateDlg::CalcLabelRect(LPRECT lpRect, LPCRECT lpLastRect, int nRow, int nCol, CSize szMax, int nGridWidthInPixel)
 {
 	//X
 	lpRect->left = nStartPosX + nCol * (nGridWidthInPixel + nSpaceX);
 	lpRect->right = lpRect->left + szMax.cx;
-
+	
 	//Y
-	lpRect->top = nStartPosY + nRow * (szMax.cy + nSpaceY);
-	lpRect->bottom = lpRect->top + szMax.cy;
+	if(nCol == 0)
+	{
+		lpRect->top = lpLastRect->bottom + nSpaceY;
+		lpRect->bottom = lpRect->top + szMax.cy;
+	}
+	else
+	{
+		lpRect->top = lpLastRect->top;
+		lpRect->bottom = lpLastRect->bottom;
+	}
 }
 
-void CCustomLangDlg::OnOK()
+void CLangTemplateDlg::OnOK()
 {
 	CDialog::OnOK();
+}
+
+void CLangTemplateDlg::CalcSepRect(LPRECT lpRect, LPCRECT lpLastRect, int nClientWidth)
+{
+	//X
+	lpRect->left = nStartPosX;
+	lpRect->right = lpRect->left + 1 + (nClientWidth - 2 * nStartPosX);
+	
+	//Y
+	lpRect->top = lpLastRect->bottom + nSpaceY;
+	lpRect->bottom = lpRect->top + 2;
+}
+
+void CLangTemplateDlg::SetModal(BOOL bModal, CWnd* pParentWnd)
+{
+	if(bModal)
+	{
+		InitModalIndirect(*m_dlgTemplate, pParentWnd);
+	}
+	else
+	{
+		CreateIndirect(*m_dlgTemplate, pParentWnd);
+	}
+}
+
+void CLangTemplateDlg::UpdatePropValue()
+{
+	m_mapPropOut.RemoveAll();
+	
+	int nCount = m_mapLayout.GetCount();
+	CString szLabelName, szLabelValue;
+	for(int i = 0; i < nCount; i++)
+	{
+		GetDlgItemText(ID_TXT_LABEL_FIRST + i, szLabelName);
+		GetDlgItemText(ID_PROP_EDIT_FIRST + i, szLabelValue);
+		m_mapPropOut.SetAt(szLabelName, szLabelValue);
+	}
 }

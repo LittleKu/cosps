@@ -16,13 +16,13 @@ ResourceCount=16
 Resource1=CG_IDD_PROGRESS
 Resource2=IDR_MAINFRAME
 Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
-Resource4=IDD_LISTCTRLDEMO_DIALOG
+Resource4=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource5=IDD_PROGRESS
-Resource6=IDD_PROPPAGE_GENERAL
+Resource6=IDD_LISTCTRLDEMO_DIALOG
 Class4=CProgressDlg
-Resource7=IDD_MAIN_DLG
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource9=IDR_RESULT_MENU (Neutral)
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
@@ -32,14 +32,14 @@ Class8=CResultListCtrl
 Class9=CMainReBar
 Resource12=IDD_PROPPAGE_GENERAL (English (U.S.))
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_PROGRESS (Chinese (P.R.C.))
+Resource13=IDD_MAIN_DLG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=IDD_ABOUTBOX
+Resource14=IDD_PROGRESS (Chinese (P.R.C.))
 Resource15=IDD_MAIN_DLG (English (U.S.))
 Class14=CCustomLangDlg
-Resource16=IDR_RESULT_MENU (Neutral)
+Resource16=IDD_PROPPAGE_GENERAL
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -121,8 +121,9 @@ Command9=IDM_REPORT_EXPORT_XML
 Command10=IDM_REPORT_EXPORT_HTML
 Command11=IDM_TOOLS_OPTIONS
 Command12=IDM_TOOLS_CUSTOM_LANG
-Command13=IDM_HELP_ABOUT
-CommandCount=13
+Command13=IDM_TOOLS_SHOW_LANG_RULES
+Command14=IDM_HELP_ABOUT
+CommandCount=14
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG (English (U.S.))]
 Type=1

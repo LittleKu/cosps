@@ -1,49 +1,57 @@
-#if !defined(AFX_CUSTOMLANGDLG_H__E874DD3B_8CDF_4263_824F_46F8CD602B40__INCLUDED_)
-#define AFX_CUSTOMLANGDLG_H__E874DD3B_8CDF_4263_824F_46F8CD602B40__INCLUDED_
+#if !defined(_LANG_TEMPLATE_DLG_H_)
+#define _LANG_TEMPLATE_DLG_H_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// CustomLangDlg.h : header file
+// LangTemplateDlg.h : header file
 //
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomLangDlg dialog
+// CLangTemplateDlg dialog
 class CDlgTemplate;
-class CCustomLangDlg : public CDialog
+
+#define LAYOUT_TYPE_PROP			0
+#define LAYOUT_TYPE_SEPARATOR		1
+#define LAYOUT_TYPE_CHECKBOX		2
+
+class CLangTemplateDlg : public CDialog
 {
 protected:
 	class LayoutInfo
 	{
 	public:
+		int nType;
 		CString sPropName;
 		CString sPropValue;
 		int nGridWidth;
-		int nGridHeight;
-		LayoutInfo() : sPropName(), sPropValue(), nGridWidth(1), nGridHeight(1)
+		LayoutInfo() : nType(LAYOUT_TYPE_PROP), sPropName(), sPropValue(), nGridWidth(1)
 		{
 		}
-		LayoutInfo(LPCTSTR lpszName, LPCTSTR lpszDefaultValue, int gridwidth, int gridheight)
-			: sPropName(lpszName), sPropValue(lpszDefaultValue), nGridWidth(gridwidth), nGridHeight(gridheight)
+		LayoutInfo(int type, LPCTSTR lpszName, LPCTSTR lpszDefaultValue, int gridwidth)
+			: nType(type), sPropName(lpszName), sPropValue(lpszDefaultValue), nGridWidth(gridwidth)
 		{
 		}
 	};
 // Construction
 public:
-	CCustomLangDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~CCustomLangDlg();
-
-	void AddProperty(LPCTSTR lpszName, LPCTSTR lpszDefaultValue = NULL, int gridwidth = 1, int gridheight = 1);
+	void UpdatePropValue();
+	CLangTemplateDlg();   // standard constructor
+	virtual ~CLangTemplateDlg();
+	void SetModal(BOOL bModal = TRUE, CWnd* pParentWnd = NULL);
+	void SetTitle(LPCTSTR lpTitle);
+	void AddProperty(LPCTSTR lpszName, int gridwidth = 1, LPCTSTR lpszDefaultValue = NULL, int type = LAYOUT_TYPE_PROP);
 	void AddSeparator();
+	
 // Dialog Data
-	//{{AFX_DATA(CCustomLangDlg)
+	//{{AFX_DATA(CLangTemplateDlg)
 		// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
 
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCustomLangDlg)
+	//{{AFX_VIRTUAL(CLangTemplateDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -52,25 +60,28 @@ public:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(CCustomLangDlg)
+	//{{AFX_MSG(CLangTemplateDlg)
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
 	BOOL CalcMaxLabelSize(CSize& sizeMax, int& nMaxGridWidth);
-private:
-	void CalcLabelRect(LPRECT lpRect, int nRow, int nCol, CSize szMax, int nMaxGridWidth);
+	void CalcLabelRect(LPRECT lpRect, LPCRECT lpLastRect, int nRow, int nCol, CSize szMax, int nGridWidthInPixel);
+	void CalcSepRect(LPRECT lpRect, LPCRECT lpLastRect, int nClientWidth);
 	void CreateControls();
+protected:
 	CDlgTemplate* m_dlgTemplate;
+	CString m_szTitle;
 	CMapStringToPtr m_mapLayout;
 	CList<LayoutInfo, LayoutInfo&> m_listLayout;
+	CMapStringToString m_mapPropOut;
 
 	CPtrList m_listLabel;
 	CPtrList m_listEdit;
 	CButton* m_pOkButton;
 	CButton* m_pCancelButton;
-private:
+private:	
 	static int nStartPosX;
 	static int nStartPosY;
 	static int nSpaceX;
@@ -80,4 +91,4 @@ private:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_CUSTOMLANGDLG_H__E874DD3B_8CDF_4263_824F_46F8CD602B40__INCLUDED_)
+#endif // !defined(_LANG_TEMPLATE_DLG_H_)

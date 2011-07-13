@@ -109,10 +109,6 @@ SOURCE=.\Counter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\CustomLangDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
@@ -125,7 +121,15 @@ SOURCE=.\ThirdParty\HyperLink.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\LangGrammarDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\LangGrammarMap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\LangTemplateDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -161,6 +165,10 @@ SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\NewLangDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PPgGeneral.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +194,10 @@ SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.cpp
 # Begin Source File
 
 SOURCE=.\ResultListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ShowLangRuleDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -238,10 +250,6 @@ SOURCE=.\Counter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\CustomLangDlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Export.h
 # End Source File
 # Begin Source File
@@ -254,7 +262,15 @@ SOURCE=.\ThirdParty\HyperLink.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\LangGrammarDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\LangGrammarMap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\LangTemplateDlg.h
 # End Source File
 # Begin Source File
 
@@ -283,6 +299,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\NewLangDlg.h
 # End Source File
 # Begin Source File
 
@@ -315,6 +335,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\ResultListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ShowLangRuleDlg.h
 # End Source File
 # Begin Source File
 

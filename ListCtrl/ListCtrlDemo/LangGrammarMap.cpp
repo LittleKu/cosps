@@ -168,23 +168,24 @@ void CLangGrammarMap::Init(LPCTSTR lpXmlConfigFile)
 
 		pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
 
-		//Add the LangGrammarInfo to the map
-		MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(pLangGrammarInfo->m_nLangType);
-		//A same type key already exists
-		if(it != m_mapLangGrammar.end())
-		{
-			TCHAR sLogBuffer[128];
-			_stprintf(sLogBuffer, "duplicate lang type [%d] exists for lang [%s] and [%s].", 
-				pLangGrammarInfo->m_nLangType, it->second->m_szLangName, pLangGrammarInfo->m_szLangName);
-			LOG4CPLUS_ERROR_STR(THE_LOGGER, sLogBuffer)
-
-			//Delete the latter one
-			delete pLangGrammarInfo;
-		}
-		else
-		{
-			m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
-		}
+		AddLangGrammarInfo(pLangGrammarInfo);
+// 		//Add the LangGrammarInfo to the map
+// 		MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(pLangGrammarInfo->m_nLangType);
+// 		//A same type key already exists
+// 		if(it != m_mapLangGrammar.end())
+// 		{
+// 			TCHAR sLogBuffer[128];
+// 			_stprintf(sLogBuffer, "duplicate lang type [%d] exists for lang [%s] and [%s].", 
+// 				pLangGrammarInfo->m_nLangType, it->second->m_szLangName, pLangGrammarInfo->m_szLangName);
+// 			LOG4CPLUS_ERROR_STR(THE_LOGGER, sLogBuffer)
+// 
+// 			//Delete the latter one
+// 			delete pLangGrammarInfo;
+// 		}
+// 		else
+// 		{
+// 			m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
+// 		}
 	}
 }
 
@@ -299,6 +300,43 @@ void CLangGrammarMap::Save(LPCTSTR lpXmlConfigFile)
 		CString sLogInfo;
 		sLogInfo.Format("Failed to save file %s. Error in %s: %s.", lpXmlConfigFile, doc.Value(), doc.ErrorDesc());
 		LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)sLogInfo)
+	}
+}
+
+void CLangGrammarMap::AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
+{
+	ASSERT(pLangGrammarInfo != NULL);
+	//TODO: make sure we can give an unique id for the type
+	if(pLangGrammarInfo->m_nLangType < 0)
+	{
+		//Find the biggest type value
+		MapInt2LangGrammarInfoPtr::reverse_iterator rit = m_mapLangGrammar.rbegin();
+		if(rit != m_mapLangGrammar.rend())
+		{
+			pLangGrammarInfo->m_nLangType = (rit->first) + 1;
+		}
+		else
+		{
+			pLangGrammarInfo->m_nLangType = 10000;
+		}
+	}
+
+	//Add the LangGrammarInfo to the map
+	MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(pLangGrammarInfo->m_nLangType);
+	//A same type key already exists
+	if(it != m_mapLangGrammar.end())
+	{
+		TCHAR sLogBuffer[128];
+		_stprintf(sLogBuffer, "duplicate lang type [%d] exists for lang [%s] and [%s].", 
+			pLangGrammarInfo->m_nLangType, it->second->m_szLangName, pLangGrammarInfo->m_szLangName);
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, sLogBuffer)
+			
+		//Delete the latter one
+		delete pLangGrammarInfo;
+	}
+	else
+	{
+		m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
 	}
 }
 
