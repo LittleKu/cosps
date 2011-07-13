@@ -9,19 +9,24 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "LangTemplateDlg.h"
+#include "LangGrammarDlg.h"
 #include "LangGrammarMap.h"
 
-class CNewLangDlg : public CLangTemplateDlg  
+class CCustomLangDlg : public CDialog  
 {
 public:
-	BOOL GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BOOL bShowError = TRUE);
-	CNewLangDlg();
-	virtual ~CNewLangDlg();
+	CCustomLangDlg();
+	virtual ~CCustomLangDlg();
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	DECLARE_MESSAGE_MAP()
+protected:
+	void InitGUI();
+	CDlgTemplate* m_dlgTemplate;
+	CLangGrammarDlg* m_pLangGrammarDlg;
+	CButton* m_pOkButton;
+	CButton* m_pCancelButton;
 };
 
 #endif // !defined(AFX_NEWLANGDLG_H__E30448A5_5CEE_4C25_A14F_CC332C654C78__INCLUDED_)

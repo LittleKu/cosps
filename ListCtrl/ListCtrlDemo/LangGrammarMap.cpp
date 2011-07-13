@@ -311,14 +311,14 @@ void CLangGrammarMap::AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
 	{
 		//Find the biggest type value
 		MapInt2LangGrammarInfoPtr::reverse_iterator rit = m_mapLangGrammar.rbegin();
-		if(rit != m_mapLangGrammar.rend())
+		int nMinCustomType = 10000;
+		int nMaxType = (rit != m_mapLangGrammar.rend()) ? rit->first : nMinCustomType;
+		if(nMaxType < nMinCustomType)
 		{
-			pLangGrammarInfo->m_nLangType = (rit->first) + 1;
+			nMaxType = nMinCustomType;
 		}
-		else
-		{
-			pLangGrammarInfo->m_nLangType = 10000;
-		}
+		nMaxType++;
+		pLangGrammarInfo->m_nLangType = nMaxType;
 	}
 
 	//Add the LangGrammarInfo to the map

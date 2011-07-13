@@ -7,7 +7,7 @@
 #include "AboutDlg.h"
 #include "Preferences.h"
 #include "PreferencesDlg.h"
-#include "NewLangDlg.h"
+#include "CustomLangDlg.h"
 #include "ShowLangRuleDlg.h"
 
 #ifdef _DEBUG
@@ -216,7 +216,7 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		break;
 	case IDM_TOOLS_CUSTOM_LANG:
 		{
-			CNewLangDlg customLangDlg;
+			CCustomLangDlg customLangDlg;
 			int nResponse = customLangDlg.DoModal();
 			if(nResponse == IDOK)
 			{

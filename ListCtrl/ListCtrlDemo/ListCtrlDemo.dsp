@@ -109,6 +109,10 @@ SOURCE=.\Counter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CustomLangDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
@@ -126,10 +130,6 @@ SOURCE=.\LangGrammarDlg.cpp
 # Begin Source File
 
 SOURCE=.\LangGrammarMap.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\LangTemplateDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -162,10 +162,6 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\NewLangDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -250,6 +246,10 @@ SOURCE=.\Counter.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\CustomLangDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Export.h
 # End Source File
 # Begin Source File
@@ -267,10 +267,6 @@ SOURCE=.\LangGrammarDlg.h
 # Begin Source File
 
 SOURCE=.\LangGrammarMap.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\LangTemplateDlg.h
 # End Source File
 # Begin Source File
 
@@ -299,10 +295,6 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\NewLangDlg.h
 # End Source File
 # Begin Source File
 

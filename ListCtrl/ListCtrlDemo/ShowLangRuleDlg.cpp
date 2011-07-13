@@ -53,6 +53,7 @@ BOOL CShowLangRuleDlg::OnInitDialog()
 	{
 		return FALSE;
 	}
+	SetWindowText("Language Rules");
 
 	InitGUI();
 	
@@ -71,6 +72,7 @@ void CShowLangRuleDlg::InitGUI()
 	CRect rcGrammarDlg;
 	m_pLangGrammarDlg->GetWindowRect(&rcGrammarDlg);
 
+
 	CRect rcListBox;
 	rcListBox.left = 7;
 	rcListBox.top = 7;
@@ -81,11 +83,16 @@ void CShowLangRuleDlg::InitGUI()
 
 	m_pLangGrammarDlg->SetWindowPos(NULL, rcListBox.right + 5, rcListBox.top, rcGrammarDlg.Width(), rcGrammarDlg.Height(), SWP_NOZORDER);
 
+	int nRequiredWidth = 7 + rcListBox.Width() + 5 + rcGrammarDlg.Width() + 7;
 	CRect rcWindow, rcClient;
 	GetWindowRect(&rcWindow);
 	GetClientRect(&rcClient);
 
 	int nDlgHeight = rcListBox.bottom + 10;
 	nDlgHeight += rcWindow.Height() - rcClient.Height();
-	SetWindowPos(NULL, 0, 0, rcWindow.Width(), nDlgHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	if(nDlgHeight < 376)
+	{
+		nDlgHeight = 376;
+	}
+	SetWindowPos(NULL, 0, 0, nRequiredWidth, nDlgHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
