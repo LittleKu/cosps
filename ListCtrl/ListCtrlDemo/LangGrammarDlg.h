@@ -16,6 +16,12 @@ class CDlgTemplate;
 #define LAYOUT_TYPE_PROP			0
 #define LAYOUT_TYPE_SEPARATOR		1
 #define LAYOUT_TYPE_CHECKBOX		2
+
+#define ALL_EDIT_STATUS_EMPTY		0x00000001
+#define ALL_EDIT_STATUS_READONLY	0x00000002
+
+extern UINT WM_LANG_GRAMMAR_DLG_MSG;
+
 class CLangTemplateDlg  : public CDialog
 {
 protected:
@@ -26,11 +32,12 @@ protected:
 		CString sPropName;
 		CString sPropValue;
 		int nGridWidth;
-		LayoutInfo() : nType(LAYOUT_TYPE_PROP), sPropName(), sPropValue(), nGridWidth(1)
+		POSITION posEdit;
+		LayoutInfo() : nType(LAYOUT_TYPE_PROP), sPropName(), sPropValue(), nGridWidth(1), posEdit(NULL)
 		{
 		}
 		LayoutInfo(int type, LPCTSTR lpszName, LPCTSTR lpszDefaultValue, int gridwidth)
-			: nType(type), sPropName(lpszName), sPropValue(lpszDefaultValue), nGridWidth(gridwidth)
+			: nType(type), sPropName(lpszName), sPropValue(lpszDefaultValue), nGridWidth(gridwidth), posEdit(NULL)
 		{
 		}
 	};
@@ -43,8 +50,14 @@ public:
 	void AddSeparator();
 	void CreateModeless(CWnd* pParentWnd = NULL);
 	void SetEditWidth(int nEditWidth) { m_nEditWidth = nEditWidth; }
+	CEdit* GetEdit(LPCTSTR lpszName);
+	void ModifyAllEditStatus(DWORD dwAdd, DWORD dwRemove = 0);
+	void SetAllEditStatus(DWORD nStatus);
+	DWORD GetAllEditStatus() const { return m_nStatus; }
+	void AddMsgReceiver(HWND hWnd) { m_hWndMsgReceiver = hWnd; }
 protected:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 public:
 	void CreateControls();
@@ -59,6 +72,9 @@ public:
 	CPtrList m_listLabel;
 	CPtrList m_listEdit;
 	int m_nEditWidth;
+
+	DWORD m_nStatus;
+	HWND m_hWndMsgReceiver;
 private:	
 	static int nStartPosX;
 	static int nStartPosY;
@@ -71,6 +87,7 @@ class CLangGrammarDlg : public CLangTemplateDlg
 public:
 	CLangGrammarDlg();
 	virtual ~CLangGrammarDlg();
+	void SetLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo);
 	BOOL GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BOOL bValidate = FALSE, BOOL bShowError = FALSE);
 	BOOL Validate(BOOL bShowError = FALSE);
 public:

@@ -311,11 +311,10 @@ void CLangGrammarMap::AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
 	{
 		//Find the biggest type value
 		MapInt2LangGrammarInfoPtr::reverse_iterator rit = m_mapLangGrammar.rbegin();
-		int nMinCustomType = 10000;
-		int nMaxType = (rit != m_mapLangGrammar.rend()) ? rit->first : nMinCustomType;
-		if(nMaxType < nMinCustomType)
+		int nMaxType = (rit != m_mapLangGrammar.rend()) ? rit->first : USER_DEFINED_LANG_ID_START;
+		if(nMaxType < USER_DEFINED_LANG_ID_START)
 		{
-			nMaxType = nMinCustomType;
+			nMaxType = USER_DEFINED_LANG_ID_START;
 		}
 		nMaxType++;
 		pLangGrammarInfo->m_nLangType = nMaxType;
@@ -337,6 +336,44 @@ void CLangGrammarMap::AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
 	else
 	{
 		m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
+	}
+}
+
+std::map<int, CLangGrammarInfo*>& CLangGrammarMap::GetLangGrammaInfoMap()
+{
+	return m_mapLangGrammar;
+}
+
+CLangGrammarInfo* CLangGrammarMap::GetLangGrammarInfo(int nLangType)
+{
+	MapInt2LangGrammarInfoPtr::const_iterator iter = m_mapLangGrammar.find(nLangType);
+	if(iter == m_mapLangGrammar.end())
+	{
+		return NULL;
+	}
+	return iter->second;
+}
+
+void CLangGrammarMap::ModifyLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
+{
+	MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(pLangGrammarInfo->m_nLangType);
+	if(it != m_mapLangGrammar.end())
+	{
+		CLangGrammarInfo* pOldItem = it->second;
+		delete pOldItem;
+
+		m_mapLangGrammar[pLangGrammarInfo->m_nLangType] = pLangGrammarInfo;
+	}
+}
+void CLangGrammarMap::DeleteLangGrammarInfo(int nLangType)
+{
+	MapInt2LangGrammarInfoPtr::iterator it = m_mapLangGrammar.find(nLangType);
+	if(it != m_mapLangGrammar.end())
+	{
+		CLangGrammarInfo* pOldItem = it->second;
+		delete pOldItem;
+		
+		m_mapLangGrammar.erase(it);
 	}
 }
 

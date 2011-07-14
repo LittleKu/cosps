@@ -12,11 +12,14 @@
 #include "LangGrammar.h"
 #include <map>
 
+#define USER_DEFINED_LANG_ID_START		10000
+
 class CLangGrammarInfo
 {
 public:
 	CLangGrammarInfo();
 	~CLangGrammarInfo();
+	BOOL IsUserDefined() const { return m_nLangType >= USER_DEFINED_LANG_ID_START; }
 public:
 	int m_nLangType;
 	CString m_szLangName;
@@ -25,15 +28,19 @@ public:
 
 class CLangGrammarMap  
 {
-private:
-	CLangGrammarMap();
-	typedef std::map<int, CLangGrammarInfo*> MapInt2LangGrammarInfoPtr;
-	MapInt2LangGrammarInfoPtr m_mapLangGrammar;
 public:
+	typedef std::map<int, CLangGrammarInfo*> MapInt2LangGrammarInfoPtr;
+	virtual ~CLangGrammarMap();
 	void Init(LPCTSTR lpXmlConfigFile);
 	void Save(LPCTSTR lpXmlConfigFile);
 	void AddLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo);
-	virtual ~CLangGrammarMap();
+	void ModifyLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo);
+	void DeleteLangGrammarInfo(int nLangType);
+	CLangGrammarInfo* GetLangGrammarInfo(int nLangType);
+	std::map<int, CLangGrammarInfo*>& GetLangGrammaInfoMap();
+private:
+	CLangGrammarMap();	
+	MapInt2LangGrammarInfoPtr m_mapLangGrammar;
 public:
 	static CLangGrammarMap* GetInstance();
 };

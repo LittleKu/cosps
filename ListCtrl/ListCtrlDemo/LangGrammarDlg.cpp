@@ -24,6 +24,8 @@ int CLangTemplateDlg::nStartPosY = 7;
 int CLangTemplateDlg::nSpaceX = 5;
 int CLangTemplateDlg::nSpaceY = 7;
 
+UINT WM_LANG_GRAMMAR_DLG_MSG = ::RegisterWindowMessage(_T("WM_LANG_GRAMMAR_DLG_MSG"));
+
 CLangTemplateDlg::CLangTemplateDlg()  : CDialog(), m_dlgTemplate(NULL)
 {
 	//{{AFX_DATA_INIT(CLangTemplateDlg)
@@ -33,6 +35,9 @@ CLangTemplateDlg::CLangTemplateDlg()  : CDialog(), m_dlgTemplate(NULL)
 	m_dlgTemplate = new CDlgTemplate(_T(""), style, 0, 0, 400, 35, _T("MS Sans Serif"), 8);
 
 	m_nEditWidth = 1024;
+
+	m_nStatus = 0;
+	m_hWndMsgReceiver = NULL;
 }
 CLangTemplateDlg::~CLangTemplateDlg()
 {
@@ -168,6 +173,7 @@ void CLangTemplateDlg::CreateControls()
 	int i = 0;
 	int nRow = 0, nCol = 0;
 	POSITION pos = m_listLayout.GetHeadPosition();
+	POSITION posEdit = NULL;
 	while (pos != NULL)
 	{
 		// get layout info
@@ -204,7 +210,8 @@ void CLangTemplateDlg::CreateControls()
 			pEdit->ModifyStyleEx(0,   WS_EX_CLIENTEDGE | WS_EX_NOPARENTNOTIFY, SWP_DRAWFRAME);
 			pEdit->SetFont(pDlgFont, TRUE);
 			pEdit->SetWindowText(layout.sPropValue);
-			m_listLabel.AddTail(pEdit);
+			posEdit = m_listLabel.AddTail(pEdit);
+			layout.posEdit = posEdit;
 
 			nCol += layout.nGridWidth;
 			ASSERT(nCol <= nMaxGridWidth);
@@ -259,17 +266,75 @@ void CLangTemplateDlg::CalcSepRect(LPRECT lpRect, LPCRECT lpLastRect, int nClien
 void CLangTemplateDlg::UpdatePropValue()
 {
 	m_mapPropOut.RemoveAll();
-	
-	int nCount = m_mapLayout.GetCount();
+
+	POSITION pos = m_mapLayout.GetStartPosition();
 	CString szLabelName, szLabelValue;
-	for(int i = 0; i < nCount; i++)
+	void* pData;
+	while (pos != NULL)
 	{
-		GetDlgItemText(ID_TXT_LABEL_FIRST + i, szLabelName);
-		GetDlgItemText(ID_PROP_EDIT_FIRST + i, szLabelValue);
+		m_mapLayout.GetNextAssoc(pos, szLabelName, pData);
+		LayoutInfo& layout = m_listLayout.GetAt((POSITION)pData);
+		CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
+		pEdit->GetWindowText(szLabelValue);
 		m_mapPropOut.SetAt(szLabelName, szLabelValue);
 	}
 }
 
+CEdit* CLangTemplateDlg::GetEdit(LPCTSTR lpszName)
+{
+	void* pData = NULL;
+	if(!m_mapLayout.Lookup(lpszName, pData))
+	{
+		return NULL;
+	}
+	ASSERT(pData != NULL);
+	
+	LayoutInfo& layout = m_listLayout.GetAt((POSITION)pData);	
+	return (CEdit*)m_listEdit.GetAt(layout.posEdit);
+}
+
+void CLangTemplateDlg::ModifyAllEditStatus(DWORD dwAdd, DWORD dwRemove)
+{
+	DWORD nStatus = GetAllEditStatus();
+	nStatus |= dwAdd;
+	nStatus &= ~dwRemove;
+	SetAllEditStatus(nStatus);
+}
+
+void CLangTemplateDlg::SetAllEditStatus(DWORD nStatus)
+{
+	if(m_nStatus == nStatus)
+	{
+		return;
+	}
+	m_nStatus = nStatus;
+
+	POSITION pos = m_mapLayout.GetStartPosition();
+	CString szLabelName, szLabelValue;
+	void* pData;
+	while (pos != NULL)
+	{
+		m_mapLayout.GetNextAssoc(pos, szLabelName, pData);
+		LayoutInfo& layout = m_listLayout.GetAt((POSITION)pData);
+		CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
+
+		if(m_nStatus & ALL_EDIT_STATUS_EMPTY)
+		{
+			pEdit->SetWindowText("");
+		}
+		pEdit->SetReadOnly(m_nStatus & ALL_EDIT_STATUS_READONLY);
+	}
+}
+
+BOOL CLangTemplateDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	int nCode = HIWORD(wParam);
+	if(nCode == EN_CHANGE && m_hWndMsgReceiver != NULL)
+	{
+		::SendMessage(m_hWndMsgReceiver, WM_LANG_GRAMMAR_DLG_MSG, wParam, lParam);
+	}	
+	return CDialog::OnCommand(wParam, lParam);
+}
 
 BEGIN_MESSAGE_MAP(CLangGrammarDlg, CLangTemplateDlg)
 //{{AFX_MSG_MAP(CLangGrammarDlg)
@@ -417,4 +482,59 @@ BOOL CLangGrammarDlg::Validate(BOOL bShowError)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+void CLangGrammarDlg::SetLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
+{
+	if(pLangGrammarInfo == NULL)
+	{
+		return;
+	}
+	CEdit* pEdit;
+
+	//Lang Name
+	pEdit = GetEdit(lpszLangName);
+	pEdit->SetWindowText(pLangGrammarInfo->m_szLangName);
+
+	ILangGrammar* pLangGrammar = pLangGrammarInfo->m_pLangGrammar;
+	CString szText;
+
+	//Line Comment
+	CSingleLineComment* pLineComment;
+	pLineComment = (pLangGrammar->GetCountOfSingleLineComment() > 0) ? &(pLangGrammar->GetSingleLineComment(0)) : NULL;
+	pEdit = GetEdit(lpszLineComment);
+	pEdit->SetWindowText( (pLineComment != NULL) ? pLineComment->m_szTag : "");
+	
+	//Escape
+	LG_STRING* pEscapeStr;
+	pEscapeStr = pLangGrammar->GetCountOfEscStr() > 0 ? &(pLangGrammar->GetEscapeStr(0)) : NULL;
+	pEdit = GetEdit(lpszEscapeString);
+	pEdit->SetWindowText( (pEscapeStr != NULL) ? *pEscapeStr : "");
+
+	//Block Comment
+	CMultiLineComment* pBlockComment;
+	pBlockComment = (pLangGrammar->GetCountOfMultiLineComment() > 0) ? &(pLangGrammar->GetMultiLineComment(0)) : NULL;
+
+	pEdit = GetEdit(lpszBlockCommentOn);
+	pEdit->SetWindowText( (pBlockComment != NULL) ? pBlockComment->m_szStart : "");
+
+	pEdit = GetEdit(lpszBlockCommentOff);
+	pEdit->SetWindowText( (pBlockComment != NULL) ? pBlockComment->m_szEnd : "");
+
+	//String
+	CPair* pPair;
+	pPair = (pLangGrammar->GetCountOfStringMark() > 0) ? &(pLangGrammar->GetStringMark(0)) : NULL;
+	pEdit = GetEdit(lpszStringOn);
+	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szStart : "");
+	
+	pEdit = GetEdit(lpszStringOff);
+	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szEnd : "");
+
+	//Char
+	pPair = (pLangGrammar->GetCountOfCharMark() > 0) ? &(pLangGrammar->GetCharMark(0)) : NULL;
+	pEdit = GetEdit(lpszCharacterOn);
+	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szStart : "");
+	
+	pEdit = GetEdit(lpszCharacterOff);
+	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szEnd : "");
 }
