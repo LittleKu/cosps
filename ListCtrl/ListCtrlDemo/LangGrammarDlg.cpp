@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "LangGrammarDlg.h"
 #include "DlgTemplate.h"
+#include "ListCtrlDemo.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -337,8 +338,10 @@ BOOL CLangTemplateDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 }
 
 BEGIN_MESSAGE_MAP(CLangGrammarDlg, CLangTemplateDlg)
-//{{AFX_MSG_MAP(CLangGrammarDlg)
-//}}AFX_MSG_MAP
+	//{{AFX_MSG_MAP(CLangGrammarDlg)
+	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
+	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 LPCTSTR CLangGrammarDlg::lpszLangName = _T("Name:");
@@ -371,6 +374,27 @@ CLangGrammarDlg::~CLangGrammarDlg()
 {
 }
 
+BOOL CLangGrammarDlg::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rect;
+	GetClientRect(&rect);
+	
+	pDC->FillRect(&rect, SYS_APP()->m_pSysBkBrush);
+	
+	return TRUE;
+}
+
+HBRUSH CLangGrammarDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	HBRUSH hbr = CLangTemplateDlg::OnCtlColor(pDC, pWnd, nCtlColor);
+	if(nCtlColor == CTLCOLOR_STATIC)
+    {
+		pDC->SetBkMode(TRANSPARENT);
+		
+		return (HBRUSH)(SYS_APP()->m_pSysBkBrush->GetSafeHandle());
+    }
+	return hbr;
+}
 BOOL CLangGrammarDlg::GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BOOL bValidate, BOOL bShowError)
 {
 	if(bValidate)

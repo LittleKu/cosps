@@ -103,6 +103,7 @@ void CShowLangRuleDlg::InitGUI()
 
 	//1. Grammar Dialog layout
 	m_pLangGrammarDlg->CreateModeless(this);
+	m_pLangGrammarDlg->SetFont(pDlgFont);
 	
 	CRect rcGrammarDlg;
 	m_pLangGrammarDlg->GetWindowRect(&rcGrammarDlg);
@@ -120,6 +121,7 @@ void CShowLangRuleDlg::InitGUI()
 	m_pLangListBox->Create(WS_VISIBLE | WS_CHILD | WS_BORDER | WS_HSCROLL | WS_VSCROLL | LBS_NOTIFY, rcListBox, this, ID_LANG_LIST_BOX);
 	m_pLangListBox->SetFont(pDlgFont);
 
+	m_pLangListBox->SetWindowPos(NULL, rcListBox.left, rcListBox.top, rcListBox.Width(), rcListBox.Height(), SWP_NOZORDER);
 	m_pLangGrammarDlg->SetWindowPos(NULL, rcListBox.right + 5, rcListBox.top, rcGrammarDlg.Width(), nListBoxHeight, SWP_NOZORDER);
 
 	int nRequiredWidth = rcListBox.Width() + 5 + rcGrammarDlg.Width() + 2 * nStartX;
@@ -137,11 +139,13 @@ void CShowLangRuleDlg::InitGUI()
 	rcButton.left = rcButton.right - nButtonWidth;
 	rcButton.top = rcListBox.bottom + nButtonSpace;
 	rcButton.bottom = rcButton.top + nButtonHeight;
-	
-
+	//Apply Button
+	m_pApplyButton->Create("Apply", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, ID_BUTTON_APPLY);
+	m_pApplyButton->SetFont(pDlgFont);
 
 	//Cancel Button
-
+	rcButton.right = rcButton.left - nButtonSpace;
+	rcButton.left = rcButton.right - nButtonWidth;
 	m_pCancelButton->Create("Cancel", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, IDCANCEL);
 	m_pCancelButton->SetFont(pDlgFont);
 
@@ -151,22 +155,19 @@ void CShowLangRuleDlg::InitGUI()
 	m_pOkButton->Create("OK", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_DEFPUSHBUTTON, rcButton, this, IDOK);
 	m_pOkButton->SetFont(pDlgFont);
 
-	//Apply Button
-	rcButton.right = rcButton.left - nButtonSpace;
-	rcButton.left = rcButton.right - nButtonWidth;
-	m_pApplyButton->Create("Apply", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, ID_BUTTON_APPLY);
-	m_pApplyButton->SetFont(pDlgFont);
-
+	//Modify
 	rcButton.right = rcButton.left - nButtonSpace;
 	rcButton.left = rcButton.right - nButtonWidth;
 	m_pModifyButton->Create("Modify", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, ID_BUTTON_MODIFY);
 	m_pModifyButton->SetFont(pDlgFont);
 
+	//Delete
 	rcButton.right = rcButton.left - nButtonSpace;
 	rcButton.left = rcButton.right - nButtonWidth;
 	m_pDeleteButton->Create("Delete", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, ID_BUTTON_DELETE);
 	m_pDeleteButton->SetFont(pDlgFont);
 	
+	//New
 	rcButton.right = rcButton.left - nButtonSpace;
 	rcButton.left = rcButton.right - nButtonWidth;
 	m_pNewButton->Create("New", WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON, rcButton, this, ID_BUTTON_NEW);
@@ -206,17 +207,16 @@ void CShowLangRuleDlg::OnSelchangeListLangGrammar()
 	{
 		return;
 	}
-	m_nCurEditStatus = CUR_EDIT_STATUS_INVALID;	
 
 	DWORD nItemData = m_pLangListBox->GetItemData(nCurSel);
-
 	CLangGrammarInfo* pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nItemData);
 	ASSERT(pLangGrammarInfo != NULL);
-
 	m_pLangGrammarDlg->SetLangGrammarInfo(pLangGrammarInfo);
 
 	m_nCurSelectedIndex = nCurSel;
+
 	//Button Status update
+	m_nCurEditStatus = CUR_EDIT_STATUS_INVALID;
 	UpdateButtonStatus();
 }
 
@@ -229,53 +229,70 @@ void CShowLangRuleDlg::SetModified(BOOL bModified)
 
 void CShowLangRuleDlg::UpdateButtonStatus()
 {
-	//Apply
-	m_pApplyButton->EnableWindow(GetModified() && (m_nCurEditStatus == CUR_EDIT_STATUS_NEW 
-		|| m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY));
+	//Get The current Selected Lang Grammar Info
+	int nCurSel = m_pLangListBox->GetCurSel();
+	CLangGrammarInfo* pLangGrammarInfo = NULL;
+	if(nCurSel >= 0)
+	{
+		DWORD nItemData = m_pLangListBox->GetItemData(nCurSel);
+		pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nItemData);
+	}
 
 	//New
 	m_pNewButton->EnableWindow(m_nCurEditStatus != CUR_EDIT_STATUS_NEW);
 
 	//Delete
-	int nCurSel = m_pLangListBox->GetCurSel();
-	if(nCurSel == LB_ERR)
+	if(pLangGrammarInfo != NULL && pLangGrammarInfo->IsUserDefined())
 	{
-		m_pModifyButton->EnableWindow(FALSE);
-		m_pDeleteButton->EnableWindow(FALSE);
-		if(m_nCurEditStatus == CUR_EDIT_STATUS_INVALID)
-		{
-			m_pLangGrammarDlg->ModifyAllEditStatus(ALL_EDIT_STATUS_EMPTY | ALL_EDIT_STATUS_READONLY);
-		}
-		else
-		{
-			m_pLangGrammarDlg->ModifyAllEditStatus(0, ALL_EDIT_STATUS_EMPTY | ALL_EDIT_STATUS_READONLY);
-		}
+		m_pDeleteButton->EnableWindow(TRUE);
 	}
 	else
 	{
-		DWORD nItemData = m_pLangListBox->GetItemData(nCurSel);
-		CLangGrammarInfo* pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nItemData);
-		if(pLangGrammarInfo != NULL && pLangGrammarInfo->IsUserDefined())
-		{			
-			m_pDeleteButton->EnableWindow(TRUE);
-			if(m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY)
-			{
-				m_pModifyButton->EnableWindow(FALSE);
-				m_pLangGrammarDlg->ModifyAllEditStatus(0, ALL_EDIT_STATUS_EMPTY | ALL_EDIT_STATUS_READONLY);
-			}
-			else
-			{
-				m_pModifyButton->EnableWindow(TRUE);
-				m_pLangGrammarDlg->ModifyAllEditStatus(ALL_EDIT_STATUS_READONLY, ALL_EDIT_STATUS_EMPTY);
-			}
-		}
-		else
+		m_pDeleteButton->EnableWindow(FALSE);
+	}
+
+	//Modify
+	if(pLangGrammarInfo != NULL && pLangGrammarInfo->IsUserDefined() && m_nCurEditStatus != CUR_EDIT_STATUS_MODIFY)
+	{
+		m_pModifyButton->EnableWindow(TRUE);
+	}
+	else
+	{
+		m_pModifyButton->EnableWindow(FALSE);
+	}
+
+	//Apply
+	m_pApplyButton->EnableWindow(GetModified() && 
+		(m_nCurEditStatus == CUR_EDIT_STATUS_NEW  || m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY));
+
+
+	//Lang Grammar Dlg
+	DWORD dwStatus;
+	if(m_nCurEditStatus == CUR_EDIT_STATUS_INVALID)
+	{
+		//ReadOnly
+		dwStatus = ALL_EDIT_STATUS_READONLY;
+		//None selection, should be empty
+		if(pLangGrammarInfo == NULL)
 		{
-			m_pModifyButton->EnableWindow(FALSE);
-			m_pDeleteButton->EnableWindow(FALSE);
-			m_pLangGrammarDlg->ModifyAllEditStatus(ALL_EDIT_STATUS_READONLY, ALL_EDIT_STATUS_EMPTY);
+			dwStatus |= ALL_EDIT_STATUS_EMPTY;
 		}
 	}
+	else if(m_nCurEditStatus == CUR_EDIT_STATUS_NEW)
+	{
+		//Editable, empty content
+		dwStatus = ALL_EDIT_STATUS_EMPTY;	
+	}
+	else if(m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY)
+	{
+		//Editable, keep the content as it is
+		dwStatus = 0;
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+	m_pLangGrammarDlg->SetAllEditStatus(dwStatus);
 }
 
 void CShowLangRuleDlg::OnOK()
@@ -309,6 +326,8 @@ void CShowLangRuleDlg::OnButtonApply()
 
 		int iIndex = m_pLangListBox->AddString(pLangGrammarInfo->m_szLangName);
 		m_pLangListBox->SetItemData(iIndex, pLangGrammarInfo->m_nLangType);
+
+		m_pLangListBox->SetCurSel(iIndex);
 	}
 	else if(m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY)
 	{
@@ -334,9 +353,6 @@ void CShowLangRuleDlg::OnButtonApply()
 
 			m_pLangListBox->SetCurSel(m_nCurSelectedIndex);
 		}
-
-// 		m_nCurSelectedIndex = -1;
-// 		m_pLangListBox->SetCurSel(-1);
 	}
 	SetModified(FALSE);
 	m_nCurEditStatus = CUR_EDIT_STATUS_INVALID;
@@ -347,14 +363,13 @@ void CShowLangRuleDlg::OnButtonNew()
 	m_nCurSelectedIndex = -1;
 	m_pLangListBox->SetCurSel(-1);
 
-	m_pLangGrammarDlg->ModifyAllEditStatus(ALL_EDIT_STATUS_EMPTY, ALL_EDIT_STATUS_READONLY);
+	m_nCurEditStatus = CUR_EDIT_STATUS_NEW;
+	UpdateButtonStatus();
 
 	CEdit* pEdit = m_pLangGrammarDlg->GetEdit(CLangGrammarDlg::lpszLangName);
+	pEdit->SetWindowText("Untitled");
+	pEdit->SetSel(8, -1, TRUE);
 	pEdit->SetFocus();
-
-	m_nCurEditStatus = CUR_EDIT_STATUS_NEW;
-
-	UpdateButtonStatus();
 }
 void CShowLangRuleDlg::OnButtonDelete()
 {
@@ -377,20 +392,19 @@ void CShowLangRuleDlg::OnButtonDelete()
 }
 void CShowLangRuleDlg::OnButtonModify()
 {
-//	m_pLangGrammarDlg->ModifyAllEditStatus(0, ALL_EDIT_STATUS_READONLY);
-
 	m_nCurEditStatus = CUR_EDIT_STATUS_MODIFY;
 	UpdateButtonStatus();
 }
-
 
 LRESULT CShowLangRuleDlg::OnLangGrammarDlgEditChanged(WPARAM wParam, LPARAM lParam)
 {	
 	HWND hWndEdit = (HWND)lParam;
 	if(::IsWindow(m_hWnd) && ::IsWindowVisible(m_hWnd) && ::GetFocus() == hWndEdit)
 	{
-		AfxTrace("This should be in user edit mode.\n");
-		SetModified(TRUE);
+		if(m_nCurEditStatus == CUR_EDIT_STATUS_NEW || m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY)
+		{
+			SetModified(TRUE);
+		}
 	}
 	return 1L;
 }
