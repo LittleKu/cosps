@@ -6,6 +6,7 @@
 #include "LangGrammarDlg.h"
 #include "DlgTemplate.h"
 #include "ListCtrlDemo.h"
+#include "ThirdParty/VisualStylesXP.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -325,6 +326,11 @@ void CLangTemplateDlg::SetAllEditStatus(DWORD nStatus)
 		}
 		pEdit->SetReadOnly(m_nStatus & ALL_EDIT_STATUS_READONLY);
 	}
+	if( (m_nStatus & ALL_EDIT_STATUS_READONLY) == 0)
+	{
+		Invalidate();
+		UpdateWindow();
+	}
 }
 
 BOOL CLangTemplateDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
@@ -377,17 +383,16 @@ CLangGrammarDlg::~CLangGrammarDlg()
 BOOL CLangGrammarDlg::OnEraseBkgnd(CDC* pDC)
 {
 	CRect rect;
-	GetClientRect(&rect);
-	
-	pDC->FillRect(&rect, SYS_APP()->m_pSysBkBrush);
-	
+	GetClientRect(&rect);	
+	CBkDraw::GetInstance()->Draw(pDC, &rect);	
 	return TRUE;
 }
 
 HBRUSH CLangGrammarDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CLangTemplateDlg::OnCtlColor(pDC, pWnd, nCtlColor);
-	if(nCtlColor == CTLCOLOR_STATIC)
+	int nCtrlID = pWnd->GetDlgCtrlID(); 
+	if(nCtlColor == CTLCOLOR_STATIC && (nCtrlID >= ID_TXT_LABEL_FIRST && nCtrlID < ID_PROP_EDIT_FIRST))
     {
 		pDC->SetBkMode(TRANSPARENT);
 		

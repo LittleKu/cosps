@@ -17,6 +17,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 #define ID_LANG_LIST_BOX		48297
+#define ID_LANG_LIST_BOX_BK_WND	48298
 #define ID_BUTTON_APPLY			8888
 #define ID_BUTTON_MODIFY		8889
 #define ID_BUTTON_DELETE		8890
@@ -46,6 +47,8 @@ CShowLangRuleDlg::CShowLangRuleDlg()
 	m_pNewButton = new CButton();
 	m_pModifyButton = new CButton();
 
+	m_pListBoxBkWnd = NULL;
+
 	InitModalIndirect(*m_dlgTemplate);
 }
 
@@ -67,6 +70,12 @@ CShowLangRuleDlg::~CShowLangRuleDlg()
 	delete m_pDeleteButton;
 	delete m_pNewButton;
 	delete m_pModifyButton;
+
+	if(m_pListBoxBkWnd != NULL)
+	{
+		delete m_pListBoxBkWnd;
+		m_pListBoxBkWnd = NULL;
+	}
 }
 BEGIN_MESSAGE_MAP(CShowLangRuleDlg, CDialog)
 	ON_LBN_SELCHANGE(ID_LANG_LIST_BOX, OnSelchangeListLangGrammar)
@@ -118,24 +127,34 @@ void CShowLangRuleDlg::InitGUI()
 	rcListBox.right = rcListBox.left + 150;
 	rcListBox.bottom = rcListBox.top + nListBoxHeight;
 
-	m_pLangListBox->Create(WS_VISIBLE | WS_CHILD | WS_BORDER | WS_HSCROLL | WS_VSCROLL | LBS_NOTIFY, rcListBox, this, ID_LANG_LIST_BOX);
+	//ListBox
+	DWORD dwStyle = WS_VISIBLE | WS_CHILD | /*WS_BORDER |*/ WS_HSCROLL | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT;
+	CRect rcShrinkListBox = rcListBox;
+	rcShrinkListBox.DeflateRect(1, 1);
+	m_pLangListBox->Create(dwStyle, rcShrinkListBox, this, ID_LANG_LIST_BOX);
 	m_pLangListBox->SetFont(pDlgFont);
 
-	m_pLangListBox->SetWindowPos(NULL, rcListBox.left, rcListBox.top, rcListBox.Width(), rcListBox.Height(), SWP_NOZORDER);
-	m_pLangGrammarDlg->SetWindowPos(NULL, rcListBox.right + 5, rcListBox.top, rcGrammarDlg.Width(), nListBoxHeight, SWP_NOZORDER);
+	//ListBox Background
+	m_pListBoxBkWnd = new CBkWnd();
+	m_pListBoxBkWnd->Create(WS_CHILD|WS_VISIBLE|WS_CLIPSIBLINGS, rcListBox, this, ID_LANG_LIST_BOX_BK_WND);
+
+	//Adjust position
+	m_pLangGrammarDlg->SetWindowPos(NULL, rcListBox.right + 5, rcListBox.top, rcGrammarDlg.Width(), nListBoxHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+//	m_pLangListBox->SetWindowPos(NULL, rcShrinkListBox.left, rcShrinkListBox.top, rcShrinkListBox.Width(), rcShrinkListBox.Height(), SWP_NOZORDER | SWP_NOACTIVATE);	
+	m_pListBoxBkWnd->SetWindowPos(&wndBottom, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
 	int nRequiredWidth = rcListBox.Width() + 5 + rcGrammarDlg.Width() + 2 * nStartX;
 
 	//3. OK, Cancel Button layout
-	int nButtonWidth = 75;
-	int nButtonHeight = 23;
+	CRect rcButton(0, 0, 50, 14);
+	MapDialogRect(&rcButton);
+	int nButtonWidth = rcButton.Width();
+	int nButtonHeight = rcButton.Height();
 	int nButtonSpace = 14;
 	
-	int nButtonTotalWidth = nButtonWidth * 2 + nButtonSpace;
-	CRect rcButton;
 
 	//From Right to Left: Apply, Cancel, OK, Delete, New
-	rcButton.right = nRequiredWidth - 20;
+	rcButton.right = nRequiredWidth - nStartX;
 	rcButton.left = rcButton.right - nButtonWidth;
 	rcButton.top = rcListBox.bottom + nButtonSpace;
 	rcButton.bottom = rcButton.top + nButtonHeight;
@@ -180,6 +199,7 @@ void CShowLangRuleDlg::InitGUI()
 
 	int nDlgHeight = rcButton.bottom + 10;
 	nDlgHeight += rcWindow.Height() - rcClient.Height();
+	nRequiredWidth += rcWindow.Width() - rcClient.Width();
 	SetWindowPos(NULL, 0, 0, nRequiredWidth, nDlgHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
@@ -189,14 +209,17 @@ void CShowLangRuleDlg::InitLangGrammarData()
 		CLangGrammarMap::GetInstance()->GetLangGrammaInfoMap();
 
 	std::map<int, CLangGrammarInfo*>::iterator iter = mapLangGrammar.begin();
-	CLangGrammarInfo* pLangGrammarInfo;
-	int iIndex;
+// 	CLangGrammarInfo* pLangGrammarInfo;
+// 	int iIndex;
+	CDC* pDC = GetDC();
 	for( ; iter != mapLangGrammar.end(); ++iter)
 	{
-		pLangGrammarInfo = iter->second;
-		iIndex = m_pLangListBox->AddString(pLangGrammarInfo->m_szLangName);
-		m_pLangListBox->SetItemData(iIndex, iter->first);
+		InsertStringToListBox(iter->second->m_szLangName, iter->first, pDC);
+// 		pLangGrammarInfo = iter->second;
+// 		iIndex = m_pLangListBox->AddString(pLangGrammarInfo->m_szLangName);
+// 		m_pLangListBox->SetItemData(iIndex, iter->first);
 	}
+	ReleaseDC(pDC);
 }
 
 void CShowLangRuleDlg::OnSelchangeListLangGrammar()
@@ -324,10 +347,13 @@ void CShowLangRuleDlg::OnButtonApply()
 		//Add Lang Grammar into map
 		CLangGrammarMap::GetInstance()->AddLangGrammarInfo(pLangGrammarInfo);
 
-		int iIndex = m_pLangListBox->AddString(pLangGrammarInfo->m_szLangName);
-		m_pLangListBox->SetItemData(iIndex, pLangGrammarInfo->m_nLangType);
+// 		int iIndex = m_pLangListBox->AddString(pLangGrammarInfo->m_szLangName);
+// 		m_pLangListBox->SetItemData(iIndex, pLangGrammarInfo->m_nLangType);
+
+		int iIndex = InsertStringToListBox(pLangGrammarInfo->m_szLangName, pLangGrammarInfo->m_nLangType);
 
 		m_pLangListBox->SetCurSel(iIndex);
+		m_nCurSelectedIndex = iIndex;
 	}
 	else if(m_nCurEditStatus == CUR_EDIT_STATUS_MODIFY)
 	{
@@ -345,13 +371,17 @@ void CShowLangRuleDlg::OnButtonApply()
 
 		if(bLangNameChanged)
 		{
-			m_pLangListBox->LockWindowUpdate(); 
+			//Don't use LockWindowUpdate, it cause the entire window redraw
+			//m_pLangListBox->LockWindowUpdate();
+			m_pLangListBox->SetRedraw(FALSE);
 			int iIndex = m_pLangListBox->DeleteString(m_nCurSelectedIndex); 
-			iIndex = m_pLangListBox->InsertString(m_nCurSelectedIndex, pLangGrammarInfo->m_szLangName);
-			m_pLangListBox->SetItemData(iIndex, pLangGrammarInfo->m_nLangType);
-			m_pLangListBox->UnlockWindowUpdate();
-
+			iIndex = InsertStringToListBox(pLangGrammarInfo->m_szLangName, pLangGrammarInfo->m_nLangType, NULL, iIndex);
+// 			iIndex = m_pLangListBox->InsertString(m_nCurSelectedIndex, pLangGrammarInfo->m_szLangName);
+// 			m_pLangListBox->SetItemData(iIndex, pLangGrammarInfo->m_nLangType);
 			m_pLangListBox->SetCurSel(m_nCurSelectedIndex);
+			//m_pLangListBox->UnlockWindowUpdate();
+			m_pLangListBox->SetRedraw(TRUE);
+			m_pLangListBox->UpdateWindow();
 		}
 	}
 	SetModified(FALSE);
@@ -360,6 +390,7 @@ void CShowLangRuleDlg::OnButtonApply()
 }
 void CShowLangRuleDlg::OnButtonNew()
 {
+	SetModified(FALSE);
 	m_nCurSelectedIndex = -1;
 	m_pLangListBox->SetCurSel(-1);
 
@@ -392,8 +423,15 @@ void CShowLangRuleDlg::OnButtonDelete()
 }
 void CShowLangRuleDlg::OnButtonModify()
 {
+	SetModified(FALSE);
 	m_nCurEditStatus = CUR_EDIT_STATUS_MODIFY;
 	UpdateButtonStatus();
+
+	CEdit* pEdit = m_pLangGrammarDlg->GetEdit(CLangGrammarDlg::lpszLangName);
+	CString szLangName;
+	pEdit->GetWindowText(szLangName);
+	pEdit->SetSel(szLangName.GetLength(), -1, TRUE);
+	pEdit->SetFocus();
 }
 
 LRESULT CShowLangRuleDlg::OnLangGrammarDlgEditChanged(WPARAM wParam, LPARAM lParam)
@@ -407,4 +445,41 @@ LRESULT CShowLangRuleDlg::OnLangGrammarDlgEditChanged(WPARAM wParam, LPARAM lPar
 		}
 	}
 	return 1L;
+}
+
+int CShowLangRuleDlg::InsertStringToListBox(LPCTSTR lpszString, DWORD nItemData, CDC* pDC, int nIndex)
+{
+	CLangGrammarInfo* pLangInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nItemData);
+	ASSERT(pLangInfo != NULL);
+	
+	CString sContent;
+	if(pLangInfo->IsUserDefined())
+	{
+		sContent.Format("%s%s", "[Customized]: ", pLangInfo->m_szLangName);
+	}
+	else
+	{
+		sContent = lpszString;
+	}
+	CDC* pTempDC = pDC;
+	if(pDC == NULL)
+	{
+		pTempDC = GetDC();
+	}
+	CSize sz = pTempDC->GetTextExtent(sContent);
+	if(pDC == NULL)
+	{
+		ReleaseDC(pTempDC);
+	}
+
+	
+	LONG nCurScrollWidth = (LONG)::SendDlgItemMessage(m_hWnd, ID_LANG_LIST_BOX, LB_GETHORIZONTALEXTENT, 0, 0);
+	if(sz.cx > nCurScrollWidth)
+	{
+		::SendDlgItemMessage(m_hWnd, ID_LANG_LIST_BOX, LB_SETHORIZONTALEXTENT, (WPARAM)sz.cx, 0);
+	}
+	nIndex = m_pLangListBox->InsertString(nIndex, sContent);
+	m_pLangListBox->SetItemData(nIndex, nItemData);
+
+	return nIndex;
 }

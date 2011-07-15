@@ -2,6 +2,7 @@
 #include "MultiSelTreeCtrl.h"
 #include "tinyxml.h"
 #include "PropDlg.h"
+#include "../NewFilterGroupDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -591,26 +592,28 @@ void CMultiSelTreeCtrl::Remove()
 
 void CMultiSelTreeCtrl::AddNewLanguage()
 {
-	CPropDlg dlg;
-	dlg.SetTitle(_T("Add New Language"));
-	
-	LPCTSTR lpPropName = _T("Language Name:");
-	dlg.AddProperty(lpPropName);
-
-	int nResponse = dlg.DoModal();
-	if(nResponse == IDOK)
-	{
-		HTREEITEM hItem = GetSelectedItem();
-		ASSERT(hItem);
-
-		TiXmlElement element(XML_NM_LANG);
-		element.SetAttribute(XML_ATTRIB_TEXT, dlg.GetProperty(lpPropName));
-		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
-
-		InsertSubItem(hItem, &element);
-
-		ValidateCheck();
-	}
+// 	CPropDlg dlg;
+// 	dlg.SetTitle(_T("Add New Language"));
+// 	
+// 	LPCTSTR lpPropName = _T("Language Name:");
+// 	dlg.AddProperty(lpPropName);
+// 
+// 	int nResponse = dlg.DoModal();
+// 	if(nResponse == IDOK)
+// 	{
+// 		HTREEITEM hItem = GetSelectedItem();
+// 		ASSERT(hItem);
+// 
+// 		TiXmlElement element(XML_NM_LANG);
+// 		element.SetAttribute(XML_ATTRIB_TEXT, dlg.GetProperty(lpPropName));
+// 		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
+// 
+// 		InsertSubItem(hItem, &element);
+// 
+// 		ValidateCheck();
+// 	}
+	CNewFilterGroupDlg dlg;
+	dlg.DoModal();
 }
 void CMultiSelTreeCtrl::AddNewFileType()
 {

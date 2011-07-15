@@ -133,6 +133,10 @@ SOURCE=.\LangGrammarMap.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\LangRuleDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.cpp
 # End Source File
 # Begin Source File
@@ -162,6 +166,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.cpp
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiSelTreeCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\NewFilterGroupDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -224,6 +232,10 @@ SOURCE=.\ThirdParty\TreePropSheet\TreePropSheet.cpp
 
 SOURCE=.\Util.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\VisualStylesXP.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -270,6 +282,10 @@ SOURCE=.\LangGrammarMap.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\LangRuleDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.h
 # End Source File
 # Begin Source File
@@ -295,6 +311,10 @@ SOURCE=.\ThirdParty\MultiColumnSortListView.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\MultiSelTreeCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\NewFilterGroupDlg.h
 # End Source File
 # Begin Source File
 
@@ -363,6 +383,10 @@ SOURCE=.\Util.h
 # Begin Source File
 
 SOURCE=.\Version.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\VisualStylesXP.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

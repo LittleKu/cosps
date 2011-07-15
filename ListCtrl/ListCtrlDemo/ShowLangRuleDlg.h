@@ -18,6 +18,7 @@ public:
 	CShowLangRuleDlg();
 	virtual ~CShowLangRuleDlg();
 protected:
+	int InsertStringToListBox(LPCTSTR lpszString, DWORD nItemData, CDC* pDC = NULL, int nIndex = -1);
 	void UpdateButtonStatus();
 	void InitLangGrammarData();
 	void InitGUI();
@@ -45,6 +46,8 @@ private:
 	CButton* m_pDeleteButton;
 	CButton* m_pNewButton;
 	CButton* m_pModifyButton;
+
+	CBkWnd* m_pListBoxBkWnd;
 
 	int m_nCurSelectedIndex;
 	int m_nCurEditStatus;
