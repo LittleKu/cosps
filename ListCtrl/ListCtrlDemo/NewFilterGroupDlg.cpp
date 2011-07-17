@@ -67,12 +67,13 @@ BOOL CNewFilterGroupDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	SetWindowText(_T("Add Filter Group"));
+	SetWindowText(m_szTitle);
 
 	InitGUI();
-	InitComboBox();
-
 	m_pLangRuleDlg->AddMsgReceiver(m_hWnd);
+
+	InitComboBox();
+	InitData();
 
 	return TRUE;
 }
@@ -195,18 +196,29 @@ void CNewFilterGroupDlg::InitComboBox()
 	std::map<int, CLangGrammarInfo*>::iterator iter = mapLangGrammar.begin();
 	CLangGrammarInfo* pLangGrammarInfo;
 	CString sContent;
+	int iIndex, iSelIndex = -1;
 	for( ; iter != mapLangGrammar.end(); ++iter)
 	{
 		pLangGrammarInfo = iter->second;
 		if(!pLangGrammarInfo->IsUserDefined())
 		{
-			m_pLangRuleType->AddString(pLangGrammarInfo->m_szLangName);
+			iIndex = m_pLangRuleType->AddString(pLangGrammarInfo->m_szLangName);
 		}
 		else
 		{
 			sContent.Format("%s%s", "[Customized]: ", pLangGrammarInfo->m_szLangName);
-			m_pLangRuleType->AddString(sContent);
+			iIndex = m_pLangRuleType->AddString(sContent);
 		}
+
+		if(pLangGrammarInfo->m_nLangType == m_nLangRuleType)
+		{
+			iSelIndex = iIndex;
+		}
+	}
+	if(iSelIndex >= 0)
+	{
+		::SendMessage(m_hWnd, CLangRuleDlg::WM_LANG_SEL_CHANGED, 0, (LPARAM)iSelIndex);
+		::SendMessage(m_pLangRuleDlg->GetSafeHwnd(), CLangRuleDlg::WM_LANG_SEL_CHANGED, m_nCurSelectedIndex, iSelIndex);
 	}
 }
 
@@ -230,4 +242,28 @@ LRESULT CNewFilterGroupDlg::OnLangListBoxSelChanged(WPARAM wParam, LPARAM lParam
 	}
 
 	return 1L;
+}
+
+void CNewFilterGroupDlg::OnOK()
+{
+	m_pFilterName->GetWindowText(m_szFilterName);
+	if(m_szFilterName.IsEmpty())
+	{
+		AfxMessageBox("You can't specify an empty filter group name.");
+		return;
+	}
+	if(m_pLangRuleType->GetCurSel() < 0)
+	{
+		AfxMessageBox("You don't specify the language rule type yet.");
+		return;
+	}
+	m_nLangRuleType = m_pLangRuleDlg->GetCurSelData();
+	ASSERT(m_nLangRuleType != 0);
+
+	CDialog::OnOK();
+}
+
+void CNewFilterGroupDlg::InitData()
+{
+	m_pFilterName->SetWindowText(m_szFilterName);
 }

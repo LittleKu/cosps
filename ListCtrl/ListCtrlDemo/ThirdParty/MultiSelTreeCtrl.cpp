@@ -12,10 +12,6 @@ static char THIS_FILE[] = __FILE__;
 
 UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELECTED_EVENT"));
 
-#define XML_NM_ROOT			"root"
-#define XML_NM_LANG			"language"
-#define XML_NM_FILE			"file"
-
 #define XML_ATTRIB_TEXT		"text"
 #define XML_ATTRIB_TYPE		"type"
 #define XML_ATTRIB_CHECKED	"checked"
@@ -318,7 +314,7 @@ HTREEITEM CMultiSelTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pEle
 	tvis.item.lParam = (LPARAM)pData;
 
 	//Branch node
-	if(pData->szType.IsEmpty())
+	if(pData->szName.Compare(XML_NM_FILE) != 0)
 	{
 		//non-selected state image
 		tvis.item.iImage = CommonUtils::GetWindowsDirIconIndex();
@@ -459,7 +455,7 @@ void CMultiSelTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//Root Item
 	if(pTVIData->szName.Compare(XML_NM_ROOT) == 0)
 	{
-		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,	_T("Add New Language.."));
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,	_T("Add New Filter Group.."));
 		ctMenu.EnableMenuItem(IDM_FILTER_TREE_REMOVE, MF_BYCOMMAND | MF_GRAYED);
 	}
 	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
@@ -494,7 +490,7 @@ BOOL CMultiSelTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		break;
 	case IDM_FILTER_TREE_ADD_LANGUAGE:
 		{
-			AddNewLanguage();
+			AddNewFilterGroup();
 		}
 		break;
 	case IDM_FILTER_TREE_ADD_FILE_TYPE:
@@ -518,24 +514,18 @@ void CMultiSelTreeCtrl::Modify()
 {
 	HTREEITEM hItem = GetSelectedItem();
 	ASSERT(hItem);
-
-	CPropDlg dlg;
-	dlg.SetTitle(_T("Modify"));
-
-	LPCTSTR lpPropName = _T("Name:");
-	dlg.AddProperty(lpPropName, GetItemText(hItem));
-
+	
 	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
-	if(pTVIData->szName.Compare(XML_NM_FILE) != 0)
+
+	//Filter File
+	if(pTVIData->szName.Compare(XML_NM_FILE) == 0)
 	{
-		int nResponse = dlg.DoModal();
-		if(nResponse == IDOK)
-		{
-			SetItemText(hItem, dlg.GetProperty(lpPropName));
-		}
-	}
-	else
-	{	
+		CPropDlg dlg;
+		dlg.SetTitle(_T("Modify"));
+		
+		LPCTSTR lpPropName = _T("Name:");
+		dlg.AddProperty(lpPropName, GetItemText(hItem));
+
 		LPCTSTR lpFileType = _T("File Type Filter:");
 		dlg.AddProperty(lpFileType, pTVIData->szType);
 
@@ -543,10 +533,10 @@ void CMultiSelTreeCtrl::Modify()
 		if(nResponse == IDOK)
 		{
 			SetItemText(hItem, dlg.GetProperty(lpPropName));
-
+			
 			CString szValue;
 			dlg.GetProperty(lpFileType, szValue);
-
+			
 			//File Type Changed
 			if(szValue.Compare(pTVIData->szType) != 0)
 			{
@@ -560,6 +550,11 @@ void CMultiSelTreeCtrl::Modify()
 				}	
 			}
 		}
+	}
+	//Filter Group
+	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
+	{
+		ModifyFilterGroup();
 	}
 }
 void CMultiSelTreeCtrl::Remove()
@@ -590,30 +585,50 @@ void CMultiSelTreeCtrl::Remove()
 	SendMessageToOwner(ID_TREE_ITEM_SELECTED_EVENT, 0, m_uFlags);
 }
 
-void CMultiSelTreeCtrl::AddNewLanguage()
+void CMultiSelTreeCtrl::AddNewFilterGroup()
 {
-// 	CPropDlg dlg;
-// 	dlg.SetTitle(_T("Add New Language"));
-// 	
-// 	LPCTSTR lpPropName = _T("Language Name:");
-// 	dlg.AddProperty(lpPropName);
-// 
-// 	int nResponse = dlg.DoModal();
-// 	if(nResponse == IDOK)
-// 	{
-// 		HTREEITEM hItem = GetSelectedItem();
-// 		ASSERT(hItem);
-// 
-// 		TiXmlElement element(XML_NM_LANG);
-// 		element.SetAttribute(XML_ATTRIB_TEXT, dlg.GetProperty(lpPropName));
-// 		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
-// 
-// 		InsertSubItem(hItem, &element);
-// 
-// 		ValidateCheck();
-// 	}
 	CNewFilterGroupDlg dlg;
-	dlg.DoModal();
+	dlg.m_szTitle = "Add Filter Group";
+	dlg.m_szFilterName = "";
+	dlg.m_nLangRuleType = -1;
+	int nResponse = dlg.DoModal();
+	if(nResponse == IDOK)
+	{
+		HTREEITEM hItem = GetSelectedItem();
+		ASSERT(hItem);
+
+		TiXmlElement element(XML_NM_LANG);
+		element.SetAttribute(XML_ATTRIB_TEXT, dlg.m_szFilterName);
+		element.SetAttribute(XML_ATTRIB_TYPE, dlg.m_nLangRuleType);
+		element.SetAttribute(XML_ATTRIB_CHECKED, TVIS_IMAGE_STATE_UNCHECK);
+
+		InsertSubItem(hItem, &element);
+
+		ValidateCheck();
+	}
+}
+
+void CMultiSelTreeCtrl::ModifyFilterGroup()
+{
+	HTREEITEM hItem = GetSelectedItem();
+	ASSERT(hItem);
+	
+	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
+
+	CNewFilterGroupDlg dlg;
+	dlg.m_szTitle = "Modify Filter Group";
+	dlg.m_szFilterName = GetItemText(hItem);
+	int iType = atoi(pTVIData->szType);
+	if(iType > 0)
+	{
+		dlg.m_nLangRuleType = iType;
+	}
+	int nResponse = dlg.DoModal();
+	if(nResponse == IDOK)
+	{		
+		SetItemText(hItem, dlg.m_szFilterName);
+		pTVIData->szType.Format("%d", dlg.m_nLangRuleType);
+	}
 }
 void CMultiSelTreeCtrl::AddNewFileType()
 {

@@ -13,6 +13,78 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add Folder...",              IDM_FILE_ADD
+        MENUITEM "&Delete Folder",              IDM_FILE_DEL
+        MENUITEM "&Start to Count",             IDM_FILE_START
+        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Report"
+    BEGIN
+        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
+        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
+        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
+        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "&Show Language Rules...",     IDM_TOOLS_SHOW_LANG_RULES
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add Source Folder"
+    IDM_FILE_DEL            "Delete Source Folder"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
+    ID_TBBTN_START_TO_COUNT "Start to Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+    ID_TBBTN_EXPORT         "Export"
+    ID_TBBTN_SETTING        "Options"
+    ID_TBBTN_EXIT           "Exit"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -78,79 +150,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Chinese (P.R.C.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add Folder...",              IDM_FILE_ADD
-        MENUITEM "&Delete Folder",              IDM_FILE_DEL
-        MENUITEM "&Start to Count",             IDM_FILE_START
-        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Report"
-    BEGIN
-        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
-        MENUITEM SEPARATOR
-        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
-        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
-        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
-        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
-    END
-    POPUP "&Tools"
-    BEGIN
-        MENUITEM "&Options",                    IDM_TOOLS_OPTIONS
-        MENUITEM SEPARATOR
-        MENUITEM "&Custom Language...",         IDM_TOOLS_CUSTOM_LANG
-        MENUITEM "&Show Language Rules...",     IDM_TOOLS_SHOW_LANG_RULES
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add Source Folder"
-    IDM_FILE_DEL            "Delete Source Folder"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
-    ID_TBBTN_START_TO_COUNT "Start to Count"
-    ID_TBBTN_CLEAR_RESULT   "Clear Result"
-    ID_TBBTN_EXPORT         "Export"
-    ID_TBBTN_SETTING        "Options"
-    ID_TBBTN_EXIT           "Exit"
-END
-
-#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 

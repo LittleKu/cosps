@@ -17,9 +17,16 @@ class CNewFilterGroupDlg  : public CDialog
 public:
 	CNewFilterGroupDlg();
 	virtual ~CNewFilterGroupDlg();
+
+	CString m_szTitle;
+	//The out data
+	CString m_szFilterName;
+	int m_nLangRuleType;
 protected:
 	virtual void InitGUI();
 	void InitComboBox();
+	void InitData();
+	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeComboBox();
 	afx_msg LRESULT OnLangListBoxSelChanged(WPARAM wParam, LPARAM lParam);

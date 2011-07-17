@@ -395,8 +395,12 @@ HBRUSH CLangGrammarDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if(nCtlColor == CTLCOLOR_STATIC && (nCtrlID >= ID_TXT_LABEL_FIRST && nCtrlID < ID_PROP_EDIT_FIRST))
     {
 		pDC->SetBkMode(TRANSPARENT);
-		
-		return (HBRUSH)(SYS_APP()->m_pSysBkBrush->GetSafeHandle());
+		//Comment:
+		//1. If we have paint the background, return HOLLOW_BRUSH is the simple way
+		//2. If we don't explicitly paint background, return a same brush with the background.
+		return (HBRUSH)::GetStockObject(HOLLOW_BRUSH); //1st way
+//		return (HBRUSH)::GetStockObject(WHITE_BRUSH);  //2nd way
+//		return (HBRUSH)(SYS_APP()->m_pSysBkBrush->GetSafeHandle());
     }
 	return hbr;
 }

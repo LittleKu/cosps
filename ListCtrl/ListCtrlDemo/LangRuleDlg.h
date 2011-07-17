@@ -18,6 +18,7 @@ public:
 	CLangRuleDlg();
 	virtual ~CLangRuleDlg();
 	void CreateModeless(CWnd* pParentWnd = NULL);
+	DWORD GetCurSelData() const;
 	void AddMsgReceiver(HWND hWnd) { m_hWndMsgReceiver = hWnd; }
 	static UINT WM_LANG_SEL_CHANGED;
 protected:

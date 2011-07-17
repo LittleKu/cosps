@@ -124,3 +124,16 @@ void CHistoryComboBox::SaveHistory()
 		::WritePrivateProfileString(m_sSectionName, sKey, sValue, m_sIniFile);
 	}
 }
+
+BOOL CHistoryComboBox::PreTranslateMessage(MSG* pMsg) 
+{
+	//The Key RETURN and ESCAPE will cause the system halted, remove the response of the 2 keys.
+	if(pMsg->message == WM_KEYDOWN)
+	{
+		if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE)
+		{
+			return TRUE;
+		}
+	}	
+	return CComboBox::PreTranslateMessage(pMsg);
+}

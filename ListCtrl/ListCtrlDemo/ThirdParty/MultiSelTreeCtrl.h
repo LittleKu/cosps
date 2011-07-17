@@ -17,6 +17,10 @@ class CMultiSelTreeCtrl;
 // Definitions
 typedef BOOL (CALLBACK* ENUM_TREEITEMPROC)(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam);
 
+#define XML_NM_ROOT			"root"
+#define XML_NM_LANG			"language"
+#define XML_NM_FILE			"file"
+
 class CMultiSelTreeCtrl : public CTreeCtrl
 {
 public:
@@ -25,7 +29,6 @@ public:
 		CString szName;
 		CString szType;
 	};
-
 
 public:
 	CMultiSelTreeCtrl();
@@ -50,7 +53,8 @@ public:
 
 	void Remove();
 	void Modify();
-	void AddNewLanguage();
+	void ModifyFilterGroup();
+	void AddNewFilterGroup();
 	void AddNewFileType();
 protected:
 	virtual void PreSubclassWindow();

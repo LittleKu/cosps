@@ -13,33 +13,33 @@ Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
 ResourceCount=16
-Resource1=CG_IDD_PROGRESS
+Resource1=IDD_PROPPAGE_GENERAL (English (U.S.))
 Resource2=IDR_MAINFRAME
-Resource3=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource3=IDD_MAIN_DLG (English (U.S.))
 Resource4=IDD_ABOUTBOX
-Resource5=IDD_PROGRESS
+Resource5=IDD_PROPPAGE_GENERAL
 Resource6=IDD_MAIN_DLG
 Class4=CProgressDlg
 Resource7=IDD_LISTCTRLDEMO_DIALOG
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=IDR_RESULT_MENU (Neutral)
+Resource9=CG_IDD_PROGRESS
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_ABOUTBOX (English (U.S.))
+Resource11=IDD_PROGRESS
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource12=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Class10=CFilterTreeModifyDlg
 Resource13=IDD_PROGRESS (Chinese (P.R.C.))
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=CG_IDD_PROGRESS (Chinese (P.R.C.))
-Resource15=IDD_MAIN_DLG (English (U.S.))
+Resource15=IDD_ABOUTBOX (English (U.S.))
 Class14=CCustomLangDlg
-Resource16=IDD_PROPPAGE_GENERAL
+Resource16=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -120,10 +120,9 @@ Command8=IDM_REPORT_EXPORT_XLS
 Command9=IDM_REPORT_EXPORT_XML
 Command10=IDM_REPORT_EXPORT_HTML
 Command11=IDM_TOOLS_OPTIONS
-Command12=IDM_TOOLS_CUSTOM_LANG
-Command13=IDM_TOOLS_SHOW_LANG_RULES
-Command14=IDM_HELP_ABOUT
-CommandCount=14
+Command12=IDM_TOOLS_SHOW_LANG_RULES
+Command13=IDM_HELP_ABOUT
+CommandCount=13
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG (English (U.S.))]
 Type=1
@@ -319,6 +318,7 @@ HeaderFile=HistoryComboBox.h
 ImplementationFile=HistoryComboBox.cpp
 BaseClass=CComboBox
 Filter=W
+VirtualFilter=cWC
 
 [DLG:IDD_PROPPAGE_GENERAL]
 Type=1

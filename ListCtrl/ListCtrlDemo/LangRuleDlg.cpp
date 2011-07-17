@@ -202,3 +202,18 @@ void CLangRuleDlg::AddStringToListBox(LPCTSTR lpszString, DWORD nItemData, CDC* 
 	int nIndex = m_pLangListBox->AddString(sContent);
 	m_pLangListBox->SetItemData(nIndex, nItemData);
 }
+
+DWORD CLangRuleDlg::GetCurSelData() const
+{
+	int nCurSel = m_pLangListBox->GetCurSel();
+	if(nCurSel < 0)
+	{
+		return 0;
+	}
+	DWORD nCurSelData = m_pLangListBox->GetItemData(nCurSel);
+	if(LB_ERR == nCurSelData)
+	{
+		return 0;
+	}
+	return nCurSelData;
+}
