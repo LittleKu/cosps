@@ -56,6 +56,8 @@ public:
 	void ModifyFilterGroup();
 	void AddNewFilterGroup();
 	void AddNewFileType();
+
+	void GetFilterGroupList(LPFilterGroupList& lpFilterGroupList);
 protected:
 	virtual void PreSubclassWindow();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);

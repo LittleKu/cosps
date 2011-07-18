@@ -37,7 +37,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 		{
 			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
 		}
-		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor, &progChecker);
+		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker);
 		if(result == -1)
 		{
 			break;
@@ -77,7 +77,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 		{
 			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
 		}
-		if(CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterList, lpThreadParam->bRecursive, pVisitor, &progChecker) == -1)
+		if(CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker) == -1)
 		{
 			break;
 		}
@@ -130,7 +130,7 @@ CFileCountVisitor::CFileCountVisitor(HWND hWnd) : m_hProgWnd(hWnd), m_nCount(0),
 {
 }
 
-int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
+int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 {
 	m_nCount++;
 
@@ -150,7 +150,7 @@ int CFileCountVisitor::VisitFile(LPCTSTR lpszFileName)
 CFileParserVisitor::CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMainWnd(hMainWnd), m_hProgWnd(hProgressWnd), m_nCount(0)
 {
 }
-int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName)
+int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 {
 	m_nCount++;
 
@@ -166,8 +166,18 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName)
 	CFileInfo* pFi = new CFileInfo();
 	pFi->SetFileName(lpszFileName);
 
-	IFileParser* pFileParser = CFileParserFactory::GetFileParser(LANG_TYPE_CPP, pFi);
-	pFileParser->ParseFile();
+	LPFilterGroup lpFilterGroup = (LPFilterGroup)lpParam;
+	ASSERT(lpFilterGroup != NULL && lpFilterGroup->nLangRuleType >= 0);
+
+	IFileParser* pFileParser = CFileParserFactory::GetFileParser(static_cast<ELangType>(lpFilterGroup->nLangRuleType), pFi);
+	if(pFileParser == NULL)
+	{
+		AfxTrace("File[%s], Lang[%s:%d]\n", lpszFileName, lpFilterGroup->szLangRuleName, lpFilterGroup->nLangRuleType);
+	}
+	else
+	{
+		pFileParser->ParseFile();
+	}	
 
 	::SendMessage(m_hMainWnd, WM_PROGRESS_UPDATE, (WPARAM)(pFi), 0);
 

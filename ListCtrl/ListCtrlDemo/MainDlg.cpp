@@ -214,21 +214,7 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			prefsDlg.DoModal();
 		}
 		break;
-	case IDM_TOOLS_CUSTOM_LANG:
-		{
-			/* Remove this menu
-			CCustomLangDlg customLangDlg;
-			int nResponse = customLangDlg.DoModal();
-			if(nResponse == IDOK)
-			{
-				CString sPrompt;
-				sPrompt.Format(_T("A new language type was successfully added."));
-				AfxMessageBox(sPrompt, MB_OK | MB_ICONINFORMATION);
-			}
-			*/
-		}
-		break;
-	case IDM_TOOLS_SHOW_LANG_RULES:
+	case IDM_TOOLS_LANG_RULES:
 		{
 			CShowLangRuleDlg showLangRuleDlg;
 			showLangRuleDlg.DoModal();

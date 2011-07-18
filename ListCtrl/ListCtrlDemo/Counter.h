@@ -22,7 +22,7 @@ class CFileCountVisitor : public CFileVisitor
 {
 public:
 	CFileCountVisitor(HWND hWnd);
-	virtual int VisitFile(LPCTSTR lpszFileName);
+	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL);
 	virtual UINT GetResult() { return m_nCount; }
 private:
 	HWND m_hProgWnd;
@@ -34,7 +34,7 @@ class CFileParserVisitor : public CFileVisitor
 {
 public:
 	CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd);
-	virtual int VisitFile(LPCTSTR lpszFileName);
+	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL);
 	virtual UINT GetResult() { return m_nCount; }
 private:
 	HWND m_hMainWnd;

@@ -14,6 +14,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+DECLARE_THE_LOGGER_NAME("CListCtrlDemoDlg")
+
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoDlg dialog
 
@@ -428,12 +430,15 @@ void CListCtrlDemoDlg::OnButtonStart()
 	}
 
 	//Filter
-	RefreshFilterArrays();
-	nCount = m_sFilterArray.GetSize();
-	for(i = 0; i < nCount; i++)
-	{
-		lpThreadParam->filterList.Add(m_sFilterArray.GetAt(i));
-	}
+	m_filterTree.GetFilterGroupList(lpThreadParam->filterGroupList);
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)CommonUtils::ToString(lpThreadParam->filterGroupList))
+	//TODO
+// 	RefreshFilterArrays();
+// 	nCount = m_sFilterArray.GetSize();
+// 	for(i = 0; i < nCount; i++)
+// 	{
+// 		lpThreadParam->filterList.Add(m_sFilterArray.GetAt(i));
+// 	}
 
 	//Is recursive?
 	lpThreadParam->bRecursive = SYS_PREF()->m_bSearchIncludeSubFolders;
@@ -690,26 +695,36 @@ void CListCtrlDemoDlg::OnSize(UINT nType, int cx, int cy)
 
 LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam) 
 {
-	CList<HTREEITEM, HTREEITEM> htiSelectedList;
-	m_filterTree.GetSelectedItems(htiSelectedList);
-
-	CString sFilterStr;
-	POSITION pos = htiSelectedList.GetHeadPosition();
-	HTREEITEM hti;
-	CMultiSelTreeCtrl::TVITEMDATA* pTVIData = NULL;
-	while(pos != NULL)
-	{
-		hti = htiSelectedList.GetNext(pos);
-		
-		pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
-		if(pTVIData != NULL && !pTVIData->szType.IsEmpty())
-		{
-			sFilterStr += pTVIData->szType;
-			sFilterStr += _T(";");
-		}
-	}
+// 	CList<HTREEITEM, HTREEITEM> htiSelectedList;
+// 	m_filterTree.GetSelectedItems(htiSelectedList);
+// 
+// 	CString sFilterStr;
+// 	POSITION pos = htiSelectedList.GetHeadPosition();
+// 	HTREEITEM hti;
+// 	CMultiSelTreeCtrl::TVITEMDATA* pTVIData = NULL;
+// 	while(pos != NULL)
+// 	{
+// 		hti = htiSelectedList.GetNext(pos);
+// 		
+// 		pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
+// 		if(pTVIData != NULL && !pTVIData->szType.IsEmpty())
+// 		{
+// 			sFilterStr += pTVIData->szType;
+// 			sFilterStr += _T(";");
+// 		}
+// 	}
+	LPFilterGroupList lpFilterGroupList;
+	m_filterTree.GetFilterGroupList(lpFilterGroupList);
+	CString sFilterStr = CommonUtils::ToString(lpFilterGroupList);
 
 	m_filterComboBox.SetWindowText(sFilterStr);
+
+	POSITION pos = lpFilterGroupList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		LPFilterGroup pFilterGroup = lpFilterGroupList.GetNext(pos);
+		delete pFilterGroup;
+	}
 
 	return TRUE;
 }

@@ -1,7 +1,6 @@
 // LangGrammarMap.h: interface for the CLangGrammarMap class.
 //
 //////////////////////////////////////////////////////////////////////
-
 #if !defined(AFX_LANGGRAMMARMAP_H__E5DEA38A_3B11_44BA_B323_FB1DC7C1DEA9__INCLUDED_)
 #define AFX_LANGGRAMMARMAP_H__E5DEA38A_3B11_44BA_B323_FB1DC7C1DEA9__INCLUDED_
 

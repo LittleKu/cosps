@@ -1,6 +1,49 @@
 #include "StdAfx.h"
 #include "ListCtrlDemo.h"
 
+CString FilterGroup::ToString()
+{
+	CString szNameType;
+	szNameType.Format("%s:%d", szLangRuleName, nLangRuleType);
+
+	CString szInclude;
+	POSITION pos = includeList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		szInclude += includeList.GetNext(pos);
+		if(pos != NULL)
+		{
+			szInclude += ":";
+		}
+	}
+
+	CString szExclude;
+	pos = excludeList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		szExclude += excludeList.GetNext(pos);
+		if(pos != NULL)
+		{
+			szExclude += ":";
+		}
+	}
+
+	CString szResult;
+	szResult.Format("<%s><%s><%s>", szNameType, szInclude, szExclude);
+	return szResult;
+}
+CountThreadParam::~CountThreadParam()
+{
+	dirList.RemoveAll();
+
+	POSITION pos = filterGroupList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		LPFilterGroup pFilterGroup = filterGroupList.GetNext(pos);
+		delete pFilterGroup;
+	}
+}
+
 CTimeCost::CTimeCost(UINT timeInMs) : m_nDiff(timeInMs), m_clockCurr(clock()), m_clockLast(clock())
 {
 }
@@ -221,7 +264,7 @@ BOOL IsMatched(CStringArray& sFilterList, const char* sStr)
 	int nCount = sFilterList.GetSize();
 	if(nCount <= 0)
 	{
-		return TRUE;
+		return FALSE;
 	}
 	
 	CString filter;
@@ -235,6 +278,49 @@ BOOL IsMatched(CStringArray& sFilterList, const char* sStr)
 		}
 	}
 	return FALSE;
+}
+
+BOOL IsMatched(LPFilterGroup lpFilterGroup, const char* sStr)
+{
+	POSITION pos = lpFilterGroup->excludeList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		CString& sFilter = lpFilterGroup->excludeList.GetNext(pos);
+		if(CommonUtils::wildcmp(sFilter, sStr))
+		{
+			return FALSE;
+		}
+	}
+
+	pos = lpFilterGroup->includeList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		CString& sFilter = lpFilterGroup->includeList.GetNext(pos);
+		if(CommonUtils::wildcmp(sFilter, sStr))
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+POSITION IsMatched(LPFilterGroupList& filterGourpList, const char* sStr)
+{
+	if(filterGourpList.IsEmpty())
+	{
+		return NULL;
+	}
+	POSITION pos = filterGourpList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		LPFilterGroup lpFilterGroup = filterGourpList.GetNext(pos);
+
+		if(IsMatched(lpFilterGroup, sStr))
+		{
+			return pos;
+		}
+	}
+	return NULL;
 }
 
 void LoadBitmapFromFile(LPCTSTR lpszBmpFilePath, CBitmap* pBitmap)
@@ -428,7 +514,7 @@ int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL
 }
 
 
-int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker)
+int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker)
 {
 	ASSERT(lpszDirName);
 	ASSERT(pVisitor);
@@ -466,14 +552,17 @@ int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecur
 			//1. File
 			if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
 			{
-				if(!IsMatched(sFilterArray, FindFileData.cFileName))
+				POSITION pos = IsMatched(lpFilterGroupList, FindFileData.cFileName);
+				if(pos == NULL)
 				{
 					continue;
 				}
 				sCurFile.Format("%s\\%s", sCurDir, FindFileData.cFileName);
 				TRACE_LONG_NAME(sCurFile);
 
-				if(pVisitor->VisitFile(sCurFile) == -1)
+				LPFilterGroup lpFilterGroup = lpFilterGroupList.GetAt(pos);
+				ASSERT(lpFilterGroup != NULL);
+				if(pVisitor->VisitFile(sCurFile, (LPVOID)lpFilterGroup) == -1)
 				{
 					AfxTrace ("FileVisitor request to quit\n");
 					FindClose(hFind);
@@ -501,6 +590,57 @@ int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecur
 	}
 
 	return 0;
+}
+
+void Split(const CString& szStr, TCHAR delim, CStringList& outStringList)
+{
+	if(szStr.IsEmpty())
+	{
+		return;
+	}
+	
+	char cSep = ';';
+	int nStart = 0, nIndex;
+	CString str;
+	while( (nIndex = szStr.Find(delim, nStart)) != -1)
+	{
+		if(nIndex > nStart)
+		{
+			str = szStr.Mid(nStart, nIndex - nStart);
+			outStringList.AddTail(str);
+		}
+		nStart = nIndex + 1;
+	}
+	//Not the last char
+	if(nStart < szStr.GetLength())
+	{
+		str = szStr.Mid(nStart);
+		outStringList.AddTail(str);
+	}
+// #ifdef _DEBUG
+// 	for(int i = 0; i < m_sFilterArray.GetSize(); i++)
+// 	{
+// 		AfxTrace("Filer(%d): [%s]\n", i + 1, m_sFilterArray.GetAt(i));
+// 	}
+// #endif
+}
+
+CString ToString(LPFilterGroupList& filterGroupList)
+{
+	CString szResult;
+	LPFilterGroup lpFilterGroup = NULL;
+	POSITION pos = filterGroupList.GetHeadPosition();
+	while(pos != NULL)
+	{
+		lpFilterGroup = filterGroupList.GetNext(pos);
+		ASSERT(lpFilterGroup != NULL);
+		szResult += lpFilterGroup->ToString();
+		if(pos != NULL)
+		{
+			szResult += " | ";
+		}
+	}
+	return szResult;
 }
 
 END_NAMESPACE()

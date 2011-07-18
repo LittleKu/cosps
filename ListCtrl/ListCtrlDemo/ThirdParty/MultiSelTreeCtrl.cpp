@@ -3,6 +3,7 @@
 #include "tinyxml.h"
 #include "PropDlg.h"
 #include "../NewFilterGroupDlg.h"
+#include "../LangGrammarMap.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -151,6 +152,54 @@ BOOL CALLBACK ValidateCheckProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, L
 			nCurrItemStateImage = TVIS_IMAGE_STATE_PARTIAL_CHECK;
 		}
 		pTree->SetItemState(hTreeItem, INDEXTOSTATEIMAGEMASK(nCurrItemStateImage), TVIS_STATEIMAGEMASK);
+	}
+	//Reach the "file", stop loop
+	else if(pTVIData->szName.Compare(XML_NM_FILE) == 0)
+	{
+		return FALSE;
+	}
+	return TRUE;
+}
+
+BOOL CALLBACK GetFilterGroupListProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
+{
+	LPFilterGroupList* pLPFilterGroupList = (LPFilterGroupList*)lParam;
+
+	CMultiSelTreeCtrl::TVITEMDATA* pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)pTree->GetItemData(hTreeItem);
+	//lang
+	if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
+	{
+		UINT nStateImage = pTree->GetItemStateImage(hTreeItem);
+		if(nStateImage == TVIS_IMAGE_STATE_PARTIAL_CHECK || nStateImage == TVIS_IMAGE_STATE_FULL_CHECK)
+		{
+			int nLangRuleType = atoi(pTVIData->szType);
+			CLangGrammarInfo* pLangGrammarInfo = NULL;
+			pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nLangRuleType);
+			//TODO: This lang rule has been deleted.
+			if(pLangGrammarInfo == NULL)
+			{
+				return TRUE;
+			}
+
+			LPFilterGroup lpFilterGroup = new FilterGroup();
+			lpFilterGroup->nLangRuleType = nLangRuleType;
+			lpFilterGroup->szLangRuleName = pLangGrammarInfo->m_szLangName;
+
+			//Iterate all the children items
+			HTREEITEM hChildItem = pTree->GetChildItem(hTreeItem);
+			while(hChildItem != NULL)
+			{
+				nStateImage = pTree->GetItemStateImage(hChildItem);
+				if(nStateImage == TVIS_IMAGE_STATE_FULL_CHECK)
+				{
+					pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)pTree->GetItemData(hChildItem);
+					CommonUtils::Split(pTVIData->szType, _T(':'), lpFilterGroup->includeList);
+				}
+				hChildItem = pTree->GetNextItem(hChildItem, TVGN_NEXT);
+			}
+
+			pLPFilterGroupList->AddTail(lpFilterGroup);
+		}
 	}
 	//Reach the "file", stop loop
 	else if(pTVIData->szName.Compare(XML_NM_FILE) == 0)
@@ -896,4 +945,9 @@ LRESULT CMultiSelTreeCtrl::SendMessageToOwner(UINT message, WPARAM wParam, LPARA
 	CWnd* pOwner = GetOwner();
 	ASSERT(pOwner);
 	return pOwner->SendMessage(message, wParam, lParam);
+}
+
+void CMultiSelTreeCtrl::GetFilterGroupList(LPFilterGroupList& lpFilterGroupList)
+{
+	BFSEnumItems(GetRootItem(), GetFilterGroupListProc, (LPARAM)&lpFilterGroupList);
 }

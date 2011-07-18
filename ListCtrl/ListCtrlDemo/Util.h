@@ -15,13 +15,31 @@
 #define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #endif
 
-typedef struct tagCountThreadParam
+class FilterGroup
 {
+public:
+	int nLangRuleType;
+	CString szLangRuleName;
+	CStringList includeList;
+	CStringList excludeList;
+public:
+	CString ToString();
+};
+
+typedef FilterGroup* LPFilterGroup;
+typedef CList<LPFilterGroup, LPFilterGroup> LPFilterGroupList;
+
+class CountThreadParam
+{
+public:
+	~CountThreadParam();
 	HWND hwndMain;
 	CStringArray dirList;
-	CStringArray filterList;
+	LPFilterGroupList filterGroupList;
 	BOOL bRecursive;
-}CountThreadParam, *LPCountThreadParam;
+};
+
+typedef CountThreadParam* LPCountThreadParam;
 
 typedef struct tagUpdateProgressParam
 {
@@ -35,7 +53,7 @@ class CFileVisitor
 {
 public:
 	virtual ~CFileVisitor(){}
-	virtual int VisitFile(LPCTSTR lpszFileName) = 0;
+	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL) = 0;
 	virtual UINT GetResult() = 0;
 };
 
@@ -81,10 +99,14 @@ BEGIN_NAMESPACE(CommonUtils)
 	CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags = GCFP_AUTO, LPCTSTR lpBaseDir = NULL);
 	int wildcmp(const char *wild, const char *string);
 	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
+	BOOL IsMatched(FilterGroup& filterGroup, const char* sStr);
+	POSITION IsMatched(LPFilterGroupList& filterGourpList, const char* sStr);
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
-	int EnumDirectoryIt(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
+	int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	void LoadBitmapFromFile(LPCTSTR lpszBmpFilePath, CBitmap* pBitmap);
+	void Split(const CString& szStr, TCHAR delim, CStringList& outStringList);
+	CString ToString(LPFilterGroupList& filterGroupList);
 END_NAMESPACE()
 
 
