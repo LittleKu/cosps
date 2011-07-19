@@ -16,7 +16,7 @@
         <line_comment content="&apos;" />
     </lang_grammar>
     <lang_grammar name="BAT" type="102">
-        <line_comment content="rem" case_sensitive="false" />
+        <line_comment content="rem" start_column="0" case_sensitive="false" />
     </lang_grammar>
     <lang_grammar name="C" type="201">
         <line_comment content="//" />
@@ -53,7 +53,7 @@
         <block_comment start="&lt;!--" end="--&gt;" />
     </lang_grammar>
     <lang_grammar name="INI" type="801">
-        <line_comment content=";" />
+        <line_comment content=";" start_column="0" />
     </lang_grammar>
     <lang_grammar name="Java" type="901">
         <line_comment content="//" />
