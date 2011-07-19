@@ -18,6 +18,7 @@ public:
 public:
 	BOOL m_bSearchIncludeSubFolders;
 	UINT m_nMaxItemsInFilterComboBox;
+	DWORD	m_nStatMode;
 	//This attribute is maintenanced by CSourceDirListCtrl. CPreferences just provide the space. 
 	CString m_szLastSelectedSrcFolder;
 };

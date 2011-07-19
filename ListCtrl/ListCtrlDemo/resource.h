@@ -21,6 +21,7 @@
 #define IDB_MAIN_TOOLBAR_BKG            141
 #define IDD_PROPPAGE_GENERAL            142
 #define IDI_OPTIONS_GENERAL             143
+#define IDD_PROPPAGE_STAT               144
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -75,6 +76,10 @@
 #define IDC_CHECK_INCLUDE_SUB_FOLDER    1055
 #define IDC_TXT_MAX_HISTORY_ITEMS       1056
 #define IDC_MAX_HISTORY_ITEMS           1057
+#define IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT 1058
+#define IDC_CHECK_MIXED_LINE_CODE       1059
+#define IDC_CHECK_MIXED_LINE_COMMENT    1060
+#define IDC_CHECK_STRING_IN_MULTI_LINE  1061
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
@@ -102,9 +107,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        144
+#define _APS_NEXT_RESOURCE_VALUE        145
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         1058
+#define _APS_NEXT_CONTROL_VALUE         1062
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

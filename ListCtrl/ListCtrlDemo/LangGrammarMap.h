@@ -18,7 +18,8 @@ class CLangGrammarInfo
 public:
 	CLangGrammarInfo();
 	~CLangGrammarInfo();
-	BOOL IsUserDefined() const { return m_nLangType >= USER_DEFINED_LANG_ID_START; }
+	BOOL IsUserDefined() const { return m_nLangType > USER_DEFINED_LANG_ID_START; }
+	static BOOL IsUserDefinedLangGrammar(int nLangRuleType);
 public:
 	int m_nLangType;
 	CString m_szLangName;

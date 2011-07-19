@@ -2,8 +2,8 @@
 
 [General Info]
 Version=1
-LastClass=CCustomLangDlg
-LastTemplate=CDialog
+LastClass=CPPgStatistic
+LastTemplate=CPropertyPage
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
@@ -12,15 +12,15 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=16
+ResourceCount=17
 Resource1=IDD_PROPPAGE_GENERAL (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_ABOUTBOX
+Resource4=IDD_LISTCTRLDEMO_DIALOG
 Resource5=IDD_PROPPAGE_GENERAL
-Resource6=IDD_LISTCTRLDEMO_DIALOG
+Resource6=IDD_MAIN_DLG
 Class4=CProgressDlg
-Resource7=IDD_MAIN_DLG
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=CG_IDD_PROGRESS
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
@@ -32,14 +32,15 @@ Class8=CResultListCtrl
 Class9=CMainReBar
 Resource12=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_PROGRESS (Chinese (P.R.C.))
+Resource13=IDD_PROPPAGE_STAT
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource14=IDD_PROGRESS (Chinese (P.R.C.))
 Resource15=IDD_ABOUTBOX (English (U.S.))
-Class14=CCustomLangDlg
-Resource16=IDR_RESULT_MENU (Neutral)
+Class14=CPPgStatistic
+Resource16=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource17=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -60,7 +61,7 @@ VirtualFilter=dWC
 
 [DLG:IDD_ABOUTBOX]
 Type=1
-Class=CCustomLangDlg
+Class=?
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -161,7 +162,7 @@ Control30=IDC_SPLITTER_HORIZONTAL,static,1342177287
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=CCustomLangDlg
+Class=?
 ControlCount=8
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_PRODUCT_VERSION,static,1342308480
@@ -344,11 +345,21 @@ Control1=IDC_CHECK_INCLUDE_SUB_FOLDER,button,1342242819
 Control2=IDC_TXT_MAX_HISTORY_ITEMS,static,1342308876
 Control3=IDC_MAX_HISTORY_ITEMS,edit,1350639616
 
-[CLS:CCustomLangDlg]
+[DLG:IDD_PROPPAGE_STAT]
+Type=1
+Class=CPPgStatistic
+ControlCount=4
+Control1=IDC_STATIC,button,1342177287
+Control2=IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT,button,1342242819
+Control3=IDC_CHECK_MIXED_LINE_CODE,button,1342242819
+Control4=IDC_CHECK_MIXED_LINE_COMMENT,button,1342242819
+
+[CLS:CPPgStatistic]
 Type=0
-HeaderFile=CustomLangDlg.h
-ImplementationFile=CustomLangDlg.cpp
-BaseClass=CDialog
+HeaderFile=PPgStatistic.h
+ImplementationFile=PPgStatistic.cpp
+BaseClass=CPropertyPage
 Filter=D
-VirtualFilter=dWC
+LastObject=IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT
+VirtualFilter=idWC
 

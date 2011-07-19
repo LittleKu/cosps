@@ -311,14 +311,16 @@ POSITION IsMatched(LPFilterGroupList& filterGourpList, const char* sStr)
 		return NULL;
 	}
 	POSITION pos = filterGourpList.GetHeadPosition();
+	LPFilterGroup lpFilterGroup;
 	while(pos != NULL)
 	{
-		LPFilterGroup lpFilterGroup = filterGourpList.GetNext(pos);
-
+		lpFilterGroup = filterGourpList.GetAt(pos);
 		if(IsMatched(lpFilterGroup, sStr))
 		{
 			return pos;
 		}
+		//Move to next pos
+		filterGourpList.GetNext(pos);
 	}
 	return NULL;
 }

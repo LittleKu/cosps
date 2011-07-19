@@ -1,19 +1,55 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<root text="All" checked="2">
-	<language text="C/C++" type="2" checked="2">
-		<file text="C/C++ Header File (*.h)" type="*.h" checked="3"/>
-		<file text="C/C++ Inline File (*.inl)" type="*.inl" checked="3"/>
-		<file text="C Source File (*.c)" type="*.c" checked="3"/>
-		<file text="C++ Source File (*.cpp)" type="*.cpp" checked="3"/>
-		<file text="C++ Source File (*.cxx)" type="*.cxx" checked="3"/>
-		<file text="C++ Header File (*.hpp)" type="*.hpp" checked="3"/>
-		<file text="Resource Script (*.rc)" type="*.rc" checked="3"/>
-		<file text="Resource Script (*.rc2)" type="*.rc2" checked="3"/>		
-	</language>
-	<language text="C#" type="3" checked="3">
-		<file text="C Sharp Source File (*.cs)" type="*.cs" checked="3"/>
-	</language>
-	<language text="Java" type="4" checked="1">
-		<file text="Java Source File (*.java)" type="*.java" checked="1"/>
-	</language>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<root text="All" type="" checked="2">
+    <language text="Java" type="901" checked="3">
+        <file text="Java Source File (*.java)" type="*.java" checked="3" />
+    </language>
+    <language text="C/C++" type="203" checked="3">
+        <file text="C/C++ Header File (*.h)" type="*.h" checked="3" />
+        <file text="C/C++ Inline File (*.inl)" type="*.inl" checked="3" />
+        <file text="C Source File (*.c)" type="*.c" checked="3" />
+        <file text="C++ Source File (*.cpp)" type="*.cpp" checked="3" />
+        <file text="C++ Source File (*.cxx)" type="*.cxx" checked="3" />
+        <file text="C++ Header File (*.hpp)" type="*.hpp" checked="3" />
+        <file text="Resource Script (*.rc)" type="*.rc" checked="3" />
+        <file text="Resource Script (*.rc2)" type="*.rc2" checked="3" />
+    </language>
+    <language text="C#" type="204" checked="1">
+        <file text="C Sharp Source File (*.cs)" type="*.cs" checked="1" />
+    </language>
+    <language text="PHP" type="1503" checked="1">
+        <file text="PHP Script File (*.php)" type="*.php" checked="1" />
+        <file text="PHP v3 Script File (*.php3)" type="*.php3" checked="1" />
+        <file text="PHP v4 Script File (*.php4)" type="*.php4" checked="1" />
+        <file text="PHP v5 Script File (*.php5)" type="*.php5" checked="1" />
+    </language>
+    <language text="Python" type="1504" checked="1">
+        <file text="Python Source File (*.py)" type="*.py" checked="1" />
+    </language>
+    <language text="Basic" type="101" checked="1">
+        <file text="Visual Basic Source File (*.vb)" type="*.vb" checked="1" />
+    </language>
+    <language text="Perl" type="1502" checked="1">
+        <file text="Perl Script File (*.pl)" type="*.pl" checked="1" />
+    </language>
+    <language text="Ruby" type="1701" checked="1">
+        <file text="Ruby Source File (*.rb)" type="*.rb" checked="1" />
+    </language>
+    <language text="JavaScript" type="902" checked="1">
+        <file text="JScript Script File (*.js)" type="*.js" checked="1" />
+    </language>
+    <language text="Delphi" type="301" checked="1">
+        <file text="Delphi Source File (*.pas)" type="*.pas" checked="1" />
+    </language>
+    <language text="Assembly" type="2" checked="1">
+        <file text="Assembler Source (*.asm)" type="*.asm" checked="1" />
+    </language>
+    <language text="Ada" type="1" checked="1">
+        <file text="Ada Source File (*.adb)" type="*.adb" checked="1" />
+    </language>
+    <language text="Pascal" type="301" checked="1">
+        <file text="Pascal Source File (*.pas)" type="*.pas" checked="1" />
+    </language>
+    <language text="SQL" type="1802" checked="1">
+        <file text="SQL Script File (*.sql)" type="*.sql" checked="1" />
+    </language>
 </root>

@@ -3,6 +3,7 @@
 #include <memory>
 #include "ListCtrlDemo.h"
 #include "IniFileReadWrite.h"
+#include "FileParser.h"
 
 CPreferences* SYS_PREF()
 {
@@ -50,6 +51,18 @@ BOOL CPreferences::Init()
 		m_nMaxItemsInFilterComboBox = _ttoi(szValue);
 	}
 
+	//m_nStatMode
+	szValue = gtb::GetKeyValue(SYS_PREF_INI_FILE(), lpSectionName, "StatisticsMode");
+	m_nStatMode = FP_MODE_DEFAULT;
+	if(!szValue.IsEmpty())
+	{
+		nValue = _ttoi(szValue);
+		if(nValue > 0)
+		{
+			m_nStatMode = (DWORD)nValue;
+		}
+	}
+
 	return TRUE;
 }
 
@@ -64,6 +77,9 @@ BOOL CPreferences::Save()
 
 	szValue.Format("%d", m_nMaxItemsInFilterComboBox);
 	::WritePrivateProfileString(lpSectionName, "MaxItemsInFilterComboBox", szValue, SYS_PREF_INI_FILE());
+
+	szValue.Format("%d", m_nStatMode);
+	::WritePrivateProfileString(lpSectionName, "StatisticsMode", szValue, SYS_PREF_INI_FILE());
 
 	return TRUE;
 }

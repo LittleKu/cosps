@@ -20,10 +20,12 @@ CPreferencesDlg::CPreferencesDlg() : m_bSaveIniFile(FALSE)
 {
 	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_wndGeneral.m_psp.dwFlags &= ~PSP_HASHELP;	
+	m_wndStatistic.m_psp.dwFlags &= ~PSP_HASHELP;
 
 	TreePropSheet::CTreePropSheet::SetPageIcon(&m_wndGeneral, IDI_OPTIONS_GENERAL);
 
 	AddPage(&m_wndGeneral);
+	AddPage(&m_wndStatistic);
 
 	//Enable Tree View Mode when there are more than 3 pages.
 	SetTreeViewMode((GetPageCount() >= 3), TRUE, TRUE);

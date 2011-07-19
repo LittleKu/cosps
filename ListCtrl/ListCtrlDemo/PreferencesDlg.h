@@ -5,6 +5,7 @@
 
 #include "./ThirdParty/TreePropSheet/TreePropSheet.h"
 #include "PPgGeneral.h"
+#include "PPgStatistic.h"
 
 class CPreferencesDlg : public TreePropSheet::CTreePropSheet
 {
@@ -14,6 +15,7 @@ public:
 	virtual ~CPreferencesDlg();
 	
 	CPPgGeneral		m_wndGeneral;
+	CPPgStatistic	m_wndStatistic;
 
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);

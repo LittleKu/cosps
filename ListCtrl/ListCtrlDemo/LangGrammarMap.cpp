@@ -26,6 +26,11 @@ CLangGrammarInfo::~CLangGrammarInfo()
 		delete m_pLangGrammar;
 	}
 }
+
+BOOL CLangGrammarInfo::IsUserDefinedLangGrammar(int nLangRuleType)
+{
+	return nLangRuleType > USER_DEFINED_LANG_ID_START;
+}
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////

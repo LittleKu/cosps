@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "Counter.h"
-#include "FileParser.h"
+#include "LangGrammarMap.h"
 
 UINT CCounter::CountThreadProc(LPVOID lpvData)
 {
@@ -169,7 +169,7 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 	LPFilterGroup lpFilterGroup = (LPFilterGroup)lpParam;
 	ASSERT(lpFilterGroup != NULL && lpFilterGroup->nLangRuleType >= 0);
 
-	IFileParser* pFileParser = CFileParserFactory::GetFileParser(static_cast<ELangType>(lpFilterGroup->nLangRuleType), pFi);
+	IFileParser* pFileParser = GetFileParser(lpFilterGroup->nLangRuleType, pFi, SYS_PREF()->m_nStatMode);
 	if(pFileParser == NULL)
 	{
 		AfxTrace("File[%s], Lang[%s:%d]\n", lpszFileName, lpFilterGroup->szLangRuleName, lpFilterGroup->nLangRuleType);
@@ -184,4 +184,20 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 	delete pFileParser;
 
 	return m_nCount;
+}
+
+IFileParser* CFileParserVisitor::GetFileParser(int nLangRuleType, CFileInfo* pFileInfo, DWORD nMode)
+{
+	IFileParser* pFileParser = NULL;
+	if(!CLangGrammarInfo::IsUserDefinedLangGrammar(nLangRuleType))
+	{
+		pFileParser = CFileParserFactory::GetFileParser(static_cast<ELangType>(nLangRuleType), pFileInfo, nMode);
+	}
+	if(pFileParser != NULL)
+	{
+		return pFileParser;
+	}
+	CLangGrammarInfo* pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nLangRuleType);
+	ASSERT(pLangGrammarInfo != NULL);
+	return CFileParserFactory::GetGenericFileParser(pLangGrammarInfo->m_pLangGrammar, pFileInfo, nMode);
 }

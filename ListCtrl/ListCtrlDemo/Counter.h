@@ -1,6 +1,8 @@
 #ifndef _COUNTER_H_
 #define _COUNTER_H_
 
+#include "FileParser.h"
+
 class CCounter
 {
 public:
@@ -36,6 +38,7 @@ public:
 	CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd);
 	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL);
 	virtual UINT GetResult() { return m_nCount; }
+	IFileParser* GetFileParser(int nLangRuleType, CFileInfo* pFileInfo, DWORD nMode = FP_MODE_DEFAULT);
 private:
 	HWND m_hMainWnd;
 	HWND m_hProgWnd;

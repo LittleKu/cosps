@@ -177,6 +177,10 @@ SOURCE=.\PPgGeneral.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PPgStatistic.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Preferences.cpp
 # End Source File
 # Begin Source File
@@ -319,6 +323,10 @@ SOURCE=.\NewFilterGroupDlg.h
 # Begin Source File
 
 SOURCE=.\PPgGeneral.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PPgStatistic.h
 # End Source File
 # Begin Source File
 
