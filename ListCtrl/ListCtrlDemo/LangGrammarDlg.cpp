@@ -6,7 +6,7 @@
 #include "LangGrammarDlg.h"
 #include "DlgTemplate.h"
 #include "ListCtrlDemo.h"
-#include "ThirdParty/VisualStylesXP.h"
+#include "StringUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -25,6 +25,8 @@ int CLangTemplateDlg::nStartPosX = 7;
 int CLangTemplateDlg::nStartPosY = 7;
 int CLangTemplateDlg::nSpaceX = 5;
 int CLangTemplateDlg::nSpaceY = 7;
+
+#define LANG_GRAMMAR_SEPARATOR	STRING_SEPARATOR
 
 UINT WM_LANG_GRAMMAR_DLG_MSG = ::RegisterWindowMessage(_T("WM_LANG_GRAMMAR_DLG_MSG"));
 
@@ -68,6 +70,16 @@ CLangTemplateDlg::~CLangTemplateDlg()
 		delete pEdit;
 	}
 	m_listEdit.RemoveAll();
+
+	//Remove all button controls
+	CButton* pButton = NULL;
+	pos = m_listCheckBox.GetHeadPosition();
+	while(pos != NULL)
+	{
+		pButton = (CButton*)m_listCheckBox.GetNext(pos);
+		delete pButton;
+	}
+	m_listCheckBox.RemoveAll();
 
 	//Remove dialog template
 	if(m_dlgTemplate != NULL)
@@ -118,6 +130,13 @@ void CLangTemplateDlg::AddProperty(LPCTSTR lpszName, int gridwidth, LPCTSTR lpsz
 void CLangTemplateDlg::AddSeparator()
 {
 	AddProperty(NULL, 0, NULL, LAYOUT_TYPE_SEPARATOR);
+}
+
+void CLangTemplateDlg::AddCheckBox(LPCTSTR lpszName, BOOL bEnd, BOOL bCheck)
+{
+	int gridwidth = bEnd ? 0 : -1;
+	LPCTSTR lpszDefaultValue = bCheck ? "1" : "0";
+	AddProperty(lpszName, gridwidth, lpszDefaultValue, LAYOUT_TYPE_CHECKBOX);
 }
 
 BOOL CLangTemplateDlg::CalcMaxLabelSize(CSize& szMax, int& nMaxGridWidth)
@@ -190,6 +209,24 @@ void CLangTemplateDlg::CreateControls()
 			m_listLabel.AddTail(pStatic);
 
 			nRow++;
+		}
+		else if(layout.nType == LAYOUT_TYPE_CHECKBOX)
+		{
+			CalcLabelRect(&rect, &lastRect, nRow, nCol, szMax, nGridWidthInPixel);
+			//Re-calculate the rect width
+			rect.right = rect.left + nGridWidthInPixel;
+			CButton* pButton = new CButton();
+			pButton->Create(layout.sPropName, WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX, rect, this, ID_PROP_EDIT_FIRST + i);
+			pButton->SetFont(pDlgFont, TRUE);
+			posEdit = m_listCheckBox.AddTail(pButton);
+			layout.posEdit = posEdit;
+
+			int iValue = atoi(layout.sPropValue);
+			pButton->SetCheck((iValue > 0) ? BST_CHECKED : BST_UNCHECKED);
+
+			nRow++;
+			nCol = 0;
+			i++;
 		}
 		else
 		{
@@ -276,9 +313,17 @@ void CLangTemplateDlg::UpdatePropValue()
 	{
 		m_mapLayout.GetNextAssoc(pos, szLabelName, pData);
 		LayoutInfo& layout = m_listLayout.GetAt((POSITION)pData);
-		CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
-		pEdit->GetWindowText(szLabelValue);
-		m_mapPropOut.SetAt(szLabelName, szLabelValue);
+		if(layout.nType == LAYOUT_TYPE_PROP)
+		{
+			CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
+			pEdit->GetWindowText(szLabelValue);
+			m_mapPropOut.SetAt(szLabelName, szLabelValue);
+		}
+		else if(layout.nType == LAYOUT_TYPE_CHECKBOX)
+		{
+			CButton* pButton = (CButton*)m_listCheckBox.GetAt(layout.posEdit);
+			m_mapPropOut.SetAt(szLabelValue, (pButton->GetCheck() == BST_CHECKED) ? "1" : "0");
+		}
 	}
 }
 
@@ -318,13 +363,26 @@ void CLangTemplateDlg::SetAllEditStatus(DWORD nStatus)
 	{
 		m_mapLayout.GetNextAssoc(pos, szLabelName, pData);
 		LayoutInfo& layout = m_listLayout.GetAt((POSITION)pData);
-		CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
 
-		if(m_nStatus & ALL_EDIT_STATUS_EMPTY)
+		if(layout.nType == LAYOUT_TYPE_PROP)
 		{
-			pEdit->SetWindowText("");
+			CEdit* pEdit = (CEdit*)m_listEdit.GetAt(layout.posEdit);
+			
+			if(m_nStatus & ALL_EDIT_STATUS_EMPTY)
+			{
+				pEdit->SetWindowText("");
+			}
+			pEdit->SetReadOnly(m_nStatus & ALL_EDIT_STATUS_READONLY);
 		}
-		pEdit->SetReadOnly(m_nStatus & ALL_EDIT_STATUS_READONLY);
+		else if(layout.nType == LAYOUT_TYPE_CHECKBOX)
+		{
+			CButton* pButton = (CButton*)m_listCheckBox.GetAt(layout.posEdit);
+			if(m_nStatus & ALL_EDIT_STATUS_EMPTY)
+			{
+				pButton->SetCheck(BST_UNCHECKED);
+			}
+			pButton->EnableWindow( (m_nStatus & ALL_EDIT_STATUS_READONLY) ? FALSE : TRUE );
+		}
 	}
 	if( (m_nStatus & ALL_EDIT_STATUS_READONLY) == 0)
 	{
@@ -352,6 +410,7 @@ END_MESSAGE_MAP()
 
 LPCTSTR CLangGrammarDlg::lpszLangName = _T("Name:");
 LPCTSTR CLangGrammarDlg::lpszLineComment = _T("Line Comment:");
+LPCTSTR CLangGrammarDlg::lpszStartsAtFirstChar = _T("Start at first character");
 LPCTSTR CLangGrammarDlg::lpszEscapeString = _T("Escape String:");
 LPCTSTR CLangGrammarDlg::lpszBlockCommentOn = _T("Block Comment On:");
 LPCTSTR CLangGrammarDlg::lpszBlockCommentOff = _T("Block Comment Off:");
@@ -367,6 +426,7 @@ CLangGrammarDlg::CLangGrammarDlg()
 	AddSeparator();
 	
 	AddProperty(lpszLineComment, 2);
+//	AddCheckBox(lpszStartsAtFirstChar, TRUE, FALSE);
 	AddProperty(lpszEscapeString, 2);
 	AddProperty(lpszBlockCommentOn, 1);
 	AddProperty(lpszBlockCommentOff, 1);
@@ -391,8 +451,8 @@ BOOL CLangGrammarDlg::OnEraseBkgnd(CDC* pDC)
 HBRUSH CLangGrammarDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CLangTemplateDlg::OnCtlColor(pDC, pWnd, nCtlColor);
-	int nCtrlID = pWnd->GetDlgCtrlID(); 
-	if(nCtlColor == CTLCOLOR_STATIC && (nCtrlID >= ID_TXT_LABEL_FIRST && nCtrlID < ID_PROP_EDIT_FIRST))
+	int nCtrlID = pWnd->GetDlgCtrlID();
+	if( (nCtlColor == CTLCOLOR_STATIC) && (nCtrlID >= ID_TXT_LABEL_FIRST && nCtrlID < ID_PROP_EDIT_FIRST))
     {
 		pDC->SetBkMode(TRANSPARENT);
 		//Comment:
@@ -418,6 +478,8 @@ BOOL CLangGrammarDlg::GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BO
 	pLangGrammarInfo = new CLangGrammarInfo();
 	BOOL bResult = FALSE;
 	
+	CStringList tokenList1, tokenList2;
+	POSITION pos1, pos2;
 	CString szTemp1, szTemp2;
 	do 
 	{
@@ -437,40 +499,101 @@ BOOL CLangGrammarDlg::GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BO
 		
 		//Line Comment
 		m_mapPropOut.Lookup(lpszLineComment, szTemp1);
-		if(!szTemp1.IsEmpty())
+		CStringUtils::Split(szTemp1, LANG_GRAMMAR_SEPARATOR, tokenList1, TRUE, FALSE);
+		for(pos1 = tokenList1.GetHeadPosition(); pos1 != NULL; )
 		{
-			builder.AddSingleComment(szTemp1);
+			builder.AddSingleComment(tokenList1.GetNext(pos1));
 		}
 		
 		//Escape String
 		m_mapPropOut.Lookup(lpszEscapeString, szTemp1);
-		if(!szTemp1.IsEmpty())
+		tokenList1.RemoveAll();
+		CStringUtils::Split(szTemp1, LANG_GRAMMAR_SEPARATOR, tokenList1, TRUE, FALSE);
+		for(pos1 = tokenList1.GetHeadPosition(); pos1 != NULL; )
 		{
-			builder.AddEscapeStr(szTemp1);
+			builder.AddEscapeStr(tokenList1.GetNext(pos1));
 		}
 		
 		//Block Comment
 		m_mapPropOut.Lookup(lpszBlockCommentOn, szTemp1);
+		tokenList1.RemoveAll();
+		CStringUtils::Split(szTemp1, LANG_GRAMMAR_SEPARATOR, tokenList1, TRUE, FALSE);
+
 		m_mapPropOut.Lookup(lpszBlockCommentOff, szTemp2);
-		if(!szTemp1.IsEmpty() && !szTemp2.IsEmpty())
+		tokenList2.RemoveAll();
+		CStringUtils::Split(szTemp2, LANG_GRAMMAR_SEPARATOR, tokenList2, TRUE, FALSE);
+
+		if(tokenList1.GetCount() != tokenList2.GetCount())
 		{
-			builder.AddMultiComment(szTemp1, szTemp2);
+			if(bShowError)
+			{
+				AfxMessageBox(_T("The token number of Block Comment On and Block Comment Off is not same."));
+			}
+			pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
+			break;
+		}
+		else
+		{
+			pos1 = tokenList1.GetHeadPosition();
+			pos2 = tokenList2.GetHeadPosition();
+			while(pos1 != NULL && pos2 != NULL)
+			{
+				builder.AddMultiComment(tokenList1.GetNext(pos1), tokenList2.GetNext(pos2));
+			}
 		}
 		
 		//String
 		m_mapPropOut.Lookup(lpszStringOn, szTemp1);
+		tokenList1.RemoveAll();
+		CStringUtils::Split(szTemp1, LANG_GRAMMAR_SEPARATOR, tokenList1, TRUE, FALSE);
+
 		m_mapPropOut.Lookup(lpszStringOff, szTemp2);
-		if(!szTemp1.IsEmpty() && !szTemp2.IsEmpty())
+		tokenList2.RemoveAll();
+		CStringUtils::Split(szTemp2, LANG_GRAMMAR_SEPARATOR, tokenList2, TRUE, FALSE);
+		if(tokenList1.GetCount() != tokenList2.GetCount())
 		{
-			builder.AddStringMark(szTemp1, szTemp2);
+			if(bShowError)
+			{
+				AfxMessageBox(_T("The token number of String On and String Off is not same."));
+			}
+			pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
+			break;
+		}
+		else
+		{
+			pos1 = tokenList1.GetHeadPosition();
+			pos2 = tokenList2.GetHeadPosition();
+			while(pos1 != NULL && pos2 != NULL)
+			{
+				builder.AddStringMark(tokenList1.GetNext(pos1), tokenList2.GetNext(pos2));
+			}
 		}
 		
 		//Character
 		m_mapPropOut.Lookup(lpszCharacterOn, szTemp1);
+		tokenList1.RemoveAll();
+		CStringUtils::Split(szTemp1, LANG_GRAMMAR_SEPARATOR, tokenList1, TRUE, FALSE);
+
 		m_mapPropOut.Lookup(lpszCharacterOff, szTemp2);
-		if(!szTemp1.IsEmpty() && !szTemp2.IsEmpty())
+		tokenList2.RemoveAll();
+		CStringUtils::Split(szTemp2, LANG_GRAMMAR_SEPARATOR, tokenList2, TRUE, FALSE);
+		if(tokenList1.GetCount() != tokenList2.GetCount())
 		{
-			builder.AddCharMark(szTemp1, szTemp2);
+			if(bShowError)
+			{
+				AfxMessageBox(_T("The token number of Single Character On and Single Character Off is not same."));
+			}
+			pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
+			break;
+		}
+		else
+		{
+			pos1 = tokenList1.GetHeadPosition();
+			pos2 = tokenList2.GetHeadPosition();
+			while(pos1 != NULL && pos2 != NULL)
+			{
+				builder.AddCharMark(tokenList1.GetNext(pos1), tokenList2.GetNext(pos2));
+			}
 		}
 		
 		pLangGrammarInfo->m_pLangGrammar = builder.GetResult();
@@ -530,44 +653,118 @@ void CLangGrammarDlg::SetLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo)
 	pEdit->SetWindowText(pLangGrammarInfo->m_szLangName);
 
 	ILangGrammar* pLangGrammar = pLangGrammarInfo->m_pLangGrammar;
-	CString szText;
+	CString szText, szText2;
+	int i, size;
 
 	//Line Comment
-	CSingleLineComment* pLineComment;
-	pLineComment = (pLangGrammar->GetCountOfSingleLineComment() > 0) ? &(pLangGrammar->GetSingleLineComment(0)) : NULL;
+	for(i = 0, size = pLangGrammar->GetCountOfSingleLineComment(); i < size; i++)
+	{
+		CSingleLineComment& lineComment = pLangGrammar->GetSingleLineComment(i);
+		szText += MakeEscapeString(lineComment.m_szTag);
+		if(i < size - 1)
+		{
+			szText += STRING_SEPARATOR;
+		}
+	}
 	pEdit = GetEdit(lpszLineComment);
-	pEdit->SetWindowText( (pLineComment != NULL) ? pLineComment->m_szTag : "");
+	pEdit->SetWindowText(szText);
 	
 	//Escape
-	LG_STRING* pEscapeStr;
-	pEscapeStr = pLangGrammar->GetCountOfEscStr() > 0 ? &(pLangGrammar->GetEscapeStr(0)) : NULL;
+	szText.Empty();
+	for(i = 0, size = pLangGrammar->GetCountOfEscStr(); i < size; i++)
+	{
+		LG_STRING& escapeStr = pLangGrammar->GetEscapeStr(i);
+		szText += MakeEscapeString(escapeStr);
+		if(i < size - 1)
+		{
+			szText += STRING_SEPARATOR;
+		}
+	}
 	pEdit = GetEdit(lpszEscapeString);
-	pEdit->SetWindowText( (pEscapeStr != NULL) ? *pEscapeStr : "");
+	pEdit->SetWindowText(szText);
 
 	//Block Comment
-	CMultiLineComment* pBlockComment;
-	pBlockComment = (pLangGrammar->GetCountOfMultiLineComment() > 0) ? &(pLangGrammar->GetMultiLineComment(0)) : NULL;
+	szText.Empty();
+	szText2.Empty();
+	for(i = 0, size = pLangGrammar->GetCountOfMultiLineComment(); i < size; i++)
+	{
+		CMultiLineComment& blockComment = pLangGrammar->GetMultiLineComment(i);
+		szText += MakeEscapeString(blockComment.m_szStart);
+		szText2 += MakeEscapeString(blockComment.m_szEnd);
+		if(i < size - 1)
+		{
+			szText += STRING_SEPARATOR;
+			szText2 += STRING_SEPARATOR;
+		}
+	}
 
 	pEdit = GetEdit(lpszBlockCommentOn);
-	pEdit->SetWindowText( (pBlockComment != NULL) ? pBlockComment->m_szStart : "");
+	pEdit->SetWindowText( szText );
 
 	pEdit = GetEdit(lpszBlockCommentOff);
-	pEdit->SetWindowText( (pBlockComment != NULL) ? pBlockComment->m_szEnd : "");
+	pEdit->SetWindowText( szText2 );
 
 	//String
-	CPair* pPair;
-	pPair = (pLangGrammar->GetCountOfStringMark() > 0) ? &(pLangGrammar->GetStringMark(0)) : NULL;
+	szText.Empty();
+	szText2.Empty();
+	for(i = 0, size = pLangGrammar->GetCountOfStringMark(); i < size; i++)
+	{
+		CPair& stringMark = pLangGrammar->GetStringMark(i);
+		szText += MakeEscapeString(stringMark.m_szStart);
+		szText2 += MakeEscapeString(stringMark.m_szEnd);
+		if(i < size - 1)
+		{
+			szText += STRING_SEPARATOR;
+			szText2 += STRING_SEPARATOR;
+		}
+	}
 	pEdit = GetEdit(lpszStringOn);
-	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szStart : "");
+	pEdit->SetWindowText( szText );
 	
 	pEdit = GetEdit(lpszStringOff);
-	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szEnd : "");
+	pEdit->SetWindowText( szText2 );
 
 	//Char
-	pPair = (pLangGrammar->GetCountOfCharMark() > 0) ? &(pLangGrammar->GetCharMark(0)) : NULL;
+	szText.Empty();
+	szText2.Empty();
+	for(i = 0, size = pLangGrammar->GetCountOfCharMark(); i < size; i++)
+	{
+		CPair& charMark = pLangGrammar->GetCharMark(i);
+		szText += MakeEscapeString(charMark.m_szStart);
+		szText2 += MakeEscapeString(charMark.m_szEnd);
+		if(i < size - 1)
+		{
+			szText += STRING_SEPARATOR;
+			szText2 += STRING_SEPARATOR;
+		}
+	}
 	pEdit = GetEdit(lpszCharacterOn);
-	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szStart : "");
+	pEdit->SetWindowText( szText );
 	
 	pEdit = GetEdit(lpszCharacterOff);
-	pEdit->SetWindowText( (pPair != NULL) ? pPair->m_szEnd : "");
+	pEdit->SetWindowText( szText2 );
+}
+
+CString CLangGrammarDlg::MakeEscapeString(const CString& str, BOOL bToEscape)
+{
+	//No escape char
+	if(str.Find(STRING_SEPARATOR) == -1)
+	{
+		return str;
+	}
+	TCHAR lpszOld[4];
+	_stprintf(lpszOld, _T("%c%c"), STRING_SEPARATOR, STRING_SEPARATOR);
+	TCHAR lpszNew[4];
+	_stprintf(lpszNew, _T("%c"), STRING_SEPARATOR);
+
+	CString szResult = str;
+	if(bToEscape)
+	{
+		szResult.Replace(lpszNew, lpszOld);
+	}
+	else
+	{
+		szResult.Replace(lpszOld, lpszNew);
+	}
+	return szResult;
 }

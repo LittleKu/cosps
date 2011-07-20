@@ -16,6 +16,7 @@ UINT ID_TREE_ITEM_SELECTED_EVENT = ::RegisterWindowMessage(_T("ID_TREE_ITEM_SELE
 #define XML_ATTRIB_TEXT		"text"
 #define XML_ATTRIB_TYPE		"type"
 #define XML_ATTRIB_CHECKED	"checked"
+#define XML_ATTRIB_EXPANDED	"expanded"
 
 typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNodePtr;
 
@@ -311,6 +312,7 @@ BOOL CMultiSelTreeCtrl::Init()
 HTREEITEM CMultiSelTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement)
 {
 	const char* pBuffer = NULL;
+	int iValue = 0;
 
 	TVINSERTSTRUCT tvis;
 	ZeroMemory(&tvis, sizeof(TVINSERTSTRUCT));
@@ -348,8 +350,12 @@ HTREEITEM CMultiSelTreeCtrl::InsertSubItem(HTREEITEM hParent, TiXmlElement* pEle
 	pBuffer = pElement->Value();
 	if(pBuffer != NULL && strcmp(pBuffer, XML_NM_FILE) != 0)
 	{
-		tvis.item.state |= TVIS_EXPANDED;
-		tvis.item.stateMask |= TVIS_EXPANDED;
+		pBuffer = pElement->Attribute(XML_ATTRIB_EXPANDED, &iValue);
+		if(pBuffer != NULL && iValue > 0)
+		{
+			tvis.item.state |= TVIS_EXPANDED;
+			tvis.item.stateMask |= TVIS_EXPANDED;
+		}
 	}
 	
 	//lparam : prepare item data
@@ -420,6 +426,12 @@ TiXmlNode* CMultiSelTreeCtrl::InsertXMLChild(TiXmlNode* pParentNode, HTREEITEM h
 	element.SetAttribute(XML_ATTRIB_TEXT, GetItemText(hItem));
 	element.SetAttribute(XML_ATTRIB_TYPE, pTVIData->szType);
 	element.SetAttribute(XML_ATTRIB_CHECKED, GetItemStateImage(hItem));
+	if(ItemHasChildren(hItem))
+	{
+		UINT nItemState = GetItemState(hItem, TVIS_EXPANDED);
+		nItemState = (nItemState & TVIS_EXPANDED) ? 1 : 0;
+		element.SetAttribute(XML_ATTRIB_EXPANDED, nItemState);
+	}
 
 	return pParentNode->InsertEndChild(element);
 }

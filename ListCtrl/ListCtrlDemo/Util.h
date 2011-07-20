@@ -15,6 +15,7 @@
 #define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #endif
 
+#define STRING_SEPARATOR		','
 class FilterGroup
 {
 public:

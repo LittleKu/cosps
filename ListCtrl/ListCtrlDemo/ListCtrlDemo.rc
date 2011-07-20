@@ -258,12 +258,12 @@ CAPTION "Statistics"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Mode",IDC_STATIC,7,7,328,72
-    CONTROL         "Count BLANK lines in block comment as COMMENT",
+    CONTROL         "Count Blank lines in block comment as Comment",
                     IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,16,23,313,10
-    CONTROL         "Count mixed lines as CODE",IDC_CHECK_MIXED_LINE_CODE,
+    CONTROL         "Count Mixed lines as Code",IDC_CHECK_MIXED_LINE_CODE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,40,313,10
-    CONTROL         "Count Mixed lines as COMMENT",
+    CONTROL         "Count Mixed lines as Comment",
                     IDC_CHECK_MIXED_LINE_COMMENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,57,313,10
 END

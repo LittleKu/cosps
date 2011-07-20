@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "ListCtrlDemo.h"
+#include "StringUtils.h"
 
 CString FilterGroup::ToString()
 {
@@ -226,7 +227,7 @@ CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
 
 // the following function based on a function by Jack Handy - you may find 
 // his original article at: http://www.codeproject.com/useritems/wildcmp.asp
-int CommonUtils::wildcmp(const char *wild, const char *string) {
+int wildcmp(const char *wild, const char *string) {
 	const char *cp, *mp;
 	
 	while ((*string) && (*wild != '*')) {
@@ -286,7 +287,7 @@ BOOL IsMatched(LPFilterGroup lpFilterGroup, const char* sStr)
 	while(pos != NULL)
 	{
 		CString& sFilter = lpFilterGroup->excludeList.GetNext(pos);
-		if(CommonUtils::wildcmp(sFilter, sStr))
+		if(CStringUtils::wildicmp(sFilter, sStr))
 		{
 			return FALSE;
 		}
@@ -296,7 +297,7 @@ BOOL IsMatched(LPFilterGroup lpFilterGroup, const char* sStr)
 	while(pos != NULL)
 	{
 		CString& sFilter = lpFilterGroup->includeList.GetNext(pos);
-		if(CommonUtils::wildcmp(sFilter, sStr))
+		if(CStringUtils::wildicmp(sFilter, sStr))
 		{
 			return TRUE;
 		}

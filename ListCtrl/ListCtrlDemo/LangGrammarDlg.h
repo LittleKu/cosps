@@ -48,6 +48,7 @@ public:
 	void UpdatePropValue();
 	void AddProperty(LPCTSTR lpszName, int gridwidth = 1, LPCTSTR lpszDefaultValue = NULL, int type = LAYOUT_TYPE_PROP);
 	void AddSeparator();
+	void AddCheckBox(LPCTSTR lpszName, BOOL bEnd = FALSE, BOOL bCheck = FALSE);
 	void CreateModeless(CWnd* pParentWnd = NULL);
 	void SetEditWidth(int nEditWidth) { m_nEditWidth = nEditWidth; }
 	CEdit* GetEdit(LPCTSTR lpszName);
@@ -71,6 +72,7 @@ public:
 	CMapStringToString m_mapPropOut;
 	CPtrList m_listLabel;
 	CPtrList m_listEdit;
+	CPtrList m_listCheckBox;
 	int m_nEditWidth;
 
 	DWORD m_nStatus;
@@ -90,9 +92,11 @@ public:
 	void SetLangGrammarInfo(CLangGrammarInfo* pLangGrammarInfo);
 	BOOL GetLangGrammarInfo(CLangGrammarInfo*& pLangGrammarInfo, BOOL bValidate = FALSE, BOOL bShowError = FALSE);
 	BOOL Validate(BOOL bShowError = FALSE);
+	static CString MakeEscapeString(const CString& str, BOOL bToEscape = TRUE);
 public:
 	static LPCTSTR lpszLangName;
 	static LPCTSTR lpszLineComment;
+	static LPCTSTR lpszStartsAtFirstChar;
 	static LPCTSTR lpszEscapeString;
 	static LPCTSTR lpszBlockCommentOn;
 	static LPCTSTR lpszBlockCommentOff;
