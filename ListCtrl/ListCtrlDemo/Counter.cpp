@@ -2,6 +2,8 @@
 #include "Counter.h"
 #include "LangGrammarMap.h"
 
+DECLARE_THE_LOGGER_NAME("Counter.cpp")
+
 UINT CCounter::CountThreadProc(LPVOID lpvData)
 {
 	LPCountThreadParam lpThreadParam = (LPCountThreadParam)lpvData;
@@ -30,23 +32,25 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	CString sCurDir;
 	CProgressChecker progChecker(hProgWnd);
 	CTimeCost timeCost;
+	CString szLogInfo;
 	for(i = 0; i < count; i++)
 	{
 		sCurDir = lpThreadParam->dirList.GetAt(i);
-		if(sCurDir.GetAt(sCurDir.GetLength() - 1) == '\\')
-		{
-			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
-		}
 		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker);
 		if(result == -1)
 		{
 			break;
 		}
-		AfxTrace("[COUNT]: dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		//Format Log
+		szLogInfo.Format("[SEARCH]: dir=%s, count=%d", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLogInfo)
+
 		prev = pVisitor->GetResult();
 	}
 	timeCost.UpdateCurrClock();
-	AfxTrace("Time Cost %d\n", timeCost.GetTimeCost());
+
+	szLogInfo.Format("Cost %d for [SEARCH]", timeCost.GetTimeCost());
+	LOG4CPLUS_INFO_STR(GET_LOGGER("Timer"), (LPCTSTR)szLogInfo)
 	cAllFiles = pVisitor->GetResult();
 	delete pVisitor;
 	pVisitor = NULL;
@@ -73,19 +77,19 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	for(i = 0; i < count; i++)
 	{
 		sCurDir = lpThreadParam->dirList.GetAt(i);
-		if(sCurDir.GetAt(sCurDir.GetLength() - 1) == '\\')
-		{
-			sCurDir.SetAt(sCurDir.GetLength() - 1, '\0');
-		}
 		if(CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker) == -1)
 		{
 			break;
 		}
-		AfxTrace("[PRINT]: dir=%s, count=%d\n", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		//Format Log
+		szLogInfo.Format("[COUNT]: dir=%s, count=%d", lpThreadParam->dirList.GetAt(i), pVisitor->GetResult() - prev);
+		LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLogInfo)
 		prev = pVisitor->GetResult();
 	}
 	timeCost.UpdateCurrClock();
-	AfxTrace("Time Cost %d\n", timeCost.GetTimeCost());
+
+	szLogInfo.Format("Cost %d for [COUNT]", timeCost.GetTimeCost());
+	LOG4CPLUS_INFO_STR(GET_LOGGER("Timer"), (LPCTSTR)szLogInfo)
 	delete pVisitor;
 	pVisitor = NULL;
 
@@ -169,7 +173,7 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 	LPFilterGroup lpFilterGroup = (LPFilterGroup)lpParam;
 	ASSERT(lpFilterGroup != NULL && lpFilterGroup->nLangRuleType >= 0);
 
-	IFileParser* pFileParser = GetFileParser(lpFilterGroup->nLangRuleType, pFi, SYS_PREF()->m_nStatMode);
+	IFileParser* pFileParser = GetFileParser(lpFilterGroup->nLangRuleType, pFi, SYS_PREF()->m_nStatMode | FP_MODE_LOG_ALL);
 	if(pFileParser == NULL)
 	{
 		AfxTrace("File[%s], Lang[%s:%d]\n", lpszFileName, lpFilterGroup->szLangRuleName, lpFilterGroup->nLangRuleType);

@@ -260,7 +260,7 @@ int wildcmp(const char *wild, const char *string) {
 	return !*wild;
 }
 
-BOOL IsMatched(CStringArray& sFilterList, const char* sStr)
+BOOL IsMatched(CStringArray& sFilterList, LPCTSTR sStr)
 {
 	int nCount = sFilterList.GetSize();
 	if(nCount <= 0)
@@ -281,26 +281,45 @@ BOOL IsMatched(CStringArray& sFilterList, const char* sStr)
 	return FALSE;
 }
 
-BOOL IsMatched(LPFilterGroup lpFilterGroup, const char* sStr)
+BOOL IsMatched(CStringList& sFilterList, LPCTSTR sStr)
 {
-	POSITION pos = lpFilterGroup->excludeList.GetHeadPosition();
+	POSITION pos = sFilterList.GetHeadPosition();
 	while(pos != NULL)
 	{
-		CString& sFilter = lpFilterGroup->excludeList.GetNext(pos);
-		if(CStringUtils::wildicmp(sFilter, sStr))
+		CString& sFilter = sFilterList.GetNext(pos);
+		//If the last character is '.', the string that contains '.' is not included
+		if(sFilter.GetAt(sFilter.GetLength() - 1) == '.')
 		{
-			return FALSE;
+			if(CStringUtils::IndexOf(sStr, _T('.')) == -1)
+			{
+				CString sFixedFilter = sFilter;
+				sFixedFilter.GetBufferSetLength(sFilter.GetLength() - 1);
+				if(CStringUtils::wildicmp(sFixedFilter, sStr))
+				{
+					return TRUE;
+				}
+			}
+		}
+		else
+		{
+			if(CStringUtils::wildicmp(sFilter, sStr))
+			{
+				return TRUE;
+			}
 		}
 	}
+	return FALSE;	
+}
 
-	pos = lpFilterGroup->includeList.GetHeadPosition();
-	while(pos != NULL)
+BOOL IsMatched(LPFilterGroup lpFilterGroup, LPCTSTR sStr)
+{
+	if(IsMatched(lpFilterGroup->excludeList, sStr))
 	{
-		CString& sFilter = lpFilterGroup->includeList.GetNext(pos);
-		if(CStringUtils::wildicmp(sFilter, sStr))
-		{
-			return TRUE;
-		}
+		return FALSE;
+	}
+	if(IsMatched(lpFilterGroup->includeList, sStr))
+	{
+		return TRUE;
 	}
 	return FALSE;
 }

@@ -99,9 +99,10 @@ BEGIN_NAMESPACE(CommonUtils)
 	BOOL IsFileExist(LPCTSTR lpFileName);
 	CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags = GCFP_AUTO, LPCTSTR lpBaseDir = NULL);
 	int wildcmp(const char *wild, const char *string);
-	BOOL IsMatched(CStringArray& sFilterList, const char* sStr);
-	BOOL IsMatched(FilterGroup& filterGroup, const char* sStr);
-	POSITION IsMatched(LPFilterGroupList& filterGourpList, const char* sStr);
+	BOOL IsMatched(CStringArray& sFilterList, LPCTSTR sStr);
+	BOOL IsMatched(CStringList& sFilterList, LPCTSTR sStr);
+	BOOL IsMatched(FilterGroup& filterGroup, LPCTSTR sStr);
+	POSITION IsMatched(LPFilterGroupList& filterGourpList, LPCTSTR sStr);
 	int EnumDirectory(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	int EnumDirectoryFileFirst(LPCTSTR lpszDirName, CStringArray& sFilterArray, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);
 	int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, BOOL bRecursive, CFileVisitor* pVisitor, CCancelledChecker* pCancelledChecker);

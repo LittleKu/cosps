@@ -425,6 +425,7 @@ void CListCtrlDemoDlg::OnButtonStart()
 		if(m_srcDirListCtrl.GetItemCheckedState(i, 0) == CL_CHECKED)
 		{
 			sDir = m_srcDirListCtrl.GetItemText(i, 1);
+			sDir.TrimRight(_T('\\'));
 			lpThreadParam->dirList.Add(sDir);
 		}
 	}
