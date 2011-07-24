@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "BlowFishTest.h"
 #include "Blowfish.h"
+#include "Base32.h"
+#include <string>
+#include <Wincrypt.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,6 +20,42 @@ static char THIS_FILE[] = __FILE__;
 CWinApp theApp;
 
 using namespace std;
+
+string CalcMD5(const char* s)
+{
+    HCRYPTPROV hCryptProv;
+    HCRYPTHASH hHash = 0;
+    BYTE pbData[0x7f];
+    DWORD dwDataLen= 16; // The MD5 algorithm always returns 16 bytes.
+    DWORD cbContent= strlen(s)*sizeof(char);
+    BYTE* pbContent= (BYTE*)s;
+    string retHash;
+	
+    if (CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_MACHINE_KEYSET))
+    {
+        if (CryptCreateHash(hCryptProv, CALG_MD5, 0, 0, &hHash))
+        {
+            if (CryptHashData(hHash, pbContent, cbContent, 0))
+            {
+                if (CryptGetHashParam(hHash, HP_HASHVAL, pbData, &dwDataLen, 0))
+                {
+                    // Make a string version of the numeric digest value
+                    char tmpBuf[3];
+                    for (int i = 0; i<16; i++)
+                    {
+                        sprintf(tmpBuf, "%02X", pbData[i]);
+                        retHash += tmpBuf;
+                    }
+                }
+            }
+        }
+    }
+	
+    CryptDestroyHash(hHash);
+    CryptReleaseContext(hCryptProv, 0);
+	
+    return retHash;
+}
 
 void encrypt(const char* str)
 {
@@ -49,6 +88,35 @@ void encrypt(const char* str)
     }
 	if(!szLog.IsEmpty())
 		printf("%s\n", szLog);
+	printf("\n\n\n");
+
+	int tempBufSize = 20;
+	int nBase32Len = Base32::GetEncode32Length(tempBufSize);
+	char* out = new char[nBase32Len + 1];
+	memset(out, 0x00, nBase32Len + 1);
+	if(Base32::Encode32((unsigned char*)pOut, tempBufSize, (unsigned char*)out))
+	{
+		const char alphabet[] = "123456789ABCDEFGHJKMNPQRSTUVWXYZ";
+		Base32::Map32((unsigned char*)out, nBase32Len, (unsigned char*)alphabet);
+		printf("%s\n\n", out);
+		szLog.Empty();
+// 		for (i = 0; i < nBase32Len; i++)
+// 		{
+// 			szTemp.Format("%02X ", (pBase32[i] & 0xFF));
+// 			szLog += szTemp;
+// 			if((i > 0) && ( (i + 1) % 8) == 0)
+// 			{
+// 				printf("%s\n", szLog);
+// 				szLog.Empty();
+// 			}
+// 		}
+// 		if(!szLog.IsEmpty())
+// 			printf("%s\n", szLog);
+	}
+	else
+	{
+		printf("Failed to encode\n");
+	}
 	
 	//Decrypt
 	blower.Decrypt( (unsigned char*)pOut, sizeof(char) * bufSize );
@@ -56,6 +124,7 @@ void encrypt(const char* str)
 	printf("%s\n", pOut);
 
 	delete [] pOut;
+	delete [] out;
 }
 
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
@@ -70,7 +139,11 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		nRetCode = 1;
 	}
 
-	encrypt("Blow Fish Testcccccc");
+	const char* pStr = "Blow Fish Testcccccc";
+	encrypt(pStr);
+
+	string s = CalcMD5(pStr);
+	cout<<s<<endl;
 
 	return nRetCode;
 }
