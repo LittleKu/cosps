@@ -11,11 +11,18 @@
 #define WM_PROGRESS_IS_CANCELLED  (WM_USER + 104)
 #define WM_SUMMARY_UPDATE         (WM_USER + 105)
 
+#define COUNTER_RET_CODE_USER_CANCELLED			-1
+#define COUNTER_RET_CODE_EXCEEDS_LIMITATION		-2
+
+#define MAX_EVALUATION_FILE_COUNT				50
+
+
 #if !defined(_countof)
 #define _countof(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #endif
 
 #define STRING_SEPARATOR		','
+
 class FilterGroup
 {
 public:

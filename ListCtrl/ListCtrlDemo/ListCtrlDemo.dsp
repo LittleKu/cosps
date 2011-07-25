@@ -113,6 +113,10 @@ SOURCE=.\CustomLangDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\EvaluationLimitDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
@@ -271,6 +275,10 @@ SOURCE=.\Counter.h
 # Begin Source File
 
 SOURCE=.\CustomLangDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\EvaluationLimitDlg.h
 # End Source File
 # Begin Source File
 

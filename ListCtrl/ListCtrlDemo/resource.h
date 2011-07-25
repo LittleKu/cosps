@@ -23,6 +23,7 @@
 #define IDI_OPTIONS_GENERAL             143
 #define IDD_PROPPAGE_STAT               144
 #define IDD_REGISTER                    145
+#define IDD_EVALUATION_LIMIT            146
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -87,6 +88,10 @@
 #define IDC_TXT_REG_CODE                1066
 #define IDC_TXT_REG_INFO_BELOW          1067
 #define IDC_REG_HELP                    1068
+#define IDC_BUTTON_REGISTER             1069
+#define IDC_BUTTON_ORDER                1070
+#define IDC_STATIC_P1                   1071
+#define IDC_STATIC_P2                   1072
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
@@ -118,9 +123,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        146
+#define _APS_NEXT_RESOURCE_VALUE        147
 #define _APS_NEXT_COMMAND_VALUE         32789
-#define _APS_NEXT_CONTROL_VALUE         1069
+#define _APS_NEXT_CONTROL_VALUE         1073
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

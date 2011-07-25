@@ -7,6 +7,7 @@
 #include "ProgressDlg.h"
 #include "Export.h"
 #include "Preferences.h"
+#include "EvaluationLimitDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -477,6 +478,11 @@ LRESULT CListCtrlDemoDlg::OnEndCount(WPARAM wParam, LPARAM lParam)
 	{
 		delete m_pProgressDlg;
 		m_pProgressDlg = NULL;
+	}
+	if(wParam == COUNTER_RET_CODE_EXCEEDS_LIMITATION)
+	{
+		CEvaluationLimitDlg dlg;
+		dlg.DoModal();
 	}
 	return (LRESULT)TRUE;
 }

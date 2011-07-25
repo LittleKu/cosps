@@ -2,18 +2,18 @@
 
 [General Info]
 Version=1
-LastClass=CRegisterDlg
+LastClass=CEvaluationLimitDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=15
+ClassCount=16
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=18
-Resource1=IDD_PROPPAGE_GENERAL (English (U.S.))
+ResourceCount=21
+Resource1=CG_IDD_PROGRESS
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
 Resource4=IDD_PROPPAGE_STAT
@@ -22,27 +22,31 @@ Resource6=IDD_MAIN_DLG
 Class4=CProgressDlg
 Resource7=IDD_REGISTER
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=CG_IDD_PROGRESS
+Resource9=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_PROGRESS
+Resource11=IDD_ABOUTBOX (English (U.S.))
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource12=IDD_PROPPAGE_GENERAL (English (U.S.))
 Class10=CFilterTreeModifyDlg
 Resource13=IDD_LISTCTRLDEMO_DIALOG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=CG_IDD_PROGRESS (Chinese (P.R.C.))
-Resource15=IDD_ABOUTBOX (English (U.S.))
+Resource15=IDD_PROPPAGE_STAT (English (U.S.))
 Class14=CPPgStatistic
 Resource16=IDD_ABOUTBOX
 Resource17=IDD_PROGRESS (Chinese (P.R.C.))
 Class15=CRegisterDlg
-Resource18=IDR_RESULT_MENU (Neutral)
+Resource18=IDD_REGISTER (English (U.S.))
+Resource19=IDD_EVALUATION_LIMIT
+Resource20=IDD_PROGRESS
+Class16=CEvaluationLimitDlg
+Resource21=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -390,6 +394,50 @@ HeaderFile=RegisterDlg.h
 ImplementationFile=RegisterDlg.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=IDC_REG_HELP
+LastObject=CRegisterDlg
+VirtualFilter=dWC
+
+[DLG:IDD_PROPPAGE_STAT (English (U.S.))]
+Type=1
+Class=CPPgStatistic
+ControlCount=4
+Control1=IDC_STATIC,button,1342177287
+Control2=IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT,button,1342242819
+Control3=IDC_CHECK_MIXED_LINE_CODE,button,1342242819
+Control4=IDC_CHECK_MIXED_LINE_COMMENT,button,1342242819
+
+[DLG:IDD_REGISTER (English (U.S.))]
+Type=1
+Class=CRegisterDlg
+ControlCount=10
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_TXT_REG_INFO_ABOVE,static,1342308352
+Control4=IDC_TXT_REG_NAME,static,1342308864
+Control5=IDC_TXT_REG_CODE,static,1342308864
+Control6=IDC_REG_NAME,edit,1350631552
+Control7=IDC_REG_CODE,edit,1350631552
+Control8=IDC_TXT_REG_INFO_BELOW,static,1342308352
+Control9=IDC_STATIC,static,1342177296
+Control10=IDC_REG_HELP,static,1342308352
+
+[DLG:IDD_EVALUATION_LIMIT]
+Type=1
+Class=CEvaluationLimitDlg
+ControlCount=6
+Control1=IDCANCEL,button,1342242817
+Control2=IDC_STATIC_P1,static,1342308352
+Control3=IDC_STATIC_P2,static,1342308352
+Control4=IDC_STATIC,static,1342177296
+Control5=IDC_BUTTON_REGISTER,button,1342242816
+Control6=IDC_BUTTON_ORDER,button,1342242816
+
+[CLS:CEvaluationLimitDlg]
+Type=0
+HeaderFile=EvaluationLimitDlg.h
+ImplementationFile=EvaluationLimitDlg.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=CEvaluationLimitDlg
 VirtualFilter=dWC
 

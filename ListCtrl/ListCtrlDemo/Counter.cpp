@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "Counter.h"
 #include "LangGrammarMap.h"
+#include "LicenseMgr.h"
 
 DECLARE_THE_LOGGER_NAME("Counter.cpp")
 
@@ -36,8 +37,9 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	for(i = 0; i < count; i++)
 	{
 		sCurDir = lpThreadParam->dirList.GetAt(i);
-		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker);
-		if(result == -1)
+		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, 
+			pVisitor, &progChecker);
+		if(result < 0)
 		{
 			break;
 		}
@@ -55,7 +57,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	delete pVisitor;
 	pVisitor = NULL;
 
-	if(result == -1)
+	if(result < 0)
 	{
 		//End the works
 		::SendMessage(lpThreadParam->hwndMain, WM_END_COUNT, 0, 0);
@@ -77,7 +79,9 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	for(i = 0; i < count; i++)
 	{
 		sCurDir = lpThreadParam->dirList.GetAt(i);
-		if(CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, pVisitor, &progChecker) == -1)
+		result = CommonUtils::EnumDirectoryIt(sCurDir, lpThreadParam->filterGroupList, lpThreadParam->bRecursive, 
+			pVisitor, &progChecker);
+		if(result < 0)
 		{
 			break;
 		}
@@ -96,7 +100,7 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	::SendMessage(lpThreadParam->hwndMain, WM_SUMMARY_UPDATE, 0, 0);
 
 	//End the works
-	::SendMessage(lpThreadParam->hwndMain, WM_END_COUNT, 0, 0);
+	::SendMessage(lpThreadParam->hwndMain, WM_END_COUNT, result, 0);
 
 	delete lpThreadParam;
 	lpThreadParam = NULL;
@@ -156,6 +160,10 @@ CFileParserVisitor::CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMa
 }
 int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 {
+	if(!CLicenseMgr::GetInstance()->IsRegistered() && m_nCount >= MAX_EVALUATION_FILE_COUNT)
+	{
+		return COUNTER_RET_CODE_EXCEEDS_LIMITATION;
+	}
 	m_nCount++;
 
 	UpdateProgressParam param;

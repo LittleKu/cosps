@@ -13,81 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
-LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 94
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Counting..."
-FONT 10, "System"
-BEGIN
-    CTEXT           "Processing",IDC_TEXT_TOP,7,7,173,10
-    CONTROL         "Progress2",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
-                    32,173,7
-    LTEXT           "file name...",IDC_TEXT_BOTTOM,7,57,173,13
-    PUSHBUTTON      "Cancel",IDCANCEL,57,73,50,14
-END
-
-CG_IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 186, 95
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "Cancel",IDCANCEL,67,74,50,14
-    CONTROL         "Progress1",CG_IDC_PROGDLG_PROGRESS,"msctls_progress32",
-                    WS_BORDER,15,34,154,13
-    LTEXT           " 0 %",CG_IDC_PROGDLG_PERCENT,85,23,18,8
-    LTEXT           "",CG_IDC_PROGDLG_STATUS,13,7,158,8
-    LTEXT           "",CG_IDC_PROGDLG_CURR_OBJ,13,59,158,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
-BEGIN
-    IDD_PROGRESS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 180
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 87
-    END
-
-    CG_IDD_PROGRESS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 179
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 73
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // Chinese (P.R.C.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(936)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -160,6 +91,96 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 187, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Counting..."
+FONT 10, "System"
+BEGIN
+    CTEXT           "Processing",IDC_TEXT_TOP,7,7,173,10
+    CONTROL         "Progress2",IDC_PROGRESS,"msctls_progress32",WS_BORDER,7,
+                    32,173,7
+    LTEXT           "file name...",IDC_TEXT_BOTTOM,7,57,173,13
+    PUSHBUTTON      "Cancel",IDCANCEL,57,73,50,14
+END
+
+CG_IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 186, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,67,74,50,14
+    CONTROL         "Progress1",CG_IDC_PROGDLG_PROGRESS,"msctls_progress32",
+                    WS_BORDER,15,34,154,13
+    LTEXT           " 0 %",CG_IDC_PROGDLG_PERCENT,85,23,18,8
+    LTEXT           "",CG_IDC_PROGDLG_STATUS,13,7,158,8
+    LTEXT           "",CG_IDC_PROGDLG_CURR_OBJ,13,59,158,8
+END
+
+IDD_EVALUATION_LIMIT DIALOG DISCARDABLE  0, 0, 358, 161
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Evaluation Version"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Continue Trial",IDCANCEL,249,132,78,22
+    LTEXT           "",IDC_STATIC_P1,7,15,344,39
+    LTEXT           "",IDC_STATIC_P2,7,70,344,39
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,118,344,1
+    PUSHBUTTON      "Register",IDC_BUTTON_REGISTER,151,132,78,22
+    PUSHBUTTON      "Order Now",IDC_BUTTON_ORDER,53,132,78,22
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+
+    CG_IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 73
+    END
+
+    IDD_EVALUATION_LIMIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 351
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 154
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -175,7 +196,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 319, 161
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,7,10,20,20
     LTEXT           "%s - %s",IDC_PRODUCT_VERSION,40,10,272,24,SS_NOPREFIX

@@ -549,6 +549,7 @@ int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, B
 	WIN32_FIND_DATA FindFileData;
 	BOOL hasMore;
 	DWORD dwError = 0;
+	int nResult = 0;
 
 	while(!sDirList.IsEmpty())
 	{
@@ -562,7 +563,7 @@ int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, B
 			{
 				AfxTrace("The EnumDirectoryIt process is cancelled\n");
 				FindClose(hFind);
-				return -1;
+				return COUNTER_RET_CODE_USER_CANCELLED;
 			}
 			//Ignore hidden files, current, and parent directory
 			if( ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0)
@@ -584,11 +585,12 @@ int EnumDirectoryIt(LPCTSTR lpszDirName, LPFilterGroupList& lpFilterGroupList, B
 
 				LPFilterGroup lpFilterGroup = lpFilterGroupList.GetAt(pos);
 				ASSERT(lpFilterGroup != NULL);
-				if(pVisitor->VisitFile(sCurFile, (LPVOID)lpFilterGroup) == -1)
+				nResult = pVisitor->VisitFile(sCurFile, (LPVOID)lpFilterGroup);
+				if(nResult < 0)
 				{
 					AfxTrace ("FileVisitor request to quit\n");
 					FindClose(hFind);
-					return -1;
+					return nResult;
 				}
 			}
 			//2. Dir
