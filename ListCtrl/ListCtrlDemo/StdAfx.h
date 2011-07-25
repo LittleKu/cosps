@@ -30,6 +30,8 @@
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 #include <afxdb.h>
 
+#pragma comment(lib, "htmlhelp.lib")
+
 #ifdef _DEBUG
 
 #ifndef ENABLE_LOG4CPLUS

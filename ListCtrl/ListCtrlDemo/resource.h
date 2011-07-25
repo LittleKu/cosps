@@ -22,6 +22,7 @@
 #define IDD_PROPPAGE_GENERAL            142
 #define IDI_OPTIONS_GENERAL             143
 #define IDD_PROPPAGE_STAT               144
+#define IDD_REGISTER                    145
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -79,7 +80,13 @@
 #define IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT 1058
 #define IDC_CHECK_MIXED_LINE_CODE       1059
 #define IDC_CHECK_MIXED_LINE_COMMENT    1060
-#define IDC_CHECK_STRING_IN_MULTI_LINE  1061
+#define IDC_REG_NAME                    1062
+#define IDC_REG_CODE                    1063
+#define IDC_TXT_REG_INFO_ABOVE          1064
+#define IDC_TXT_REG_NAME                1065
+#define IDC_TXT_REG_CODE                1066
+#define IDC_TXT_REG_INFO_BELOW          1067
+#define IDC_REG_HELP                    1068
 #define ID_TBBTN_ADD_SOURCE_DIR         16129
 #define ID_TBBTN_START_TO_COUNT         16130
 #define ID_TBBTN_CLEAR_RESULT           16131
@@ -102,14 +109,18 @@
 #define IDM_REPORT_EXPORT_XML           32781
 #define IDM_REPORT_EXPORT_HTML          32782
 #define IDM_TOOLS_LANG_RULES            32783
+#define IDM_HELP_SOFTWARE_WEBSITE       32785
+#define IDM_HELP_ORDER                  32786
+#define IDM_HELP_REGISTER               32787
+#define IDM_HELP_HELP_CONTENT           32788
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        145
-#define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         1062
+#define _APS_NEXT_RESOURCE_VALUE        146
+#define _APS_NEXT_COMMAND_VALUE         32789
+#define _APS_NEXT_CONTROL_VALUE         1069
 #define _APS_NEXT_SYMED_VALUE           107
 #endif
 #endif

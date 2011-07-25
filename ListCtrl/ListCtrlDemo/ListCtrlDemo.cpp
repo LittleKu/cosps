@@ -8,6 +8,7 @@
 #include <log4cplus/configurator.h>
 #include <direct.h>
 #include "LangGrammarMap.h"
+#include "htmlhelp.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,7 +28,7 @@ BEGIN_MESSAGE_MAP(CListCtrlDemoApp, CWinApp)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 		//    DO NOT EDIT what you see in these blocks of generated code!
 	//}}AFX_MSG
-	ON_COMMAND(ID_HELP, CWinApp::OnHelp)
+	ON_COMMAND(ID_HELP, /*CWinApp::*/OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -122,6 +123,14 @@ BOOL CListCtrlDemoApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+void CListCtrlDemoApp::OnHelp()
+{
+	LOG4CPLUS_DEBUG_STR(THE_LOGGER, "OnHelp Called.")
+	CWnd* pMainWnd = AfxGetMainWnd();
+	ASSERT(pMainWnd != NULL);
+	pMainWnd->SendMessage(WM_COMMAND, IDM_HELP_HELP_CONTENT);
 }
 
 CString& SYS_PREF_INI_FILE() 

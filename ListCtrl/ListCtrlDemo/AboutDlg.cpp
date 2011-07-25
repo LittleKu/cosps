@@ -2,6 +2,7 @@
 #include "ListCtrlDemo.h"
 #include "AboutDlg.h"
 #include "gtb.h"
+#include "LicenseMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,14 +91,27 @@ BOOL CAboutDlg::OnInitDialog()
 	szProductVersion.Format("%s - %s", SZ_PRODUCT_NAME, SZ_VERSION_NAME);
 	SetDlgItemText(IDC_PRODUCT_VERSION, szProductVersion);	
 
-	//Set licenced info
-	//TODO:
+	CString szCopyRight;
+	szCopyRight.Format(_T("Copyright (c) 2011-2016 by %s"), SZ_ORGNIZATION_NAME);
+	SetDlgItemText(IDC_COPYRIGHT, szCopyRight);
+
+	//Set license info
 	CString szLicenceInfo;
-	szLicenceInfo.Format(_T("%s\r\n%s\r\n%s\r\n"), 
-		"This software is licensed to:",
-		"Tester User 1",
-		"2596-9748-0000-0000-YYYY-ZZZZ-AAAA-WXYZ");
+	if(CLicenseMgr::GetInstance()->IsRegistered())
+	{
+		CString szName, szCode;
+		CLicenseMgr::GetInstance()->GetLicenseInfo(szName, szCode);
+
+		szLicenceInfo.Format(_T("%s\r\n%s\r\n%s\r\n"), "This software is licensed to:", szName, szCode);
+	}
+	else
+	{
+		szLicenceInfo.Format(_T("Evaluation Version"));
+	}
 	m_RegInfo.SetWindowText(szLicenceInfo);
+
+	m_HomePage.SetWindowText(SZ_PRODUCT_WEBSITE);
+	m_HomePage.SetURL(SZ_PRODUCT_WEBSITE);
 	
 	return TRUE;
 }

@@ -9,6 +9,9 @@
 #include "PreferencesDlg.h"
 #include "CustomLangDlg.h"
 #include "ShowLangRuleDlg.h"
+#include "RegisterDlg.h"
+#include "LicenseMgr.h"
+#include "htmlhelp.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -49,14 +52,22 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CMainDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CMainDlg)
-	ON_WM_ERASEBKGND()
 	ON_WM_CLOSE()
+	ON_WM_ERASEBKGND()
+	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainDlg message handlers
-
+void CMainDlg::OnOK()
+{
+	return;
+}
+void CMainDlg::OnCancel()
+{
+	CResizableDialog::OnCancel();
+}
 BOOL CMainDlg::OnInitDialog() 
 {
 	CResizableDialog::OnInitDialog();
@@ -67,7 +78,12 @@ BOOL CMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	SetWindowText(AfxGetApp()->m_pszAppName);
+	CString szText = AfxGetApp()->m_pszAppName;
+	if(!CLicenseMgr::GetInstance()->IsRegistered())
+	{
+		szText += _T("(Evaluation Version)");
+	}
+	SetWindowText(szText);
 
 	SetMenuBarBkg();
 
@@ -227,6 +243,29 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			AfxGetMainWnd()->SendMessage(WM_CLOSE);
 		}
 		break;
+	case IDM_HELP_HELP_CONTENT:
+		{
+			CString szHelpFilePath;
+			szHelpFilePath.Format(_T("%s\\help\\help_en.chm"), SYS_APP()->m_szWorkDir);
+			HtmlHelp(m_hWnd, szHelpFilePath, HH_DISPLAY_TOPIC, NULL);
+		}
+		break;
+	case IDM_HELP_SOFTWARE_WEBSITE:
+		{
+			CHyperLink::GotoURL(SZ_PRODUCT_WEBSITE, SW_SHOW);
+		}
+		break;
+	case IDM_HELP_ORDER:
+		{
+			CHyperLink::GotoURL(SZ_PRODUCT_WEBSITE_ORDER, SW_SHOW);
+		}
+		break;
+	case IDM_HELP_REGISTER:
+		{
+			CRegisterDlg regDlg;
+			regDlg.DoModal();
+		}
+		break;
 	case IDM_HELP_ABOUT:
 		{
 			CAboutDlg dlg;
@@ -245,7 +284,11 @@ BOOL CMainDlg::OnEraseBkgnd(CDC* pDC)
 
 void CMainDlg::OnClose() 
 {
-	SYS_PREF()->Save();
-	
 	CResizableDialog::OnClose();
+}
+
+void CMainDlg::OnDestroy() 
+{
+	SYS_PREF()->Save();
+	CResizableDialog::OnDestroy();
 }

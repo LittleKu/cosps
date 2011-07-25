@@ -2,25 +2,25 @@
 
 [General Info]
 Version=1
-LastClass=CPPgStatistic
-LastTemplate=CPropertyPage
+LastClass=CRegisterDlg
+LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=14
+ClassCount=15
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=17
+ResourceCount=18
 Resource1=IDD_PROPPAGE_GENERAL (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_PROGRESS (Chinese (P.R.C.))
-Resource5=IDD_ABOUTBOX
-Resource6=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource4=IDD_PROPPAGE_STAT
+Resource5=IDD_PROPPAGE_GENERAL
+Resource6=IDD_MAIN_DLG
 Class4=CProgressDlg
-Resource7=IDD_PROPPAGE_STAT
+Resource7=IDD_REGISTER
 Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=CG_IDD_PROGRESS
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
@@ -36,11 +36,13 @@ Resource13=IDD_LISTCTRLDEMO_DIALOG
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=IDD_PROPPAGE_GENERAL
+Resource14=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Resource15=IDD_ABOUTBOX (English (U.S.))
 Class14=CPPgStatistic
-Resource16=IDD_MAIN_DLG
-Resource17=IDR_RESULT_MENU (Neutral)
+Resource16=IDD_ABOUTBOX
+Resource17=IDD_PROGRESS (Chinese (P.R.C.))
+Class15=CRegisterDlg
+Resource18=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -122,8 +124,12 @@ Command9=IDM_REPORT_EXPORT_XML
 Command10=IDM_REPORT_EXPORT_HTML
 Command11=IDM_TOOLS_OPTIONS
 Command12=IDM_TOOLS_LANG_RULES
-Command13=IDM_HELP_ABOUT
-CommandCount=13
+Command13=IDM_HELP_HELP_CONTENT
+Command14=IDM_HELP_SOFTWARE_WEBSITE
+Command15=IDM_HELP_ORDER
+Command16=IDM_HELP_REGISTER
+Command17=IDM_HELP_ABOUT
+CommandCount=17
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG (English (U.S.))]
 Type=1
@@ -360,6 +366,30 @@ HeaderFile=PPgStatistic.h
 ImplementationFile=PPgStatistic.cpp
 BaseClass=CPropertyPage
 Filter=D
-LastObject=IDC_CHECK_BLANK_IN_COMMENT_BLOCK_COMMENT
+LastObject=CPPgStatistic
 VirtualFilter=idWC
+
+[DLG:IDD_REGISTER]
+Type=1
+Class=CRegisterDlg
+ControlCount=10
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_TXT_REG_INFO_ABOVE,static,1342308352
+Control4=IDC_TXT_REG_NAME,static,1342308864
+Control5=IDC_TXT_REG_CODE,static,1342308864
+Control6=IDC_REG_NAME,edit,1350631552
+Control7=IDC_REG_CODE,edit,1350631552
+Control8=IDC_TXT_REG_INFO_BELOW,static,1342308352
+Control9=IDC_STATIC,static,1342177296
+Control10=IDC_REG_HELP,static,1342308352
+
+[CLS:CRegisterDlg]
+Type=0
+HeaderFile=RegisterDlg.h
+ImplementationFile=RegisterDlg.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=IDC_REG_HELP
+VirtualFilter=dWC
 

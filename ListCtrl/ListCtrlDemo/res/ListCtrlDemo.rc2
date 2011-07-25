@@ -32,13 +32,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0" // Lang=US English, CharSet=Unicode
         BEGIN
-            VALUE "CompanyName", "cconger77@gmail.com"
-            VALUE "FileDescription", "Source Code Counter Tool"
+            VALUE "CompanyName", SZ_ORGNIZATION_NAME
+            VALUE "FileDescription", SZ_PRODUCT_NAME
             VALUE "FileVersion", SZ_VERSION_NAME
-            VALUE "InternalName", "scct.exe"
-            VALUE "LegalCopyright", "Copyright ?2011-2019 colin conger - Read license.txt for more infos."
-            VALUE "OriginalFilename", "scct.exe"
-            VALUE "ProductName", "Source Code Counter Tool"
+            VALUE "InternalName", "ecc.exe"
+            VALUE "LegalCopyright", SZ_COPYRIGHT
+            VALUE "OriginalFilename", "ecc.exe"
+            VALUE "ProductName", SZ_PRODUCT_NAME
             VALUE "ProductVersion", SZ_VERSION_NAME
         END
     END

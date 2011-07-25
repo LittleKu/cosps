@@ -137,6 +137,10 @@ SOURCE=.\LangRuleDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\LicenseMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.cpp
 # End Source File
 # Begin Source File
@@ -198,6 +202,10 @@ SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.cpp
 # Begin Source File
 
 SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\RegisterDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -290,6 +298,10 @@ SOURCE=.\LangRuleDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\LicenseMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlDemo.h
 # End Source File
 # Begin Source File
@@ -347,6 +359,10 @@ SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RegisterDlg.h
 # End Source File
 # Begin Source File
 

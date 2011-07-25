@@ -43,10 +43,13 @@ protected:
 	void SetMenuBarBkg();
 	void InitGUI();
 	CWnd* InitReBar();
+	virtual void OnOK();
+	virtual void OnCancel();
 	// Generated message map functions
 	//{{AFX_MSG(CMainDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnClose();
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()

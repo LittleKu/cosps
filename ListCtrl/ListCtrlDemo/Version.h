@@ -28,15 +28,20 @@
 //  <major>.<minor>.<update> is used for the displayed version (GUI) and the version check number
 //	<major>.<minor>			 is used for the protocol(!) version
 //
-#define VERSION_MJR		0
-#define VERSION_MIN		17
-#define VERSION_UPDATE	0
-#define VERSION_BUILD	102
+#define VERSION_MJR		2
+#define VERSION_MIN		1
+#define VERSION_UPDATE	5
+#define VERSION_BUILD	19
 
 // NOTE: This version string is also used by the language DLLs!
-#define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(".") chSTR(VERSION_BUILD)
+#define	SZ_VERSION_NAME				chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(".") chSTR(VERSION_BUILD)
+#define SZ_SHORT_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
 
-#define SZ_PRODUCT_NAME		chSTR(Easy Counter)
-#define SZ_ORGNIZATION_NAME	chSTR(CenaSoft)
+#define SZ_PRODUCT_NAME				_T("Demo")
+#define SZ_ORGNIZATION_NAME			_T("www.easy-demo77.com")
+#define SZ_PRODUCT_WEBSITE			_T("http://www.easy-demo77.com")
+#define SZ_PRODUCT_WEBSITE_ORDER	_T("http://www.easy-demo77.com/buynow.html")
+#define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@easy-demo77.com")
+#define SZ_COPYRIGHT				_T("Copyright (c) 2011-2016") _T(" ") SZ_ORGNIZATION_NAME
 
 #endif /* !__VERSION_H__ */
