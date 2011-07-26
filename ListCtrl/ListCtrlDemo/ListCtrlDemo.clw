@@ -12,15 +12,15 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=21
+ResourceCount=22
 Resource1=CG_IDD_PROGRESS
 Resource2=IDR_MAINFRAME
 Resource3=IDD_MAIN_DLG (English (U.S.))
-Resource4=IDD_PROPPAGE_STAT
-Resource5=IDD_PROPPAGE_GENERAL
+Resource4=IDR_RESULT_MENU (Neutral)
+Resource5=IDD_PROPPAGE_STAT
 Resource6=IDD_MAIN_DLG
 Class4=CProgressDlg
-Resource7=IDD_REGISTER
+Resource7=IDD_PROGRESS (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
@@ -32,21 +32,22 @@ Class8=CResultListCtrl
 Class9=CMainReBar
 Resource12=IDD_PROPPAGE_GENERAL (English (U.S.))
 Class10=CFilterTreeModifyDlg
-Resource13=IDD_LISTCTRLDEMO_DIALOG
+Resource13=IDD_ABOUTBOX
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
-Resource14=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource14=IDD_EVALUATION_LIMIT (Chinese (P.R.C.))
 Resource15=IDD_PROPPAGE_STAT (English (U.S.))
 Class14=CPPgStatistic
-Resource16=IDD_ABOUTBOX
-Resource17=IDD_PROGRESS (Chinese (P.R.C.))
+Resource16=IDD_LISTCTRLDEMO_DIALOG
+Resource17=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Class15=CRegisterDlg
 Resource18=IDD_REGISTER (English (U.S.))
 Resource19=IDD_EVALUATION_LIMIT
 Resource20=IDD_PROGRESS
 Class16=CEvaluationLimitDlg
-Resource21=IDR_RESULT_MENU (Neutral)
+Resource21=IDD_PROPPAGE_GENERAL
+Resource22=IDD_REGISTER
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -440,4 +441,15 @@ BaseClass=CDialog
 Filter=D
 LastObject=CEvaluationLimitDlg
 VirtualFilter=dWC
+
+[DLG:IDD_EVALUATION_LIMIT (Chinese (P.R.C.))]
+Type=1
+Class=?
+ControlCount=6
+Control1=IDCANCEL,button,1342242817
+Control2=IDC_STATIC_P1,static,1342308352
+Control3=IDC_STATIC_P2,static,1342308352
+Control4=IDC_STATIC,static,1342177296
+Control5=IDC_BUTTON_REGISTER,button,1342242816
+Control6=IDC_BUTTON_ORDER,button,1342242816
 

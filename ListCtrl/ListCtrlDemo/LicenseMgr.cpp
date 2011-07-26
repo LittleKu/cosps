@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "LicenseMgr.h"
 #include <memory>
+#include "RegKeyMgr.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -38,7 +39,8 @@ BOOL CLicenseMgr::IsRegistered()
 
 BOOL CLicenseMgr::Register(const CString& szName, const CString& szCode)
 {
-	return TRUE;
+	BOOL bResult = CRegKeyMgr::CheckKey(szName, szCode);
+	return bResult;
 }
 
 BOOL CLicenseMgr::GetLicenseInfo(CString& szName, CString& szCode)
