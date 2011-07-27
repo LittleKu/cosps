@@ -61,7 +61,43 @@ CListCtrlDemoApp theApp;
 
 /////////////////////////////////////////////////////////////////////////////
 // CListCtrlDemoApp initialization
+void CListCtrlDemoApp::InitWorkDir()
+{
+	//The old way can't work if the current work dir is not the dir where exe is at
+	/*
+	_tgetcwd(m_szWorkDir.GetBuffer(MAX_PATH), MAX_PATH);
+	m_szWorkDir.ReleaseBuffer();
+	//Remove the last backslash if exist
+	m_szWorkDir.TrimRight('\\');
+	*/
 
+	//Get the Full Path of the .exe file
+	LPTSTR lpszFullPath = m_szWorkDir.GetBuffer(MAX_PATH);
+	::GetModuleFileName(NULL, lpszFullPath, MAX_PATH);
+	m_szWorkDir.ReleaseBuffer();
+
+	TCHAR drive[MAX_PATH];
+    TCHAR dir[MAX_PATH];
+    TCHAR fname[MAX_PATH];
+    TCHAR ext[MAX_PATH];
+	
+    _tsplitpath(m_szWorkDir, drive, dir, fname, ext);
+	m_szWorkDir.Format("%s%s", drive, dir);
+	//Remove the last backslash if exist
+	m_szWorkDir.TrimRight('\\');
+
+	//For Debug and Release version in VC++
+	CString szCheckFilePath;
+	szCheckFilePath.Format(_T("%s\\dat\\default\\filter_tree.xml"), m_szWorkDir);
+	if(!::PathFileExists(szCheckFilePath))
+	{
+		int nLastBSPos = m_szWorkDir.ReverseFind(_T('\\'));
+		if(nLastBSPos >= 0)
+		{
+			m_szWorkDir.GetBufferSetLength(nLastBSPos);
+		}
+	}
+}
 BOOL CListCtrlDemoApp::InitInstance()
 {
 	AfxEnableControlContainer();
@@ -76,10 +112,8 @@ BOOL CListCtrlDemoApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-	_tgetcwd(m_szWorkDir.GetBuffer(MAX_PATH), MAX_PATH);
-	m_szWorkDir.ReleaseBuffer();
-	//Remove the last backslash if exist
-	m_szWorkDir.TrimRight('\\');
+
+	InitWorkDir();
 
 	InitLog4cplus();
 	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
@@ -88,6 +122,7 @@ BOOL CListCtrlDemoApp::InitInstance()
 		GetTimeZoneInformation(&tzi);	
 		LOG4CPLUS_INFO(THE_LOGGER, "Application Initialized. TimeZone="<<(-(tzi.Bias)))
 	}
+
 	//Set App's name
 	if(m_pszAppName != NULL)
 	{

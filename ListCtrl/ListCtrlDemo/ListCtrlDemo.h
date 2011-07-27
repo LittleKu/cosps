@@ -43,6 +43,8 @@ public:
 	afx_msg void OnHelp();          // F1 (uses current context)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+protected:
+	void InitWorkDir();
 };
 
 
