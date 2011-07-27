@@ -51,6 +51,18 @@ BOOL CEvaluationLimitDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	//Bold font
+	CFont *pFontTTL = GetFont();
+	LOGFONT lf;
+	pFontTTL->GetLogFont(&lf);
+	lf.lfWeight = FW_BOLD;
+	//lf.lfHeight *= 2;
+	m_fontBold.CreateFontIndirect(&lf);
+
+	//Set Font to the Labels
+	SendDlgItemMessage(IDC_STATIC_P1, WM_SETFONT, (WPARAM)m_fontBold.GetSafeHandle(), TRUE);
+	SendDlgItemMessage(IDC_STATIC_P2, WM_SETFONT, (WPARAM)m_fontBold.GetSafeHandle(), TRUE);
+
 	CString szText;
 
 	szText.Format(_T("You are using the evaluation copy of %s. "

@@ -34,7 +34,7 @@ void CPPgGeneral::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	//{{AFX_MSG_MAP(CPPgGeneral)
-	ON_EN_CHANGE(IDC_MAX_HISTORY_ITEMS, OnSettingsChange)
+//	ON_EN_CHANGE(IDC_MAX_HISTORY_ITEMS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK_INCLUDE_SUB_FOLDER, OnSettingsChange)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -48,7 +48,7 @@ BOOL CPPgGeneral::OnInitDialog()
 	
 	LoadSettings();
 
-	RepositionComponents();
+//	RepositionComponents();
 	
 	return TRUE;
 }
@@ -58,12 +58,12 @@ BOOL CPPgGeneral::OnApply()
 	UINT nChecked = IsDlgButtonChecked(IDC_CHECK_INCLUDE_SUB_FOLDER);
 	SYS_PREF()->m_bSearchIncludeSubFolders = ((nChecked & BST_CHECKED) != 0);
 
-	CString str;
-	GetDlgItemText(IDC_MAX_HISTORY_ITEMS, str);
-	if(!str.IsEmpty())
-	{
-		SYS_PREF()->m_nMaxItemsInFilterComboBox = _ttoi(str);
-	}
+// 	CString str;
+// 	GetDlgItemText(IDC_MAX_HISTORY_ITEMS, str);
+// 	if(!str.IsEmpty())
+// 	{
+// 		SYS_PREF()->m_nMaxItemsInFilterComboBox = _ttoi(str);
+// 	}
 
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
@@ -74,7 +74,7 @@ void CPPgGeneral::LoadSettings()
 	CheckDlgButton(IDC_CHECK_INCLUDE_SUB_FOLDER, 
 		(SYS_PREF()->m_bSearchIncludeSubFolders ? BST_CHECKED : BST_UNCHECKED));
 
-	SetDlgItemInt(IDC_MAX_HISTORY_ITEMS, SYS_PREF()->m_nMaxItemsInFilterComboBox);
+//	SetDlgItemInt(IDC_MAX_HISTORY_ITEMS, SYS_PREF()->m_nMaxItemsInFilterComboBox);
 }
 
 void CPPgGeneral::RepositionComponents()

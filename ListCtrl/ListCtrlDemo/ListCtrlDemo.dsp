@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib TC.lib /nologo /subsystem:windows /machine:I386 /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
+# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib TC.lib /nologo /subsystem:windows /machine:I386 /out:"Release/ecc.exe" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
 
 !ELSEIF  "$(CFG)" == "ListCtrlDemo - Win32 Debug"
 
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtbd.lib TCd.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtbd.lib TCd.lib /nologo /subsystem:windows /debug /machine:I386 /out:"Debug/ecc.exe" /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
 
 !ENDIF 
 
@@ -213,6 +213,10 @@ SOURCE=.\RegisterDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RegKeyMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ResultListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -230,10 +234,6 @@ SOURCE=.\ThirdParty\SortClass.cpp
 # Begin Source File
 
 SOURCE=.\SourceDirListCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\RegKeyMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -378,15 +378,15 @@ SOURCE=.\RegisterDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\RegKeyMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\ResultListCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\RegKeyMgr.h
 # End Source File
 # Begin Source File
 
@@ -467,6 +467,10 @@ SOURCE=.\res\MainToolBarHot.bmp
 # Begin Source File
 
 SOURCE=.\res\Options_General.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\Options_Statistics.ico
 # End Source File
 # Begin Source File
 

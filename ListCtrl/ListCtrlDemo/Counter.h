@@ -39,10 +39,17 @@ public:
 	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL);
 	virtual UINT GetResult() { return m_nCount; }
 	IFileParser* GetFileParser(int nLangRuleType, CFileInfo* pFileInfo, DWORD nMode = FP_MODE_DEFAULT);
-private:
+protected:
 	HWND m_hMainWnd;
 	HWND m_hProgWnd;
 	UINT m_nCount;
+};
+
+class CEvaluationFileParserVisitor : public CFileParserVisitor
+{
+public:
+	CEvaluationFileParserVisitor(HWND hMainWnd, HWND hProgressWnd);
+	virtual int VisitFile(LPCTSTR lpszFileName, LPVOID lpParam = NULL);
 };
 
 #endif

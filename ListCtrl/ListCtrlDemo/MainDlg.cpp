@@ -12,6 +12,7 @@
 #include "RegisterDlg.h"
 #include "LicenseMgr.h"
 #include "htmlhelp.h"
+#include "EvaluationLimitDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,16 +79,24 @@ BOOL CMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
 	// TODO: Add extra initialization here
-	CString szText = AfxGetApp()->m_pszAppName;
-	if(!CLicenseMgr::GetInstance()->IsRegistered())
-	{
-		szText += _T("(Evaluation Version)");
-	}
-	SetWindowText(szText);
-
 	SetMenuBarBkg();
 
 	InitGUI();
+
+	CString szText = AfxGetApp()->m_pszAppName;
+	if(!CLicenseMgr::GetInstance()->IsRegistered(TRUE))
+	{
+		CString szText;
+		szText.Format("%s%s", AfxGetApp()->m_pszAppName, _T("(Evaluation Version)"));
+		SetWindowText(szText);
+
+		CEvaluationLimitDlg dlg;
+		dlg.DoModal();
+	}
+	else
+	{
+		SetWindowText(AfxGetApp()->m_pszAppName);
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -262,8 +271,17 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		break;
 	case IDM_HELP_REGISTER:
 		{
-			CRegisterDlg regDlg;
-			regDlg.DoModal();
+			if(CLicenseMgr::GetInstance()->IsRegistered(TRUE))
+			{
+				CString szText;
+				szText.Format(_T("You have REGISTERED this software already. Thanks for your supporting!"));
+				AfxMessageBox(szText, MB_OK | MB_ICONINFORMATION);
+			}
+			else
+			{
+				CRegisterDlg regDlg;
+				regDlg.DoModal();
+			}
 		}
 		break;
 	case IDM_HELP_ABOUT:

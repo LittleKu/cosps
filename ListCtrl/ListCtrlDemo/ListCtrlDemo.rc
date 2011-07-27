@@ -13,84 +13,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add Folder...",              IDM_FILE_ADD
-        MENUITEM "&Delete Folder",              IDM_FILE_DEL
-        MENUITEM "&Start to Count",             IDM_FILE_START
-        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Report"
-    BEGIN
-        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
-        MENUITEM SEPARATOR
-        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
-        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
-        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
-        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
-    END
-    POPUP "&Tools"
-    BEGIN
-        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
-        MENUITEM SEPARATOR
-        MENUITEM "&Language Rules...",          IDM_TOOLS_LANG_RULES
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Help Contents\tF1",          IDM_HELP_HELP_CONTENT
-        MENUITEM "&Software Website...",        IDM_HELP_SOFTWARE_WEBSITE
-        MENUITEM SEPARATOR
-        MENUITEM "&Order Now...",               IDM_HELP_ORDER
-        MENUITEM "&Register...",                IDM_HELP_REGISTER
-        MENUITEM SEPARATOR
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add Source Folder"
-    IDM_FILE_DEL            "Delete Source Folder"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
-    ID_TBBTN_START_TO_COUNT "Start to Count"
-    ID_TBBTN_CLEAR_RESULT   "Clear Result"
-    ID_TBBTN_EXPORT         "Export"
-    ID_TBBTN_SETTING        "Options"
-    ID_TBBTN_EXIT           "Exit"
-END
-
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -181,6 +103,84 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add Folder...",              IDM_FILE_ADD
+        MENUITEM "&Delete Folder",              IDM_FILE_DEL
+        MENUITEM "&Start to Count",             IDM_FILE_START
+        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Report"
+    BEGIN
+        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
+        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
+        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
+        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "&Language Rules...",          IDM_TOOLS_LANG_RULES
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Contents\tF1",          IDM_HELP_HELP_CONTENT
+        MENUITEM "&Software Website...",        IDM_HELP_SOFTWARE_WEBSITE
+        MENUITEM SEPARATOR
+        MENUITEM "&Order Now...",               IDM_HELP_ORDER
+        MENUITEM "&Register...",                IDM_HELP_REGISTER
+        MENUITEM SEPARATOR
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add Source Folder"
+    IDM_FILE_DEL            "Delete Source Folder"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
+    ID_TBBTN_START_TO_COUNT "Start to Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+    ID_TBBTN_EXPORT         "Export"
+    ID_TBBTN_SETTING        "Options"
+    ID_TBBTN_EXIT           "Exit"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -216,8 +216,6 @@ EXSTYLE WS_EX_APPWINDOW
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Source Directories",IDC_SOURCE_DIR_FRAME,201,4,410,111
-    COMBOBOX        IDC_FILTER_COMBO,208,96,394,141,CBS_DROPDOWN | 
-                    WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Result",IDC_RESULT_FRAME,201,128,410,148
     CONTROL         "List4",IDC_RESULT_LIST,"SysListView32",LVS_REPORT | 
                     WS_BORDER | WS_TABSTOP,208,139,394,132
@@ -244,7 +242,7 @@ BEGIN
     LTEXT           "",IDC_MIXED_P,482,327,45,12,SS_SUNKEN
     LTEXT           "",IDC_BLANK_P,535,327,45,12,SS_SUNKEN
     CONTROL         "List1",IDC_SOURCE_DIR_LIST,"SysListView32",LVS_REPORT | 
-                    WS_BORDER | WS_TABSTOP,208,15,394,72
+                    WS_BORDER | WS_TABSTOP,208,15,394,95
     CONTROL         "",IDC_SPLITTER_VERTICAL,"Static",SS_BLACKFRAME,197,0,3,
                     356
     CONTROL         "Tree1",IDC_FILTER_TREE,"SysTreeView32",TVS_HASBUTTONS | 
@@ -273,10 +271,7 @@ BEGIN
     CONTROL         "Recursive search sub folders",
                     IDC_CHECK_INCLUDE_SUB_FOLDER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,13,14,314,12
-    CONTROL         "Maximum history items in filter combobox:",
-                    IDC_TXT_MAX_HISTORY_ITEMS,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_CENTERIMAGE | WS_GROUP,13,40,158,12
-    EDITTEXT        IDC_MAX_HISTORY_ITEMS,180,40,24,12,ES_NUMBER
+    GROUPBOX        "General",IDC_STATIC,7,7,328,171
 END
 
 IDD_PROPPAGE_STAT DIALOG DISCARDABLE  0, 0, 342, 185
@@ -414,6 +409,7 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON    DISCARDABLE     "res\\AppIcon.ico"
 IDI_OPTIONS_GENERAL     ICON    DISCARDABLE     "res\\Options_General.ico"
+IDI_OPTIONS_STATISTICS  ICON    DISCARDABLE     "res\\Options_Statistics.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

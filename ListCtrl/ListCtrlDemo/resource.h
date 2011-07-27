@@ -24,6 +24,7 @@
 #define IDD_PROPPAGE_STAT               144
 #define IDD_REGISTER                    145
 #define IDD_EVALUATION_LIMIT            146
+#define IDI_OPTIONS_STATISTICS          147
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -123,7 +124,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        147
+#define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32789
 #define _APS_NEXT_CONTROL_VALUE         1073
 #define _APS_NEXT_SYMED_VALUE           107

@@ -97,16 +97,20 @@ BOOL CAboutDlg::OnInitDialog()
 
 	//Set license info
 	CString szLicenceInfo;
-	if(CLicenseMgr::GetInstance()->IsRegistered())
+	if(CLicenseMgr::GetInstance()->IsRegistered(TRUE))
 	{
 		CString szName, szCode;
 		CLicenseMgr::GetInstance()->GetLicenseInfo(szName, szCode);
 
-		szLicenceInfo.Format(_T("%s\r\n%s\r\n%s\r\n"), "This software is licensed to:", szName, szCode);
+		szLicenceInfo.Format(_T("%s\r\n%s\r\n"), "This software is licensed to:", szName);
 	}
 	else
 	{
-		szLicenceInfo.Format(_T("Evaluation Version"));
+		szLicenceInfo.Format(_T("Evaluation Version\r\n"
+			"You are using the evaluation copy of %s. "
+			"Only %d files could be counted in each count operation. "
+			"To remove this limitation, please order a registration key."),
+			SZ_PRODUCT_NAME, MAX_EVALUATION_FILE_COUNT);
 	}
 	m_RegInfo.SetWindowText(szLicenceInfo);
 

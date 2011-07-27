@@ -32,7 +32,7 @@ public:
 
 // Implementation
 protected:
-
+	CFont m_fontBold;
 	// Generated message map functions
 	//{{AFX_MSG(CEvaluationLimitDlg)
 	virtual BOOL OnInitDialog();

@@ -38,7 +38,7 @@ void CListCtrlDemoDlg::DoDataExchange(CDataExchange* pDX)
 	CResizableDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CListCtrlDemoDlg)
 	DDX_Control(pDX, IDC_FILTER_TREE, m_filterTree);
-	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
+//	DDX_Control(pDX, IDC_FILTER_COMBO, m_filterComboBox);
 	DDX_Control(pDX, IDC_SOURCE_DIR_LIST, m_srcDirListCtrl);
 	DDX_Control(pDX, IDC_RESULT_LIST, m_resultListCtrl);
 	//}}AFX_DATA_MAP
@@ -94,7 +94,7 @@ BOOL CListCtrlDemoDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 	InitSplitters();
 
-	m_filterComboBox.Init();
+//	m_filterComboBox.Init();
 
 	InitFilterTree();
 
@@ -132,7 +132,7 @@ void CListCtrlDemoDlg::InitResizableDlgAnchor()
     AddAnchor(IDC_SOURCE_DIR_FRAME, TOP_LEFT, TOP_RIGHT);
 	
     AddAnchor(IDC_SOURCE_DIR_LIST, TOP_LEFT,    TOP_RIGHT);
-    AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
+//    AddAnchor(IDC_FILTER_COMBO,		TOP_LEFT,    TOP_RIGHT);
 
 	
     AddAnchor(IDC_RESULT_FRAME, TOP_LEFT, BOTTOM_RIGHT);
@@ -576,7 +576,7 @@ void CListCtrlDemoDlg::DoSizeVertical(int delta)
 
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_SOURCE_DIR_FRAME), -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(&m_srcDirListCtrl, -delta, CW_RIGHTALIGN);
-	CSplitterControl::ChangeWidth(&m_filterComboBox, -delta, CW_RIGHTALIGN);
+//	CSplitterControl::ChangeWidth(&m_filterComboBox, -delta, CW_RIGHTALIGN);
 
 	CSplitterControl::ChangeWidth(&m_splitterHorizontal, -delta, CW_RIGHTALIGN);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_RIGHTALIGN);
@@ -619,35 +619,10 @@ void CListCtrlDemoDlg::DoSizeHorizontal(int delta)
 {
 	CSplitterControl::ChangeHeight(GetDlgItem(IDC_SOURCE_DIR_FRAME), delta, CW_TOPALIGN);
 	CSplitterControl::ChangeHeight(&m_srcDirListCtrl, delta, CW_TOPALIGN);
-	CSplitterControl::ChangePos(&m_filterComboBox, 0, delta);
+//	CSplitterControl::ChangePos(&m_filterComboBox, 0, delta);
 
 	CSplitterControl::ChangeHeight(GetDlgItem(IDC_RESULT_FRAME), -delta, CW_BOTTOMALIGN);
 	CSplitterControl::ChangeHeight(&m_resultListCtrl, -delta, CW_BOTTOMALIGN);
-
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_SUMMARY_FRAME), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_TOTAL), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_FILE_NUMBER), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_LINES), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_CODE), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_COMMENT), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_MIXED), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_BLANK), 0, delta);
-// 	
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_C), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_C), 0, delta);
-// 	
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_TXT_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_NUMBER_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_LINES_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_CODE_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_COMMENT_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_MIXED_P), 0, delta);
-// 	CSplitterControl::ChangePos(GetDlgItem(IDC_BLANK_P), 0, delta);
 
 	SetSplitterHRange();
 
@@ -702,24 +677,7 @@ void CListCtrlDemoDlg::OnSize(UINT nType, int cx, int cy)
 
 LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam) 
 {
-// 	CList<HTREEITEM, HTREEITEM> htiSelectedList;
-// 	m_filterTree.GetSelectedItems(htiSelectedList);
-// 
-// 	CString sFilterStr;
-// 	POSITION pos = htiSelectedList.GetHeadPosition();
-// 	HTREEITEM hti;
-// 	CMultiSelTreeCtrl::TVITEMDATA* pTVIData = NULL;
-// 	while(pos != NULL)
-// 	{
-// 		hti = htiSelectedList.GetNext(pos);
-// 		
-// 		pTVIData = (CMultiSelTreeCtrl::TVITEMDATA*)m_filterTree.GetItemData(hti);
-// 		if(pTVIData != NULL && !pTVIData->szType.IsEmpty())
-// 		{
-// 			sFilterStr += pTVIData->szType;
-// 			sFilterStr += _T(";");
-// 		}
-// 	}
+	/*
 	LPFilterGroupList lpFilterGroupList;
 	m_filterTree.GetFilterGroupList(lpFilterGroupList);
 	CString sFilterStr = CommonUtils::ToString(lpFilterGroupList);
@@ -732,7 +690,7 @@ LRESULT CListCtrlDemoDlg::OnTreeItemSelected(WPARAM wParam, LPARAM lParam)
 		LPFilterGroup pFilterGroup = lpFilterGroupList.GetNext(pos);
 		delete pFilterGroup;
 	}
-
+	*/
 	return TRUE;
 }
 

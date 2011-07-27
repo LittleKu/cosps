@@ -22,7 +22,8 @@ CPreferencesDlg::CPreferencesDlg() : m_bSaveIniFile(FALSE)
 	m_wndGeneral.m_psp.dwFlags &= ~PSP_HASHELP;	
 	m_wndStatistic.m_psp.dwFlags &= ~PSP_HASHELP;
 
-	TreePropSheet::CTreePropSheet::SetPageIcon(&m_wndGeneral, IDI_OPTIONS_GENERAL);
+// 	TreePropSheet::CTreePropSheet::SetPageIcon(&m_wndGeneral, IDI_OPTIONS_GENERAL);
+// 	TreePropSheet::CTreePropSheet::SetPageIcon(&m_wndStatistic, IDI_OPTIONS_STATISTICS);
 
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndStatistic);

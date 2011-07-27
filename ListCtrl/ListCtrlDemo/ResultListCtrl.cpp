@@ -33,13 +33,13 @@ struct ColumnInfo
 static ColumnInfo columns[] =
 {
     { _T("File Name"),  				TYPE_TEXT,    DESCENDING,   40 },
-    { _T("Extension"),  				TYPE_TEXT,    DESCENDING,   0  },
-    { _T("Path"),       				TYPE_TEXT,    DESCENDING,   25 },
-    { _T("Lines"),						TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT },
-    { _T("Code"),						TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
-    { _T("Comment"),					TYPE_NUMERIC, DESCENDING,  -10, LVCFMT_RIGHT },
-    { _T("Mixed"),						TYPE_NUMERIC, DESCENDING,  -75, LVCFMT_RIGHT },
-    { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT }
+    { _T("Extension"),  				TYPE_TEXT,    DESCENDING,   25  },
+    { _T("Lines"),						TYPE_NUMERIC, DESCENDING,   20, LVCFMT_RIGHT },
+    { _T("Code"),						TYPE_NUMERIC, DESCENDING,   15, LVCFMT_RIGHT },
+    { _T("Comment"),					TYPE_NUMERIC, DESCENDING,   20, LVCFMT_RIGHT },
+    { _T("Mixed"),						TYPE_NUMERIC, DESCENDING,   20, LVCFMT_RIGHT },
+    { _T("Blank"),      				TYPE_NUMERIC, DESCENDING,   20, LVCFMT_RIGHT },
+	{ _T("Path"),       				TYPE_TEXT,    DESCENDING,   300 }
 };
 
 CResultListCtrl::CResultListCtrl()
@@ -103,7 +103,6 @@ int CResultListCtrl::AddRow(const CFileInfo& fi)
 	
     int iSubItem = 0;
     SetItemText(lvi.iItem, ++iSubItem, fi.m_sFileExt);
-    SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
 	
 	SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nTotalLines));
     SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nCodeLines));
@@ -111,6 +110,8 @@ int CResultListCtrl::AddRow(const CFileInfo& fi)
     SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.GetMixedLines()));
     SetItemText(lvi.iItem, ++iSubItem, CommonUtils::ToString(fi.m_nBlankLines));
 	
+	SetItemText(lvi.iItem, ++iSubItem, fi.m_sFilePath);
+
 	return nRes;
 }
 
@@ -211,11 +212,11 @@ void CResultListCtrl::Init()
             &lvc);
     }
 	
-	SortColumn( 2, false );
-	SortColumn( 1, true );
-	SortColumn( 0, true );
+// 	SortColumn( 2, false );
+// 	SortColumn( 1, true );
+// 	SortColumn( 0, true );
 	
-	SetUniqueName( "ResultsListCtrl" );
+	SetUniqueName( "Result-Table" );
 	LoadColumnWidths();
     LoadColumnOrder();
     LoadColumnSort();

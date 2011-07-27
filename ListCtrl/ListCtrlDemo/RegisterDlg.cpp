@@ -64,7 +64,7 @@ BOOL CRegisterDlg::OnInitDialog()
 	pOkButton->SetWindowText(_T("Register"));
 	
 	CString szText;
-	if(CLicenseMgr::GetInstance()->IsRegistered())
+	if(CLicenseMgr::GetInstance()->IsRegistered(TRUE))
 	{
 		szText.Format(_T("You have REGISTERED this software already. Thanks for your supporting!"));
 		SetDlgItemText(IDC_TXT_REG_INFO_ABOVE, szText);
@@ -114,6 +114,9 @@ void CRegisterDlg::OnOK()
 	CString szPromptText;
 	if(bResult)
 	{
+		//Update Main Window Title
+		AfxGetMainWnd()->SetWindowText(AfxGetApp()->m_pszAppName);
+
 		szPromptText.Format(_T("Register successfully. Thanks for your supporting."));
 		AfxMessageBox(szPromptText, MB_OK | MB_ICONINFORMATION);
 

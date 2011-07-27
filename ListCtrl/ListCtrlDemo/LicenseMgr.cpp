@@ -13,6 +13,9 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#define THE_REG_SUB_KEY					"Software\\" SZ_PRODUCT_NAME "\\Common"
+#define THE_REG_LICENSE_VALUE_NAME		"UID"
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -22,7 +25,7 @@ CLicenseMgr* CLicenseMgr::GetInstance()
 	static std::auto_ptr<CLicenseMgr> ptr(new CLicenseMgr);	
  	return ptr.get();
 }
-CLicenseMgr::CLicenseMgr()
+CLicenseMgr::CLicenseMgr() : m_bRegistered(FALSE)
 {
 }
 
@@ -32,28 +35,19 @@ CLicenseMgr::~CLicenseMgr()
 }
 
 
-BOOL CLicenseMgr::IsRegistered()
+BOOL CLicenseMgr::IsRegistered(BOOL bRefreshData)
 {
-	LONG lResult = ERROR_SUCCESS;
-	CString szName, szCode;
-	lResult = ReadRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Name", szName);
-	if(lResult != ERROR_SUCCESS)
+	if(bRefreshData)
 	{
-		return FALSE;
+		CString szName, szCode;
+		m_bRegistered = GetLicenseInfo(szName, szCode);
+		if(!m_bRegistered)
+		{
+			return FALSE;
+		}
+		m_bRegistered = CRegKeyMgr::CheckKey(szName, szCode);
 	}
-	lResult = ReadRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Code", szCode);
-	if(lResult != ERROR_SUCCESS)
-	{
-		return FALSE;
-	}
-
-	BOOL bResult = CRegKeyMgr::CheckKey(szName, szCode);
-	if(!bResult)
-	{
-		return FALSE;
-	}
-
-	return TRUE;
+	return m_bRegistered;
 }
 
 BOOL CLicenseMgr::Register(const CString& szName, const CString& szCode)
@@ -64,27 +58,54 @@ BOOL CLicenseMgr::Register(const CString& szName, const CString& szCode)
 		return FALSE;
 	}
 
-	LONG lResult;
-	lResult = WriteRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Name", szName);
-	lResult = WriteRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Code", szCode);
+	BYTE* pBinaryStr = NULL;
+	DWORD dwSize = 0;
+	
+	CRegKeyMgr::Serialize(szName, szCode, &pBinaryStr, &dwSize);
+	ASSERT(pBinaryStr != NULL && dwSize > 0);
 
-	return bResult;
+	LONG lResult;
+	lResult = WriteRegData(HKEY_LOCAL_MACHINE, THE_REG_SUB_KEY, THE_REG_LICENSE_VALUE_NAME, pBinaryStr, dwSize);
+	//Release data
+	delete [] pBinaryStr;
+	pBinaryStr = NULL;
+
+	if(lResult != ERROR_SUCCESS)
+	{
+		return FALSE;
+	}
+
+	m_bRegistered = TRUE;
+	return m_bRegistered;
 }
 
 BOOL CLicenseMgr::GetLicenseInfo(CString& szName, CString& szCode)
 {
-	LONG lResult;
-	lResult = ReadRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Name", szName);
-	if(lResult != ERROR_SUCCESS)
+	BYTE* pBinaryStr = NULL;
+	DWORD dwSize = 0;
+
+	BOOL bResult = FALSE;
+	do 
 	{
-		return FALSE;
-	}
-	lResult = ReadRegString(HKEY_LOCAL_MACHINE, "Software\\Code Project\\LicenseInfo", "Registration Code", szCode);
-	if(lResult != ERROR_SUCCESS)
+		LONG lResult = ReadRegData(HKEY_LOCAL_MACHINE, THE_REG_SUB_KEY, THE_REG_LICENSE_VALUE_NAME, 
+			&pBinaryStr, &dwSize);
+		if(lResult != ERROR_SUCCESS)
+		{
+			break;
+		}
+
+		bResult = CRegKeyMgr::Deserialize(pBinaryStr, dwSize, szName, szCode);
+
+	} while (FALSE);
+
+	//Release data
+	if(pBinaryStr != NULL)
 	{
-		return FALSE;
+		delete [] pBinaryStr;
+		pBinaryStr = NULL;
 	}
-	return TRUE;
+
+	return bResult;
 }
 
 LONG CLicenseMgr::WriteRegString(HKEY hKey, LPCTSTR lpSubKey, LPCTSTR lpValueName, LPCTSTR pszData)
@@ -171,4 +192,77 @@ LONG CLicenseMgr::ReadRegString(HKEY hKey, LPCTSTR lpSubKey, LPCTSTR lpValueName
     if( NULL != pcbData ) { delete[] pcbData; }
 	
     return lResult;
+}
+
+LONG CLicenseMgr::WriteRegData(HKEY hKey, LPCTSTR lpSubKey, LPCTSTR lpValueName, const BYTE *pcbData, UINT nSize)
+{
+    LONG lResult = ERROR_SUCCESS;
+    HKEY hKeyResult = NULL;
+	do 
+	{
+		// When writing, create the Key if it does not exist
+		lResult = RegCreateKeyEx( hKey, lpSubKey, 0, NULL, REG_OPTION_NON_VOLATILE, 
+			KEY_WRITE, NULL, &hKeyResult, NULL );
+		// Sanity Check
+		if( ERROR_SUCCESS != lResult ) { break; }
+
+		// Paydirt
+		lResult = RegSetValueEx( hKeyResult, lpValueName, 0, REG_BINARY, pcbData, nSize );
+
+	} while (FALSE);	
+
+    // Cleanup...
+    if( NULL != hKeyResult ) { RegCloseKey( hKeyResult ); }
+	
+    return lResult;
+}
+
+LONG CLicenseMgr::ReadRegData(HKEY hKey, LPCTSTR lpSubKey, LPCTSTR lpValueName, BYTE **pcbData, DWORD *pdwSize)
+{
+	ASSERT( NULL != pcbData && NULL != pdwSize );
+
+	LONG lResult = ERROR_SUCCESS;
+	HKEY hKeyResult = NULL;
+	do 
+	{
+		// Sanity Check
+		if( NULL == pcbData || NULL == pdwSize ) 
+		{        
+			lResult = ERROR_INVALID_PARAMETER;
+			break;
+		}
+
+		// Open the Key
+		lResult = RegOpenKeyEx( hKey, lpSubKey, 0, KEY_READ, &hKeyResult );
+		if( ERROR_SUCCESS != lResult )
+		{
+			break;
+		}
+
+		// Query for needed buffer size
+		lResult = RegQueryValueEx( hKeyResult, lpValueName, 0, NULL, NULL, pdwSize );
+		if( ERROR_SUCCESS != lResult )
+		{
+			break;
+		}
+
+		// Allocate a buffer
+		*pcbData = new BYTE[ *pdwSize + sizeof(TCHAR) ];
+		// Sanity Check
+		if( NULL == *pcbData ) 
+		{
+			lResult = ERROR_NOT_ENOUGH_MEMORY;
+			break;
+		}
+
+		// Query for the actual value
+		lResult = RegQueryValueEx( hKeyResult, lpValueName, 0, NULL, *pcbData, pdwSize );
+	} while (FALSE);
+
+	if( NULL != hKeyResult ) 
+	{ 
+		RegCloseKey( hKeyResult ); 
+	}
+
+	return lResult;
 }

@@ -72,7 +72,15 @@ UINT CCounter::CountThreadProc(LPVOID lpvData)
 	::SendMessage(hProgWnd, WM_PROGRESS_SET_RANGE, 0, cAllFiles);
 	
 	//Do the works
-	pVisitor = new CFileParserVisitor(lpThreadParam->hwndMain, hProgWnd);
+	if(CLicenseMgr::GetInstance()->IsRegistered(TRUE))
+	{
+		pVisitor = new CFileParserVisitor(lpThreadParam->hwndMain, hProgWnd);
+	}
+	else
+	{
+		pVisitor = new CEvaluationFileParserVisitor(lpThreadParam->hwndMain, hProgWnd);
+	}
+
 	progChecker.Reset();
 	prev = 0;
 	timeCost.Reset();
@@ -160,10 +168,6 @@ CFileParserVisitor::CFileParserVisitor(HWND hMainWnd, HWND hProgressWnd) : m_hMa
 }
 int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 {
-	if(!CLicenseMgr::GetInstance()->IsRegistered() && m_nCount >= MAX_EVALUATION_FILE_COUNT)
-	{
-		return COUNTER_RET_CODE_EXCEEDS_LIMITATION;
-	}
 	m_nCount++;
 
 	UpdateProgressParam param;
@@ -181,7 +185,7 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 	LPFilterGroup lpFilterGroup = (LPFilterGroup)lpParam;
 	ASSERT(lpFilterGroup != NULL && lpFilterGroup->nLangRuleType >= 0);
 
-	IFileParser* pFileParser = GetFileParser(lpFilterGroup->nLangRuleType, pFi, SYS_PREF()->m_nStatMode | FP_MODE_LOG_ALL);
+	IFileParser* pFileParser = GetFileParser(lpFilterGroup->nLangRuleType, pFi, SYS_PREF()->m_nStatMode);
 	if(pFileParser == NULL)
 	{
 		AfxTrace("File[%s], Lang[%s:%d]\n", lpszFileName, lpFilterGroup->szLangRuleName, lpFilterGroup->nLangRuleType);
@@ -200,6 +204,9 @@ int CFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
 
 IFileParser* CFileParserVisitor::GetFileParser(int nLangRuleType, CFileInfo* pFileInfo, DWORD nMode)
 {
+#ifdef _DEBUG
+	nMode |= FP_MODE_LOG_ALL;
+#endif
 	IFileParser* pFileParser = NULL;
 	if(!CLangGrammarInfo::IsUserDefinedLangGrammar(nLangRuleType))
 	{
@@ -212,4 +219,18 @@ IFileParser* CFileParserVisitor::GetFileParser(int nLangRuleType, CFileInfo* pFi
 	CLangGrammarInfo* pLangGrammarInfo = CLangGrammarMap::GetInstance()->GetLangGrammarInfo(nLangRuleType);
 	ASSERT(pLangGrammarInfo != NULL);
 	return CFileParserFactory::GetGenericFileParser(pLangGrammarInfo->m_pLangGrammar, pFileInfo, nMode);
+}
+
+CEvaluationFileParserVisitor::CEvaluationFileParserVisitor(HWND hMainWnd, HWND hProgressWnd)
+ : CFileParserVisitor(hMainWnd, hProgressWnd)
+{
+}
+
+int CEvaluationFileParserVisitor::VisitFile(LPCTSTR lpszFileName, LPVOID lpParam)
+{
+	if(m_nCount >= MAX_EVALUATION_FILE_COUNT)
+	{
+		return COUNTER_RET_CODE_EXCEEDS_LIMITATION;
+	}
+	return CFileParserVisitor::VisitFile(lpszFileName, lpParam);
 }
