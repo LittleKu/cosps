@@ -218,3 +218,22 @@ int CListCtrlDemoApp::ExitInstance()
 	LOG4CPLUS_INFO(THE_LOGGER, "Application Exit.")
 	return CWinApp::ExitInstance();
 }
+
+BOOL CListCtrlDemoApp::PreTranslateMessage(MSG* pMsg) 
+{
+	//The Key RETURN and ESCAPE will cause the system halted, remove the response of the 2 keys.
+	if(pMsg->message == WM_KEYDOWN)
+	{
+		if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE)
+		{
+			HWND hWndMsgParent = ::GetParent(pMsg->hwnd);
+			HWND hWndWork = ((CMainDlg*)AfxGetMainWnd())->m_pCounterDlg->GetSafeHwnd();
+			if(hWndWork == hWndMsgParent)
+			{
+				return TRUE;
+			}
+		}
+	}
+	
+	return CWinApp::PreTranslateMessage(pMsg);
+}

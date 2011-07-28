@@ -78,7 +78,7 @@ BOOL CMainDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 	
-	// TODO: Add extra initialization here
+
 	SetMenuBarBkg();
 
 	InitGUI();
@@ -94,8 +94,10 @@ BOOL CMainDlg::OnInitDialog()
 		SetWindowText(AfxGetApp()->m_pszAppName);
 	}
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	EnableSaveRestore("MainDlg");
+	m_pCounterDlg->UpdateFilterTreeBkgnd();
+
+	return TRUE;
 }
 
 void CMainDlg::SetMenuBarBkg()
@@ -142,12 +144,8 @@ void CMainDlg::InitGUI()
 	AddAnchor(pWndToolBar->m_hWnd,	TOP_LEFT, TOP_RIGHT);
 	AddAnchor(m_pCounterDlg->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
 
-    EnableSaveRestore("MainDlg");
-
 	SetSizeGripVisibility(FALSE);
 	UpdateSizeGrip();
-
-	m_pCounterDlg->UpdateFilterTreeBkgnd();
 }
 
 CWnd* CMainDlg::InitReBar()
