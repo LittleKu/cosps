@@ -45,14 +45,14 @@ BOOL CLicenseMgr::IsRegistered(BOOL bRefreshData)
 		{
 			return FALSE;
 		}
-		m_bRegistered = CRegKeyMgr::CheckKey(szName, szCode);
+		m_bRegistered = CRegKeyMgr::CheckKey(SZ_PRODUCT_NAME, szName, szCode);
 	}
 	return m_bRegistered;
 }
 
 BOOL CLicenseMgr::Register(const CString& szName, const CString& szCode)
 {
-	BOOL bResult = CRegKeyMgr::CheckKey(szName, szCode);
+	BOOL bResult = CRegKeyMgr::CheckKey(SZ_PRODUCT_NAME, szName, szCode);
 	if(!bResult)
 	{
 		return FALSE;

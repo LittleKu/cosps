@@ -69,6 +69,13 @@
         <string start='&quot;' end='&quot;' />
         <string start="&apos;" end="&apos;" />
     </lang_grammar>
+    <lang_grammar name="Pascal" type="1501">
+        <line_comment content="//" />
+        <escape content="\" />
+        <block_comment start="{" end="}" />
+        <block_comment start="(*" end="*)" />
+        <string start="&apos;" end="&apos;" />
+    </lang_grammar>    
     <lang_grammar name="Perl" type="1502">
         <line_comment content="#" />
         <escape content="\" />

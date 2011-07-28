@@ -82,7 +82,11 @@ BOOL CEvaluationLimitDlg::OnInitDialog()
 void CEvaluationLimitDlg::OnButtonRegister() 
 {
 	CRegisterDlg regDlg;
-	regDlg.DoModal();
+	int nResponse = regDlg.DoModal();
+	if(nResponse == IDOK)
+	{
+		CDialog::OnOK();
+	}
 }
 
 void CEvaluationLimitDlg::OnButtonOrder() 

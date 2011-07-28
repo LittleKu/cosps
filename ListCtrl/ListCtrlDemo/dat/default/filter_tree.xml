@@ -37,8 +37,8 @@
     <language text="JavaScript" type="902" checked="1" expanded="0">
         <file text="JScript Script File (*.js)" type="*.js" checked="1" />
     </language>
-    <language text="Delphi" type="301" checked="1" expanded="0">
-        <file text="Delphi Source File (*.pas)" type="*.pas" checked="1" />
+    <language text="Delphi/Pascal" type="1501" checked="1" expanded="0">
+        <file text="Pascal Source File (*.pas)" type="*.pas" checked="1" />
     </language>
     <language text="Assembly" type="2" checked="1" expanded="0">
         <file text="Assembler Source (*.asm)" type="*.asm" checked="1" />
