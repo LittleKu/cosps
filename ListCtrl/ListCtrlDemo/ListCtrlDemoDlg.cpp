@@ -122,6 +122,19 @@ void CListCtrlDemoDlg::InitFilterTree()
 //	m_filterTree.ExpandAllItems();
 	OnTreeItemSelected(0, 0);
 }
+
+void CListCtrlDemoDlg::UpdateFilterTreeBkgnd()
+{
+	CRect rect;
+	m_filterTree.GetWindowRect(&rect);
+	ScreenToClient(&rect);
+
+	m_filterTree.Invalidate();
+	m_filterTree.UpdateWindow();
+
+	InvalidateRect(&rect);
+	UpdateWindow();
+}
 void CListCtrlDemoDlg::InitResizableDlgAnchor()
 {
 	//Anchor for splitters

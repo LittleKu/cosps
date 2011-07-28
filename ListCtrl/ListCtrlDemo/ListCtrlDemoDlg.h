@@ -33,6 +33,7 @@ public:
 	virtual ~CListCtrlDemoDlg();
 	CTotalInfo* GetTotalInfo();
 	void OnExport(DWORD nTypeIndex = EXPORT_TYPE_CSV);
+	void UpdateFilterTreeBkgnd();
 // Dialog Data
 	//{{AFX_DATA(CListCtrlDemoDlg)
 	enum { IDD = IDD_LISTCTRLDEMO_DIALOG };

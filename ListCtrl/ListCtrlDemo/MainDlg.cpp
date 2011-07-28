@@ -83,15 +83,11 @@ BOOL CMainDlg::OnInitDialog()
 
 	InitGUI();
 
-	CString szText = AfxGetApp()->m_pszAppName;
 	if(!CLicenseMgr::GetInstance()->IsRegistered(TRUE))
 	{
 		CString szText;
 		szText.Format("%s%s", AfxGetApp()->m_pszAppName, _T("(Evaluation Version)"));
 		SetWindowText(szText);
-
-		CEvaluationLimitDlg dlg;
-		dlg.DoModal();
 	}
 	else
 	{
@@ -146,10 +142,12 @@ void CMainDlg::InitGUI()
 	AddAnchor(pWndToolBar->m_hWnd,	TOP_LEFT, TOP_RIGHT);
 	AddAnchor(m_pCounterDlg->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
 
-    EnableSaveRestore("ListCtrlDemoDlg-MainDlg");
+    EnableSaveRestore("MainDlg");
 
-	SetSizeGripVisibility(TRUE);
+	SetSizeGripVisibility(FALSE);
 	UpdateSizeGrip();
+
+	m_pCounterDlg->UpdateFilterTreeBkgnd();
 }
 
 CWnd* CMainDlg::InitReBar()
