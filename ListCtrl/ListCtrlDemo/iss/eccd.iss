@@ -68,5 +68,6 @@ Type: files; Name: "{app}\dat\user\lang_grammar.xml"
 Type: files; Name: "{app}\dat\user\preferences.ini"
 Type: dirifempty; Name: "{app}\dat"
 Type: dirifempty; Name: "{app}"
+Type: files; Name: "{win}\ecc.INI"
 
 [UninstallRun]

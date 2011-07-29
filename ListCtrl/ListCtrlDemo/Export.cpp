@@ -129,6 +129,16 @@ CXLSExporter::CXLSExporter(CResultListCtrl* pListCtrl, CTotalInfo* pTotalInfo) :
 
 BOOL CXLSExporter::DoExport(LPCTSTR lpFileName)
 {
+	if(::PathFileExists(lpFileName))
+	{
+		if(!::DeleteFile(lpFileName))
+		{
+			CString szCause;
+			szCause.Format(_T("Failed to overwrite the file: %s"), lpFileName);
+			AfxMessageBox(szCause, MB_OK | MB_ICONEXCLAMATION);
+			return FALSE;
+		}
+	}
 	BOOL bResult = FALSE;
 	
 	CDatabase database;
@@ -245,9 +255,9 @@ BOOL CXMLExporter::DoExport(LPCTSTR lpFileName)
             "%s"
 
             // root
-            "<statistics orgnization=\"%s\" product=\"%s\" date=\"%s\" version=\"%s\" licence=\"%s\">\n",
+            "<statistics orgnization=\"%s\" product=\"%s\" date=\"%s\" version=\"%s\">\n",
             SZ_PRODUCT_NAME, sXSLT, SZ_ORGNIZATION_NAME, SZ_PRODUCT_NAME, 
-			CommonUtils::GetCurrentTime(), SZ_VERSION_NAME, "Unregistered");
+			CommonUtils::GetCurrentTime(), SZ_VERSION_NAME);
         cFile.WriteString(s);
 
 		int nRowCount = m_pListCtrl->GetItemCount();

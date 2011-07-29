@@ -61,10 +61,13 @@ Root: HKLM; Subkey: "Software\{#AppName}\Common"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\{#AppName}\Common"; ValueType: string; ValueName: "Path"; ValueData: "{app}"
 
 [UninstallDelete]
+Type: files; Name: "{app}\dat\user\*.log"
 Type: files; Name: "{app}\dat\user\filter_tree.xml"
 Type: files; Name: "{app}\dat\user\lang_grammar.xml"
 Type: files; Name: "{app}\dat\user\preferences.ini"
 Type: dirifempty; Name: "{app}\dat"
 Type: dirifempty; Name: "{app}"
+Type: files; Name: "{win}\ecc.INI"
+
 
 [UninstallRun]

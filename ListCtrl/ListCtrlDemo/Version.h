@@ -37,11 +37,11 @@
 #define	SZ_VERSION_NAME				chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(".") chSTR(VERSION_BUILD)
 #define SZ_SHORT_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
 
-#define SZ_PRODUCT_NAME				_T("Easy Code Counter")
-#define SZ_ORGNIZATION_NAME			_T("www.easy-code-counter.com")
-#define SZ_PRODUCT_WEBSITE			_T("http://www.easy-code-counter.com")
-#define SZ_PRODUCT_WEBSITE_ORDER	_T("http://www.easy-code-counter.com/buynow.html")
-#define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@easy-code-counter.com")
+#define SZ_PRODUCT_NAME				_T("Demo")
+#define SZ_ORGNIZATION_NAME			_T("www.easydemo77.com")
+#define SZ_PRODUCT_WEBSITE			_T("http://www.easydemo77.com")
+#define SZ_PRODUCT_WEBSITE_ORDER	_T("http://www.easydemo77.com/buynow.html")
+#define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@easydemo77.com")
 #define SZ_COPYRIGHT				_T("Copyright (c) 2011-2016") _T(" ") SZ_ORGNIZATION_NAME
 
 #endif /* !__VERSION_H__ */

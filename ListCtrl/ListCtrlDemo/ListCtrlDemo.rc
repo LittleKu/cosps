@@ -271,7 +271,7 @@ BEGIN
     CONTROL         "Recursive search sub folders",
                     IDC_CHECK_INCLUDE_SUB_FOLDER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,23,313,10
-    GROUPBOX        "General",IDC_STATIC,7,7,328,171
+    GROUPBOX        "General",IDC_STATIC,7,7,328,39
 END
 
 IDD_PROPPAGE_STAT DIALOG DISCARDABLE  0, 0, 342, 185

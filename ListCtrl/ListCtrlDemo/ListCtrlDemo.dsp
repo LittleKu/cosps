@@ -54,6 +54,11 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
 # ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib TC.lib /nologo /subsystem:windows /machine:I386 /out:"Release/ecc.exe" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Desc=Restore Version.h
+PostBuild_Cmds=Version-Config.bat 2
+# End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "ListCtrlDemo - Win32 Debug"
 
@@ -81,6 +86,11 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtbd.lib TCd.lib /nologo /subsystem:windows /debug /machine:I386 /out:"Debug/ecc.exe" /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Desc=Restore Version.h
+PostBuild_Cmds=Version-Config.bat 2
+# End Special Build Tool
 
 !ENDIF 
 
@@ -503,7 +513,31 @@ SOURCE=.\res\TreeItemSelState.bmp
 # End Group
 # Begin Source File
 
-SOURCE=.\ReadMe.txt
+SOURCE=.\Dummy
+
+!IF  "$(CFG)" == "ListCtrlDemo - Win32 Release"
+
+# Begin Custom Build - Update Version.h by Version.h.in
+InputPath=.\Dummy
+
+"Version.h.bak" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	Version-Config.bat 1
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ListCtrlDemo - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Update Version.h by Version.h.in
+InputPath=.\Dummy
+
+"Version.h.bak" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	Version-Config.bat 1
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Target
 # End Project
