@@ -8,8 +8,10 @@ if "%MODE%"=="1" (
   copy /Y /B "Version.h" "Version.h.bak" >nul
   echo copy /Y /B "Version.h" "Version.h.bak"
   
-  copy /Y /B "Version.h.in" "Version.h" >nul
-  echo copy /Y /B "Version.h.in" "Version.h"
+  rem copy /Y /B "Version.h.in" "Version.h" >nul
+  rem echo copy /Y /B "Version.h.in" "Version.h"
+  SubWCRev.exe . "Version.h.in" "Version.h"
+  echo SubWCRev.exe . "Version.h.in" "Version.h"
 ) else ( 
   if not exist "Version.h.bak" goto END
   copy /Y /B "Version.h.bak" "Version.h" >nul  

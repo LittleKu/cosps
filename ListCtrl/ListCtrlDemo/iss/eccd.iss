@@ -24,7 +24,7 @@ DefaultDirName={pf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 OutputDir=output
-OutputBaseFilename=Easy-Code-Counter-SetupD-{#AppVersion}
+OutputBaseFilename=Easy-Code-Counter-Setup-{#AppVersion}D
 VersionInfoVersion={#AppVersion}VersionInfoCopyright={#AppCopyRight}
 
 [Languages]
