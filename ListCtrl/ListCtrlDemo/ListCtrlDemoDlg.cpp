@@ -8,6 +8,7 @@
 #include "Export.h"
 #include "Preferences.h"
 #include "EvaluationLimitDlg.h"
+#include "ThirdParty/FileDialogEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -729,8 +730,7 @@ void CListCtrlDemoDlg::OnExport(DWORD nTypeIndex)
         _T("XML Data (*.xml)|*.xml|")
 		_T("HTML files (*.html)|*.html|")
         _T("|");
-	CFileDialog dlg(FALSE, "", NULL, 
-        OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
+	CFileDialogEx dlg(FALSE, "", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, FILTERS);
     dlg.m_ofn.nFilterIndex = nTypeIndex;
 	
 	BOOL bSuccess = FALSE;

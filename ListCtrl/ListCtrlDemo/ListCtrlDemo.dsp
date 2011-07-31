@@ -131,6 +131,10 @@ SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\FileDialogEx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\HistoryComboBox.cpp
 # End Source File
 # Begin Source File
@@ -297,6 +301,10 @@ SOURCE=.\EvaluationLimitDlg.h
 # Begin Source File
 
 SOURCE=.\Export.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\FileDialogEx.h
 # End Source File
 # Begin Source File
 

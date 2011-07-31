@@ -182,14 +182,20 @@ CListCtrlDemoApp* SYS_APP()
 void InitLog4cplus()
 {
 #ifdef ENABLE_LOG4CPLUS	
-	const char* pEnvName = "LOG_FILE_SUFFIX";
-	CString szOldValue = getenv(pEnvName);
+	const char* pLogFileSuffixName = "LOG_FILE_SUFFIX";
+	CString szLogFileSuffix = getenv(pLogFileSuffixName);
+
+	const char* pAppWorkDirName = "APP_WORK_DIR";
+	CString szAppWorkDir = getenv(pAppWorkDirName);
 	
 	//Set the env to the current time str
 	CString sTime = CTime::GetCurrentTime().Format("_%Y_%m_%d_%H_%M_%S");
 	
 	CString szValue;
-	szValue.Format("%s=%s", pEnvName, sTime);
+	szValue.Format("%s=%s", pLogFileSuffixName, sTime);
+	_putenv(szValue);
+
+	szValue.Format("%s=%s", pAppWorkDirName, SYS_APP()->m_szWorkDir);
 	_putenv(szValue);
 	
 	CString szConfigFile;
@@ -208,7 +214,10 @@ void InitLog4cplus()
 	}
 	
 	//After configuration, restore the environment variable.
-	szValue.Format("%s=%s", pEnvName, szOldValue);
+	szValue.Format("%s=%s", pLogFileSuffixName, szLogFileSuffix);
+	_putenv(szValue);
+
+	szValue.Format("%s=%s", pAppWorkDirName, szAppWorkDir);
 	_putenv(szValue);
 #endif
 }
