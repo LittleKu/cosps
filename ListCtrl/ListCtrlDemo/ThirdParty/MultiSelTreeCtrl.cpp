@@ -26,6 +26,9 @@ typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNode
 #define IDM_FILTER_TREE_REMOVE				(IDM_FILTER_TREE_FIRST + 1)
 #define IDM_FILTER_TREE_ADD_LANGUAGE		(IDM_FILTER_TREE_FIRST + 2)
 #define IDM_FILTER_TREE_ADD_FILE_TYPE		(IDM_FILTER_TREE_FIRST + 3)
+#define IDM_FILTER_TREE_EXPAND				(IDM_FILTER_TREE_FIRST + 4)
+#define IDM_FILTER_TREE_EXPAND_CHECKED		(IDM_FILTER_TREE_FIRST + 5)
+#define IDM_FILTER_TREE_COLLAPSE			(IDM_FILTER_TREE_FIRST + 6)
 
 BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
@@ -34,15 +37,43 @@ BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lP
 	return TRUE;
 }
 
+typedef struct tagExpandParam
+{
+	UINT nCode;
+	UINT nStateImage;
+	HTREEITEM hItemExclude;
+	UINT nMask;
+}ExpandParam, *LPExpandParam;
+
 BOOL CALLBACK ExpandProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
-	UINT nCode = (UINT)lParam;
-	if(pTree->ItemHasChildren(hTreeItem))
+	LPExpandParam lpExpandParam = (LPExpandParam)lParam;
+	if( lpExpandParam->nMask & MST_EXPAND_PARAM_ITEM_EXCLUDE )
 	{
-		return pTree->Expand(hTreeItem, nCode);
+		if(hTreeItem == lpExpandParam->hItemExclude)
+		{
+			return TRUE;
+		}
 	}
+
+	if( lpExpandParam->nMask & MST_EXPAND_PARAM_STATE_IMAGE )
+	{
+		UINT nStateImage = pTree->GetItemStateImage(hTreeItem);
+		nStateImage = (1 << (nStateImage - 1));
+		if( (nStateImage & lpExpandParam->nStateImage) == 0)
+		{
+			return TRUE;
+		}
+	}
+
+	if(!pTree->ItemHasChildren(hTreeItem))
+	{
+		return FALSE;
+	}
+	pTree->Expand(hTreeItem, lpExpandParam->nCode);
 	return TRUE;
 }
+
 
 BOOL CALLBACK SetItemStateImageProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
@@ -516,8 +547,11 @@ void CMultiSelTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//Root Item
 	if(pTVIData->szName.Compare(XML_NM_ROOT) == 0)
 	{
-		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,	_T("Add New Filter Group.."));
-		ctMenu.EnableMenuItem(IDM_FILTER_TREE_REMOVE, MF_BYCOMMAND | MF_GRAYED);
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,		_T("Add New Filter Group.."));
+		ctMenu.EnableMenuItem(IDM_FILTER_TREE_REMOVE,					MF_BYCOMMAND | MF_GRAYED);
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND,			_T("Expand All"));
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND_CHECKED,	_T("Expand All Checked Items"));
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_COLLAPSE,			_T("Collapse All"));
 	}
 	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
 	{
@@ -557,6 +591,27 @@ BOOL CMultiSelTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	case IDM_FILTER_TREE_ADD_FILE_TYPE:
 		{
 			AddNewFileType();
+		}
+		break;
+	case IDM_FILTER_TREE_EXPAND:
+		{
+			HTREEITEM hItem = GetSelectedItem();
+			ASSERT(hItem);
+			ExpandAllItems(hItem, TVE_EXPAND);
+		}
+		break;
+	case IDM_FILTER_TREE_EXPAND_CHECKED:
+		{
+			HTREEITEM hItem = GetSelectedItem();
+			ASSERT(hItem);
+			ExpandAllItems(hItem, TVE_EXPAND, NULL, MST_EXPAND_SUB_PARAM_STATE_FULL_CHECK | MST_EXPAND_SUB_PARAM_STATE_PARTIAL_CHECK);
+		}
+		break;
+	case IDM_FILTER_TREE_COLLAPSE:
+		{
+			HTREEITEM hItem = GetSelectedItem();
+			ASSERT(hItem);
+			ExpandAllItems(hItem, TVE_COLLAPSE, hItem, 0);
 		}
 		break;
 	default:
@@ -830,10 +885,29 @@ BOOL CMultiSelTreeCtrl::DFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC 
 	return TRUE;
 }
 
-void CMultiSelTreeCtrl::ExpandAllItems(UINT nCode)
+void CMultiSelTreeCtrl::ExpandAllItems(HTREEITEM hTreeItemRoot, UINT nCode, HTREEITEM hItemExclude, UINT nStateImage)
 {
+	if(hTreeItemRoot == NULL)
+	{
+		hTreeItemRoot = GetRootItem();
+	}
+	ExpandParam param;
+	ZeroMemory(&param, sizeof(ExpandParam));
+	param.nCode = nCode;
+	if(hItemExclude != NULL)
+	{
+		param.hItemExclude = hItemExclude;
+		param.nMask |= MST_EXPAND_PARAM_ITEM_EXCLUDE;
+	}
+	
+	if(nStateImage != 0)
+	{
+		param.nStateImage = nStateImage;
+		param.nMask |= MST_EXPAND_PARAM_STATE_IMAGE;
+	}	
+
 	SetRedraw(FALSE);
-	BOOL nResult = BFSEnumItems(GetRootItem(), ExpandProc, (LPARAM)nCode);
+	BOOL nResult = BFSEnumItems(hTreeItemRoot, ExpandProc, (LPARAM)&param);
 	if(!nResult)
 	{
 		AfxTrace("Failed to ExpandAllItems\n");

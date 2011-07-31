@@ -6,14 +6,19 @@
     </lang_grammar>
     <lang_grammar name="Assembly" type="2">
         <line_comment content=";" />
+        <string start='&quot;' end='&quot;' />
+        <string start="&apos;" end="&apos;" />
     </lang_grammar>
     <lang_grammar name="ASP" type="3">
         <line_comment content="&apos;" />
         <line_comment content="rem" case_sensitive="false" />
+        <block_comment start="/*" end="*/" />
+        <block_comment start="&lt;!--" end="--&gt;" />
         <string start='&quot;' end='&quot;' />
     </lang_grammar>
     <lang_grammar name="Basic" type="101">
         <line_comment content="&apos;" />
+        <string start='&quot;' end='&quot;' />
     </lang_grammar>
     <lang_grammar name="BAT" type="102">
         <line_comment content="rem" start_column="0" case_sensitive="false" />
@@ -69,13 +74,16 @@
         <string start='&quot;' end='&quot;' />
         <string start="&apos;" end="&apos;" />
     </lang_grammar>
+    <lang_grammar name="Makefile" type="1201">
+        <line_comment content="#" />
+    </lang_grammar>
     <lang_grammar name="Pascal" type="1501">
         <line_comment content="//" />
         <escape content="\" />
         <block_comment start="{" end="}" />
         <block_comment start="(*" end="*)" />
         <string start="&apos;" end="&apos;" />
-    </lang_grammar>    
+    </lang_grammar>
     <lang_grammar name="Perl" type="1502">
         <line_comment content="#" />
         <escape content="\" />
@@ -109,6 +117,7 @@
         <block_comment start="/*" end="*/" />
         <string start="&apos;" end="&apos;" />
     </lang_grammar>
+    <lang_grammar name="Text" type="1999" />
     <lang_grammar name="XML" type="2301">
         <block_comment start="&lt;!--" end="--&gt;" />
     </lang_grammar>

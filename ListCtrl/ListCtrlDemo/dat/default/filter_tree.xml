@@ -25,7 +25,7 @@
     <language text="Python" type="1504" checked="1" expanded="0">
         <file text="Python Source File (*.py)" type="*.py" checked="1" />
     </language>
-    <language text="Basic" type="101" checked="1" expanded="0">
+    <language text="VB/Basic" type="101" checked="1" expanded="0">
         <file text="Visual Basic Source File (*.vb)" type="*.vb" checked="1" />
     </language>
     <language text="Perl" type="1502" checked="1" expanded="0">
@@ -36,6 +36,9 @@
     </language>
     <language text="JavaScript" type="902" checked="1" expanded="0">
         <file text="JScript Script File (*.js)" type="*.js" checked="1" />
+    </language>
+    <language text="ASP" type="3" checked="1" expanded="0">
+        <file text="ASP File (*.asp)" type="*.asp" checked="1" />
     </language>
     <language text="Delphi/Pascal" type="1501" checked="1" expanded="0">
         <file text="Pascal Source File (*.pas)" type="*.pas" checked="1" />
@@ -51,5 +54,29 @@
     </language>
     <language text="SQL" type="1802" checked="1" expanded="0">
         <file text="SQL Script File (*.sql)" type="*.sql" checked="1" />
+    </language>
+    <language text="HTML/XML" type="701" checked="1" expanded="0">
+        <file text="HTML Document (*.html)" type="*.html" checked="1" />
+        <file text="HTML Document (*.htm)" type="*.htm" checked="1" />
+        <file text="XML Document (*.xml)" type="*.xml" checked="1" />
+        <file text="XML Schema File (*.xsd)" type="*.xsd" checked="1" />
+        <file text="XSL Style Sheet (*.xsl)" type="*.xsl" checked="1" />
+    </language>
+    <language text="CSS" type="205" checked="1" expanded="0">
+        <file text="Cascade Style Sheet (*.css)" type="*.css" checked="1" />
+    </language>
+    <language text="BAT" type="102" checked="1" expanded="0">
+        <file text="BAT File (*.bat)" type="*.bat" checked="1" />
+    </language>
+    <language text="INI" type="801" checked="1" expanded="0">
+        <file text="INI File (*.ini)" type="*.ini" checked="1" />
+    </language>
+    <language text="Makefile" type="1201" checked="1" expanded="0">
+        <file text="MS NMAKE File (*.mak)" type="*.mak" checked="1" />
+        <file text="Common Makefile (makefile)" type="makefile" checked="1" />
+    </language>
+    <language text="Text" type="1999" checked="1" expanded="0">
+        <file text="Text File (*.txt)" type="*.txt" checked="1" />
+        <file text="&lt;File without Extension&gt;" type="*." checked="1" />
     </language>
 </root>
