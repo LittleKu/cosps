@@ -131,6 +131,10 @@ SOURCE=.\Export.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ExportSuccessDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ThirdParty\FileDialogEx.cpp
 # End Source File
 # Begin Source File
@@ -301,6 +305,10 @@ SOURCE=.\EvaluationLimitDlg.h
 # Begin Source File
 
 SOURCE=.\Export.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ExportSuccessDlg.h
 # End Source File
 # Begin Source File
 

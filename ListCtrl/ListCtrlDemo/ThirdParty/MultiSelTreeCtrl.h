@@ -41,7 +41,7 @@ public:
 	CMultiSelTreeCtrl();
 	virtual ~CMultiSelTreeCtrl();
 
-	BOOL Init();
+	BOOL Init(const char * lpXMLFile = NULL);
 	HTREEITEM InsertSubItem(HTREEITEM hParent, TiXmlElement* pElement);
 
 	BOOL BFSEnumItems(HTREEITEM hTreeItemRoot, ENUM_TREEITEMPROC enumProc, LPARAM lParam);
@@ -63,6 +63,7 @@ public:
 	void ModifyFilterGroup();
 	void AddNewFilterGroup();
 	void AddNewFileType();
+	void Resotre2Default();
 
 	void GetFilterGroupList(LPFilterGroupList& lpFilterGroupList);
 protected:

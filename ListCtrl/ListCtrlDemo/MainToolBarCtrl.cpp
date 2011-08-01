@@ -58,6 +58,7 @@ void CMainToolBarCtrl::Init()
 	int nFirstButtonID = IDC_MAIN_TOOLBAR_BUTTON_FIRST;
 	int m_nButtonCount = IDC_MAIN_TOOLBAR_BUTTON_LAST - nFirstButtonID + 1;
 	
+	int nBitmapIndex[] = {0, 18, 4, 6, 1, 11, 0, 0};
 	TBBUTTON tb;
 	for (int nIndex = 0; nIndex < m_nButtonCount; nIndex++)
 	{
@@ -76,7 +77,7 @@ void CMainToolBarCtrl::Init()
 		tb.fsState = TBSTATE_ENABLED;
 		tb.fsStyle = TBSTYLE_BUTTON | TBSTYLE_AUTOSIZE;
 		tb.dwData = 0;
-		tb.iBitmap = nIndex;
+		tb.iBitmap = nBitmapIndex[nIndex];
 		tb.idCommand = nIndex + nFirstButtonID;
 		
 		AddButtons(1, &tb);

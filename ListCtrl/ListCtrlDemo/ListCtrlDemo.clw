@@ -2,17 +2,17 @@
 
 [General Info]
 Version=1
-LastClass=CEvaluationLimitDlg
+LastClass=CExportSuccessDlg
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "ListCtrlDemo.h"
 
-ClassCount=16
+ClassCount=17
 Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=22
+ResourceCount=23
 Resource1=IDD_MAIN_DLG (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_REGISTER (English (U.S.))
@@ -22,32 +22,34 @@ Resource6=IDD_ABOUTBOX
 Class4=CProgressDlg
 Resource7=IDD_EVALUATION_LIMIT (Chinese (P.R.C.))
 Resource8=IDD_PROP_DLG (English (U.S.))
-Resource9=IDD_ABOUTBOX (English (U.S.))
+Resource9=IDD_PROGRESS
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
 Class5=CMainDlg
 Class6=CMainToolBarCtrl
-Resource11=IDD_EVALUATION_LIMIT
+Resource11=IDD_EXPORT_RESULT
 Class7=CSourceDirListCtrl
 Class8=CResultListCtrl
 Class9=CMainReBar
-Resource12=IDD_PROGRESS
+Resource12=IDD_PROPPAGE_STAT (English (U.S.))
 Class10=CFilterTreeModifyDlg
 Resource13=CG_IDD_PROGRESS (Chinese (P.R.C.))
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=IDD_MAIN_DLG
-Resource15=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource15=IDD_ABOUTBOX (English (U.S.))
 Class14=CPPgStatistic
 Resource16=IDD_PROPPAGE_GENERAL
 Resource17=IDD_PROGRESS (Chinese (P.R.C.))
 Class15=CRegisterDlg
-Resource18=IDD_PROPPAGE_STAT (English (U.S.))
-Resource19=CG_IDD_PROGRESS
-Resource20=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource18=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
+Resource19=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource20=CG_IDD_PROGRESS
 Class16=CEvaluationLimitDlg
 Resource21=IDD_LISTCTRLDEMO_DIALOG
-Resource22=IDR_RESULT_MENU (Neutral)
+Resource22=IDD_EVALUATION_LIMIT
+Class17=CExportSuccessDlg
+Resource23=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -440,7 +442,7 @@ VirtualFilter=dWC
 
 [DLG:IDD_EVALUATION_LIMIT (Chinese (P.R.C.))]
 Type=1
-Class=?
+Class=CEvaluationLimitDlg
 ControlCount=6
 Control1=IDCANCEL,button,1342242817
 Control2=IDC_STATIC_P1,static,1342308352
@@ -448,4 +450,23 @@ Control3=IDC_STATIC_P2,static,1342308352
 Control4=IDC_STATIC,static,1342177296
 Control5=IDC_BUTTON_REGISTER,button,1342242816
 Control6=IDC_BUTTON_ORDER,button,1342242816
+
+[DLG:IDD_EXPORT_RESULT]
+Type=1
+Class=CExportSuccessDlg
+ControlCount=5
+Control1=IDCANCEL,button,1342242817
+Control2=IDC_INFO_LABEL,static,1342308352
+Control3=IDC_STATIC,static,1342177296
+Control4=IDC_BUTTON_OPEN_FILE,button,1342242816
+Control5=IDC_BUTTON_OPEN_DIRECTORY,button,1342242816
+
+[CLS:CExportSuccessDlg]
+Type=0
+HeaderFile=ExportSuccessDlg.h
+ImplementationFile=ExportSuccessDlg.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=IDCANCEL
+VirtualFilter=dWC
 

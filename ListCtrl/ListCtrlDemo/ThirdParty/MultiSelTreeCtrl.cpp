@@ -29,6 +29,7 @@ typedef CMap<HTREEITEM, HTREEITEM, TiXmlNode*, TiXmlNode*> CMapHTreeItem2XmlNode
 #define IDM_FILTER_TREE_EXPAND				(IDM_FILTER_TREE_FIRST + 4)
 #define IDM_FILTER_TREE_EXPAND_CHECKED		(IDM_FILTER_TREE_FIRST + 5)
 #define IDM_FILTER_TREE_COLLAPSE			(IDM_FILTER_TREE_FIRST + 6)
+#define IDM_FILTER_TREE_RESTORE_DEFAULT		(IDM_FILTER_TREE_FIRST + 7)
 
 BOOL CALLBACK PrintProc(CMultiSelTreeCtrl* pTree, HTREEITEM hTreeItem, LPARAM lParam)
 {
@@ -291,10 +292,19 @@ void CMultiSelTreeCtrl::PreSubclassWindow()
 		pIface = NULL;
 	}
 }
-BOOL CMultiSelTreeCtrl::Init()
+BOOL CMultiSelTreeCtrl::Init(const char * lpXMLFile)
 {
-	const TCHAR* lpXMLFile = _T("filter_tree.xml");
-	TiXmlDocument doc( CommonUtils::GetConfFilePath(lpXMLFile) );
+	CString szXmlFile;
+	if(lpXMLFile == NULL)
+	{
+		szXmlFile = CommonUtils::GetConfFilePath("filter_tree.xml");
+	}
+	else
+	{
+		szXmlFile = lpXMLFile;
+	}
+
+	TiXmlDocument doc( szXmlFile );
 	bool loadOkay = doc.LoadFile();	
 	if ( !loadOkay )
 	{
@@ -552,6 +562,7 @@ void CMultiSelTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND,			_T("Expand All"));
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND_CHECKED,	_T("Expand All Checked Items"));
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_COLLAPSE,			_T("Collapse All"));
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_RESTORE_DEFAULT,	_T("Restore to Default"));
 	}
 	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
 	{
@@ -614,6 +625,11 @@ BOOL CMultiSelTreeCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			ExpandAllItems(hItem, TVE_COLLAPSE, hItem, 0);
 		}
 		break;
+	case IDM_FILTER_TREE_RESTORE_DEFAULT:
+		{
+			Resotre2Default();
+		}
+		break;
 	default:
 		{
 			bResult = FALSE;
@@ -671,6 +687,20 @@ void CMultiSelTreeCtrl::Modify()
 	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
 	{
 		ModifyFilterGroup();
+	}
+	else if(pTVIData->szName.Compare(XML_NM_ROOT) == 0)
+	{
+		CPropDlg dlg;
+		dlg.SetTitle(_T("Modify"));
+		
+		LPCTSTR lpPropName = _T("Name:");
+		dlg.AddProperty(lpPropName, GetItemText(hItem));
+
+		int nResponse = dlg.DoModal();
+		if(nResponse == IDOK)
+		{
+			SetItemText(hItem, dlg.GetProperty(lpPropName));
+		}
 	}
 }
 void CMultiSelTreeCtrl::Remove()
@@ -772,6 +802,31 @@ void CMultiSelTreeCtrl::AddNewFileType()
 
 		ValidateCheck();
 	}
+}
+
+void CMultiSelTreeCtrl::Resotre2Default()
+{
+	CString szPromptText;
+	szPromptText.Format(_T("Are you sure you to restore the entire filter tree to the default?"
+		"\nIf you click \"Yes\", all the changes you made will be lost."));
+	int nResult = AfxMessageBox(szPromptText, MB_YESNO | MB_ICONQUESTION);
+	if(nResult != IDYES)
+	{
+		return;
+	}
+	//Stop drawing while restore
+	SetRedraw(FALSE);
+
+	//First Delete
+	DeleteAllItems();
+
+	//Re init again
+	CString szXmlFile = CommonUtils::GetConfFilePath(_T("filter_tree.xml"), GCFP_DEFAULT);
+	Init(szXmlFile);
+
+	//Update again
+	SetRedraw(TRUE);
+	RedrawWindow();
 }
 
 void CMultiSelTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
