@@ -67,7 +67,8 @@ Type: files; Name: "{app}\dat\user\filter_tree.xml"
 Type: files; Name: "{app}\dat\user\lang_grammar.xml"
 Type: files; Name: "{app}\dat\user\preferences.ini"
 Type: dirifempty; Name: "{app}\dat"
-Type: dirifempty; Name: "{app}"
+; Don't explicitly delete the dir {app}, in case the user install the app in the root drive
+;Type: dirifempty; Name: "{app}"
 Type: files; Name: "{win}\{#AppExeName}.INI"
 
 [UninstallRun]

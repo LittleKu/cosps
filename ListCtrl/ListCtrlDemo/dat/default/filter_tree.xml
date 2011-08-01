@@ -60,13 +60,13 @@
         <file text="HTML Document (*.htm)" type="*.htm" checked="1" />
         <file text="XML Document (*.xml)" type="*.xml" checked="1" />
         <file text="XML Schema File (*.xsd)" type="*.xsd" checked="1" />
-        <file text="XSL Style Sheet (*.xsl)" type="*.xsl" checked="1" />
+        <file text="XSL Stylesheet (*.xsl)" type="*.xsl" checked="1" />
     </language>
     <language text="CSS" type="205" checked="1" expanded="0">
         <file text="Cascade Style Sheet (*.css)" type="*.css" checked="1" />
     </language>
     <language text="BAT" type="102" checked="1" expanded="0">
-        <file text="BAT File (*.bat)" type="*.bat" checked="1" />
+        <file text="MS-DOS Batch File (*.bat)" type="*.bat" checked="1" />
     </language>
     <language text="INI" type="801" checked="1" expanded="0">
         <file text="INI File (*.ini)" type="*.ini" checked="1" />
@@ -76,7 +76,7 @@
         <file text="Common Makefile (makefile)" type="makefile" checked="1" />
     </language>
     <language text="Text" type="1999" checked="1" expanded="0">
-        <file text="Text File (*.txt)" type="*.txt" checked="1" />
+        <file text="Text Document (*.txt)" type="*.txt" checked="1" />
         <file text="&lt;File without Extension&gt;" type="*." checked="1" />
     </language>
 </root>

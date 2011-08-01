@@ -12,6 +12,10 @@ if "%MODE%"=="1" (
   rem echo copy /Y /B "Version.h.in" "Version.h"
   SubWCRev.exe . "Version.h.in" "Version.h"
   echo SubWCRev.exe . "Version.h.in" "Version.h"
+  
+  rem for debug
+  copy /Y /B "Version.h" "Version.h.build" >nul
+  echo copy /Y /B "Version.h" "Version.h.build"
 ) else ( 
   if not exist "Version.h.bak" goto END
   copy /Y /B "Version.h.bak" "Version.h" >nul  
