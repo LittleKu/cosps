@@ -768,10 +768,6 @@ void CListCtrlDemoDlg::OnExport(DWORD nTypeIndex)
 
 		if(bSuccess)
 		{
-// 			CString sPrompt;
-// 			sPrompt.Format(_T("The data was successfully exported to: %s"), dlg.GetPathName());
-// 			AfxMessageBox(sPrompt, MB_OK | MB_ICONINFORMATION);
-
 			CExportSuccessDlg successDlg;
 			successDlg.SetExportedFile(dlg.GetPathName());
 

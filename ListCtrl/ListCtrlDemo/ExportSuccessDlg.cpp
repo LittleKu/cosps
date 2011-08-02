@@ -94,11 +94,18 @@ BOOL CExportSuccessDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
+	//Make the Info Label to auto wrap line
+	CWnd* pWndInfoLabel = GetDlgItem(IDC_INFO_LABEL);
+	ASSERT(pWndInfoLabel != NULL);
+	pWndInfoLabel->ModifyStyle(0, SS_EDITCONTROL, 0);
+
+	//Set Title
 	SetWindowText(SYS_APP()->m_pszAppName);
 
+	//Show Information
 	CString szText;
 	szText.Format(_T("The data was successfully exported to: %s"), m_szExportedFile);
-	SetDlgItemText(IDC_INFO_LABEL, szText);
+	pWndInfoLabel->SetWindowText(szText);
 	
 	return TRUE;
 }

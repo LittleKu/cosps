@@ -13,84 +13,6 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
-#ifdef _WIN32
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(936)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_RESULT_MENU MENU DISCARDABLE 
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Add Folder...",              IDM_FILE_ADD
-        MENUITEM "&Delete Folder",              IDM_FILE_DEL
-        MENUITEM "&Start to Count",             IDM_FILE_START
-        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       IDM_FILE_EXIT
-    END
-    POPUP "&Report"
-    BEGIN
-        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
-        MENUITEM SEPARATOR
-        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
-        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
-        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
-        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
-    END
-    POPUP "&Tools"
-    BEGIN
-        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
-        MENUITEM SEPARATOR
-        MENUITEM "&Language Rules...",          IDM_TOOLS_LANG_RULES
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&Help Contents\tF1",          IDM_HELP_HELP_CONTENT
-        MENUITEM "&Software Website...",        IDM_HELP_SOFTWARE_WEBSITE
-        MENUITEM SEPARATOR
-        MENUITEM "&Order Now...",               IDM_HELP_ORDER
-        MENUITEM "&Register...",                IDM_HELP_REGISTER
-        MENUITEM SEPARATOR
-        MENUITEM "&About",                      IDM_HELP_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDM_FILE_ADD            "Add Source Folder"
-    IDM_FILE_DEL            "Delete Source Folder"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
-    ID_TBBTN_START_TO_COUNT "Start to Count"
-    ID_TBBTN_CLEAR_RESULT   "Clear Result"
-    ID_TBBTN_EXPORT         "Export"
-    ID_TBBTN_SETTING        "Options"
-    ID_TBBTN_EXIT           "Exit"
-END
-
-#endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
 // Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
@@ -141,15 +63,15 @@ BEGIN
     PUSHBUTTON      "Order Now",IDC_BUTTON_ORDER,53,132,78,22
 END
 
-IDD_EXPORT_RESULT DIALOG DISCARDABLE  0, 0, 363, 119
+IDD_EXPORT_RESULT DIALOG DISCARDABLE  0, 0, 363, 102
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "Close",IDCANCEL,252,95,65,17
-    LTEXT           "",IDC_INFO_LABEL,7,7,349,32
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,79,349,1
-    PUSHBUTTON      "Open File",IDC_BUTTON_OPEN_FILE,44,95,65,17
-    PUSHBUTTON      "Open Folder",IDC_BUTTON_OPEN_DIRECTORY,148,95,65,17
+    DEFPUSHBUTTON   "Close",IDCANCEL,252,78,65,17
+    LTEXT           "",IDC_INFO_LABEL,7,7,349,47
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,70,348,1
+    PUSHBUTTON      "Open File",IDC_BUTTON_OPEN_FILE,44,78,65,17
+    PUSHBUTTON      "Open Folder",IDC_BUTTON_OPEN_DIRECTORY,148,78,65,17
 END
 
 
@@ -190,12 +112,91 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 356
         TOPMARGIN, 7
-        BOTTOMMARGIN, 112
+        BOTTOMMARGIN, 95
     END
 END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_RESULT_MENU MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Add Folder...",              IDM_FILE_ADD
+        MENUITEM "&Delete Folder",              IDM_FILE_DEL
+        MENUITEM "&Start to Count",             IDM_FILE_START
+        MENUITEM "&Clear Result",               IDM_FILE_CLEAR
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Report"
+    BEGIN
+        MENUITEM "&Export...",                  IDM_REPORT_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "Export to CSV File(*.&csv)",  IDM_REPORT_EXPORT_CSV
+        MENUITEM "Export to Excel File(*.xl&s)", IDM_REPORT_EXPORT_XLS
+        MENUITEM "Export to XML File(*.&xml)",  IDM_REPORT_EXPORT_XML
+        MENUITEM "Export to Html File(*.&html)", IDM_REPORT_EXPORT_HTML
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "&Language Rules...",          IDM_TOOLS_LANG_RULES
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help Contents\tF1",          IDM_HELP_HELP_CONTENT
+        MENUITEM "&Software Website...",        IDM_HELP_SOFTWARE_WEBSITE
+        MENUITEM "&Check for Upgrades...",      IDM_HELP_CHECK_UPGRADES
+        MENUITEM SEPARATOR
+        MENUITEM "&Order Now...",               IDM_HELP_ORDER
+        MENUITEM "&Register...",                IDM_HELP_REGISTER
+        MENUITEM SEPARATOR
+        MENUITEM "&About",                      IDM_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDM_FILE_ADD            "Add Source Folder"
+    IDM_FILE_DEL            "Delete Source Folder"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TBBTN_ADD_SOURCE_DIR "Add Folder"
+    ID_TBBTN_START_TO_COUNT "Start to Count"
+    ID_TBBTN_CLEAR_RESULT   "Clear Result"
+    ID_TBBTN_EXPORT         "Export"
+    ID_TBBTN_SETTING        "Options"
+    ID_TBBTN_EXIT           "Exit"
+END
+
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 

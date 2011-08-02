@@ -35,9 +35,9 @@ BEGIN
             VALUE "CompanyName", SZ_ORGNIZATION_NAME
             VALUE "FileDescription", SZ_PRODUCT_NAME
             VALUE "FileVersion", SZ_VERSION_NAME
-            VALUE "InternalName", "ecc.exe"
+            VALUE "InternalName", SZ_EXE_NAME
             VALUE "LegalCopyright", SZ_COPYRIGHT
-            VALUE "OriginalFilename", "ecc.exe"
+            VALUE "OriginalFilename", SZ_EXE_NAME
             VALUE "ProductName", SZ_PRODUCT_NAME
             VALUE "ProductVersion", SZ_VERSION_NAME
         END

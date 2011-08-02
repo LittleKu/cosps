@@ -218,6 +218,12 @@ void CCheckListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect
 
 	CRect boundRect = rect;
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
+
+	if(boundRect.Height() >= 13)
+	{
+		CCheckHeaderCtrl::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
+		return;
+	}
 	
 	chkboxrect = boundRect;
 	chkboxrect.bottom -= 1;

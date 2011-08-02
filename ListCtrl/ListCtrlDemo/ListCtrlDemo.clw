@@ -12,15 +12,15 @@ Class1=CListCtrlDemoApp
 Class2=CListCtrlDemoDlg
 Class3=CPPgGeneral
 
-ResourceCount=23
+ResourceCount=24
 Resource1=IDD_MAIN_DLG (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_REGISTER (English (U.S.))
-Resource4=IDD_PROPPAGE_STAT
-Resource5=IDD_REGISTER
-Resource6=IDD_ABOUTBOX
+Resource4=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource5=IDD_LISTCTRLDEMO_DIALOG
+Resource6=IDD_PROPPAGE_STAT
 Class4=CProgressDlg
-Resource7=IDD_EVALUATION_LIMIT (Chinese (P.R.C.))
+Resource7=IDD_ABOUTBOX
 Resource8=IDD_PROP_DLG (English (U.S.))
 Resource9=IDD_PROGRESS
 Resource10=IDD_EDIT_PROP_DLG (Neutral)
@@ -32,24 +32,25 @@ Class8=CResultListCtrl
 Class9=CMainReBar
 Resource12=IDD_PROPPAGE_STAT (English (U.S.))
 Class10=CFilterTreeModifyDlg
-Resource13=CG_IDD_PROGRESS (Chinese (P.R.C.))
+Resource13=IDD_EVALUATION_LIMIT (Chinese (P.R.C.))
 Class11=CFilterTreeModifyFileTypeDlg
 Class12=CPropDlg
 Class13=CHistoryComboBox
 Resource14=IDD_MAIN_DLG
 Resource15=IDD_ABOUTBOX (English (U.S.))
 Class14=CPPgStatistic
-Resource16=IDD_PROPPAGE_GENERAL
+Resource16=IDD_EXPORT_RESULT (Chinese (P.R.C.))
 Resource17=IDD_PROGRESS (Chinese (P.R.C.))
 Class15=CRegisterDlg
 Resource18=IDD_LISTCTRLDEMO_DIALOG (English (U.S.))
 Resource19=IDD_PROPPAGE_GENERAL (English (U.S.))
 Resource20=CG_IDD_PROGRESS
 Class16=CEvaluationLimitDlg
-Resource21=IDD_LISTCTRLDEMO_DIALOG
+Resource21=IDD_PROPPAGE_GENERAL
 Resource22=IDD_EVALUATION_LIMIT
 Class17=CExportSuccessDlg
-Resource23=IDR_RESULT_MENU (Neutral)
+Resource23=IDD_REGISTER
+Resource24=IDR_RESULT_MENU (Neutral)
 
 [CLS:CListCtrlDemoApp]
 Type=0
@@ -132,10 +133,11 @@ Command11=IDM_TOOLS_OPTIONS
 Command12=IDM_TOOLS_LANG_RULES
 Command13=IDM_HELP_HELP_CONTENT
 Command14=IDM_HELP_SOFTWARE_WEBSITE
-Command15=IDM_HELP_ORDER
-Command16=IDM_HELP_REGISTER
-Command17=IDM_HELP_ABOUT
-CommandCount=17
+Command15=IDM_HELP_CHECK_UPGRADES
+Command16=IDM_HELP_ORDER
+Command17=IDM_HELP_REGISTER
+Command18=IDM_HELP_ABOUT
+CommandCount=18
 
 [DLG:IDD_LISTCTRLDEMO_DIALOG (English (U.S.))]
 Type=1
@@ -469,4 +471,14 @@ BaseClass=CDialog
 Filter=D
 LastObject=IDCANCEL
 VirtualFilter=dWC
+
+[DLG:IDD_EXPORT_RESULT (Chinese (P.R.C.))]
+Type=1
+Class=?
+ControlCount=5
+Control1=IDCANCEL,button,1342242817
+Control2=IDC_INFO_LABEL,static,1342308352
+Control3=IDC_STATIC,static,1342177296
+Control4=IDC_BUTTON_OPEN_FILE,button,1342242816
+Control5=IDC_BUTTON_OPEN_DIRECTORY,button,1342242816
 

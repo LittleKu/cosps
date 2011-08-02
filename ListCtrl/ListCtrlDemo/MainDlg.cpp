@@ -260,6 +260,11 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			CHyperLink::GotoURL(SZ_PRODUCT_WEBSITE, SW_SHOW);
 		}
 		break;
+	case IDM_HELP_CHECK_UPGRADES:
+		{
+			CHyperLink::GotoURL(SZ_PRODUCT_UPGRADE, SW_SHOW);
+		}
+		break;
 	case IDM_HELP_ORDER:
 		{
 			CHyperLink::GotoURL(SZ_PRODUCT_WEBSITE_ORDER, SW_SHOW);

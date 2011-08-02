@@ -123,13 +123,14 @@
 #define IDM_HELP_ORDER                  32786
 #define IDM_HELP_REGISTER               32787
 #define IDM_HELP_HELP_CONTENT           32788
+#define IDM_HELP_CHECK_UPGRADES         32789
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        149
-#define _APS_NEXT_COMMAND_VALUE         32789
+#define _APS_NEXT_COMMAND_VALUE         32790
 #define _APS_NEXT_CONTROL_VALUE         1076
 #define _APS_NEXT_SYMED_VALUE           107
 #endif

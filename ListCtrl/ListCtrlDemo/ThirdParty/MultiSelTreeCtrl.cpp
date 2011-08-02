@@ -550,23 +550,34 @@ void CMultiSelTreeCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CMenu ctMenu;
 	ctMenu.CreatePopupMenu();
 	ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_MODIFY,		_T("Modify.."));
-	ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_REMOVE,		_T("Remove.."));
 	
 	TVITEMDATA* pTVIData = (TVITEMDATA*)GetItemData(hItem);
 	ASSERT(pTVIData);
 	//Root Item
 	if(pTVIData->szName.Compare(XML_NM_ROOT) == 0)
 	{
+		ctMenu.AppendMenu(MF_SEPARATOR);
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_LANGUAGE,		_T("Add New Filter Group.."));
 		ctMenu.EnableMenuItem(IDM_FILTER_TREE_REMOVE,					MF_BYCOMMAND | MF_GRAYED);
+
+		ctMenu.AppendMenu(MF_SEPARATOR);
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND,			_T("Expand All"));
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_EXPAND_CHECKED,	_T("Expand All Checked Items"));
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_COLLAPSE,			_T("Collapse All"));
+
+		ctMenu.AppendMenu(MF_SEPARATOR);
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_RESTORE_DEFAULT,	_T("Restore to Default"));
 	}
 	else if(pTVIData->szName.Compare(XML_NM_LANG) == 0)
 	{
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_REMOVE,		_T("Remove.."));
+		ctMenu.AppendMenu(MF_SEPARATOR);
 		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_ADD_FILE_TYPE, _T("Add New File Type.."));
+	}
+	//Leaf node
+	else
+	{
+		ctMenu.AppendMenu(MF_STRING, IDM_FILTER_TREE_REMOVE,		_T("Remove.."));
 	}
 	
 	ctMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
