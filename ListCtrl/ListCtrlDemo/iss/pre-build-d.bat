@@ -3,6 +3,7 @@
 set SYSDLL_DIR=C:\WINDOWS\system32
 set DST_DIR=.\sourced
 
+if exist "constantd.in" copy /b /y "constantd.in" "constantd"
 if not exist "%DST_DIR%" mkdir "%DST_DIR%"
 
 copy /Y /B "%SYSDLL_DIR%\mfc42d.dll" "%DST_DIR%"
