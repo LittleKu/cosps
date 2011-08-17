@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<header version="0" />
 <lang_grammars>
     <lang_grammar name="Ada" type="1">
         <line_comment content="--" />

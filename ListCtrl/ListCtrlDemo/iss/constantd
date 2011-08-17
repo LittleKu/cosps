@@ -1,0 +1,10 @@
+#define AppExeName              "acc"
+#define AppExeFullName          "acc.exe"
+#define AppName                 "Demo"
+#define AppWebSite              "http://www.easydemo77.com/"
+#define SetupFileBaseName       "Demo-Setup"
+
+#define AppExeFilePath          "..\Debug\acc.exe"
+#define AppVersion              GetFileVersion("..\Debug\acc.exe")
+#define AppCopyRight            GetFileCopyright("..\Debug\acc.exe")
+#define AppOrgName              GetFileCompany("..\Debug\acc.exe")

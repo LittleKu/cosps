@@ -443,6 +443,8 @@ BOOL CMultiSelTreeCtrl::SaveTree(const char * filename, HTREEITEM hTreeItemRoot)
 	TiXmlDeclaration declaration("1.0", "UTF-8", "yes");
 	doc.InsertEndChild(declaration);
 
+	CommonUtils::InsertHeaderInXML(&doc);
+
 	CMapHTreeItem2XmlNodePtr map;
 	map.SetAt((HTREEITEM)NULL, &doc);
 	BFSEnumItems(hTreeItemRoot, SaveTreeProc, (LPARAM)&map);

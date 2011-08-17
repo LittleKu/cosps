@@ -50,10 +50,10 @@ RSC=rc.exe
 # ADD RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"Release/acc.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib TC.lib /nologo /subsystem:windows /machine:I386 /out:"Release/ecc.exe" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
+# ADD LINK32 ResizableLib.lib SCC.lib tinyxml.lib gtb.lib TC.lib /nologo /subsystem:windows /machine:I386 /out:"Release/acc.exe" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Release"
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Desc=Restore Version.h
@@ -82,10 +82,10 @@ PostBuild_Cmds=Version-Config.bat 2
 # ADD RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
+# ADD BSC32 /nologo /o"Debug/acc.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtbd.lib TCd.lib /nologo /subsystem:windows /debug /machine:I386 /out:"Debug/ecc.exe" /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# ADD LINK32 ResizableLib.lib SCCd.lib tinyxmld.lib gtbd.lib TCd.lib /nologo /subsystem:windows /debug /machine:I386 /out:"Debug/acc.exe" /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:".\Lib\\" /libpath:"..\..\tinyxml_2_5_3\Debug"
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Desc=Restore Version.h

@@ -88,6 +88,9 @@ private:
 	clock_t m_clockLast;
 };
 
+
+class TiXmlDocument;
+
 BEGIN_NAMESPACE(CommonUtils)
 #define LEH_MESSAGE_BOX		0x0001
 #define LEH_AFX_TRACE		0x0002
@@ -116,6 +119,9 @@ BEGIN_NAMESPACE(CommonUtils)
 	void LoadBitmapFromFile(LPCTSTR lpszBmpFilePath, CBitmap* pBitmap);
 	void Split(const CString& szStr, TCHAR delim, CStringList& outStringList);
 	CString ToString(LPFilterGroupList& filterGroupList);
+	BOOL GetVersionInXML(LPCTSTR lpXmlFileName, CString& szVersionInfo);
+	BOOL InsertHeaderInXML(TiXmlDocument* doc);
+	BOOL GetVersionInt(const CString& szVersionInfo, UINT& nVersion, UINT& nBuild);
 END_NAMESPACE()
 
 

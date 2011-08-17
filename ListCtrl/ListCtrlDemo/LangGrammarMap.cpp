@@ -201,6 +201,8 @@ void CLangGrammarMap::Save(LPCTSTR lpXmlConfigFile)
 	//declaration
 	TiXmlDeclaration declaration("1.0", "UTF-8", "yes");
 	doc.InsertEndChild(declaration);
+
+	CommonUtils::InsertHeaderInXML(&doc);
 	
 	//root element: lang_grammars
 	TiXmlElement lang_grammars("lang_grammars");

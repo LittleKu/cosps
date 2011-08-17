@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "ListCtrlDemo.h"
 #include "StringUtils.h"
+#include "tinyxml.h"
 
 CString FilterGroup::ToString()
 {
@@ -209,7 +210,41 @@ CString GetConfFilePath(LPCTSTR lpFileName, UINT uFlags, LPCTSTR lpBaseDir)
 	if(uFlags == GCFP_AUTO)
 	{
 		szFilePath.Format("%s\\dat\\user\\%s", lpBaseDir, lpFileName);
-		if(!::PathFileExists(szFilePath))
+
+		BOOL bDefault = TRUE;
+		do 
+		{
+			if(!::PathFileExists(szFilePath))
+			{
+				break;
+			}
+
+			CString szVersionInfo;
+			if(!GetVersionInXML(szFilePath, szVersionInfo))
+			{
+				break;
+			}
+
+			UINT nVersion, nBuild;
+			if(!GetVersionInt(szVersionInfo, nVersion, nBuild))
+			{
+				break;
+			}
+			AfxTrace("File: [%s], Version: [%08X], Build: [%d]\n", szFilePath, nVersion, nBuild);
+			nVersion &= 0xFFFF0000;
+			UINT nCurVersion = (UINT)(VERSION_MJR << 8 | VERSION_MIN);
+			nCurVersion <<= 16;
+
+			//The version in the user's file is too old
+			if(nVersion < nCurVersion)
+			{
+				break;
+			}
+
+			bDefault = FALSE;
+		} while (FALSE);
+
+		if(bDefault)
 		{
 			szFilePath.Format("%s\\dat\\default\\%s", lpBaseDir, lpFileName);
 		}
@@ -665,6 +700,88 @@ CString ToString(LPFilterGroupList& filterGroupList)
 		}
 	}
 	return szResult;
+}
+
+BOOL GetVersionInXML(LPCTSTR lpXmlFileName, CString& szVersionInfo)
+{
+	TiXmlDocument doc( lpXmlFileName );
+	bool loadOkay = doc.LoadFile();	
+	if ( !loadOkay )
+	{
+		return FALSE;
+	}
+	
+	TiXmlNode *pNode = NULL;
+	TiXmlElement *pElement = NULL;
+	
+	pNode = doc.FirstChild( "header" );
+	if(pNode == NULL)
+	{
+		return FALSE;
+	}
+	pElement = pNode->ToElement();
+	if(pElement == NULL)
+	{
+		return FALSE;
+	}
+	
+	const char* pBuffer = pElement->Attribute("version");
+	if(pBuffer == NULL)
+	{
+		return FALSE;
+	}
+	szVersionInfo = pBuffer;
+	return TRUE;
+}
+
+BOOL InsertHeaderInXML(TiXmlDocument* doc)
+{
+	TiXmlElement header("header");
+	header.SetAttribute("version", SZ_VERSION_NAME);
+	return doc->InsertEndChild(header) != NULL;
+}
+
+BOOL GetVersionInt(const CString& szVersionInfo, UINT& nVersion, UINT& nBuild)
+{
+	CStringList tokenList;
+	CStringUtils::Split(szVersionInfo, '.', tokenList);
+
+	if(tokenList.GetCount() != 4)
+	{
+		return FALSE;
+	}
+
+	nVersion = 0;
+	nBuild = 0;
+
+	POSITION pos = tokenList.GetHeadPosition();
+	int nIndex = 0, nValue;
+	for( ; pos != NULL && nIndex < 3; nIndex++)
+	{
+		CString& token = tokenList.GetNext(pos);
+
+		nValue = atoi(token);
+		if(nValue < 0 || nValue > 255)
+		{
+			return FALSE;
+		}
+
+		nVersion |= nValue;
+		nVersion <<= 8;
+	}
+
+	if(pos != NULL)
+	{
+		CString& token = tokenList.GetNext(pos);
+		nValue = atoi(token);
+		if(nValue <= 0)
+		{
+			return FALSE;
+		}
+		nBuild = (UINT)nValue;
+	}
+
+	return TRUE;
 }
 
 END_NAMESPACE()

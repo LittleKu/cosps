@@ -38,7 +38,7 @@
 #define SZ_SHORT_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
 
 #define SZ_PRODUCT_NAME				_T("Demo")
-#define SZ_EXE_NAME					_T("ecc.exe")
+#define SZ_EXE_NAME					_T("acc.exe")
 #define SZ_ORGNIZATION_NAME			_T("www.easydemo77.com")
 #define SZ_PRODUCT_WEBSITE			_T("http://www.easydemo77.com")
 #define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@easydemo77.com")
