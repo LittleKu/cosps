@@ -88,7 +88,7 @@ BOOL CRegisterDlg::OnInitDialog()
 		"For further help, please click the registration help link below."));
 	SetDlgItemText(IDC_TXT_REG_INFO_BELOW, szText);
 	
-	m_regHelpLink.SetURL(SZ_PRODUCT_WEBSITE);
+	m_regHelpLink.SetURL(SZ_PRODUCT_WEBSITE_HELP);
 	
 	return TRUE;
 }
