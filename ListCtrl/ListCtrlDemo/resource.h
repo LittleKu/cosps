@@ -26,6 +26,12 @@
 #define IDD_EVALUATION_LIMIT            146
 #define IDI_OPTIONS_STATISTICS          147
 #define IDD_EXPORT_RESULT               148
+#define IDB_TB_START                    149
+#define IDB_TB_ADD                      150
+#define IDB_TB_CLEAR                    151
+#define IDB_TB_EXIT                     152
+#define IDB_TB_EXPORT                   153
+#define IDB_TB_OPTION                   154
 #define IDC_MENU_SEP                    1001
 #define IDC_SOURCE_DIR_FRAME            1003
 #define CG_IDC_PROGDLG_PROGRESS         1003
@@ -129,7 +135,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        149
+#define _APS_NEXT_RESOURCE_VALUE        155
 #define _APS_NEXT_COMMAND_VALUE         32790
 #define _APS_NEXT_CONTROL_VALUE         1076
 #define _APS_NEXT_SYMED_VALUE           107

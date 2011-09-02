@@ -37,28 +37,29 @@ END_MESSAGE_MAP()
 // CMainToolBarCtrl message handlers
 void CMainToolBarCtrl::Init()
 {
-	COLORREF crMask = RGB(255, 0, 255);
-	CBitmap tbBitmap;
-	tbBitmap.LoadBitmap(IDB_MAIN_TOOLBAR_HOT);
+	COLORREF crMask = RGB(255, 255, 255);
 	
-	BITMAP bmpInfo;
-	tbBitmap.GetBitmap(&bmpInfo);
-	
-	CSize bitmapSize(bmpInfo.bmHeight - 2, bmpInfo.bmHeight);
+	CSize bitmapSize(32, 32);
 	SetBitmapSize(bitmapSize);
 	
-	CSize buttonSize(bmpInfo.bmHeight + 7, bmpInfo.bmHeight + 7);
+	CSize buttonSize(40, 40);
 	SetButtonSize(buttonSize);
 	
-	m_normalIL.Create(bmpInfo.bmHeight - 2, bmpInfo.bmHeight, ILC_COLOR24|ILC_MASK, 1, 1);
-	m_normalIL.Add(&tbBitmap, crMask);
+	m_normalIL.Create(32, 32, ILC_COLOR24|ILC_MASK, 6, 1);
+	UINT nBtnID[] = {IDB_TB_ADD, IDB_TB_START, IDB_TB_CLEAR, IDB_TB_EXPORT, IDB_TB_OPTION, IDB_TB_EXIT};
+	int i;
+	for(i = 0; i < (sizeof(nBtnID)/sizeof(nBtnID[0])); i++)
+	{
+		CBitmap bm;
+		bm.LoadBitmap(nBtnID[i]);
+		m_normalIL.Add(&bm, crMask);
+	}
 	SetImageList(&m_normalIL);
-	tbBitmap.DeleteObject();
 	
 	int nFirstButtonID = IDC_MAIN_TOOLBAR_BUTTON_FIRST;
 	int m_nButtonCount = IDC_MAIN_TOOLBAR_BUTTON_LAST - nFirstButtonID + 1;
 	
-	int nBitmapIndex[] = {0, 18, 4, 6, 1, 11, 0, 0};
+	int nBitmapIndex[] = {0, 1, 2, 3, 4, 5};
 	TBBUTTON tb;
 	for (int nIndex = 0; nIndex < m_nButtonCount; nIndex++)
 	{

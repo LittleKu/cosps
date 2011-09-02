@@ -444,6 +444,12 @@ IDB_FILTER_TREE_CHECK_BOX_STATE BITMAP  DISCARDABLE     "res\\TreeCheckBoxState.
 IDB_SPLITTER_V_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgV.bmp"
 IDB_SPLITTER_H_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgH.bmp"
 IDB_MAIN_TOOLBAR_BKG    BITMAP  DISCARDABLE     "res\\MainToolBarBkg.bmp"
+IDB_TB_START            BITMAP  DISCARDABLE     "res\\tb_start.bmp"
+IDB_TB_ADD              BITMAP  DISCARDABLE     "res\\tb_add.bmp"
+IDB_TB_CLEAR            BITMAP  DISCARDABLE     "res\\tb_clear.bmp"
+IDB_TB_EXIT             BITMAP  DISCARDABLE     "res\\tb_exit.bmp"
+IDB_TB_EXPORT           BITMAP  DISCARDABLE     "res\\tb_export.bmp"
+IDB_TB_OPTION           BITMAP  DISCARDABLE     "res\\tb_option.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

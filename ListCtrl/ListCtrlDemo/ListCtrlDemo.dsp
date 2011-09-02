@@ -520,6 +520,30 @@ SOURCE=.\res\SplitterBkgV.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\tb_add.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_clear.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_exit.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_export.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_option.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_start.bmp
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\TreeCheckBoxState.bmp
 # End Source File
 # Begin Source File
