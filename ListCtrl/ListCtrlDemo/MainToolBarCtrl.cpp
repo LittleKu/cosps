@@ -47,12 +47,14 @@ void CMainToolBarCtrl::Init()
 	
 	m_normalIL.Create(32, 32, ILC_COLOR24|ILC_MASK, 6, 1);
 	UINT nBtnID[] = {IDB_TB_ADD, IDB_TB_START, IDB_TB_CLEAR, IDB_TB_EXPORT, IDB_TB_OPTION, IDB_TB_EXIT};
+	COLORREF nCrMask[] = {RGB(255, 255, 255), RGB(255, 0, 255), RGB(255, 0, 255), RGB(255, 0, 255), 
+		RGB(255, 255, 255), RGB(255, 255, 255)};
 	int i;
 	for(i = 0; i < (sizeof(nBtnID)/sizeof(nBtnID[0])); i++)
 	{
 		CBitmap bm;
 		bm.LoadBitmap(nBtnID[i]);
-		m_normalIL.Add(&bm, crMask);
+		m_normalIL.Add(&bm, nCrMask[i]);
 	}
 	SetImageList(&m_normalIL);
 	
