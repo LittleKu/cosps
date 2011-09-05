@@ -52,7 +52,7 @@ Filename: "{app}\{#AppExeFullName}"; Description: "{cm:LaunchProgram,{#AppName}}
 
 [Registry]
 Root: HKLM; Subkey: "Software\{#AppName}"; Flags: uninsdeletekeyifempty
-Root: HKLM; Subkey: "Software\{#AppName}\Common"; Flags: uninsdeletekeyifempty
+Root: HKLM; Subkey: "Software\{#AppName}\Common"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\{#AppName}\Common"; ValueType: string; ValueName: "Path"; ValueData: "{app}"; Flags: uninsdeletekeyifempty uninsdeletevalue
 
 [UninstallDelete]
