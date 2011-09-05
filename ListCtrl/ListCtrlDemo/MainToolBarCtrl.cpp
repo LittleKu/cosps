@@ -12,7 +12,9 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define IDC_MAIN_TOOLBAR_BUTTON_FIRST		ID_TBBTN_ADD_SOURCE_DIR
-#define IDC_MAIN_TOOLBAR_BUTTON_LAST		ID_TBBTN_EXIT
+//#define IDC_MAIN_TOOLBAR_BUTTON_LAST		ID_TBBTN_EXIT
+//Remove exit button
+#define IDC_MAIN_TOOLBAR_BUTTON_LAST		ID_TBBTN_SETTING
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainToolBarCtrl
@@ -44,10 +46,11 @@ void CMainToolBarCtrl::Init()
 	
 	CSize buttonSize(40, 40);
 	SetButtonSize(buttonSize);
+
 	
 	m_normalIL.Create(32, 32, ILC_COLOR24|ILC_MASK, 6, 1);
 	UINT nBtnID[] = {IDB_TB_ADD, IDB_TB_START, IDB_TB_CLEAR, IDB_TB_EXPORT, IDB_TB_OPTION, IDB_TB_EXIT};
-	COLORREF nCrMask[] = {RGB(255, 255, 255), RGB(255, 0, 255), RGB(255, 0, 255), RGB(255, 0, 255), 
+	COLORREF nCrMask[] = {RGB(255, 255, 255), RGB(255, 0, 255), RGB(255, 0, 255), RGB(255, 255, 255), 
 		RGB(255, 255, 255), RGB(255, 255, 255)};
 	int i;
 	for(i = 0; i < (sizeof(nBtnID)/sizeof(nBtnID[0])); i++)
