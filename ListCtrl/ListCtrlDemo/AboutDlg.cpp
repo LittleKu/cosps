@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	//{{AFX_MSG_MAP(CAboutDialog)
 	ON_WM_CTLCOLOR()
 	ON_WM_ERASEBKGND()
+	ON_WM_PAINT()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -71,6 +72,9 @@ END_MESSAGE_MAP()
 BOOL CAboutDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
+
+	//App Icon
+	m_hAppIcon = ::LoadIcon(AfxGetResourceHandle(), MAKEINTRESOURCE(IDR_MAINFRAME));
 
 	//Window Title
 	CString sText;
@@ -143,4 +147,15 @@ BOOL CAboutDlg::OnEraseBkgnd(CDC* pDC)
 	gtb::DrawGradient(pDC, &rect, colorStart, colorEnd, FALSE);
 
 	return TRUE;
+}
+
+void CAboutDlg::OnPaint()
+{
+	CDialog::OnPaint();
+
+	CClientDC dc(this);
+
+	CRect rcAppIcon(7, 10, 27, 30);
+	MapDialogRect(&rcAppIcon);
+	dc.DrawIcon(rcAppIcon.left, rcAppIcon.top, m_hAppIcon);
 }

@@ -46,10 +46,12 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnPaint();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 		
 	CFont m_fontBold;
+	HICON m_hAppIcon;
 };
 
 //{{AFX_INSERT_LOCATION}}
