@@ -4,6 +4,7 @@ set SYSDLL_DIR=C:\WINDOWS\system32
 set DST_DIR=.\sourced
 
 if exist "constantd.in" copy /b /y "constantd.in" "constantd"
+if exist "help_en.in.chm" copy /b /y "help_en.in.chm" "..\help\help_en.chm"
 if not exist "%DST_DIR%" mkdir "%DST_DIR%"
 
 copy /Y /B "%SYSDLL_DIR%\mfc42d.dll" "%DST_DIR%"
