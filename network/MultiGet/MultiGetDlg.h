@@ -23,6 +23,7 @@ public:
 	enum { IDD = IDD_MULTIGET_DIALOG };
 	CEdit	m_editUrl;
 	CTaskListCtrl	m_taskListCtrl;
+	CControlInfo m_controlInfo;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides
@@ -45,8 +46,16 @@ protected:
 	virtual void OnOK();
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnAdd1();
+	afx_msg void OnButtonStart1();
+	afx_msg void OnButtonPause();
+	afx_msg void OnButton4();
+	afx_msg void OnButtonStop();
+	afx_msg void OnButtonResume();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

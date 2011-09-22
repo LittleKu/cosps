@@ -31,7 +31,7 @@ ImplementationFile=MultiGetDlg.cpp
 Filter=D
 BaseClass=CDialog
 VirtualFilter=dWC
-LastObject=IDC_EDIT_URL
+LastObject=CMultiGetDlg
 
 [CLS:CAboutDlg]
 Type=0
@@ -51,12 +51,17 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_MULTIGET_DIALOG]
 Type=1
 Class=CMultiGetDlg
-ControlCount=5
+ControlCount=10
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_LIST_TASK,SysListView32,1350631425
 Control4=IDC_EDIT_URL,edit,1350631552
 Control5=IDC_BUTTON_ADD,button,1342242816
+Control6=IDC_ADD1,button,1342242816
+Control7=IDC_BUTTON_START1,button,1342242816
+Control8=IDC_BUTTON_PAUSE,button,1342242816
+Control9=IDC_BUTTON_RESUME,button,1342242816
+Control10=IDC_BUTTON_STOP,button,1342242816
 
 [CLS:CTaskListCtrl]
 Type=0

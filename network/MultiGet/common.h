@@ -27,6 +27,18 @@ public:
 	}
 };
 
+class CControlInfo
+{
+public:
+	BOOL isModified;
+	BOOL isPaused;
+	BOOL isStopped;
+
+	CControlInfo() : isPaused(FALSE), isStopped(FALSE), isModified(FALSE)
+	{
+	}
+};
+
 
 
 #endif

@@ -5,6 +5,7 @@
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
 #include "Downloader.h"
+#include "easy_down.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -87,6 +88,11 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_MESSAGE(WM_DOWNLOAD_PROGRESS, OnUpdateProgress)
 	ON_MESSAGE(WM_DOWNLOAD_COMPLETE, OnEnd)
+	ON_BN_CLICKED(IDC_ADD1, OnAdd1)
+	ON_BN_CLICKED(IDC_BUTTON_START1, OnButtonStart1)
+	ON_BN_CLICKED(IDC_BUTTON_PAUSE, OnButtonPause)
+	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStop)
+	ON_BN_CLICKED(IDC_BUTTON_RESUME, OnButtonResume)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -327,4 +333,65 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 
 
 	return 1L;
+}
+
+void CMultiGetDlg::OnAdd1() 
+{
+	
+	CString sUrl;
+	m_editUrl.GetWindowText(sUrl);
+	
+	if(sUrl.IsEmpty())
+	{
+		AfxMessageBox("Empty Url");
+		return;
+	}
+	CTaskInfo* pTaskInfo = new CTaskInfo();
+	pTaskInfo->m_url = sUrl;
+	pTaskInfo->m_progress = "Ready";
+	
+	m_taskListCtrl.AddRow(*pTaskInfo);
+	
+	m_editUrl.SetWindowText("");	
+}
+static UINT DownloadProc1(LPVOID lpvData)
+{
+	CMultiGetDlg* pThis = (CMultiGetDlg*)lpvData;
+
+	CTaskInfo* pTaskInfo = (CTaskInfo*)pThis->m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return 1;
+	}
+	CEasyDown edown;
+	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
+
+	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
+	
+	return 0;
+}
+void CMultiGetDlg::OnButtonStart1() 
+{
+	m_controlInfo.isModified = FALSE;
+	m_controlInfo.isPaused = FALSE;
+	m_controlInfo.isStopped = FALSE;
+	AfxBeginThread(DownloadProc1, (LPVOID)this);
+}
+
+void CMultiGetDlg::OnButtonPause() 
+{
+	m_controlInfo.isPaused = TRUE;
+	m_controlInfo.isModified = TRUE;
+}
+
+void CMultiGetDlg::OnButtonStop() 
+{
+	m_controlInfo.isStopped = TRUE;
+	
+}
+
+void CMultiGetDlg::OnButtonResume() 
+{
+	m_controlInfo.isPaused = FALSE;
+	m_controlInfo.isModified = TRUE;
 }
