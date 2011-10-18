@@ -6,6 +6,7 @@
 #include "MultiGetDlg.h"
 #include "Downloader.h"
 #include "easy_down.h"
+#include "HeaderParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -93,6 +94,8 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_PAUSE, OnButtonPause)
 	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStop)
 	ON_BN_CLICKED(IDC_BUTTON_RESUME, OnButtonResume)
+	ON_BN_CLICKED(IDC_BUTTON_HEADER, OnButtonHeader)
+	ON_BN_CLICKED(IDC_BUTTON_REMOVE, OnButtonRemove)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -394,4 +397,27 @@ void CMultiGetDlg::OnButtonResume()
 {
 	m_controlInfo.isPaused = FALSE;
 	m_controlInfo.isModified = TRUE;
+}
+
+void CMultiGetDlg::OnButtonHeader() 
+{
+	if(m_taskListCtrl.GetItemCount() <= 0)
+	{
+		return;
+	}
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+
+	CHeaderParser headerParser(pTaskInfo->m_url);
+	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
+
+	CString szMsg;
+	szMsg.Format("code=%d, size=%d, is_range_bytes=%d", 
+		pHeaderInfo->httpcode, pHeaderInfo->header_size, pHeaderInfo->is_range_bytes);
+	AfxMessageBox(szMsg);
+}
+
+void CMultiGetDlg::OnButtonRemove() 
+{
+	
+	m_taskListCtrl.RemoveSelectedItems();
 }

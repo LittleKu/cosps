@@ -29,6 +29,7 @@ public:
 
 // Implementation
 public:
+	void RemoveSelectedItems();
 	int AddRow(const CTaskInfo& taskInfo);
 	void Init();
 	void InvalidateSubItem(int nItem, int nSubItem);
@@ -38,7 +39,7 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskListCtrl)
-		// NOTE - the ClassWizard will add and remove member functions here.
+	afx_msg void OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

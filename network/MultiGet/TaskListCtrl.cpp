@@ -40,7 +40,7 @@ CTaskListCtrl::~CTaskListCtrl()
 
 BEGIN_MESSAGE_MAP(CTaskListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CTaskListCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
+	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnDeleteitem)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -155,4 +155,36 @@ void CTaskListCtrl::InvalidateSubItem(int nItem, int nSubItem)
 	rect.InflateRect(2, 2);
 	
 	InvalidateRect(&rect);
+}
+
+void CTaskListCtrl::RemoveSelectedItems()
+{
+	SetRedraw(FALSE);
+	//Delete all selected items
+	POSITION pos = GetFirstSelectedItemPosition();
+	
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = GetNextSelectedItem(pos);
+		
+		DeleteItem(nItem);
+		
+		//Delete the previous one item will affect the pos
+		pos = GetFirstSelectedItemPosition();
+	}
+	
+	SetRedraw(TRUE);
+	UpdateWindow();
+}
+
+void CTaskListCtrl::OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	CTaskInfo* pTaskInfo = (CTaskInfo*)GetItemData(pNMListView->iItem);
+	ASSERT(pTaskInfo != NULL);
+	delete pTaskInfo;
+	pTaskInfo = NULL;
+
+	*pResult = 0;
 }

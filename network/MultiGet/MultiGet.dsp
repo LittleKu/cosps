@@ -103,6 +103,10 @@ SOURCE=.\easy_down.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\HeaderParser.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MultiGet.cpp
 # End Source File
 # Begin Source File
@@ -145,6 +149,10 @@ SOURCE=.\Downloader.h
 # Begin Source File
 
 SOURCE=.\easy_down.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\HeaderParser.h
 # End Source File
 # Begin Source File
 

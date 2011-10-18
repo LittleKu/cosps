@@ -51,7 +51,7 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_MULTIGET_DIALOG]
 Type=1
 Class=CMultiGetDlg
-ControlCount=10
+ControlCount=12
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_LIST_TASK,SysListView32,1350631425
@@ -62,6 +62,8 @@ Control7=IDC_BUTTON_START1,button,1342242816
 Control8=IDC_BUTTON_PAUSE,button,1342242816
 Control9=IDC_BUTTON_RESUME,button,1342242816
 Control10=IDC_BUTTON_STOP,button,1342242816
+Control11=IDC_BUTTON_HEADER,button,1342242816
+Control12=IDC_BUTTON_REMOVE,button,1342242816
 
 [CLS:CTaskListCtrl]
 Type=0
@@ -69,4 +71,5 @@ HeaderFile=TaskListCtrl.h
 ImplementationFile=TaskListCtrl.cpp
 BaseClass=CListCtrl
 Filter=W
+VirtualFilter=FWC
 

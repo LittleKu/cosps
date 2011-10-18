@@ -39,6 +39,19 @@ public:
 	}
 };
 
-
+class CHeaderInfo
+{
+public:
+	int		httpcode;
+	long	header_size;
+	bool	is_range_bytes;
+	CHeaderInfo() : httpcode(0), header_size(0), is_range_bytes(false) {}
+	void Reset()
+	{
+		httpcode = 0;
+		header_size = 0;
+		is_range_bytes = false;
+	}
+};
 
 #endif

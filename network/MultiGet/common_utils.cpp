@@ -197,3 +197,20 @@ int file_download(const char* url, const char* out_file_name, const char* proxy)
 
 	return 1;
 }
+
+
+size_t ThrowAwayCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	(void)ptr;
+	(void)data;
+
+	return (size_t)(size * nmemb);
+}
+size_t WriteFileCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	FILE* fp = (FILE*)data;
+
+	fwrite(ptr, size, nmemb, fp);
+	
+	return (size_t)(size * nmemb);
+}

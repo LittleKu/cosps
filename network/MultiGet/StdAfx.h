@@ -24,6 +24,7 @@
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 #include "common.h"
+#include "common_utils.h"
 
 #define CURL_STATICLIB
 
