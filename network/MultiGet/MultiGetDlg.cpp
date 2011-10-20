@@ -4,9 +4,10 @@
 #include "stdafx.h"
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
-#include "Downloader.h"
+#include "TestDownloader.h"
 #include "easy_down.h"
 #include "HeaderParser.h"
+#include "EasyDownloader.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -269,7 +270,7 @@ void CMultiGetDlg::OnButtonAdd()
 static UINT DownloadProc(LPVOID lpvData)
 {
 	HWND hwnd = (HWND)lpvData;
-	CDownloader downloader;
+	CTestDownloader downloader;
 	downloader.download(hwnd);
 
 	::SendMessage(hwnd, WM_DOWNLOAD_COMPLETE, 0, 0);
@@ -298,7 +299,7 @@ void CMultiGetDlg::OnOK()
 LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 {
 	CProgressInfo* pProgressInfo = (CProgressInfo*)wParam;
-	int index = (int)lParam;
+	int index = pProgressInfo->index;
 
 	ASSERT(index >= 0 && index < m_taskListCtrl.GetItemCount());
 
@@ -366,8 +367,21 @@ static UINT DownloadProc1(LPVOID lpvData)
 	{
 		return 1;
 	}
-	CEasyDown edown;
-	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
+
+	CDownloadParam param;
+	param.m_hWnd = pThis->GetSafeHwnd();
+	param.m_nIndex = 0;
+
+// 	CEasyDown edown;
+// 	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
+
+	if(pTaskInfo->m_lpDownloader == NULL)
+	{
+		pTaskInfo->m_lpDownloader = new CEasyDownloader();
+	}
+	
+	pTaskInfo->m_lpDownloader->Init(pTaskInfo->m_url, param);
+	pTaskInfo->m_lpDownloader->Start();
 
 	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
 	
@@ -385,11 +399,24 @@ void CMultiGetDlg::OnButtonPause()
 {
 	m_controlInfo.isPaused = TRUE;
 	m_controlInfo.isModified = TRUE;
+
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return;
+	}
+	pTaskInfo->m_lpDownloader->Pause();
 }
 
 void CMultiGetDlg::OnButtonStop() 
 {
 	m_controlInfo.isStopped = TRUE;
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return;
+	}
+	pTaskInfo->m_lpDownloader->Stop();
 	
 }
 
@@ -397,6 +424,13 @@ void CMultiGetDlg::OnButtonResume()
 {
 	m_controlInfo.isPaused = FALSE;
 	m_controlInfo.isModified = TRUE;
+
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return;
+	}
+	pTaskInfo->m_lpDownloader->Resume();
 }
 
 void CMultiGetDlg::OnButtonHeader() 

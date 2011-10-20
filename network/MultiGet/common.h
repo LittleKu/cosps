@@ -4,14 +4,6 @@
 #define WM_DOWNLOAD_PROGRESS	(WM_USER + 1099)
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
 
-class CTaskInfo
-{
-public:
-	CString m_url;
-	CString m_fileName;
-	CString m_fileSize;
-	CString m_progress;
-};
 
 class CProgressInfo
 {
@@ -22,7 +14,8 @@ public:
 	DWORD64 ulnow;
 	int retCode;
 	CString szReason;
-	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0)
+	int index;
+	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0), index(-1)
 	{
 	}
 };
@@ -52,6 +45,14 @@ public:
 		header_size = 0;
 		is_range_bytes = false;
 	}
+};
+
+class CDownloadParam
+{
+public:
+	HWND m_hWnd;
+	int m_nIndex;
+	CDownloadParam(HWND hwnd = NULL, int index = -1) : m_hWnd(hwnd), m_nIndex(index) {}
 };
 
 #endif

@@ -7,6 +7,27 @@
 // TaskListCtrl.h : header file
 //
 
+#include "Downloader.h"
+
+class CTaskInfo
+{
+public:
+	CString m_url;
+	CString m_fileName;
+	CString m_fileSize;
+	CString m_progress;
+	CDownloader*	m_lpDownloader;
+	CTaskInfo() : m_lpDownloader(0) {}
+	~CTaskInfo()
+	{
+		if(m_lpDownloader != NULL)
+		{
+			delete m_lpDownloader;
+			m_lpDownloader = NULL;
+		}
+	}
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CTaskListCtrl window
 

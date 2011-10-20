@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
+#include <log4cplus/configurator.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,6 +37,29 @@ CMultiGetApp::CMultiGetApp()
 
 CMultiGetApp theApp;
 
+static void InitLog4cplus()
+{
+#ifdef ENABLE_LOG4CPLUS
+	
+	const char* pEnvName = "LOG_FILE_SUFFIX";
+	CString szOldValue = getenv(pEnvName);
+	
+	//Set the env to the current time str
+	CString sTime = CTime::GetCurrentTime().Format("_%Y_%m_%d_%H_%M_%S");
+	
+	CString szValue;
+	szValue.Format("%s=%s", pEnvName, sTime);
+	_putenv(szValue);
+	
+	//This will take effect in the configure process
+	log4cplus::PropertyConfigurator::doConfigure("log4cplus.properties");
+	
+	//After configuration, restore the envrionment varialble.
+	szValue.Format("%s=%s", pEnvName, szOldValue);
+	_putenv(szValue);
+#endif
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CMultiGetApp initialization
 
@@ -53,6 +77,8 @@ BOOL CMultiGetApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
+
+	InitLog4cplus();
 
 	CMultiGetDlg dlg;
 	m_pMainWnd = &dlg;

@@ -2,8 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_DOWNLOADER_H__F60EFBBF_218A_45D1_9804_D882B60DA127__INCLUDED_)
-#define AFX_DOWNLOADER_H__F60EFBBF_218A_45D1_9804_D882B60DA127__INCLUDED_
+#if !defined(AFX_DOWNLOADER_H__7AFFE40E_1B65_460E_B5BA_3F1B0265C530__INCLUDED_)
+#define AFX_DOWNLOADER_H__7AFFE40E_1B65_460E_B5BA_3F1B0265C530__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -14,8 +14,12 @@ class CDownloader
 public:
 	CDownloader();
 	virtual ~CDownloader();
-	
-	int download(HWND hwnd);
+public:
+	virtual void Init(LPCTSTR lpszUrl, CDownloadParam param) = 0;
+	virtual void Start() = 0;
+	virtual void Stop() = 0;
+	virtual void Pause() = 0;
+	virtual void Resume() = 0;
 };
 
-#endif // !defined(AFX_DOWNLOADER_H__F60EFBBF_218A_45D1_9804_D882B60DA127__INCLUDED_)
+#endif // !defined(AFX_DOWNLOADER_H__7AFFE40E_1B65_460E_B5BA_3F1B0265C530__INCLUDED_)
