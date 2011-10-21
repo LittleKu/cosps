@@ -123,6 +123,10 @@ SOURCE=.\MultiGetDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SegmentDownloader.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -177,6 +181,10 @@ SOURCE=.\MultiGetDlg.h
 # Begin Source File
 
 SOURCE=.\Resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SegmentDownloader.h
 # End Source File
 # Begin Source File
 

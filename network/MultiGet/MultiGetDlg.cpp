@@ -8,6 +8,7 @@
 #include "easy_down.h"
 #include "HeaderParser.h"
 #include "EasyDownloader.h"
+#include "SegmentDownloader.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -367,23 +368,49 @@ static UINT DownloadProc1(LPVOID lpvData)
 	{
 		return 1;
 	}
+	
+	CHeaderParser headerParser(pTaskInfo->m_url);
+	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
+
 
 	CDownloadParam param;
 	param.m_hWnd = pThis->GetSafeHwnd();
 	param.m_nIndex = 0;
+	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
+	{
+		param.m_nFileSize = pHeaderInfo->header_size;
+		if(pTaskInfo->m_lpDownloader == NULL)
+		{
+			pTaskInfo->m_lpDownloader = new CSegmentDownloader();
+		}
+	}
+	else
+	{
+		if(pTaskInfo->m_lpDownloader == NULL)
+		{
+			pTaskInfo->m_lpDownloader = new CEasyDownloader();
+		}
+	}	
+	
+	pTaskInfo->m_lpDownloader->Init(pTaskInfo->m_url, param);
+
+	clock_t start = clock();
+	pTaskInfo->m_lpDownloader->Start();
 
 // 	CEasyDown edown;
 // 	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
 
-	if(pTaskInfo->m_lpDownloader == NULL)
-	{
-		pTaskInfo->m_lpDownloader = new CEasyDownloader();
-	}
 	
-	pTaskInfo->m_lpDownloader->Init(pTaskInfo->m_url, param);
-	pTaskInfo->m_lpDownloader->Start();
 
 	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
+
+	clock_t finish = clock();
+
+	UINT nCost = finish - start;
+
+	CString szLog;
+	szLog.Format("Time Cost (%d)", nCost);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	
 	return 0;
 }

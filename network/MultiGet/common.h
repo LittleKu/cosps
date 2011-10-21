@@ -50,9 +50,11 @@ public:
 class CDownloadParam
 {
 public:
-	HWND m_hWnd;
-	int m_nIndex;
-	CDownloadParam(HWND hwnd = NULL, int index = -1) : m_hWnd(hwnd), m_nIndex(index) {}
+	HWND	m_hWnd;
+	int		m_nIndex;
+	UINT	m_nFileSize;
+	CDownloadParam(HWND hwnd = NULL, int index = -1, UINT nFileSize = 0)
+		: m_hWnd(hwnd), m_nIndex(index), m_nFileSize(nFileSize) {}
 };
 
 #endif
