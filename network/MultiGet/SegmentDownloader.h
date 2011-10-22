@@ -14,6 +14,7 @@
 
 #define MAX_WORKER_SESSION		8
 #define MIN_SEGMENT_SIZE		(1024 * 1024)
+#define MAX_RETRY_TIMES			3
 
 typedef CSize CRange;
 
@@ -25,8 +26,10 @@ public:
 	FILE*	m_lpFileHeader;
 	FILE*	m_lpFileData;
 	DWORD64	m_nDlNow;
+	CSize	m_range;
+	int		m_nRetry;
 	CSegmentInfo(int nIndex = -1, CURL* curl = NULL, FILE* lpHeader = NULL, FILE* lpData = NULL)
-		: m_nIndex(nIndex), m_curl(curl), m_lpFileHeader(lpHeader), m_lpFileData(lpData), m_nDlNow(0)
+		: m_nIndex(nIndex), m_curl(curl), m_lpFileHeader(lpHeader), m_lpFileData(lpData), m_nDlNow(0), m_nRetry(0)
 	{
 	}
 };
@@ -55,6 +58,7 @@ public:
 private:
 	void SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>& sizeArray);
 	void InitMultiCurl();
+	CURL* InitEasyHandle(int nStartPos, int nFinishPos, int nIndex); 
 	DWORD64 GetTotalDownloadNow();
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb, int index);

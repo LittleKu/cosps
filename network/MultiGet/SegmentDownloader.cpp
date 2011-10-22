@@ -56,6 +56,68 @@ void CSegmentDownloader::Init(LPCTSTR lpszUrl, CDownloadParam param)
 	InitMultiCurl();
 }
 
+CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nIndex)
+{
+	CURL* easy_handle = curl_easy_init();
+
+	//URL address
+	curl_easy_setopt(easy_handle, CURLOPT_URL, (LPCTSTR)m_szUrl);
+
+	//agent: IE8
+	curl_easy_setopt(easy_handle, CURLOPT_USERAGENT, USER_AGENT_IE8);
+	//redirect
+	curl_easy_setopt(easy_handle, CURLOPT_FOLLOWLOCATION, 1L);
+	//no verbose
+	curl_easy_setopt(easy_handle, CURLOPT_VERBOSE, 0L);
+	//connect timeout: 10s
+	curl_easy_setopt(easy_handle, CURLOPT_CONNECTTIMEOUT, 10L);
+
+	//segment download, range setting
+	CString szRange;
+	szRange.Format("%d-%d", nStartPos, nFinishPos);
+	curl_easy_setopt(easy_handle, CURLOPT_RANGE, (LPCTSTR)szRange);
+	
+	CCallbackParam* pCallbackParam = new CCallbackParam(nIndex, this);
+	//header
+	curl_easy_setopt(easy_handle, CURLOPT_HEADERFUNCTION, CSegmentDownloader::HeaderCallback);
+	curl_easy_setopt(easy_handle, CURLOPT_HEADERDATA, pCallbackParam);
+	
+	//data
+	curl_easy_setopt(easy_handle, CURLOPT_WRITEFUNCTION, CSegmentDownloader::DataCallback);
+	curl_easy_setopt(easy_handle, CURLOPT_WRITEDATA, pCallbackParam);
+	
+	//progress
+	curl_easy_setopt(easy_handle, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(easy_handle, CURLOPT_PROGRESSFUNCTION, CSegmentDownloader::ProgressCallback);
+	curl_easy_setopt(easy_handle, CURLOPT_PROGRESSDATA, pCallbackParam);
+	
+	//private
+	curl_easy_setopt(easy_handle, CURLOPT_PRIVATE, pCallbackParam);
+	
+	//Init parameters
+	if(nIndex < m_segInfos.GetSize())
+	{
+
+	}
+	else
+	{
+
+	}
+	CSegmentInfo segmentInfo;
+	segmentInfo.m_nIndex = i;
+	segmentInfo.m_curl = easy_handle;
+	
+	char buf[32];
+	sprintf(buf, "header_%d.txt", i);
+	segmentInfo.m_lpFileHeader = fopen(buf, "wb");
+	
+	sprintf(buf, "data_%d", i);
+	segmentInfo.m_lpFileData = fopen(buf, "wb");
+	
+	m_segInfos.Add(segmentInfo);
+
+	return;
+}
 void CSegmentDownloader::InitMultiCurl()
 {
 	CArray<CRange, CRange&> sizeArray;
@@ -222,7 +284,7 @@ void CSegmentDownloader::Start()
 				if(resCode != CURLE_OK)
 				{
 					szLog.Format("(%d) - Transfer Error: %d - %s", pCallbackParam->nIndex, resCode, curl_easy_strerror(resCode));
-					LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCSTR)szLog)
+					LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCSTR)szLog)
 				}		
 
 				CSegmentInfo& segmentInfo = m_segInfos.GetAt(pCallbackParam->nIndex);
