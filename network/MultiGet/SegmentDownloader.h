@@ -25,12 +25,21 @@ public:
 	CURL*	m_curl;
 	FILE*	m_lpFileHeader;
 	FILE*	m_lpFileData;
+	DWORD64	m_nDlBefore;
 	DWORD64	m_nDlNow;
 	CSize	m_range;
 	int		m_nRetry;
-	CSegmentInfo(int nIndex = -1, CURL* curl = NULL, FILE* lpHeader = NULL, FILE* lpData = NULL)
-		: m_nIndex(nIndex), m_curl(curl), m_lpFileHeader(lpHeader), m_lpFileData(lpData), m_nDlNow(0), m_nRetry(0)
+	CSegmentInfo()
 	{
+		m_nIndex = -1;
+		m_curl = NULL;
+		m_lpFileHeader = NULL;
+		m_lpFileData = NULL;
+		m_nDlBefore = 0;
+		m_nDlNow = 0;
+		m_range.cx = 0;
+		m_range.cy = 0;
+		m_nRetry = 0;
 	}
 };
 

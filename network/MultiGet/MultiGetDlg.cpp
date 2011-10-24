@@ -372,24 +372,22 @@ static UINT DownloadProc1(LPVOID lpvData)
 	CHeaderParser headerParser(pTaskInfo->m_url);
 	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
 
-
+	if(pTaskInfo->m_lpDownloader != NULL)
+	{
+		delete pTaskInfo->m_lpDownloader;
+		pTaskInfo->m_lpDownloader = NULL;
+	}
 	CDownloadParam param;
 	param.m_hWnd = pThis->GetSafeHwnd();
 	param.m_nIndex = 0;
 	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
 	{
 		param.m_nFileSize = pHeaderInfo->header_size;
-		if(pTaskInfo->m_lpDownloader == NULL)
-		{
-			pTaskInfo->m_lpDownloader = new CSegmentDownloader();
-		}
+		pTaskInfo->m_lpDownloader = new CSegmentDownloader();
 	}
 	else
 	{
-		if(pTaskInfo->m_lpDownloader == NULL)
-		{
-			pTaskInfo->m_lpDownloader = new CEasyDownloader();
-		}
+		pTaskInfo->m_lpDownloader = new CEasyDownloader();
 	}	
 	
 	pTaskInfo->m_lpDownloader->Init(pTaskInfo->m_url, param);
