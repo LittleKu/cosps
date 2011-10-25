@@ -285,7 +285,8 @@ void CSegmentDownloader::Start()
 				{
 				case CURLE_OK:
 					{
-						//do nothing
+						//Just stop connection
+						StopConnection(nIndex, DLE_OK);
 					}
 					break;
 				case CURLE_ABORTED_BY_CALLBACK:
