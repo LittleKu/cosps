@@ -30,6 +30,21 @@ public:
 	CControlInfo() : isPaused(FALSE), isStopped(FALSE), isModified(FALSE)
 	{
 	}
+
+	BOOL IsStopped()
+	{
+		return isStopped;
+	}
+
+	BOOL IsPaused()
+	{
+		return isPaused;
+	}
+
+	BOOL IsModified()
+	{
+		return isModified;
+	}
 };
 
 class CHeaderInfo

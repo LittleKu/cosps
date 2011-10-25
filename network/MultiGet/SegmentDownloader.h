@@ -9,12 +9,22 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "afxmt.h"
 #include "Downloader.h"
 #include <curl/curl.h>
 
 #define MAX_WORKER_SESSION		8
 #define MIN_SEGMENT_SIZE		(1024 * 1024)
 #define MAX_RETRY_TIMES			3
+
+typedef enum 
+{
+	DLE_OK = 0,
+	DLE_PAUSE = 1,
+	DLE_STOP = 2,
+	DLE_OTHER
+} DLCode;
+
 
 typedef CSize CRange;
 
@@ -29,6 +39,8 @@ public:
 	DWORD64	m_nDlNow;
 	CSize	m_range;
 	int		m_nRetry;
+
+	CControlInfo m_controlInfo;
 	CSegmentInfo()
 	{
 		m_nIndex = -1;
@@ -69,6 +81,8 @@ private:
 	void InitMultiCurl();
 	CURL* InitEasyHandle(int nStartPos, int nFinishPos, int nIndex); 
 	DWORD64 GetTotalDownloadNow();
+	void StopAllConnections(int nCleanType);
+	void StopConnection(int nIndex, int nCleanType);
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb, int index);
 	size_t ProcessData(char *ptr, size_t size, size_t nmemb, int index);
@@ -83,6 +97,9 @@ protected:
 	CURLM*	m_curlm;
 
 	CArray<CSegmentInfo, CSegmentInfo&> m_segInfos;
+
+	CControlInfo m_controlInfo;
+	CCriticalSection m_ctritialSection;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

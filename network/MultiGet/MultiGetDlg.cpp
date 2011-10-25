@@ -445,6 +445,33 @@ void CMultiGetDlg::OnButtonStop()
 	
 }
 
+static UINT ResumeProc(LPVOID lpvData)
+{
+	CMultiGetDlg* pThis = (CMultiGetDlg*)lpvData;
+	
+	CTaskInfo* pTaskInfo = (CTaskInfo*)pThis->m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return 1;
+	}
+	ASSERT(pTaskInfo->m_lpDownloader != NULL);
+
+
+	clock_t start = clock();
+	pTaskInfo->m_lpDownloader->Resume();
+	
+	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
+	
+	clock_t finish = clock();
+	
+	UINT nCost = finish - start;
+	
+	CString szLog;
+	szLog.Format("Time Cost (%d)", nCost);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		
+	return 0;
+}
 void CMultiGetDlg::OnButtonResume() 
 {
 	m_controlInfo.isPaused = FALSE;
@@ -455,7 +482,8 @@ void CMultiGetDlg::OnButtonResume()
 	{
 		return;
 	}
-	pTaskInfo->m_lpDownloader->Resume();
+
+	AfxBeginThread(ResumeProc, (LPVOID)this);
 }
 
 void CMultiGetDlg::OnButtonHeader() 
