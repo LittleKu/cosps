@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "SegmentDownloader.h"
+#include "SegmentInfoMap.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -14,46 +15,65 @@ static char THIS_FILE[]=__FILE__;
 size_t CSegmentDownloader::HeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	CCallbackParam* lpParam = (CCallbackParam*)userdata;
-	return lpParam->pThis->ProcessHeader(ptr, size, nmemb, lpParam->nIndex);
+	return lpParam->pDownloader->ProcessHeader(ptr, size, nmemb, lpParam->nIndex);
 }
 
 size_t CSegmentDownloader::DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
 	CCallbackParam* lpParam = (CCallbackParam*)userdata;
-	return lpParam->pThis->ProcessData(ptr, size, nmemb, lpParam->nIndex);
+	return lpParam->pDownloader->ProcessData(ptr, size, nmemb, lpParam->nIndex);
 }
 
 int CSegmentDownloader::ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	CCallbackParam* lpParam = (CCallbackParam*)clientp;
-	return lpParam->pThis->ProcessProgress(dltotal, dlnow, ultotal, ulnow, lpParam->nIndex);
+	return lpParam->pDownloader->ProcessProgress(dltotal, dlnow, ultotal, ulnow, lpParam->nIndex);
+}
+
+UINT CSegmentDownloader::DownloadProc(LPVOID lpvData)
+{
+	CSegmentDownloader* lpDownloder = (CSegmentDownloader*)lpvData;
+
+	lpDownloder->Download();
+
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSegmentDownloader::CSegmentDownloader()
+CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL)
 {
 }
 
 CSegmentDownloader::~CSegmentDownloader()
 {
-	m_segInfos.RemoveAll();
+	m_pSegmentInfoArray = NULL;
 }
 
-void CSegmentDownloader::Init(LPCTSTR lpszUrl, CDownloadParam param)
+void CSegmentDownloader::Init(const CDownloadParam& param)
 {
-	m_segInfos.RemoveAll();
-
-	m_szUrl = lpszUrl;
 	m_dlParam = param;
 
+	m_pSegmentInfoArray = new CSegmentInfoArray();
+	CSegmentInfoMap::GetInstance()->AddSegmentInfoArray(m_dlParam.m_szUrl, m_pSegmentInfoArray);
+
 	m_curlm = curl_multi_init();
-	
 	curl_multi_setopt(m_curlm, CURLMOPT_MAXCONNECTS, (long)MAX_WORKER_SESSION);
 
-	InitMultiCurl();
+	//Init Multi CURL
+	CArray<CRange, CRange&> sizeArray;
+	SplitFileRange(m_dlParam.m_nFileSize, sizeArray);
+	
+	int i, nSize;	
+	for(i = 0, nSize = sizeArray.GetSize(); i < nSize; i++)
+	{
+		CRange& segment = sizeArray.GetAt(i);
+		CURL* easy_handle = InitEasyHandle(segment.cx, segment.cy, i);
+		
+		curl_multi_add_handle(m_curlm, easy_handle); 
+	}
 }
 
 CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nIndex)
@@ -61,7 +81,7 @@ CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nInd
 	CURL* easy_handle = curl_easy_init();
 
 	//URL address
-	curl_easy_setopt(easy_handle, CURLOPT_URL, (LPCTSTR)m_szUrl);
+	curl_easy_setopt(easy_handle, CURLOPT_URL, (LPCTSTR)m_dlParam.m_szUrl);
 
 	//agent: IE8
 	curl_easy_setopt(easy_handle, CURLOPT_USERAGENT, USER_AGENT_IE8);
@@ -98,12 +118,59 @@ CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nInd
 	curl_easy_setopt(easy_handle, CURLOPT_PRIVATE, pCallbackParam);
 	
 	//Init parameters
+	CSegmentInfoEx* pSegmentInfo = NULL;
+	if(nIndex < m_pSegmentInfoArray->GetSize())
+	{
+		pSegmentInfo = GetSegmentInfo(nIndex);
 
+		ASSERT(pSegmentInfo->m_nIndex == nIndex);
+		pSegmentInfo->m_nDlBefore += pSegmentInfo->m_nDlNow;
+		pSegmentInfo->m_nDlNow = 0;
+		pSegmentInfo->m_nRetry++;
+
+		pSegmentInfo->m_range.cx = nStartPos;
+		pSegmentInfo->m_range.cy = nFinishPos;
+
+		char buf[32];
+		
+		sprintf(buf, "header_%d(%d).txt", nIndex, pSegmentInfo->m_nRetry);
+		pSegmentInfo->m_lpFileHeader = fopen(buf, "wb");
+		
+		sprintf(buf, "data_%d", nIndex);
+		pSegmentInfo->m_lpFileData = fopen(buf, "ab");
+
+		pSegmentInfo->m_curl = easy_handle;
+	}
+	else
+	{
+		pSegmentInfo = new CSegmentInfoEx();
+		AddSegmentInfo(pSegmentInfo);
+
+		pSegmentInfo->m_nIndex = nIndex;
+		pSegmentInfo->m_nDlBefore = 0;
+		pSegmentInfo->m_nDlNow = 0;
+		pSegmentInfo->m_nRetry = 0;
+
+		pSegmentInfo->m_range.cx = nStartPos;
+		pSegmentInfo->m_range.cy = nFinishPos;
+
+		char buf[32];
+		
+		sprintf(buf, "header_%d.txt", nIndex);
+		pSegmentInfo->m_lpFileHeader = fopen(buf, "wb");
+		
+		sprintf(buf, "data_%d", nIndex);
+		pSegmentInfo->m_lpFileData = fopen(buf, "wb");
+
+		pSegmentInfo->m_curl = easy_handle;
+	}
+
+	/*
 	//exist already, retry
 	if(nIndex < m_segInfos.GetSize())
 	{
 		ASSERT(nIndex >= 0 && nIndex < m_segInfos.GetSize());
-		CSegmentInfo& segmentInfo = m_segInfos.ElementAt(nIndex);
+		CSegmentInfoEx& segmentInfo = m_segInfos.ElementAt(nIndex);
 
 		ASSERT(segmentInfo.m_nIndex == nIndex);
 		segmentInfo.m_curl = easy_handle;
@@ -126,7 +193,7 @@ CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nInd
 	//new task
 	else
 	{
-		CSegmentInfo segmentInfo;
+		CSegmentInfoEx segmentInfo;
 		segmentInfo.m_nIndex = nIndex;
 		segmentInfo.m_curl = easy_handle;
 
@@ -143,32 +210,21 @@ CURL* CSegmentDownloader::InitEasyHandle(int nStartPos, int nFinishPos, int nInd
 		segmentInfo.m_lpFileHeader = fopen(buf, "wb");
 		
 		sprintf(buf, "data_%d", nIndex);
-		segmentInfo.m_lpFileData = fopen(buf, "wb");		
+		segmentInfo.m_lpFileData = fopen(buf, "wb");
 
 		m_segInfos.Add(segmentInfo);
 	}
+	*/
 
 	return easy_handle;
 }
-void CSegmentDownloader::InitMultiCurl()
-{
-	CArray<CRange, CRange&> sizeArray;
-	SplitFileRange(m_dlParam.m_nFileSize, sizeArray);
-	
-	int i, nSize;
-	CString szRange;
-	
-	for(i = 0, nSize = sizeArray.GetSize(); i < nSize; i++)
-	{
-		CRange& segment = sizeArray.GetAt(i);
-
-		CURL* easy_handle = InitEasyHandle(segment.cx, segment.cy, i);
-
-		curl_multi_add_handle(m_curlm, easy_handle); 
-	}
-}
 
 void CSegmentDownloader::Start()
+{
+	AfxBeginThread(CSegmentDownloader::DownloadProc, (LPVOID)this);
+//	Download();
+}
+void CSegmentDownloader::Download()
 {
 	int still_running = -1; /* keep number of running handles */
 
@@ -183,10 +239,14 @@ void CSegmentDownloader::Start()
 	int msgs_left; /* how many messages are left */
 	int rc = 0;	//return value
 
-	CString szLog;	
+	CString szLog;
+	CResultCode result_code;
 
 	while (still_running) 
 	{
+		result_code.m_nMajor = TASK_STATUS_OK;
+		result_code.m_nMinor = INTERNAL_OK;
+
 		curl_multi_perform(m_curlm, &still_running);
 		
 		if (still_running) 
@@ -201,6 +261,9 @@ void CSegmentDownloader::Start()
 			{
 				szLog.Format("[curl_multi_fdset] error: (%d)", rc);
 				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCSTR)szLog)
+
+				result_code.m_nMajor = TASK_STATUS_TERMINATED;
+				result_code.m_nMinor = INTERNAL_MULTI_FDSET_ERROR;
 				break;
 			}
 			
@@ -208,7 +271,10 @@ void CSegmentDownloader::Start()
 			if(rc != CURLM_OK)
 			{
 				szLog.Format("[curl_multi_timeout] error: (%d)", rc);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCSTR)szLog)				
+				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCSTR)szLog)	
+				
+				result_code.m_nMajor = TASK_STATUS_TERMINATED;
+				result_code.m_nMinor = INTERNAL_MULTI_TIMEOUT_ERROR;
 				break;
 			}
 			if (curl_timeout == -1)
@@ -239,6 +305,9 @@ void CSegmentDownloader::Start()
 						szLog.Format("[select] error: maxfd = %d, curl_timeout = %ld, %d - %s", maxfd, curl_timeout, 
 							errno, strerror(errno));
 						LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCSTR)szLog)	
+
+						result_code.m_nMajor = TASK_STATUS_TERMINATED;
+						result_code.m_nMinor = INTERNAL_SELECT_ERROR;
 					}
 					break;
 				case 0: /* timeout */
@@ -275,7 +344,7 @@ void CSegmentDownloader::Start()
 				CURL* easy_handle = msg->easy_handle;
 				CURLcode resCode = msg->data.result;
 
-				CSegmentInfo& segmentInfo = m_segInfos.GetAt(nIndex);
+				CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 				
 				//log
 				szLog.Format("(%d) - Transfer result: %d - %s", nIndex, resCode, curl_easy_strerror(resCode));
@@ -297,6 +366,8 @@ void CSegmentDownloader::Start()
 							szLog.Format("(%d) - Connection stopped", nIndex);
 							LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
+							result_code.m_nMajor = TASK_STATUS_USER_STOPPED;
+
 							StopConnection(nIndex, DLE_STOP);
 						}
 						//(2). Pause
@@ -304,6 +375,8 @@ void CSegmentDownloader::Start()
 						{
 							szLog.Format("(%d) - Connection paused", nIndex);
 							LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+							result_code.m_nMajor = TASK_STATUS_USER_PAUSED;
 
 							StopConnection(nIndex, DLE_PAUSE);
 						}
@@ -313,8 +386,8 @@ void CSegmentDownloader::Start()
 					{
 						StopConnection(nIndex, DLE_OTHER);
 
-						CURL* retry_handle = InitEasyHandle(segmentInfo.m_range.cx + segmentInfo.m_nDlNow, 
-							segmentInfo.m_range.cy, nIndex);
+						CURL* retry_handle = InitEasyHandle(pSegmentInfo->m_range.cx + pSegmentInfo->m_nDlNow, 
+							pSegmentInfo->m_range.cy, nIndex);
 						curl_multi_add_handle(m_curlm, retry_handle);
 						still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
 					}
@@ -324,10 +397,10 @@ void CSegmentDownloader::Start()
 					{
 						StopConnection(nIndex, DLE_OTHER);
 
-						if(segmentInfo.m_nRetry < MAX_RETRY_TIMES)
+						if(pSegmentInfo->m_nRetry < MAX_RETRY_TIMES)
 						{							 
-							CURL* retry_handle = InitEasyHandle(segmentInfo.m_range.cx + segmentInfo.m_nDlNow, 
-								segmentInfo.m_range.cy, nIndex);
+							CURL* retry_handle = InitEasyHandle(pSegmentInfo->m_range.cx + pSegmentInfo->m_nDlNow, 
+								pSegmentInfo->m_range.cy, nIndex);
 							curl_multi_add_handle(m_curlm, retry_handle);
 							still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
 						}
@@ -336,6 +409,9 @@ void CSegmentDownloader::Start()
 							rc = resCode;
 							szLog.Format("(%d) - Retry times more than %d, abort download", nIndex, MAX_RETRY_TIMES);
 							LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+							result_code.m_nMajor = TASK_STATUS_TERMINATED_CURL_CODE;
+							result_code.m_nMinor = resCode;
 						}
 					}
 					break;
@@ -357,6 +433,25 @@ void CSegmentDownloader::Start()
 	
 	curl_multi_cleanup(m_curlm);
 
+	CString szErrorMsg;
+	BOOL bResult = FormatErrorMsg(result_code, szErrorMsg);
+
+	if(bResult)
+	{
+		szLog.Format("Download successfully");
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		RemoveSegmentInfoArray();
+	}
+	else
+	{
+		szLog.Format("Download failed: %s", szErrorMsg);
+		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	}
+
+	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, 0, 0);
+
+	/*
 	if(rc != 0)
 	{
 		szLog.Format("Download failed");
@@ -367,19 +462,12 @@ void CSegmentDownloader::Start()
 		szLog.Format("Download successfully");
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
+	*/
 }
 
 void CSegmentDownloader::Stop()
 {
 	m_ctritialSection.Lock();
-
-// 	int i, nSize;	
-// 	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
-// 	{
-// 		ASSERT(i >= 0 && i < m_segInfos.GetSize());
-// 		CSegmentInfo& segInfo = m_segInfos.ElementAt(i);
-// 		segInfo.m_controlInfo.isStopped = TRUE;
-// 	}
 
 	m_controlInfo.isStopped = TRUE;
 
@@ -388,18 +476,7 @@ void CSegmentDownloader::Stop()
 
 void CSegmentDownloader::Pause()
 {
-
-
 	m_ctritialSection.Lock();
-	
-// 	int i, nSize;	
-// 	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
-// 	{
-// 		ASSERT(i >= 0 && i < m_segInfos.GetSize());
-// 		CSegmentInfo& segInfo = m_segInfos.ElementAt(i);
-// 		segInfo.m_controlInfo.isModified = TRUE;
-// 		segInfo.m_controlInfo.isPaused = TRUE;
-// 	}
 
 	m_controlInfo.isModified = TRUE;
 	m_controlInfo.isPaused = TRUE;
@@ -411,15 +488,6 @@ void CSegmentDownloader::Resume()
 {
 	m_ctritialSection.Lock();
 	
-// 	int i, nSize;	
-// 	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
-// 	{
-// 		ASSERT(i >= 0 && i < m_segInfos.GetSize());
-// 		CSegmentInfo& segInfo = m_segInfos.ElementAt(i);
-// 		segInfo.m_controlInfo.isModified = TRUE;
-// 		segInfo.m_controlInfo.isPaused = FALSE;
-// 	}
-
 	m_controlInfo.isModified = TRUE;
 	m_controlInfo.isPaused = FALSE;
 	
@@ -433,12 +501,12 @@ void CSegmentDownloader::Resume()
 	int nStartPos, nFinishPos;
 
 	CString szLog;
-	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
+	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
 	{
-		CSegmentInfo& segmentInfo = m_segInfos.ElementAt(i);
+		CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(i);
 
-		nStartPos = segmentInfo.m_range.cx + segmentInfo.m_nDlNow;
-		nFinishPos = segmentInfo.m_range.cy;
+		nStartPos = pSegmentInfo->m_range.cx + pSegmentInfo->m_nDlNow;
+		nFinishPos = pSegmentInfo->m_range.cy;
 
 		if(nStartPos > nFinishPos)
 		{
@@ -452,7 +520,7 @@ void CSegmentDownloader::Resume()
 		curl_multi_add_handle(m_curlm, easy_handle); 
 	}
 
-	Start();
+	AfxBeginThread(CSegmentDownloader::DownloadProc, (LPVOID)this);
 }
 
 size_t CSegmentDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb, int index)
@@ -468,8 +536,8 @@ size_t CSegmentDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb, i
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szMsg)
 	}
 	
-	CSegmentInfo& segmentInfo = m_segInfos.GetAt(index);
-	fwrite(ptr, size, nmemb, segmentInfo.m_lpFileHeader);
+	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(index);
+	fwrite(ptr, size, nmemb, pSegmentInfo->m_lpFileHeader);
 	
 	return (size_t)(size * nmemb);
 
@@ -478,18 +546,18 @@ size_t CSegmentDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb, i
 
 size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int index)
 {
-	CSegmentInfo& segmentInfo = m_segInfos.GetAt(index);
-	fwrite(ptr, size, nmemb, segmentInfo.m_lpFileData);
+	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(index);
+	fwrite(ptr, size, nmemb, pSegmentInfo->m_lpFileData);
 
 	return size * nmemb;
 }
 
 int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow, int nIndex)
 {
-	ASSERT(nIndex >= 0 && nIndex < m_segInfos.GetSize());
-	CSegmentInfo& segmentInfo = m_segInfos.ElementAt(nIndex);
+	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
+	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 
-	segmentInfo.m_nDlNow = (DWORD64)dlnow;
+	pSegmentInfo->m_nDlNow = (DWORD64)dlnow;
 
 	DWORD64 nDlNow = GetTotalDownloadNow();
 
@@ -509,8 +577,6 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	if(m_controlInfo.IsModified() && m_controlInfo.IsPaused())
 	{
 		return 5;
-		// 		segmentInfo.m_controlInfo.isModified = FALSE;
-		// 		curl_easy_pause(segmentInfo.m_curl, CURLPAUSE_ALL);
 	}
 	//Stop
 	if(m_controlInfo.IsStopped())
@@ -525,11 +591,10 @@ DWORD64 CSegmentDownloader::GetTotalDownloadNow()
 {	
 	DWORD64 nDlNow = 0;
 	int i, nSize;	
-	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
+	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
 	{
-		ASSERT(i >= 0 && i < m_segInfos.GetSize());
-		CSegmentInfo& segInfo = m_segInfos.ElementAt(i);
-		nDlNow += segInfo.m_nDlNow + segInfo.m_nDlBefore;
+		CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(i);
+		nDlNow += pSegmentInfo->m_nDlNow + pSegmentInfo->m_nDlBefore;
 	}
 
 	return nDlNow;
@@ -580,42 +645,131 @@ void CSegmentDownloader::SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>&
 	}
 }
 
-void CSegmentDownloader::StopAllConnections(int nCleanType)
-{
-	int i, nSize;
-	CCallbackParam* pCallbackParam = NULL;
-
-	for(i = 0, nSize = m_segInfos.GetSize(); i < nSize; i++)
-	{
-		StopConnection(i, nCleanType);
-	}
-}
-
 void CSegmentDownloader::StopConnection(int nIndex, int nCleanType)
 {
-	ASSERT(nIndex >= 0 && nIndex < m_segInfos.GetSize());
-	CSegmentInfo& segmentInfo = m_segInfos.ElementAt(nIndex);
+	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 
 	//Get the current connection information
 	CCallbackParam* pCallbackParam = NULL;
-	curl_easy_getinfo(segmentInfo.m_curl, CURLINFO_PRIVATE, &pCallbackParam);
+	curl_easy_getinfo(pSegmentInfo->m_curl, CURLINFO_PRIVATE, &pCallbackParam);
 	ASSERT(pCallbackParam != NULL);
 	
 	//clean up
-	curl_multi_remove_handle(m_curlm, segmentInfo.m_curl);
-	curl_easy_cleanup(segmentInfo.m_curl);
+	curl_multi_remove_handle(m_curlm, pSegmentInfo->m_curl);
+	curl_easy_cleanup(pSegmentInfo->m_curl);
 	
 	if(nCleanType == DLE_STOP)
 	{
-		segmentInfo.m_nRetry = 0;
+		pSegmentInfo->m_nRetry = 0;
 	}
-	segmentInfo.m_curl = NULL;
+	pSegmentInfo->m_curl = NULL;
 	
-	fclose(segmentInfo.m_lpFileHeader);
-	fclose(segmentInfo.m_lpFileData);
+	fclose(pSegmentInfo->m_lpFileHeader);
+	fclose(pSegmentInfo->m_lpFileData);
 	if(pCallbackParam != NULL)
 	{
 		delete pCallbackParam;
 		pCallbackParam = NULL;
+	}
+}
+
+CSegmentInfoEx* CSegmentDownloader::GetSegmentInfo(int nIndex)
+{
+	ASSERT(m_pSegmentInfoArray != NULL);
+	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
+
+	return (CSegmentInfoEx*)m_pSegmentInfoArray->GetAt(nIndex);
+}
+void CSegmentDownloader::AddSegmentInfo(CSegmentInfoEx* pSegmentInfo)
+{
+	ASSERT(pSegmentInfo != NULL);
+	m_pSegmentInfoArray->Add(pSegmentInfo);
+}
+
+void CSegmentDownloader::RemoveSegmentInfoArray()
+{
+	CSegmentInfoArray* pSegInfoArray = CSegmentInfoMap::GetInstance()->GetSegmentInfoArray(m_dlParam.m_szUrl);
+	ASSERT(pSegInfoArray != NULL && m_pSegmentInfoArray == pSegInfoArray);
+
+	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_szUrl);
+
+	m_pSegmentInfoArray = NULL;
+}
+
+BOOL CSegmentDownloader::FormatErrorMsg(CResultCode result_code, CString& szErrorMsg)
+{
+	BOOL bResult = FALSE;
+	switch(result_code.m_nMajor)
+	{
+	case TASK_STATUS_OK:
+		{
+			szErrorMsg = "No Error";
+			bResult = TRUE;
+		}
+		break;
+	case TASK_STATUS_USER_PAUSED:
+		{
+			szErrorMsg = "Paused";
+		}
+		break;
+	case TASK_STATUS_USER_STOPPED:
+		{
+			szErrorMsg = "Stopped";
+		}
+		break;
+	case TASK_STATUS_TERMINATED:
+		{
+			FormatInternalErrorMsg(result_code.m_nMinor, szErrorMsg);
+		}
+		break;
+	case TASK_STATUS_TERMINATED_CURL_CODE:
+		{
+			szErrorMsg.Format("[Transfer Error]: %d - %s", result_code.m_nMinor, curl_easy_strerror((CURLcode)result_code.m_nMinor));
+		}
+		break;
+	default:
+		{
+			szErrorMsg.Format("Unkonwn error - %d", result_code.m_nMajor);
+		}
+		break;
+	}
+
+	return bResult;
+}
+
+void CSegmentDownloader::FormatInternalErrorMsg(int nCode, CString& szErrorMsg)
+{
+	switch(nCode)
+	{
+	case INTERNAL_OK:
+		{
+			szErrorMsg = "[Internal Error]: no error";
+		}
+		break;
+	case INTERNAL_MULTI_FDSET_ERROR:
+		{
+			szErrorMsg = "[Internal Error]: multi_fdset error";
+		}
+		break;
+	case INTERNAL_MULTI_TIMEOUT_ERROR:
+		{
+			szErrorMsg = "[Internal Error]: multi_timout error";
+		}
+		break;
+	case INTERNAL_SELECT_ERROR:
+		{
+			szErrorMsg = "[Internal Error]: select error";
+		}
+		break;
+	case INTERNAL_RETRY_OVER_ERROR:
+		{
+			szErrorMsg = "[Internal Error]: retry over error";
+		}
+		break;
+	default:
+		{
+			szErrorMsg.Format("[Internal Error]: Unkonwn error - %d", nCode);
+		}
+		break;
 	}
 }

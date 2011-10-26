@@ -42,15 +42,14 @@ CEasyDownloader::~CEasyDownloader()
 
 }
 
-void CEasyDownloader::Init(LPCTSTR lpszUrl, CDownloadParam param)
+void CEasyDownloader::Init(const CDownloadParam& param)
 {
-	m_szUrl = lpszUrl;
 	m_dlParam = param;
 
 	m_curl = curl_easy_init();
 
 	//URL address
-	curl_easy_setopt(m_curl, CURLOPT_URL, (LPCTSTR)m_szUrl);
+	curl_easy_setopt(m_curl, CURLOPT_URL, (LPCTSTR)m_dlParam.m_szUrl);
 
 
 	//agent: IE8
@@ -85,7 +84,7 @@ void CEasyDownloader::Start()
 	if(res != CURLE_OK)
 	{
 		CString szLogInfo;
-		szLogInfo.Format("curl_easy_perform failed. res = (%d) - %s, url=%s", res, curl_easy_strerror(res), m_szUrl);
+		szLogInfo.Format("curl_easy_perform failed. res = (%d) - %s, url=%s", res, curl_easy_strerror(res), m_dlParam.m_szUrl);
 		
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLogInfo)
 	}
@@ -96,7 +95,7 @@ void CEasyDownloader::Start()
 	if(rspCode != 200)
 	{
 		CString szLogInfo;
-		szLogInfo.Format("response code failed. rspCode = %d, url=%s", rspCode, m_szUrl);
+		szLogInfo.Format("response code failed. rspCode = %d, url=%s", rspCode, m_dlParam.m_szUrl);
 		
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLogInfo)
 	}

@@ -33,7 +33,7 @@ public:
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
-	virtual void Init(LPCTSTR lpszUrl, CDownloadParam param);
+	virtual void Init(const CDownloadParam& param);
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb);
 	size_t ProcessData(char *ptr, size_t size, size_t nmemb);
@@ -42,10 +42,9 @@ private:
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 protected:
-	CString m_szUrl;
+	CDownloadParam m_dlParam;
 	CURL* m_curl;
 	CDownloadData m_controlData;
-	CDownloadParam m_dlParam;
 };
 
 #endif // !defined(AFX_EASYDOWNLOADER_H__FDE4BCE2_0E7E_474E_9B1A_8B515287CAD2__INCLUDED_)

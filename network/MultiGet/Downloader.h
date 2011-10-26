@@ -15,7 +15,7 @@ public:
 	CDownloader();
 	virtual ~CDownloader();
 public:
-	virtual void Init(LPCTSTR lpszUrl, CDownloadParam param) = 0;
+	virtual void Init(const CDownloadParam& param) = 0;
 	virtual void Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Pause() = 0;

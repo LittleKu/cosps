@@ -127,6 +127,10 @@ SOURCE=.\SegmentDownloader.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\SegmentInfoMap.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -185,6 +189,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\SegmentDownloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SegmentInfoMap.h
 # End Source File
 # Begin Source File
 

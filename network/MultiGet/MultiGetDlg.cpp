@@ -380,6 +380,7 @@ static UINT DownloadProc1(LPVOID lpvData)
 	CDownloadParam param;
 	param.m_hWnd = pThis->GetSafeHwnd();
 	param.m_nIndex = 0;
+	param.m_szUrl = pTaskInfo->m_url;
 	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
 	{
 		param.m_nFileSize = pHeaderInfo->header_size;
@@ -390,7 +391,7 @@ static UINT DownloadProc1(LPVOID lpvData)
 		pTaskInfo->m_lpDownloader = new CEasyDownloader();
 	}	
 	
-	pTaskInfo->m_lpDownloader->Init(pTaskInfo->m_url, param);
+	pTaskInfo->m_lpDownloader->Init(param);
 
 	clock_t start = clock();
 	pTaskInfo->m_lpDownloader->Start();
@@ -417,7 +418,53 @@ void CMultiGetDlg::OnButtonStart1()
 	m_controlInfo.isModified = FALSE;
 	m_controlInfo.isPaused = FALSE;
 	m_controlInfo.isStopped = FALSE;
-	AfxBeginThread(DownloadProc1, (LPVOID)this);
+//	AfxBeginThread(DownloadProc1, (LPVOID)this);
+
+
+
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+
+	CHeaderParser headerParser(pTaskInfo->m_url);
+	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
+	
+	if(pTaskInfo->m_lpDownloader != NULL)
+	{
+		delete pTaskInfo->m_lpDownloader;
+		pTaskInfo->m_lpDownloader = NULL;
+	}
+	CDownloadParam param;
+	param.m_hWnd = GetSafeHwnd();
+	param.m_nIndex = 0;
+	param.m_szUrl = pTaskInfo->m_url;
+	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
+	{
+		param.m_nFileSize = pHeaderInfo->header_size;
+		pTaskInfo->m_lpDownloader = new CSegmentDownloader();
+	}
+	else
+	{
+		pTaskInfo->m_lpDownloader = new CEasyDownloader();
+	}	
+	
+	pTaskInfo->m_lpDownloader->Init(param);
+	
+	clock_t start = clock();
+	pTaskInfo->m_lpDownloader->Start();
+	
+	// 	CEasyDown edown;
+	// 	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
+	
+	
+	
+//	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
+	
+	clock_t finish = clock();
+	
+	UINT nCost = finish - start;
+	
+	CString szLog;
+	szLog.Format("Time Cost (%d)", nCost);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
 void CMultiGetDlg::OnButtonPause() 
@@ -483,7 +530,9 @@ void CMultiGetDlg::OnButtonResume()
 		return;
 	}
 
-	AfxBeginThread(ResumeProc, (LPVOID)this);
+	pTaskInfo->m_lpDownloader->Resume();
+
+//	AfxBeginThread(ResumeProc, (LPVOID)this);
 }
 
 void CMultiGetDlg::OnButtonHeader() 

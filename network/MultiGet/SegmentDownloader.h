@@ -12,6 +12,7 @@
 #include "afxmt.h"
 #include "Downloader.h"
 #include <curl/curl.h>
+#include "SegmentInfoMap.h"
 
 #define MAX_WORKER_SESSION		8
 #define MIN_SEGMENT_SIZE		(1024 * 1024)
@@ -25,33 +26,19 @@ typedef enum
 	DLE_OTHER
 } DLCode;
 
-
 typedef CSize CRange;
 
-class CSegmentInfo
+class CSegmentInfoEx : public CSegmentInfo
 {
 public:
-	int		m_nIndex;
 	CURL*	m_curl;
 	FILE*	m_lpFileHeader;
 	FILE*	m_lpFileData;
-	DWORD64	m_nDlBefore;
-	DWORD64	m_nDlNow;
-	CSize	m_range;
-	int		m_nRetry;
-
-	CControlInfo m_controlInfo;
-	CSegmentInfo()
+	CSegmentInfoEx() : CSegmentInfo()
 	{
-		m_nIndex = -1;
 		m_curl = NULL;
 		m_lpFileHeader = NULL;
 		m_lpFileData = NULL;
-		m_nDlBefore = 0;
-		m_nDlNow = 0;
-		m_range.cx = 0;
-		m_range.cy = 0;
-		m_nRetry = 0;
 	}
 };
 
@@ -61,8 +48,8 @@ class CCallbackParam
 {
 public:
 	int		nIndex;
-	CSegmentDownloader* pThis;
-	CCallbackParam(int index = -1, CSegmentDownloader* ptr = NULL) : nIndex(index), pThis(ptr) {}
+	CSegmentDownloader* pDownloader;
+	CCallbackParam(int index = -1, CSegmentDownloader* ptr = NULL) : nIndex(index), pDownloader(ptr) {}
 };
 
 class CSegmentDownloader : public CDownloader
@@ -75,14 +62,21 @@ public:
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
-	virtual void Init(LPCTSTR lpszUrl, CDownloadParam param);
+	virtual void Init(const CDownloadParam& param);
+
+	BOOL FormatErrorMsg(CResultCode result_code, CString& szErrorMsg);
+	void FormatInternalErrorMsg(int nCode, CString& szErrorMsg);
 private:
+	void Download();
+
 	void SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>& sizeArray);
-	void InitMultiCurl();
-	CURL* InitEasyHandle(int nStartPos, int nFinishPos, int nIndex); 
+	CURL* InitEasyHandle(int nStartPos, int nFinishPos, int nIndex);
 	DWORD64 GetTotalDownloadNow();
-	void StopAllConnections(int nCleanType);
 	void StopConnection(int nIndex, int nCleanType);
+
+	CSegmentInfoEx* GetSegmentInfo(int nIndex);
+	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
+	void RemoveSegmentInfoArray();
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb, int index);
 	size_t ProcessData(char *ptr, size_t size, size_t nmemb, int index);
@@ -91,12 +85,12 @@ private:
 	static size_t HeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+	static UINT DownloadProc(LPVOID lpvData);
 protected:
-	CString m_szUrl;
 	CDownloadParam m_dlParam;
-	CURLM*	m_curlm;
 
-	CArray<CSegmentInfo, CSegmentInfo&> m_segInfos;
+	CURLM*	m_curlm;
+	CSegmentInfoArray* m_pSegmentInfoArray;
 
 	CControlInfo m_controlInfo;
 	CCriticalSection m_ctritialSection;

@@ -4,6 +4,34 @@
 #define WM_DOWNLOAD_PROGRESS	(WM_USER + 1099)
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
 
+#define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
+
+typedef enum 
+{
+	TASK_STATUS_OK = 0,
+	TASK_STATUS_STARTED,
+	TASK_STATUS_USER_PAUSED,
+	TASK_STATUS_USER_STOPPED,
+	TASK_STATUS_TERMINATED,
+	TASK_STATUS_TERMINATED_CURL_CODE
+} TaskStatusCode;
+
+typedef enum
+{
+	INTERNAL_OK = 0,
+	INTERNAL_MULTI_FDSET_ERROR = 1,
+	INTERNAL_MULTI_TIMEOUT_ERROR = 2,
+	INTERNAL_SELECT_ERROR = 3,
+	INTERNAL_RETRY_OVER_ERROR = 4
+} MinorInternalCode;
+
+class CResultCode
+{
+public:
+	int m_nMajor;
+	int m_nMinor;
+	CResultCode() : m_nMajor(0), m_nMinor(0) {} 
+};
 
 class CProgressInfo
 {
@@ -65,11 +93,36 @@ public:
 class CDownloadParam
 {
 public:
+	CString m_szUrl;
 	HWND	m_hWnd;
 	int		m_nIndex;
 	UINT	m_nFileSize;
-	CDownloadParam(HWND hwnd = NULL, int index = -1, UINT nFileSize = 0)
-		: m_hWnd(hwnd), m_nIndex(index), m_nFileSize(nFileSize) {}
+	CDownloadParam(LPCTSTR lpszUrl = NULL, HWND hwnd = NULL, int index = -1, UINT nFileSize = 0)
+		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nIndex(index), m_nFileSize(nFileSize) {}
 };
+
+
+class CSegmentInfo
+{
+public:
+	int		m_nIndex;		//index of the segment
+	DWORD64	m_nDlBefore;	//how many bytes this segment has been download before
+	DWORD64	m_nDlNow;		//how many bytes this segment is downloading now
+	int		m_nRetry;		//how many times this connection retried
+	CSize	m_range;		//range
+	CString m_szFileHeader;	//header file name
+	CString m_szFileData;	//data file name
+
+	CSegmentInfo()
+	{
+		m_nIndex = -1;
+		m_nDlBefore = 0;
+		m_nDlNow = 0;
+		m_nRetry = 0;
+		m_range.cx = 0;
+		m_range.cy = 0;
+	}
+};
+
 
 #endif
