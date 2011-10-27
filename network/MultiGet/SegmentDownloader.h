@@ -11,8 +11,8 @@
 
 #include "afxmt.h"
 #include "Downloader.h"
-#include <curl/curl.h>
 #include "SegmentInfoMap.h"
+#include <curl/curl.h>
 
 #define MAX_WORKER_SESSION		8
 #define MIN_SEGMENT_SIZE		(1024 * 1024)
@@ -58,21 +58,28 @@ public:
 	CSegmentDownloader();
 	virtual ~CSegmentDownloader();
 public:
+	virtual void Init(const CDownloadParam& param);
 	virtual void Start();
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
-	virtual void Init(const CDownloadParam& param);
-
-	BOOL FormatErrorMsg(CResultCode result_code, CString& szErrorMsg);
-	void FormatInternalErrorMsg(int nCode, CString& szErrorMsg);
 private:
 	void Download();
 
 	void SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>& sizeArray);
-	CURL* InitEasyHandle(int nStartPos, int nFinishPos, int nIndex);
-	DWORD64 GetTotalDownloadNow();
+	CURL* InitEasyHandle(int nIndex, int nStartPos, int nFinishPos);
+	CURL* StartConnection(int nIndex, int nStartPos, int nFinishPos);
+	CURL* RestartConnection(int nIndex);
 	void StopConnection(int nIndex, int nCleanType);
+	void StopAllConnections();
+
+	void StartInitMultiHandle();
+	void RestartInitMultiHandle();
+
+	DWORD64 GetTotalDownloadNow();
+
+	DWORD SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout);
+	int ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult);
 
 	CSegmentInfoEx* GetSegmentInfo(int nIndex);
 	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
@@ -85,7 +92,6 @@ private:
 	static size_t HeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
-	static UINT DownloadProc(LPVOID lpvData);
 protected:
 	CDownloadParam m_dlParam;
 

@@ -88,7 +88,6 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_MESSAGE(WM_DOWNLOAD_PROGRESS, OnUpdateProgress)
 	ON_MESSAGE(WM_DOWNLOAD_COMPLETE, OnEnd)
 	ON_BN_CLICKED(IDC_ADD1, OnAdd1)
@@ -186,99 +185,6 @@ HCURSOR CMultiGetDlg::OnQueryDragIcon()
 	return (HCURSOR) m_hIcon;
 }
 
-static const char *urls[] = {
-	"http://www.microsoft.com",
-		"http://www.opensource.org",
-		"http://www.google.com",
-		"http://www.yahoo.com",
-		"http://www.ibm.com",
-		"http://www.mysql.com",
-		"http://www.oracle.com",
-		"http://www.ripe.net",
-		"http://www.iana.org",
-		"http://www.amazon.com",
-		"http://www.netcraft.com",
-		"http://www.heise.de",
-		"http://www.chip.de",
-		"http://www.ca.com",
-		"http://www.cnet.com",
-		"http://www.news.com",
-		"http://www.cnn.com",
-		"http://www.wikipedia.org",
-		"http://www.dell.com",
-		"http://www.hp.com",
-		"http://www.cert.org",
-		"http://www.mit.edu",
-		"http://www.nist.gov",
-		"http://www.ebay.com",
-		"http://www.playstation.com",
-		"http://www.uefa.com",
-		"http://www.ieee.org",
-		"http://www.apple.com",
-		"http://www.sony.com",
-		"http://www.symantec.com",
-		"http://www.zdnet.com",
-		"http://www.fujitsu.com",
-		"http://www.supermicro.com",
-		"http://www.hotmail.com",
-		"http://www.ecma.com",
-		"http://www.bbc.co.uk",
-		"http://news.google.com",
-		"http://www.foxnews.com",
-		"http://www.msn.com",
-		"http://www.wired.com",
-		"http://www.sky.com",
-		"http://www.usatoday.com",
-		"http://www.cbs.com",
-		"http://www.nbc.com",
-		"http://slashdot.org",
-		"http://www.bloglines.com",
-		"http://www.techweb.com",
-		"http://www.newslink.org",
-		"http://www.un.org",
-};
-
-void CMultiGetDlg::OnButtonAdd() 
-{
-// 	CString sUrl;
-// 	m_editUrl.GetWindowText(sUrl);
-// 	
-// 	if(sUrl.IsEmpty())
-// 	{
-// 		AfxMessageBox("Empty Url");
-// 		return;
-// 	}
-// 	CTaskInfo* pTaskInfo = new CTaskInfo();
-// 	pTaskInfo->m_url = sUrl;
-// 	pTaskInfo->m_progress = "Ready";
-// 	
-// 	m_taskListCtrl.AddRow(*pTaskInfo);
-// 	
-// 	m_editUrl.SetWindowText("");
-
-	int count = sizeof(urls)/sizeof(urls[0]);
-
-	for(int i = 0; i < count; i++)
-	{
-		CTaskInfo* pTaskInfo = new CTaskInfo();
-		pTaskInfo->m_url = urls[i];
-		pTaskInfo->m_progress = "Ready";
-
-		m_taskListCtrl.AddRow(*pTaskInfo);
-	}
-}
-
-static UINT DownloadProc(LPVOID lpvData)
-{
-	HWND hwnd = (HWND)lpvData;
-	CTestDownloader downloader;
-	downloader.download(hwnd);
-
-	::SendMessage(hwnd, WM_DOWNLOAD_COMPLETE, 0, 0);
-
-	return 0;
-}
-
 LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 {
 	const char* pmsg = (char*)wParam;
@@ -294,7 +200,6 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 }
 void CMultiGetDlg::OnOK() 
 {
-	CWinThread* pThread = AfxBeginThread(DownloadProc, (LPVOID)GetSafeHwnd());
 }
 
 LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
@@ -359,189 +264,67 @@ void CMultiGetDlg::OnAdd1()
 	
 	m_editUrl.SetWindowText("");	
 }
-static UINT DownloadProc1(LPVOID lpvData)
-{
-	CMultiGetDlg* pThis = (CMultiGetDlg*)lpvData;
 
-	CTaskInfo* pTaskInfo = (CTaskInfo*)pThis->m_taskListCtrl.GetItemData(0);
-	if(pTaskInfo == NULL)
-	{
-		return 1;
-	}
-	
-	CHeaderParser headerParser(pTaskInfo->m_url);
-	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
-
-	if(pTaskInfo->m_lpDownloader != NULL)
-	{
-		delete pTaskInfo->m_lpDownloader;
-		pTaskInfo->m_lpDownloader = NULL;
-	}
-	CDownloadParam param;
-	param.m_hWnd = pThis->GetSafeHwnd();
-	param.m_nIndex = 0;
-	param.m_szUrl = pTaskInfo->m_url;
-	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
-	{
-		param.m_nFileSize = pHeaderInfo->header_size;
-		pTaskInfo->m_lpDownloader = new CSegmentDownloader();
-	}
-	else
-	{
-		pTaskInfo->m_lpDownloader = new CEasyDownloader();
-	}	
-	
-	pTaskInfo->m_lpDownloader->Init(param);
-
-	clock_t start = clock();
-	pTaskInfo->m_lpDownloader->Start();
-
-// 	CEasyDown edown;
-// 	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
-
-	
-
-	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
-
-	clock_t finish = clock();
-
-	UINT nCost = finish - start;
-
-	CString szLog;
-	szLog.Format("Time Cost (%d)", nCost);
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	
-	return 0;
-}
 void CMultiGetDlg::OnButtonStart1() 
 {
-	m_controlInfo.isModified = FALSE;
-	m_controlInfo.isPaused = FALSE;
-	m_controlInfo.isStopped = FALSE;
-//	AfxBeginThread(DownloadProc1, (LPVOID)this);
-
-
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
 
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	ASSERT(pTaskInfo != NULL);
 
-	CHeaderParser headerParser(pTaskInfo->m_url);
-	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
-	
-	if(pTaskInfo->m_lpDownloader != NULL)
-	{
-		delete pTaskInfo->m_lpDownloader;
-		pTaskInfo->m_lpDownloader = NULL;
-	}
 	CDownloadParam param;
 	param.m_hWnd = GetSafeHwnd();
 	param.m_nIndex = 0;
 	param.m_szUrl = pTaskInfo->m_url;
-	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
+	param.m_nFileSize = 0;
+
+	if(pTaskInfo->m_lpDownloaderMgr == NULL)
 	{
-		param.m_nFileSize = pHeaderInfo->header_size;
-		pTaskInfo->m_lpDownloader = new CSegmentDownloader();
+		pTaskInfo->m_lpDownloaderMgr = new CDownloaderMgr(param);
 	}
-	else
-	{
-		pTaskInfo->m_lpDownloader = new CEasyDownloader();
-	}	
-	
-	pTaskInfo->m_lpDownloader->Init(param);
-	
-	clock_t start = clock();
-	pTaskInfo->m_lpDownloader->Start();
-	
-	// 	CEasyDown edown;
-	// 	edown.download(pTaskInfo->m_url, pThis->GetSafeHwnd(), &pThis->m_controlInfo);
-	
-	
-	
-//	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
-	
-	clock_t finish = clock();
-	
-	UINT nCost = finish - start;
-	
-	CString szLog;
-	szLog.Format("Time Cost (%d)", nCost);
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	pTaskInfo->m_lpDownloaderMgr->Start();
 }
 
 void CMultiGetDlg::OnButtonPause() 
 {
-	m_controlInfo.isPaused = TRUE;
-	m_controlInfo.isModified = TRUE;
-
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	if(pTaskInfo == NULL)
-	{
-		return;
-	}
-	pTaskInfo->m_lpDownloader->Pause();
+	ASSERT(pTaskInfo != NULL);
+	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
+	
+	pTaskInfo->m_lpDownloaderMgr->Pause();
 }
 
 void CMultiGetDlg::OnButtonStop() 
-{
-	m_controlInfo.isStopped = TRUE;
+{	
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	if(pTaskInfo == NULL)
-	{
-		return;
-	}
-	pTaskInfo->m_lpDownloader->Stop();
+	ASSERT(pTaskInfo != NULL);
+	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
 	
+	pTaskInfo->m_lpDownloaderMgr->Stop();
 }
 
-static UINT ResumeProc(LPVOID lpvData)
-{
-	CMultiGetDlg* pThis = (CMultiGetDlg*)lpvData;
-	
-	CTaskInfo* pTaskInfo = (CTaskInfo*)pThis->m_taskListCtrl.GetItemData(0);
-	if(pTaskInfo == NULL)
-	{
-		return 1;
-	}
-	ASSERT(pTaskInfo->m_lpDownloader != NULL);
-
-
-	clock_t start = clock();
-	pTaskInfo->m_lpDownloader->Resume();
-	
-	::SendMessage(pThis->GetSafeHwnd(), WM_DOWNLOAD_COMPLETE, 0, 0);
-	
-	clock_t finish = clock();
-	
-	UINT nCost = finish - start;
-	
-	CString szLog;
-	szLog.Format("Time Cost (%d)", nCost);
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		
-	return 0;
-}
 void CMultiGetDlg::OnButtonResume() 
 {
-	m_controlInfo.isPaused = FALSE;
-	m_controlInfo.isModified = TRUE;
-
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	if(pTaskInfo == NULL)
-	{
-		return;
-	}
+	ASSERT(pTaskInfo != NULL);
+	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
 
-	pTaskInfo->m_lpDownloader->Resume();
-
-//	AfxBeginThread(ResumeProc, (LPVOID)this);
+	pTaskInfo->m_lpDownloaderMgr->Resume();
 }
 
 void CMultiGetDlg::OnButtonHeader() 
 {
-	if(m_taskListCtrl.GetItemCount() <= 0)
-	{
-		return;
-	}
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	ASSERT(pTaskInfo != NULL);
 
 	CHeaderParser headerParser(pTaskInfo->m_url);
 	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
@@ -554,6 +337,5 @@ void CMultiGetDlg::OnButtonHeader()
 
 void CMultiGetDlg::OnButtonRemove() 
 {
-	
 	m_taskListCtrl.RemoveSelectedItems();
 }

@@ -95,7 +95,15 @@ SOURCE=.\common_utils.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CommonUtils.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Downloader.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\DownloaderMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -160,7 +168,15 @@ SOURCE=.\common_utils.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\CommonUtils.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Downloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DownloaderMgr.h
 # End Source File
 # Begin Source File
 

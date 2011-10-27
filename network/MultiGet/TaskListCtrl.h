@@ -7,7 +7,7 @@
 // TaskListCtrl.h : header file
 //
 
-#include "Downloader.h"
+#include "DownloaderMgr.h"
 
 class CTaskInfo
 {
@@ -16,14 +16,14 @@ public:
 	CString m_fileName;
 	CString m_fileSize;
 	CString m_progress;
-	CDownloader*	m_lpDownloader;
-	CTaskInfo() : m_lpDownloader(0) {}
+	CDownloaderMgr* m_lpDownloaderMgr;
+	CTaskInfo() : m_lpDownloaderMgr(0) {}
 	~CTaskInfo()
 	{
-		if(m_lpDownloader != NULL)
+		if(m_lpDownloaderMgr != NULL)
 		{
-			delete m_lpDownloader;
-			m_lpDownloader = NULL;
+			delete m_lpDownloaderMgr;
+			m_lpDownloaderMgr = NULL;
 		}
 	}
 };

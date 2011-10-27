@@ -9,6 +9,7 @@
 #endif // _MSC_VER > 1000
 
 #include "TaskListCtrl.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CMultiGetDlg dialog
 
@@ -42,7 +43,6 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	afx_msg void OnButtonAdd();
 	virtual void OnOK();
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
