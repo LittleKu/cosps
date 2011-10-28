@@ -114,7 +114,8 @@ void CSegmentDownloader::Download()
 			break;
 		}
 	}
-
+	
+	//1. Clean up
 	//Stop all available connections
  	StopAllConnections();
 
@@ -122,12 +123,25 @@ void CSegmentDownloader::Download()
 	curl_multi_cleanup(m_curlm);
 	m_curlm = NULL;
 
+	//2. Post process
+
+	//Merge files when successfully
+	if(dwResult == 0)
+	{
+		if(CCommonUtils::MergeFiles("data", m_pSegmentInfoArray->GetSize()))
+		{
+			CCommonUtils::DeleteFiles("data", m_pSegmentInfoArray->GetSize());
+		}
+	}
+
+	//Remove the segment information when it's not paused or stopped
 	WORD nMajor = LOWORD(dwResult);
 	//Remove the segment information data, except for Paused or Stopped status
 	if(nMajor != RC_MAJOR_PAUSED && nMajor != RC_MAJOR_STOPPED)
 	{
 		RemoveSegmentInfoArray();
 	}
+	
 
 	CString szErrorMsg;
 	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
@@ -266,8 +280,11 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 			
 			CURL* retry_handle = RestartConnection(nIndex);
 			
-			curl_multi_add_handle(m_curlm, retry_handle);
-			still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+			if(retry_handle != NULL)
+			{
+				curl_multi_add_handle(m_curlm, retry_handle);
+				still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+			}
 		}
 		break;
 		//other cases: should be actual error, retry
@@ -279,8 +296,11 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 			{							 
 				CURL* retry_handle = RestartConnection(nIndex);
 				
-				curl_multi_add_handle(m_curlm, retry_handle);
-				still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+				if(retry_handle != NULL)
+				{
+					curl_multi_add_handle(m_curlm, retry_handle);
+					still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+				}
 			}
 			else
 			{
@@ -335,7 +355,7 @@ void CSegmentDownloader::StartInitMultiHandle()
 	
 	//Split the file size into several segments
 	CArray<CRange, CRange&> sizeArray;
-	SplitFileRange(m_dlParam.m_nFileSize, sizeArray);
+	CCommonUtils::Split(sizeArray, m_dlParam.m_nFileSize, MIN_SEGMENT_SIZE, MAX_WORKER_SESSION);
 	
 	//Init multi handle
 	m_curlm = curl_multi_init();
@@ -466,6 +486,14 @@ CURL* CSegmentDownloader::InitEasyHandle(int nIndex, int nStartPos, int nFinishP
 	
 	curl_easy_setopt(easy_handle, CURLOPT_LOW_SPEED_LIMIT, 1L);
 	curl_easy_setopt(easy_handle, CURLOPT_LOW_SPEED_TIME, 15L);
+
+	if(SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_SYS_PROXY ||SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_USER_PROXY)
+	{
+		if(!SYS_OPTIONS()->GetInstance()->m_szProxy.IsEmpty())
+		{
+			curl_easy_setopt(easy_handle, CURLOPT_PROXY, (LPCTSTR)SYS_OPTIONS()->GetInstance()->m_szProxy);
+		}
+	}
 	
 	//segment download, range setting
 	CString szRange;
@@ -569,51 +597,6 @@ DWORD64 CSegmentDownloader::GetTotalDownloadNow()
 	return nDlNow;
 }
 
-void CSegmentDownloader::SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>& sizeArray)
-{
-	int i;
-	CRange segment;
-	int nMinSize = nFileSize / MAX_WORKER_SESSION;
-	if(nMinSize >= MIN_SEGMENT_SIZE)
-	{
-		for(i = 0; i < MAX_WORKER_SESSION - 1; i++)
-		{
-			segment.cx = i * nMinSize;
-			segment.cy = segment.cx + nMinSize - 1;
-			sizeArray.Add(segment);
-		}
-		segment.cx = i * nMinSize;
-		segment.cy = nFileSize - 1;
-		sizeArray.Add(segment);
-	}
-	else
-	{
-		int nSessionNumber = nFileSize / MIN_SEGMENT_SIZE;
-		if(nSessionNumber > 0)
-		{
-			for(i = 0; i < nSessionNumber; i++)
-			{
-				segment.cx = i * MIN_SEGMENT_SIZE;
-				segment.cy = segment.cx + MIN_SEGMENT_SIZE - 1;
-				sizeArray.Add(segment);
-			}
-			if(nFileSize % MIN_SEGMENT_SIZE != 0)
-			{
-				segment.cx = nSessionNumber * MIN_SEGMENT_SIZE;
-				segment.cy = nFileSize - 1;
-				sizeArray.Add(segment);
-			}			
-		}
-		//total size is less than MIN_SEGMENT_SIZE
-		else
-		{
-			segment.cx = 0;
-			segment.cy = nFileSize - 1;
-			sizeArray.Add(segment);
-		}		
-	}
-}
-
 void CSegmentDownloader::StopAllConnections()
 {
 	int i, nSize;
@@ -627,7 +610,7 @@ void CSegmentDownloader::StopConnection(int nIndex, int nCleanType)
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 
 	CString szLog;
-	szLog.Format("(%d) - StopConnection: m_curl = %8X", nIndex, pSegmentInfo->m_curl);
+	szLog.Format("(%d) - StopConnection: m_curl = 0x%08X", nIndex, pSegmentInfo->m_curl);
 	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	if(pSegmentInfo->m_curl == NULL)

@@ -75,6 +75,12 @@ UINT CDownloaderMgr::StartDownload()
 	CHeaderParser headerParser(m_dlParam.m_szUrl);
 	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
 	
+	if(m_pDownloader != NULL)
+	{
+		delete m_pDownloader;
+		m_pDownloader = NULL;
+	}
+
 	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
 	{
 		m_dlParam.m_nFileSize = pHeaderInfo->header_size;

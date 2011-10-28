@@ -5,7 +5,6 @@
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
 #include "TestDownloader.h"
-#include "easy_down.h"
 #include "HeaderParser.h"
 #include "EasyDownloader.h"
 #include "SegmentDownloader.h"

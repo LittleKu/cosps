@@ -59,6 +59,14 @@ void CEasyDownloader::Init(const CDownloadParam& param)
 	//no verbose
 	curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 0L);	
 
+	if(SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_SYS_PROXY ||SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_USER_PROXY)
+	{
+		if(!SYS_OPTIONS()->GetInstance()->m_szProxy.IsEmpty())
+		{
+			curl_easy_setopt(m_curl, CURLOPT_PROXY, (LPCTSTR)SYS_OPTIONS()->GetInstance()->m_szProxy);
+		}
+	}
+
 	//header
 	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, CEasyDownloader::HeaderCallback);
 	curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, this);

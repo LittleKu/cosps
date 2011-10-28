@@ -5,6 +5,7 @@
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
+#define THE_APP_NAME	"MultiGet"
 
 typedef enum
 {
@@ -24,13 +25,7 @@ typedef enum
 	RC_MINOR_RETRY_OVER_ERROR
 } ResultCodeMinor;
 
-class CResultCode
-{
-public:
-	int m_nMajor;
-	int m_nMinor;
-	CResultCode() : m_nMajor(0), m_nMinor(0) {} 
-};
+typedef CSize CRange;
 
 class CProgressInfo
 {

@@ -40,6 +40,7 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
@@ -52,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /machine:I386
+# ADD LINK32 shell32.lib gtb.lib /nologo /subsystem:windows /machine:I386
 
 !ELSEIF  "$(CFG)" == "MultiGet - Win32 Debug"
 
@@ -78,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libcurld.lib kernel32.lib ws2_32.lib wldap32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 libcurld.lib kernel32.lib ws2_32.lib wldap32.lib shell32.lib gtbd.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -107,10 +108,6 @@ SOURCE=.\DownloaderMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\easy_down.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\EasyDownloader.cpp
 # End Source File
 # Begin Source File
@@ -128,6 +125,10 @@ SOURCE=.\MultiGet.rc
 # Begin Source File
 
 SOURCE=.\MultiGetDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Options.cpp
 # End Source File
 # Begin Source File
 
@@ -180,10 +181,6 @@ SOURCE=.\DownloaderMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\easy_down.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\EasyDownloader.h
 # End Source File
 # Begin Source File
@@ -197,6 +194,10 @@ SOURCE=.\MultiGet.h
 # Begin Source File
 
 SOURCE=.\MultiGetDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Options.h
 # End Source File
 # Begin Source File
 

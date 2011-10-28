@@ -125,6 +125,14 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 	curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
 
+	if(SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_SYS_PROXY ||SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_USER_PROXY)
+	{
+		if(!SYS_OPTIONS()->GetInstance()->m_szProxy.IsEmpty())
+		{
+			curl_easy_setopt(m_curl, CURLOPT_PROXY, (LPCTSTR)SYS_OPTIONS()->GetInstance()->m_szProxy);
+		}
+	}
+
 	//Throw away body if it exists
 	curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, ThrowAwayCallback);
 	curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, NULL);

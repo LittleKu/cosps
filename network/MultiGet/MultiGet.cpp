@@ -5,6 +5,8 @@
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
 #include <log4cplus/configurator.h>
+#include <curl/curl.h>
+#include "Options.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,8 +79,14 @@ BOOL CMultiGetApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-
+	//First init log4cplus
 	InitLog4cplus();
+
+	//Load system options
+	SYS_OPTIONS()->Init();
+
+	//curl lib global init
+	curl_global_init(CURL_GLOBAL_ALL);
 
 	CMultiGetDlg dlg;
 	m_pMainWnd = &dlg;
@@ -93,7 +101,7 @@ BOOL CMultiGetApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
-
+	curl_global_cleanup();
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;

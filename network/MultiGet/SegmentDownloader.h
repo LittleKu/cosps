@@ -26,8 +26,6 @@ typedef enum
 	DLE_OTHER
 } DLCode;
 
-typedef CSize CRange;
-
 class CSegmentInfoEx : public CSegmentInfo
 {
 public:
@@ -66,7 +64,6 @@ public:
 private:
 	void Download();
 
-	void SplitFileRange(UINT nFileSize, CArray<CRange, CRange&>& sizeArray);
 	CURL* InitEasyHandle(int nIndex, int nStartPos, int nFinishPos);
 	CURL* StartConnection(int nIndex, int nStartPos, int nFinishPos);
 	CURL* RestartConnection(int nIndex);
