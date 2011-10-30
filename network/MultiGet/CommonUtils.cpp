@@ -416,3 +416,177 @@ BOOL CCommonUtils::GetProxyInfo(CMapUInt2String& proxyInfoMap)
 
 	return TRUE;
 }
+
+int CCommonUtils::GetHTTPStatusCode(const char* buffer)
+{
+	int nc = 0;
+	int http_version_major = 0, http_version_minor = 0, rsp_code = 0;
+	
+	do 
+	{
+		//try to parse rsp_code line
+		nc = sscanf(buffer, " HTTP/%d.%d %3d", &http_version_major, &http_version_minor, &rsp_code);
+		if(nc <= 0)
+		{
+			break;
+		}
+		
+		if(nc != 3)
+		{
+			/* this is the real world, not a Nirvana
+			NCSA 1.5.x returns this crap when asked for HTTP/1.1
+			*/
+			nc = sscanf(buffer, " HTTP %3d", &rsp_code);
+			if(nc <= 0)
+			{
+				break;
+			}
+		}
+	} while ( 0 );
+	
+	if(nc <= 0)
+	{
+		rsp_code = 0;
+	}
+	
+	return rsp_code;
+}
+
+BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName)
+{
+	TCHAR* lpLastSlash = _tcsrchr(lpszUrl, _T('/'));
+	if(lpLastSlash == NULL)
+	{
+		return FALSE;
+	}
+
+	//check if the previous char is '/', in case of the address like: http://www.yahoo.com
+	if(*(lpLastSlash - 1) == _T('/'))
+	{
+		return FALSE;
+	}
+	
+	szFileName = (lpLastSlash + 1);
+
+	//check if the length of candidate file is longer than MAX_PATH
+	if(szFileName.GetLength() >= MAX_PATH)
+	{
+		return FALSE;
+	}
+
+	szFileName = StripInvalidFilenameChars(szFileName);
+
+	return TRUE;
+}
+
+BOOL CCommonUtils::RemoveDirectory(LPCTSTR lpPathName)
+{
+	CString sCurFile, sCurFindFileFilter;
+	sCurFindFileFilter.Format("%s\\*", lpPathName);
+
+	HANDLE hFind = NULL;
+	WIN32_FIND_DATA FindFileData;
+	BOOL hasMore;
+
+	DWORD dwError = 0;
+	CString szLog;
+
+	hFind = FindFirstFile(sCurFindFileFilter, &FindFileData);
+	for(hasMore = (hFind != INVALID_HANDLE_VALUE); hasMore; hasMore = FindNextFile(hFind, &FindFileData))
+	{
+		//Ignore current, and parent directory
+		if(_tcscmp(FindFileData.cFileName, ".") == 0 || _tcscmp(FindFileData.cFileName, "..") == 0)
+		{
+			continue;
+		}
+		//1. File
+		if((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+		{
+			sCurFile.Format("%s\\%s", lpPathName, FindFileData.cFileName);
+			if(!DeleteFile(sCurFile))
+			{
+				szLog = CGenericTools::LastErrorStr("DeleteFile", sCurFile);
+				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+					
+				FindClose(hFind);
+				
+				return FALSE;
+			}
+		}
+		//2. Dir ignored
+		else if( (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 )
+		{
+		}
+	}
+	dwError = GetLastError();
+	if(hFind != INVALID_HANDLE_VALUE)
+	{
+		FindClose(hFind);
+	}
+	if (dwError != ERROR_NO_MORE_FILES)
+	{
+		szLog.Format("Find File Error: %d, %s, %s, %s", dwError, sCurFile, sCurFindFileFilter, lpPathName);
+		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		return FALSE;
+	}
+
+	if(!::RemoveDirectory(lpPathName))
+	{
+		szLog = CGenericTools::LastErrorStr("RemoveDirectory", lpPathName);
+		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		return FALSE;
+	}
+	return TRUE;
+}
+
+CString CCommonUtils::StripInvalidFilenameChars(const CString& strText)
+{
+	LPCTSTR pszSource = strText;
+	CString strDest;
+	
+	while (*pszSource != _T('\0'))
+	{
+		if (!(((_TUCHAR)*pszSource >= 0 && (_TUCHAR)*pszSource <= 31) ||
+			// lots of invalid chars for filenames in windows :=)
+			*pszSource == _T('\"') || *pszSource == _T('*') || *pszSource == _T('<')  || *pszSource == _T('>') ||
+			*pszSource == _T('?')  || *pszSource == _T('|') || *pszSource == _T('\\') || *pszSource == _T('/') || 
+			*pszSource == _T(':')) )
+		{
+			strDest += *pszSource;
+		}
+		pszSource++;
+	}
+	
+	static const LPCTSTR apszReservedFilenames[] = {
+		_T("NUL"), _T("CON"), _T("PRN"), _T("AUX"), _T("CLOCK$"),
+		_T("COM1"),_T("COM2"),_T("COM3"),_T("COM4"),_T("COM5"),_T("COM6"),_T("COM7"),_T("COM8"),_T("COM9"),
+		_T("LPT1"),_T("LPT2"),_T("LPT3"),_T("LPT4"),_T("LPT5"),_T("LPT6"),_T("LPT7"),_T("LPT8"),_T("LPT9")
+	};
+	int nCount = sizeof(apszReservedFilenames)/sizeof(apszReservedFilenames[0]);
+	
+	for (int i = 0; i < nCount; i++)
+	{
+		int nPrefixLen = _tcslen(apszReservedFilenames[i]);
+		if (_tcsnicmp(strDest, apszReservedFilenames[i], nPrefixLen) == 0)
+		{
+			if (strDest.GetLength() == nPrefixLen) {
+				// Filename is a reserved file name:
+				// Append an underscore character
+				strDest += _T("_");
+				break;
+			}
+			else if (strDest[nPrefixLen] == _T('.')) {
+				// Filename starts with a reserved file name followed by a '.' character:
+				// Replace that ',' character with an '_' character.
+				LPTSTR pszDest = strDest.GetBuffer(strDest.GetLength());
+				pszDest[nPrefixLen] = _T('_');
+				strDest.ReleaseBuffer(strDest.GetLength());
+				break;
+			}
+		}
+	}
+	
+	return strDest;
+}

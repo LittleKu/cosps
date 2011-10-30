@@ -6,6 +6,7 @@
 #include "SegmentDownloader.h"
 #include "SegmentInfoMap.h"
 #include "CommonUtils.h"
+#include "GenericTools.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -35,7 +36,7 @@ int CSegmentDownloader::ProgressCallback(void *clientp, double dltotal, double d
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL)
+CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE)
 {
 }
 
@@ -56,6 +57,7 @@ void CSegmentDownloader::Init(const CDownloadParam& param)
 
 void CSegmentDownloader::Start()
 {
+	VerifyTempFolderExist();
 	StartInitMultiHandle();
 	Download();
 }
@@ -115,25 +117,44 @@ void CSegmentDownloader::Download()
 		}
 	}
 	
+	PostDownload(dwResult);
+}
+
+void CSegmentDownloader::PostDownload(DWORD dwResult)
+{
 	//1. Clean up
 	//Stop all available connections
- 	StopAllConnections();
-
+	StopAllConnections();
+	
 	//Stop multi interface handle
 	curl_multi_cleanup(m_curlm);
 	m_curlm = NULL;
-
+	
 	//2. Post process
-
+	
 	//Merge files when successfully
 	if(dwResult == 0)
 	{
-		if(CCommonUtils::MergeFiles("data", m_pSegmentInfoArray->GetSize()))
+		//1. merge files
+		//2. delete task related folder
+		CString szTempFolder;
+		GetTempFolder(szTempFolder);
+
+		CStringArray srcFileNames;
+		int i, nSize;
+		for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
 		{
-			CCommonUtils::DeleteFiles("data", m_pSegmentInfoArray->GetSize());
+			srcFileNames.Add(GetSegmentInfo(i)->m_szFileData);
+		}
+
+		CString szDstFile;
+		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szSaveToFileName);
+		if(CCommonUtils::MergeFiles(srcFileNames, szDstFile))
+		{
+			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 	}
-
+	
 	//Remove the segment information when it's not paused or stopped
 	WORD nMajor = LOWORD(dwResult);
 	//Remove the segment information data, except for Paused or Stopped status
@@ -142,13 +163,14 @@ void CSegmentDownloader::Download()
 		RemoveSegmentInfoArray();
 	}
 	
-
+	
 	CString szErrorMsg;
 	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
-
+	
+	CString szLog;
 	szLog.Format("Download result: %X - %s", dwResult, szErrorMsg);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
+		
 	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szLog), dwResult);
 }
 
@@ -345,10 +367,16 @@ void CSegmentDownloader::Resume()
 	m_controlInfo.isStopped = FALSE;
 	m_ctritialSection.Unlock();
 
+	VerifyTempFolderExist();
+
 	RestartInitMultiHandle();
 	Download();
 }
 
+BOOL CSegmentDownloader::IsResumable()
+{
+	return m_bResumable;
+}
 void CSegmentDownloader::StartInitMultiHandle()
 {
 	ASSERT(m_curlm == NULL);
@@ -409,13 +437,15 @@ CURL* CSegmentDownloader::StartConnection(int nIndex, int nStartPos, int nFinish
 	pSegmentInfo->m_range.cx = nStartPos;
 	pSegmentInfo->m_range.cy = nFinishPos;
 	
-	char buf[32];
+
+	CString szTempFolder;
+	GetTempFolder(szTempFolder);
+
+	pSegmentInfo->m_szFileHeader.Format("%s\\%s_header_%d.txt", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_lpFileHeader = fopen(pSegmentInfo->m_szFileHeader, "wb");
 	
-	sprintf(buf, "header_%d.txt", nIndex);
-	pSegmentInfo->m_lpFileHeader = fopen(buf, "wb");
-	
-	sprintf(buf, "data_%d", nIndex);
-	pSegmentInfo->m_lpFileData = fopen(buf, "wb");
+	pSegmentInfo->m_szFileData.Format("%s\\%s_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_lpFileData = fopen(pSegmentInfo->m_szFileData, "wb");
 	
 	pSegmentInfo->m_curl = easy_handle;
 
@@ -455,13 +485,16 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex)
 	pSegmentInfo->m_range.cx = nStartPos;
 	pSegmentInfo->m_range.cy = nFinishPos;
 	
-	char buf[32];
+
+	CString szTempFolder;
+	GetTempFolder(szTempFolder);
 	
-	sprintf(buf, "header_%d(%d).txt", nIndex, pSegmentInfo->m_nRetry);
-	pSegmentInfo->m_lpFileHeader = fopen(buf, "wb");
+	pSegmentInfo->m_szFileHeader.Format("%s\\%s_header_%d(%d).txt", szTempFolder,
+		m_dlParam.m_szSaveToFileName, nIndex, pSegmentInfo->m_nRetry);
+	pSegmentInfo->m_lpFileHeader = fopen(pSegmentInfo->m_szFileHeader, "wb");
 	
-	sprintf(buf, "data_%d", nIndex);
-	pSegmentInfo->m_lpFileData = fopen(buf, "ab");
+	pSegmentInfo->m_szFileData.Format("%s\\%s_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_lpFileData = fopen(pSegmentInfo->m_szFileData, "ab");
 	
 	pSegmentInfo->m_curl = easy_handle;
 
@@ -566,7 +599,7 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	progressInfo.ulnow = (DWORD64)ulnow;
 	progressInfo.retCode = -1;
 	progressInfo.szReason = "";
-	progressInfo.index = m_dlParam.m_nIndex;
+	progressInfo.index = m_dlParam.m_nTaskID;
 	
 	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 
@@ -641,6 +674,28 @@ void CSegmentDownloader::StopConnection(int nIndex, int nCleanType)
 		pCallbackParam = NULL;
 	}
 }
+
+void CSegmentDownloader::GetTempFolder(CString& szTempFolder)
+{
+	szTempFolder.Format("%s\\%s_%d", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_szSaveToFileName, m_dlParam.m_nTaskID);
+}
+void CSegmentDownloader::VerifyTempFolderExist()
+{
+	CString szTempFolder;
+	GetTempFolder(szTempFolder);
+
+	BOOL bResult = ::PathFileExists(szTempFolder);
+	if(!bResult)
+	{
+		bResult = ::CreateDirectory(szTempFolder, NULL);
+
+		if(!bResult)
+		{
+			CString szLog = CGenericTools::LastErrorStr("CreateDirectory", szTempFolder);
+			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
+	}
+}	
 
 CSegmentInfoEx* CSegmentDownloader::GetSegmentInfo(int nIndex)
 {

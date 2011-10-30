@@ -33,6 +33,7 @@ public:
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
+	virtual BOOL IsResumable();
 	virtual void Init(const CDownloadParam& param);
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb);

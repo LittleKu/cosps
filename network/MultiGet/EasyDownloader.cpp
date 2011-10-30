@@ -133,6 +133,11 @@ void CEasyDownloader::Resume()
 	m_controlData.control.isPaused = FALSE;
 }
 
+BOOL CEasyDownloader::IsResumable()
+{
+	return FALSE;
+}
+
 size_t CEasyDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb)
 {
 	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
@@ -183,7 +188,7 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 	progressInfo.ulnow = (DWORD64)ulnow;
 	progressInfo.retCode = -1;
 	progressInfo.szReason = "";
-	progressInfo.index = m_dlParam.m_nIndex;
+	progressInfo.index = m_dlParam.m_nTaskID;
 	
 	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 

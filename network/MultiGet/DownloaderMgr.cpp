@@ -7,6 +7,7 @@
 #include "HeaderParser.h"
 #include "EasyDownloader.h"
 #include "SegmentDownloader.h"
+#include "CommonUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -37,7 +38,15 @@ UINT CDownloaderMgr::ResumeDownloadProc(LPVOID lpvData)
 
 CDownloaderMgr::CDownloaderMgr(const CDownloadParam& param) : m_dlParam(param), m_pDownloader(NULL)
 {
-	
+	//Empty file name, auto extract
+	if(m_dlParam.m_szSaveToFileName.IsEmpty())
+	{
+		BOOL bResult = CCommonUtils::ExtractFileName(m_dlParam.m_szUrl, m_dlParam.m_szSaveToFileName);
+		if(!bResult || m_dlParam.m_szSaveToFileName.GetLength() >= 64)
+		{
+			m_dlParam.m_szSaveToFileName = "data";
+		}
+	}
 }
 
 CDownloaderMgr::~CDownloaderMgr()

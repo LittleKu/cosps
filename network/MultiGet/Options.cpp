@@ -7,9 +7,6 @@
 #include <memory>
 #include "GenericTools.h"
 #include "CommonUtils.h"
-#include <Shlwapi.h>
-
-#pragma comment(lib, "Shlwapi.lib")
 
 #ifdef _DEBUG
 #undef THIS_FILE

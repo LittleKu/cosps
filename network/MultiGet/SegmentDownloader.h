@@ -61,8 +61,10 @@ public:
 	virtual void Stop();
 	virtual void Pause();
 	virtual void Resume();
+	virtual BOOL IsResumable();
 private:
 	void Download();
+	void PostDownload(DWORD dwResult);
 
 	CURL* InitEasyHandle(int nIndex, int nStartPos, int nFinishPos);
 	CURL* StartConnection(int nIndex, int nStartPos, int nFinishPos);
@@ -70,6 +72,8 @@ private:
 	void StopConnection(int nIndex, int nCleanType);
 	void StopAllConnections();
 
+	void GetTempFolder(CString& szTempFolder);
+	void VerifyTempFolderExist();
 	void StartInitMultiHandle();
 	void RestartInitMultiHandle();
 
@@ -97,6 +101,8 @@ protected:
 
 	CControlInfo m_controlInfo;
 	CCriticalSection m_ctritialSection;
+
+	BOOL m_bResumable;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

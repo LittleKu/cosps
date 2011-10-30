@@ -75,12 +75,14 @@ public:
 	int		httpcode;
 	long	header_size;
 	bool	is_range_bytes;
+	CString m_szContentType;
 	CHeaderInfo() : httpcode(0), header_size(0), is_range_bytes(false) {}
 	void Reset()
 	{
 		httpcode = 0;
 		header_size = 0;
 		is_range_bytes = false;
+		m_szContentType.Empty();
 	}
 };
 
@@ -89,10 +91,11 @@ class CDownloadParam
 public:
 	CString m_szUrl;
 	HWND	m_hWnd;
-	int		m_nIndex;
+	int		m_nTaskID;
 	UINT	m_nFileSize;
+	CString m_szSaveToFileName;
 	CDownloadParam(LPCTSTR lpszUrl = NULL, HWND hwnd = NULL, int index = -1, UINT nFileSize = 0)
-		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nIndex(index), m_nFileSize(nFileSize) {}
+		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nTaskID(index), m_nFileSize(nFileSize) {}
 };
 
 

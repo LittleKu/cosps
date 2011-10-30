@@ -273,7 +273,7 @@ void CMultiGetDlg::OnButtonStart1()
 
 	CDownloadParam param;
 	param.m_hWnd = GetSafeHwnd();
-	param.m_nIndex = 0;
+	param.m_nTaskID = 0;
 	param.m_szUrl = pTaskInfo->m_url;
 	param.m_nFileSize = 0;
 

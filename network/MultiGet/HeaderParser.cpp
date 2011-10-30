@@ -60,6 +60,16 @@ static int GetContentLength(const char* buffer)
 
 static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
+	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
+	{
+		CString szLine((char*)ptr, size * nmemb);
+		szLine.Replace(_T("\r"), _T("[0x0D]"));
+		szLine.Replace(_T("\n"), _T("[0x0A]"));
+		
+		CString szMsg;
+		szMsg.Format("HP - %s", szLine);
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szMsg)
+	}
 	CHeaderInfo* pHeaderInfo = (CHeaderInfo*)data;
 
 #define SCRATCHSIZE 127
@@ -92,7 +102,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		}
 
 		//3. check if Accept-Ranges line
-		char buf[32];
+		char buf[128];
 		int nc = sscanf(scratch, "Accept-Ranges: %s", buf);
 		if(nc > 0)
 		{
@@ -100,6 +110,14 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			{
 				pHeaderInfo->is_range_bytes = true;
 			}
+			break;
+		}
+
+		//4. check if Content-Type
+		nc = sscanf(scratch, "Content-Type: %s", buf);
+		if(nc > 0)
+		{
+			pHeaderInfo->m_szContentType = buf;
 			break;
 		}
 
