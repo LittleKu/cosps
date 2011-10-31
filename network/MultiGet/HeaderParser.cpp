@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "HeaderParser.h"
+#include "CommonUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -63,8 +64,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
 	{
 		CString szLine((char*)ptr, size * nmemb);
-		szLine.Replace(_T("\r"), _T("[0x0D]"));
-		szLine.Replace(_T("\n"), _T("[0x0A]"));
+		CCommonUtils::ReplaceCRLF(szLine);
 		
 		CString szMsg;
 		szMsg.Format("HP - %s", szLine);
@@ -87,7 +87,9 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		if(nRspCode > 0)
 		{
 			pHeaderInfo->Reset();
-			pHeaderInfo->httpcode = nRspCode;
+			pHeaderInfo->m_nHTTPCode = nRspCode;
+			pHeaderInfo->m_szStatusLine = scratch;
+			CCommonUtils::ReplaceCRLF(pHeaderInfo->m_szStatusLine, NULL, NULL);
 			break;
 		}
 
@@ -97,7 +99,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		sscanf(scratch, "Content-Length: %d", &nContentLength);
 		if(nContentLength >= 0)
 		{
-			pHeaderInfo->header_size = nContentLength;
+			pHeaderInfo->m_nContentLength = nContentLength;
 			break;
 		}
 
@@ -108,7 +110,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		{
 			if(strcmp("bytes", buf) == 0)
 			{
-				pHeaderInfo->is_range_bytes = true;
+				pHeaderInfo->m_bRangeBytes = TRUE;
 			}
 			break;
 		}
@@ -160,12 +162,15 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 
 	CURLcode res = curl_easy_perform(m_curl);
 
-	if(CURLE_OK == res)
+	m_headerInfo.m_nCurlResult = res;
+
+	if(res != CURLE_OK)
 	{
-	}
-	else
-	{
-		AfxTrace("Failed to GET header of %s: curl error code = %d\n", url, res);
+		CString szLog;
+		szLog.Format("Failed to GET header. curl code: %d - %s, url = %s", res, 
+			curl_easy_strerror(res), url);
+
+		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	/* always cleanup */
     curl_easy_cleanup(m_curl);

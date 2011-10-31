@@ -25,6 +25,13 @@ public:
 	//convert error code to error message
 	static void FormatErrorMsg(DWORD dwCode, CString& szMsg);
 
+	static void	StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg);
+
+	static LRESULT SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail = NULL);
+
+	//Replace the CR(\r) char with lpCR and the LF(\n) char with lpNL
+	static void ReplaceCRLF(CString& szStr, LPCTSTR lpCR = _T("[0x0D]"), LPCTSTR lpLF = _T("[0x0A]"));
+
 	//split the file size into several parts
 	static void Split(CArray<CRange, CRange&>& sizeArray, UINT nFileSize, int nMinSegmentSize, int nMaxSegmentCount);
 

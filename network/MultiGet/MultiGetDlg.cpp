@@ -89,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	ON_MESSAGE(WM_DOWNLOAD_PROGRESS, OnUpdateProgress)
 	ON_MESSAGE(WM_DOWNLOAD_COMPLETE, OnEnd)
+	ON_MESSAGE(WM_DOWNLOAD_STATUS, OnStatusUpdate)
 	ON_BN_CLICKED(IDC_ADD1, OnAdd1)
 	ON_BN_CLICKED(IDC_BUTTON_START1, OnButtonStart1)
 	ON_BN_CLICKED(IDC_BUTTON_PAUSE, OnButtonPause)
@@ -237,10 +238,17 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	m_taskListCtrl.SetItemText(index, 3, szProgress);
 	m_taskListCtrl.InvalidateSubItem(index, 3);
 
-	m_taskListCtrl.SetItemText(index, 4, szResult);
-	m_taskListCtrl.InvalidateSubItem(index, 4);
+// 	m_taskListCtrl.SetItemText(index, 4, szResult);
+// 	m_taskListCtrl.InvalidateSubItem(index, 4);
 
 
+	return 1L;
+}
+
+LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
+{
+	m_taskListCtrl.SetItemText(0, 4, (LPCTSTR)lParam);
+	m_taskListCtrl.InvalidateSubItem(0, 4);
 	return 1L;
 }
 
@@ -330,7 +338,7 @@ void CMultiGetDlg::OnButtonHeader()
 
 	CString szMsg;
 	szMsg.Format("code=%d, size=%d, is_range_bytes=%d", 
-		pHeaderInfo->httpcode, pHeaderInfo->header_size, pHeaderInfo->is_range_bytes);
+		pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength, pHeaderInfo->m_bRangeBytes);
 	AfxMessageBox(szMsg);
 }
 

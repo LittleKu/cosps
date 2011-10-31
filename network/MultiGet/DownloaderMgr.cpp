@@ -8,6 +8,7 @@
 #include "EasyDownloader.h"
 #include "SegmentDownloader.h"
 #include "CommonUtils.h"
+#include "TimeCost.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -81,6 +82,8 @@ void CDownloaderMgr::Pause()
 
 UINT CDownloaderMgr::StartDownload()
 {
+	CString szLog;
+
 	CHeaderParser headerParser(m_dlParam.m_szUrl);
 	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
 	
@@ -90,9 +93,31 @@ UINT CDownloaderMgr::StartDownload()
 		m_pDownloader = NULL;
 	}
 
-	if(pHeaderInfo->httpcode == 200 && pHeaderInfo->header_size > 0/* && pHeaderInfo->is_range_bytes*/)
+	//Error checking
+
+	CString szStatusMsg;
+	//1. CURL return error
+	if(pHeaderInfo->m_nCurlResult != CURLE_OK)
 	{
-		m_dlParam.m_nFileSize = pHeaderInfo->header_size;
+		CString szCurlResult;
+		szCurlResult.Format("(%d) %s", pHeaderInfo->m_nCurlResult, 
+			curl_easy_strerror((CURLcode)pHeaderInfo->m_nCurlResult));
+
+		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_END_WITH_ERROR, szCurlResult);
+
+		return 1;
+	}
+	//2. HTTP return error
+	if(pHeaderInfo->m_nHTTPCode != 200)
+	{	
+		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_END_WITH_ERROR, pHeaderInfo->m_szStatusLine);
+
+		return 2;
+	}
+
+	if(pHeaderInfo->m_nContentLength > 0/* && pHeaderInfo->m_bRangeBytes*/)
+	{
+		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
 		
 		m_pDownloader = new CSegmentDownloader();
 	}
@@ -102,18 +127,15 @@ UINT CDownloaderMgr::StartDownload()
 		
 		m_pDownloader = new CEasyDownloader();
 	}	
-	
 	m_pDownloader->Init(m_dlParam);
+
 	
-	clock_t start = clock();
-	
+	CTimeCost timeCost;
+
 	m_pDownloader->Start();
-	
-	clock_t finish = clock();
-	UINT nCost = finish - start;
-	
-	CString szLog;
-	szLog.Format("Time Cost (%d)", nCost);
+
+	timeCost.UpdateCurrClock();
+	szLog.Format("Time Cost (%d)", timeCost.GetTimeCost());
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 		
 	return 0;
@@ -122,16 +144,14 @@ UINT CDownloaderMgr::StartDownload()
 UINT CDownloaderMgr::ResumeDownload()
 {
 	ASSERT(m_pDownloader != NULL);
-	
-	clock_t start = clock();
-	
+
+	CString szLog;
+
+	CTimeCost timeCost;
 	m_pDownloader->Resume();
 	
-	clock_t finish = clock();
-	UINT nCost = finish - start;
-	
-	CString szLog;
-	szLog.Format("Time Cost (%d)", nCost);
+	timeCost.UpdateCurrClock();
+	szLog.Format("Time Cost (%d)", timeCost.GetTimeCost());
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 		
 	return 0;

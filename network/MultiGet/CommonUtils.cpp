@@ -106,6 +106,73 @@ void CCommonUtils::FormatInternalErrorMsg(int nCode, CString& szErrorMsg)
 	}
 }
 
+void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg)
+{
+	CString szStatus;
+	switch(dwCode)
+	{
+	case TSE_READY:
+		{
+			szStatus = "Ready";
+		}
+		break;
+	case TSE_TRANSFERRING:
+		{
+			szStatus = "Transferring";
+		}
+		break;
+	case TSE_PAUSED:
+		{
+			szStatus = "Paused";
+		}
+		break;
+	case TSE_STOPPED:
+		{
+			szStatus = "Stopped";
+		}
+		break;
+	case TSE_COMPLETE:
+		{
+			szStatus = "Complete";
+		}
+		break;
+	case TSE_END_WITH_ERROR:
+		{
+			szStatus = "End with error";
+		}
+		break;
+	default:
+		{
+			szStatus.Format("Unknown status code: %d", dwCode);
+		}
+		break;
+	}
+	if(lpDetail != NULL)
+	{
+		szMsg.Format("%s - %s", szStatus, lpDetail);
+	}
+	else
+	{
+		szMsg = szStatus;
+	}
+}
+
+LRESULT CCommonUtils::SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail)
+{
+	CString szStatusMsg;
+	StatusCodeToStr(dwCode, lpDetail, szStatusMsg);
+
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szStatusMsg)
+
+	return ::SendMessage(hWnd, WM_DOWNLOAD_STATUS, (WPARAM)dwCode, (LPARAM)((LPCTSTR)szStatusMsg));
+}
+
+void CCommonUtils::ReplaceCRLF(CString& szStr, LPCTSTR lpCR, LPCTSTR lpLF)
+{
+	szStr.Replace(_T("\r"), lpCR);
+	szStr.Replace(_T("\n"), lpLF);
+}
+
 void CCommonUtils::Split(CArray<CRange, CRange&>& sizeArray, UINT nFileSize, int nMinSegmentSize, int nMaxSegmentCount)
 {
 	int i;

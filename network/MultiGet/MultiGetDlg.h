@@ -46,6 +46,7 @@ protected:
 	virtual void OnOK();
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnStatusUpdate(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnAdd1();
 	afx_msg void OnButtonStart1();
 	afx_msg void OnButtonPause();

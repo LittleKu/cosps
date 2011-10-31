@@ -32,6 +32,8 @@ public:
 	CURL*	m_curl;
 	FILE*	m_lpFileHeader;
 	FILE*	m_lpFileData;
+
+	CHeaderInfo		m_headerInfo;
 	CSegmentInfoEx() : CSegmentInfo()
 	{
 		m_curl = NULL;
@@ -101,6 +103,9 @@ protected:
 
 	CControlInfo m_controlInfo;
 	CCriticalSection m_ctritialSection;
+
+	BOOL m_bHeaderChecked;
+	int m_nUsed;
 
 	BOOL m_bResumable;
 };

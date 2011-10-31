@@ -3,9 +3,20 @@
 
 #define WM_DOWNLOAD_PROGRESS	(WM_USER + 1099)
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
+#define WM_DOWNLOAD_STATUS		(WM_USER + 1101)
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
+
+typedef enum
+{
+	TSE_READY	= 0,	//Task has been added, not started yet
+	TSE_TRANSFERRING,	//Task is transferring, no error detected
+	TSE_PAUSED,			//Task has been paused by user
+	TSE_STOPPED,		//Task has been stopped by user
+	TSE_COMPLETE,		//Task has been completed successfully
+	TSE_END_WITH_ERROR	//Task ended with error
+} TaskStatusEnum;
 
 typedef enum
 {
@@ -72,17 +83,33 @@ public:
 class CHeaderInfo
 {
 public:
-	int		httpcode;
-	long	header_size;
-	bool	is_range_bytes;
+	int		m_nCurlResult;
+	int		m_nHTTPCode;
+	long	m_nContentLength;
+	BOOL	m_bRangeBytes;
+
 	CString m_szContentType;
-	CHeaderInfo() : httpcode(0), header_size(0), is_range_bytes(false) {}
+	CString m_szStatusLine;
+
+	int		m_nContentRangeX;
+	int		m_nContentRangeY;
+	int		m_nContentRangeTotal;
+
+	CHeaderInfo() : m_nCurlResult(0), m_nHTTPCode(0), m_nContentLength(0), m_bRangeBytes(FALSE), 
+		m_nContentRangeX(0), m_nContentRangeY(0), m_nContentRangeTotal(0)
+	{}
 	void Reset()
 	{
-		httpcode = 0;
-		header_size = 0;
-		is_range_bytes = false;
+		m_nCurlResult = 0;
+		m_nHTTPCode = 0;
+		m_nContentLength = 0;
+		m_bRangeBytes = FALSE;
 		m_szContentType.Empty();
+		m_szStatusLine.Empty();
+
+		m_nContentRangeX = 0;
+		m_nContentRangeY = 0;
+		m_nContentRangeTotal = 0;
 	}
 };
 
