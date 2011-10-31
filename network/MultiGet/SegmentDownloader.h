@@ -26,6 +26,14 @@ typedef enum
 	DLE_OTHER
 } DLCode;
 
+typedef enum
+{
+	VCE_OK = 0,		//check ok, the response header is same to the request, 206 and the range is also same
+	VCE_200,		//response header is 200 other than 206
+	VCE_INVALID,	//doesn't get a valid response code yet
+	VCE_OTHER		//other cases
+} ValidationCheckCode;
+
 class CSegmentInfoEx : public CSegmentInfo
 {
 public:
@@ -83,6 +91,8 @@ private:
 
 	DWORD SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout);
 	int ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult);
+
+	int CheckSegmentHeader(int nIndex);
 
 	CSegmentInfoEx* GetSegmentInfo(int nIndex);
 	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);

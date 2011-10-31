@@ -684,23 +684,88 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 
 	if(!m_bHeaderChecked && pSegmentInfo->m_headerInfo.m_nHTTPCode > 0)
-	{		
-		CString szLog;
-		szLog.Format("Select connection: (%d), http_code=%d, content_length=%d, range_x=%d, range_y=%d, range_total=%d",
-			nIndex, pSegmentInfo->m_headerInfo.m_nHTTPCode, pSegmentInfo->m_headerInfo.m_nContentLength,
-			pSegmentInfo->m_headerInfo.m_nContentRangeX, pSegmentInfo->m_headerInfo.m_nContentRangeY,
-			pSegmentInfo->m_headerInfo.m_nContentRangeTotal);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			
-		m_bHeaderChecked = TRUE;
-
-		if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 200)
+	{	
+		int nVC = CheckSegmentHeader(nIndex);
+		if(nVC == VCE_200)
 		{
+			m_bHeaderChecked = TRUE;
 			m_nUsed = nIndex;
 		}
-		else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 206)
+		else if(nVC == VCE_OK)
 		{
-			m_nUsed = -1;
+			int i, nSize, nResult;
+
+			//there is one 200
+			for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
+			{
+				if(i == nIndex)
+				{
+					continue;
+				}
+				nResult = CheckSegmentHeader(i);
+				if(nResult == VCE_200)
+				{
+					m_bHeaderChecked = TRUE;
+					m_nUsed = nIndex;
+
+					CString szLog;
+					szLog.Format("Select connection: (%d), http_code=%d, content_length=%d, range_x=%d, range_y=%d, range_total=%d",
+						nIndex, pSegmentInfo->m_headerInfo.m_nHTTPCode, pSegmentInfo->m_headerInfo.m_nContentLength,
+						pSegmentInfo->m_headerInfo.m_nContentRangeX, pSegmentInfo->m_headerInfo.m_nContentRangeY,
+						pSegmentInfo->m_headerInfo.m_nContentRangeTotal);
+					LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+					break;
+				}
+			}
+
+			if(!m_bHeaderChecked)
+			{
+				//they are all 206
+				BOOL bAllOK = TRUE;
+				for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
+				{
+					if(i == nIndex)
+					{
+						continue;
+					}
+					nResult = CheckSegmentHeader(i);
+					if(nResult != VCE_OK)
+					{
+						bAllOK = FALSE;
+						break;
+					}
+				}
+
+				if(bAllOK)
+				{
+					m_bHeaderChecked = TRUE;
+					m_nUsed = -1;
+				}
+				else
+				{
+					BOOL bHasNoInvalid = TRUE;
+					for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
+					{
+						if(i == nIndex)
+						{
+							continue;
+						}
+						nResult = CheckSegmentHeader(i);
+						if(nResult == VCE_INVALID)
+						{
+							bHasNoInvalid = FALSE;
+							break;
+						}
+					}
+
+					if(bHasNoInvalid)
+					{
+						m_bHeaderChecked = TRUE;
+						m_nUsed = -1;
+					}
+				}
+			}
 		}
 	}
 
@@ -743,6 +808,32 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	}
 
 	return 0;
+}
+
+int CSegmentDownloader::CheckSegmentHeader(int nIndex)
+{
+	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
+	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
+
+	if(pSegmentInfo->m_headerInfo.m_nHTTPCode <= 0)
+	{
+		return VCE_INVALID;
+	}
+	else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 206)
+	{
+		if( (m_dlParam.m_nFileSize == pSegmentInfo->m_headerInfo.m_nContentRangeTotal)
+			&& (pSegmentInfo->m_range.cx == pSegmentInfo->m_headerInfo.m_nContentRangeX)
+			&& (pSegmentInfo->m_range.cy == pSegmentInfo->m_headerInfo.m_nContentRangeY) )
+		{
+			return VCE_OK;
+		}
+	}
+	else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 200)
+	{
+		return VCE_200;
+	}
+	
+	return VCE_OTHER;
 }
 
 DWORD64 CSegmentDownloader::GetTotalDownloadNow()
