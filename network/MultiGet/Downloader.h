@@ -16,10 +16,10 @@ public:
 	virtual ~CDownloader();
 public:
 	virtual void Init(const CDownloadParam& param) = 0;
-	virtual void Start() = 0;
+	virtual int Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Pause() = 0;
-	virtual void Resume() = 0;
+	virtual int Resume() = 0;
 	virtual BOOL IsResumable() = 0;
 };
 

@@ -85,7 +85,7 @@ void CEasyDownloader::Init(const CDownloadParam& param)
 	m_controlData.lpFileData = fopen("data", "wb");
 }
 
-void CEasyDownloader::Start()
+int CEasyDownloader::Start()
 {
 	CURLcode res = curl_easy_perform(m_curl);
 	//failed?
@@ -114,6 +114,8 @@ void CEasyDownloader::Start()
 	//self cleanup
 	fclose(m_controlData.lpFileHeader);
 	fclose(m_controlData.lpFileData);
+
+	return 0;
 }
 
 void CEasyDownloader::Stop()
@@ -127,10 +129,12 @@ void CEasyDownloader::Pause()
 	m_controlData.control.isPaused = TRUE;	
 }
 
-void CEasyDownloader::Resume()
+int CEasyDownloader::Resume()
 {
 	m_controlData.control.isModified = TRUE;
 	m_controlData.control.isPaused = FALSE;
+
+	return 0;
 }
 
 BOOL CEasyDownloader::IsResumable()

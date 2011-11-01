@@ -65,15 +65,19 @@ class CSegmentDownloader : public CDownloader
 public:
 	CSegmentDownloader();
 	virtual ~CSegmentDownloader();
+private:
+	CSegmentInfoEx* GetSegmentInfo(int nIndex);
+	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
+	void RemoveSegmentInfoArray();
 public:
 	virtual void Init(const CDownloadParam& param);
-	virtual void Start();
+	virtual int Start();
 	virtual void Stop();
 	virtual void Pause();
-	virtual void Resume();
+	virtual int Resume();
 	virtual BOOL IsResumable();
 private:
-	void Download();
+	int Download();
 	void PostDownload(DWORD dwResult);
 
 	CURL* InitEasyHandle(int nIndex, int nStartPos, int nFinishPos);
@@ -93,10 +97,7 @@ private:
 	int ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult);
 
 	int CheckSegmentHeader(int nIndex);
-
-	CSegmentInfoEx* GetSegmentInfo(int nIndex);
-	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
-	void RemoveSegmentInfoArray();
+	void CheckSegmentHeaders(int nIndex);
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb, int index);
 	size_t ProcessData(char *ptr, size_t size, size_t nmemb, int index);

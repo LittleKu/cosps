@@ -134,6 +134,7 @@ public:
 	DWORD64	m_nDlNow;		//how many bytes this segment is downloading now
 	int		m_nRetry;		//how many times this connection retried
 	CSize	m_range;		//range
+	int		m_nRemotePos;	//Remote file position
 	CString m_szFileHeader;	//header file name
 	CString m_szFileData;	//data file name
 
@@ -143,9 +144,12 @@ public:
 		m_nDlBefore = 0;
 		m_nDlNow = 0;
 		m_nRetry = 0;
+		
 		m_range.cx = 0;
 		m_range.cy = 0;
+		m_nRemotePos = 0;
 	}
+	virtual ~CSegmentInfo() {}
 };
 
 

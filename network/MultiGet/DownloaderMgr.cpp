@@ -83,6 +83,8 @@ void CDownloaderMgr::Pause()
 UINT CDownloaderMgr::StartDownload()
 {
 	CString szLog;
+	szLog.Format("[StartDownload]: ThreadID=%d, URL=%s", GetCurrentThreadId(), m_dlParam.m_szUrl);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	CHeaderParser headerParser(m_dlParam.m_szUrl);
 	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
@@ -146,6 +148,8 @@ UINT CDownloaderMgr::ResumeDownload()
 	ASSERT(m_pDownloader != NULL);
 
 	CString szLog;
+	szLog.Format("[ResumeDownload]: ThreadID=%d, URL=%s", GetCurrentThreadId(), m_dlParam.m_szUrl);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	CTimeCost timeCost;
 	m_pDownloader->Resume();

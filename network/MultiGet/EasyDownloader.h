@@ -29,10 +29,10 @@ public:
 	CEasyDownloader();
 	virtual ~CEasyDownloader();
 public:
-	virtual void Start();
+	virtual int Start();
 	virtual void Stop();
 	virtual void Pause();
-	virtual void Resume();
+	virtual int Resume();
 	virtual BOOL IsResumable();
 	virtual void Init(const CDownloadParam& param);
 private:	

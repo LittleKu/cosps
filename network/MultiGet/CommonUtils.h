@@ -57,6 +57,8 @@ public:
 	static BOOL RemoveDirectory(LPCTSTR lpPathName);
 
 	static CString StripInvalidFilenameChars(const CString& strText);
+
+	static int Intersection(const CRange& r1, const CRange& r2, CRange& rResult);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

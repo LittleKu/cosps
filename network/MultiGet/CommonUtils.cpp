@@ -657,3 +657,21 @@ CString CCommonUtils::StripInvalidFilenameChars(const CString& strText)
 	
 	return strDest;
 }
+
+int CCommonUtils::Intersection(const CRange& r1, const CRange& r2, CRange& rResult)
+{
+	//r2 is at the left side of r1 entirely, no intersection
+	if(r1.cx > r2.cy)
+	{
+		return 1;
+	}
+	if(r1.cy < r2.cx)
+	{
+		return -1;
+	}
+
+	rResult.cx = max(r1.cx, r2.cx);
+	rResult.cy = min(r1.cy, r2.cy);
+
+	return 0;
+}
