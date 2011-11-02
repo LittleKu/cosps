@@ -24,6 +24,7 @@ private:
 public:
 	virtual ~COptions();
 	BOOL Init();
+	LPCTSTR GetProxy();
 public:
 	static COptions* GetInstance();
 
@@ -38,6 +39,9 @@ public:
 	UINT	m_nMaxConnectionCount;
 	UINT	m_nMinSegmentSize;
 	UINT	m_nMaxRetryTimes;
+
+//Debug options
+	BOOL	m_bKeepTempFiles;
 };
 
 COptions* SYS_OPTIONS();

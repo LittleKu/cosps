@@ -23,6 +23,7 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxtempl.h>
 #include <Shlwapi.h>
+#include <afxmt.h>
 
 #pragma comment(lib, "Shlwapi.lib")
 

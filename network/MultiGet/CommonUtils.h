@@ -55,6 +55,8 @@ public:
 	static BOOL ExtractFileName(LPCTSTR lpszUrl, CString& szFileName);
 
 	static BOOL RemoveDirectory(LPCTSTR lpPathName);
+	
+	static BOOL VerifyDirectoryExist(LPCTSTR lpPathName);
 
 	static CString StripInvalidFilenameChars(const CString& strText);
 

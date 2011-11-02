@@ -12,13 +12,14 @@
 #include <curl/curl.h>
 #include "Downloader.h"
 
-class CDownloadData
+class CDownloadInfo
 {
 public:
 	FILE*	lpFileHeader;
 	FILE*	lpFileData;
-	CControlInfo	control;
-	CDownloadData() : lpFileHeader(0), lpFileData(0)
+	CHeaderInfo m_headerInfo;
+	CController	m_controller;
+	CDownloadInfo() : lpFileHeader(0), lpFileData(0)
 	{
 	}
 };
@@ -42,10 +43,15 @@ private:
 	static size_t HeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+
+	void PostDownload(DWORD dwResult);
+	//Retrieve the temp directory for the download task
+	void GetTempFolder(CString& szTempFolder);
+	void VerifyTempFolderExist();
 protected:
 	CDownloadParam m_dlParam;
 	CURL* m_curl;
-	CDownloadData m_controlData;
+	CDownloadInfo m_dlInfo;
 };
 
 #endif // !defined(AFX_EASYDOWNLOADER_H__FDE4BCE2_0E7E_474E_9B1A_8B515287CAD2__INCLUDED_)

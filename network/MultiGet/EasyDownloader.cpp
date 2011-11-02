@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "EasyDownloader.h"
+#include "CommonUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -42,97 +43,100 @@ CEasyDownloader::~CEasyDownloader()
 
 }
 
-void CEasyDownloader::Init(const CDownloadParam& param)
-{
-	m_dlParam = param;
-
-	m_curl = curl_easy_init();
-
-	//URL address
-	curl_easy_setopt(m_curl, CURLOPT_URL, (LPCTSTR)m_dlParam.m_szUrl);
-
-
-	//agent: IE8
-	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
-	//redirect
-	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
-	//no verbose
-	curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 0L);	
-
-	if(SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_SYS_PROXY ||SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_USER_PROXY)
-	{
-		if(!SYS_OPTIONS()->GetInstance()->m_szProxy.IsEmpty())
-		{
-			curl_easy_setopt(m_curl, CURLOPT_PROXY, (LPCTSTR)SYS_OPTIONS()->GetInstance()->m_szProxy);
-		}
-	}
-
-	//header
-	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, CEasyDownloader::HeaderCallback);
-	curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, this);
-
-	//data
-	curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CEasyDownloader::DataCallback);
-	curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, this);
-	
-	//progress
-	curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0L);
-	curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, CEasyDownloader::ProgressCallback);
-	curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, this);
-
-	//init control data
-	m_controlData.lpFileHeader = fopen("header.txt", "wb");
-	m_controlData.lpFileData = fopen("data", "wb");
-}
-
 int CEasyDownloader::Start()
 {
+	VerifyTempFolderExist();
+
 	CURLcode res = curl_easy_perform(m_curl);
-	//failed?
-	if(res != CURLE_OK)
-	{
-		CString szLogInfo;
-		szLogInfo.Format("curl_easy_perform failed. res = (%d) - %s, url=%s", res, curl_easy_strerror(res), m_dlParam.m_szUrl);
-		
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLogInfo)
-	}
 
-	long rspCode = 0;
-	curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &rspCode);
-	//check if http success?
-	if(rspCode != 200)
-	{
-		CString szLogInfo;
-		szLogInfo.Format("response code failed. rspCode = %d, url=%s", rspCode, m_dlParam.m_szUrl);
-		
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLogInfo)
-	}
-
-	/* always cleanup */
-    curl_easy_cleanup(m_curl);
-
-	//self cleanup
-	fclose(m_controlData.lpFileHeader);
-	fclose(m_controlData.lpFileData);
+	PostDownload((DWORD)res);
 
 	return 0;
 }
 
+void CEasyDownloader::PostDownload(DWORD dwResult)
+{
+	CString szErrorMsg, szEndMsg;
+	
+	BOOL bResult = FALSE;
+	do 
+	{
+		//check if curl fail?
+		if(dwResult != CURLE_OK)
+		{
+			szErrorMsg.Format("[Transfer Error]: %d - %s", dwResult, curl_easy_strerror((CURLcode)dwResult));
+			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szErrorMsg)	
+			break;
+		}
+		
+		//check if HTTP fail?
+		if(m_dlInfo.m_headerInfo.m_nHTTPCode != 200)
+		{
+			szErrorMsg.Format("[Server Error]: %s", m_dlInfo.m_headerInfo.m_szStatusLine);
+			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szErrorMsg)	
+			break;
+		}
+		
+		bResult = TRUE;	
+	} while (FALSE);
+	
+	
+	/* always cleanup */
+	curl_easy_cleanup(m_curl);
+	
+	//self cleanup
+	fclose(m_dlInfo.lpFileHeader);
+	fclose(m_dlInfo.lpFileData);
+	
+	if(bResult)
+	{
+		//1. copy file
+		CString szTempFolder;
+		GetTempFolder(szTempFolder);
+		
+		CString szSrcFile, szDstFile;
+		szSrcFile.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szSaveToFileName);
+		
+		::CopyFile(szSrcFile, szDstFile, FALSE);
+		
+		//2. delete task related folder
+		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
+		{
+			CCommonUtils::RemoveDirectory(szTempFolder);
+		}
+		
+		//Final status: complete
+		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_COMPLETE);
+
+		CCommonUtils::StatusCodeToStr(TSE_COMPLETE, NULL, szEndMsg);
+	}
+	else
+	{
+		//error
+		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_END_WITH_ERROR, szErrorMsg);
+
+		CCommonUtils::StatusCodeToStr(TSE_END_WITH_ERROR, szErrorMsg, szEndMsg);
+	}
+
+	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szEndMsg), dwResult);
+}
+
 void CEasyDownloader::Stop()
 {
-	m_controlData.control.isStopped = TRUE;
+	m_dlInfo.m_controller.Stop();
 }
 
 void CEasyDownloader::Pause()
 {
-	m_controlData.control.isModified = TRUE;
-	m_controlData.control.isPaused = TRUE;	
+	m_dlInfo.m_controller.Pause();
 }
 
 int CEasyDownloader::Resume()
 {
-	m_controlData.control.isModified = TRUE;
-	m_controlData.control.isPaused = FALSE;
+	VerifyTempFolderExist();
+
+	m_dlInfo.m_controller.Clear();
 
 	return 0;
 }
@@ -147,19 +151,36 @@ size_t CEasyDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb)
 	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
 	{
 		CString szLine(ptr, size * nmemb);
-		szLine.Replace(_T("\r"), _T("[0x0D]"));
-		szLine.Replace(_T("\n"), _T("[0x0A]"));
+		CCommonUtils::ReplaceCRLF(szLine);
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLine)
 	}
 
-	fwrite(ptr, size, nmemb, m_controlData.lpFileHeader);
+	fwrite(ptr, size, nmemb, m_dlInfo.lpFileHeader);
+
+	CString szScratch(ptr, size * nmemb);
+	do 
+	{
+		//1. check if status line
+		int nRspCode = CCommonUtils::GetHTTPStatusCode(szScratch);
+		
+		//This is a status line
+		if(nRspCode > 0)
+		{
+			m_dlInfo.m_headerInfo.Reset();
+			m_dlInfo.m_headerInfo.m_nHTTPCode = nRspCode;
+			m_dlInfo.m_headerInfo.m_szStatusLine = szScratch;
+			CCommonUtils::ReplaceCRLF(m_dlInfo.m_headerInfo.m_szStatusLine, NULL, NULL);
+			break;
+		}
+	}
+	while(FALSE);	
 
 	return (size_t)(size * nmemb);
 }
 
 size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 {
-	fwrite(ptr, size, nmemb, m_controlData.lpFileData);
+	fwrite(ptr, size, nmemb, m_dlInfo.lpFileData);
 
 	return (size_t)(size * nmemb);
 }
@@ -167,26 +188,26 @@ size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	//Pause
-	if(m_controlData.control.isModified && m_controlData.control.isPaused == TRUE)
+	if(m_dlInfo.m_controller.IsModified() && m_dlInfo.m_controller.IsPaused())
 	{
-		m_controlData.control.isModified = FALSE;
+		m_dlInfo.m_controller.SetModified(FALSE);
 		curl_easy_pause(m_curl, CURLPAUSE_ALL);
 	}
 	//Resume
-	if(m_controlData.control.isModified && m_controlData.control.isPaused == FALSE)
+	if(m_dlInfo.m_controller.IsModified() && !m_dlInfo.m_controller.IsPaused())
 	{
-		m_controlData.control.isModified = FALSE;
+		m_dlInfo.m_controller.SetModified(FALSE);
 		curl_easy_pause(m_curl, CURLPAUSE_CONT);
 	}
 	//Stop
-	if(m_controlData.control.isStopped)
+	if(m_dlInfo.m_controller.IsStopped())
 	{
-		return 5;
+		return 2;
 	}
 
 	//Send progress notification
 	CProgressInfo progressInfo;
-	progressInfo.dltotal = (DWORD64)dltotal;
+	progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
 	progressInfo.dlnow = (DWORD64)dlnow;
 	progressInfo.ultotal = (DWORD64)ultotal;
 	progressInfo.ulnow = (DWORD64)ulnow;
@@ -198,3 +219,65 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 
 	return 0;
 }
+
+void CEasyDownloader::GetTempFolder(CString& szTempFolder)
+{
+	szTempFolder.Format("%s\\%s_%d", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_szSaveToFileName, m_dlParam.m_nTaskID);
+}
+void CEasyDownloader::VerifyTempFolderExist()
+{
+	CString szTempFolder;
+	GetTempFolder(szTempFolder);
+	
+	CCommonUtils::VerifyDirectoryExist(szTempFolder);
+}
+
+void CEasyDownloader::Init(const CDownloadParam& param)
+{
+	CString szTempFolder;
+	CString szFileName;
+
+	m_dlParam = param;
+	
+	m_curl = curl_easy_init();
+	
+	//URL address
+	curl_easy_setopt(m_curl, CURLOPT_URL, (LPCTSTR)m_dlParam.m_szUrl);
+	
+	
+	//agent: IE8
+	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
+	//redirect
+	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+	//no verbose
+	curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 0L);	
+	
+	//Proxy setting
+	if(SYS_OPTIONS()->GetInstance()->GetProxy() != NULL)
+	{
+		curl_easy_setopt(m_curl, CURLOPT_PROXY, SYS_OPTIONS()->GetInstance()->GetProxy());
+	}
+	
+	//header
+	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, CEasyDownloader::HeaderCallback);
+	curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, this);
+	
+	//data
+	curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, CEasyDownloader::DataCallback);
+	curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, this);
+	
+	//progress
+	curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, CEasyDownloader::ProgressCallback);
+	curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, this);
+	
+	//init control data
+	GetTempFolder(szTempFolder);
+	
+	szFileName.Format("%s\\header_%s.txt", szTempFolder, m_dlParam.m_szSaveToFileName);
+	m_dlInfo.lpFileHeader = fopen(szFileName, "wb");
+	
+	szFileName.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+	m_dlInfo.lpFileData = fopen(szFileName, "wb");
+}
+

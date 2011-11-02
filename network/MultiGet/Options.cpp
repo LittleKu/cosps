@@ -40,6 +40,12 @@ COptions::COptions()
 	{
 		CCommonUtils::GetProxyInfo(m_szProxy, CCommonUtils::PROXY_SERVER_HTTP);
 	}
+
+	m_bKeepTempFiles = TRUE;
+
+	m_nMaxConnectionCount = 8;
+	m_nMinSegmentSize = 1024 * 1024;
+	m_nMaxRetryTimes = 5;
 }
 
 COptions::~COptions()
@@ -98,4 +104,16 @@ BOOL COptions::CreateDefaultFolders()
 	}
 
 	return TRUE;
+}
+
+LPCTSTR COptions::GetProxy()
+{
+	if(m_nProxyMode == PME_SYS_PROXY || m_nProxyMode == PME_USER_PROXY)
+	{
+		if(!m_szProxy.IsEmpty())
+		{
+			return (LPCTSTR)m_szProxy;
+		}
+	}
+	return NULL;
 }

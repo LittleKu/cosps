@@ -53,31 +53,25 @@ public:
 	}
 };
 
-class CControlInfo
+class CController
 {
 public:
-	BOOL isModified;
-	BOOL isPaused;
-	BOOL isStopped;
+	CController();
+	virtual ~CController();
+	BOOL IsModified();
+	void SetModified(BOOL bModified);
 
-	CControlInfo() : isPaused(FALSE), isStopped(FALSE), isModified(FALSE)
-	{
-	}
+	BOOL IsPaused();
+	void Pause();
 
-	BOOL IsStopped()
-	{
-		return isStopped;
-	}
+	BOOL IsStopped();
+	void Stop();
 
-	BOOL IsPaused()
-	{
-		return isPaused;
-	}
-
-	BOOL IsModified()
-	{
-		return isModified;
-	}
+	void Clear();
+private:
+	BOOL m_bModified;
+	DWORD m_dwStatus;
+	CCriticalSection m_ctritialSection;
 };
 
 class CHeaderInfo

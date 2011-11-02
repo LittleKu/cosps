@@ -383,6 +383,12 @@ BOOL CCommonUtils::GetProxyInfo(CMapUInt2String& proxyInfoMap)
 			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 		}
 
+		if(Option[1].Value.pszValue != NULL)
+		{
+			//Free the space
+			::GlobalFree(Option[1].Value.pszValue);
+		}
+
 		return FALSE;
 	}
 
@@ -527,6 +533,12 @@ BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName)
 		return FALSE;
 	}
 
+	//"/" is the last char, in case of the address like: http://www.yahoo.com/
+	if(*(lpLastSlash + 1) == _T('\0'))
+	{
+		return FALSE;
+	}
+
 	//check if the previous char is '/', in case of the address like: http://www.yahoo.com
 	if(*(lpLastSlash - 1) == _T('/'))
 	{
@@ -606,6 +618,22 @@ BOOL CCommonUtils::RemoveDirectory(LPCTSTR lpPathName)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+BOOL CCommonUtils::VerifyDirectoryExist(LPCTSTR lpPathName)
+{	
+	BOOL bResult = ::PathFileExists(lpPathName);
+	if(!bResult)
+	{
+		bResult = ::CreateDirectory(lpPathName, NULL);
+		
+		if(!bResult)
+		{
+			CString szLog = CGenericTools::LastErrorStr("CreateDirectory", lpPathName);
+			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
+	}
+	return bResult;
 }
 
 CString CCommonUtils::StripInvalidFilenameChars(const CString& strText)

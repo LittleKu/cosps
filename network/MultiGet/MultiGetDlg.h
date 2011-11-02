@@ -24,7 +24,6 @@ public:
 	enum { IDD = IDD_MULTIGET_DIALOG };
 	CEdit	m_editUrl;
 	CTaskListCtrl	m_taskListCtrl;
-	CControlInfo m_controlInfo;
 	//}}AFX_DATA
 
 	// ClassWizard generated virtual function overrides

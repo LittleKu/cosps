@@ -15,50 +15,6 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-
-static int GetStatusCode(const char* buffer)
-{
-	int nc = 0;
-	int http_version_major = 0, http_version_minor = 0, rsp_code = 0;
-	
-	do 
-	{
-		//try to parse rsp_code line
-		nc = sscanf(buffer, " HTTP/%d.%d %3d", &http_version_major, &http_version_minor, &rsp_code);
-		if(nc <= 0)
-		{
-			break;
-		}
-		
-		if(nc != 3)
-		{
-			/* this is the real world, not a Nirvana
-			NCSA 1.5.x returns this crap when asked for HTTP/1.1
-			*/
-			nc = sscanf(buffer, " HTTP %3d", &rsp_code);
-			if(nc <= 0)
-			{
-				break;
-			}
-		}
-	} while ( 0 );
-	
-	if(nc <= 0)
-	{
-		rsp_code = 0;
-	}
-	
-	return rsp_code;
-}
-
-static int GetContentLength(const char* buffer)
-{
-	int nLen = -1;
-	sscanf(buffer, "Content-Length: %d", &nLen);
-	return nLen;
-}
-
-
 static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
 	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
@@ -81,7 +37,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 	do 
 	{
 		//1. check if status line
-		int nRspCode = GetStatusCode(scratch);
+		int nRspCode = CCommonUtils::GetHTTPStatusCode(scratch);
 
 		//This is a status line
 		if(nRspCode > 0)
@@ -123,6 +79,18 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			break;
 		}
 
+		int x, y, total;
+		nc = sscanf(scratch, "Content-Range: bytes %d-%d/%d", &x, &y, &total);
+		if(nc == 3)
+		{
+			if(x == 0 && y == 0)
+			{
+				pHeaderInfo->m_nContentRangeTotal = total;
+				pHeaderInfo->m_nContentLength = total;
+			}			
+			break;
+		}
+
 		//Do nothing now
 
 	} while ( 0 );
@@ -139,18 +107,22 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 	{
 		return;
 	}
-	
+	CString szRange;
+	CURLcode res = CURLE_OK;
+
 	curl_easy_setopt(m_curl, CURLOPT_URL, url);
 	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
 
-	if(SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_SYS_PROXY ||SYS_OPTIONS()->GetInstance()->m_nProxyMode == PME_USER_PROXY)
+	
+	szRange.Format("%d-%d", 0, 0);
+	curl_easy_setopt(m_curl, CURLOPT_RANGE, (LPCTSTR)szRange);
+
+	//Proxy setting
+	if(SYS_OPTIONS()->GetInstance()->GetProxy() != NULL)
 	{
-		if(!SYS_OPTIONS()->GetInstance()->m_szProxy.IsEmpty())
-		{
-			curl_easy_setopt(m_curl, CURLOPT_PROXY, (LPCTSTR)SYS_OPTIONS()->GetInstance()->m_szProxy);
-		}
+		curl_easy_setopt(m_curl, CURLOPT_PROXY, SYS_OPTIONS()->GetInstance()->GetProxy());
 	}
 
 	//Throw away body if it exists
@@ -160,8 +132,7 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 	curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, &m_headerInfo);	
 	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, HeaderParserCallback);
 
-	CURLcode res = curl_easy_perform(m_curl);
-
+	res = curl_easy_perform(m_curl);
 	m_headerInfo.m_nCurlResult = res;
 
 	if(res != CURLE_OK)

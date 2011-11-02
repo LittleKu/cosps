@@ -43,7 +43,7 @@ CDownloaderMgr::CDownloaderMgr(const CDownloadParam& param) : m_dlParam(param), 
 	if(m_dlParam.m_szSaveToFileName.IsEmpty())
 	{
 		BOOL bResult = CCommonUtils::ExtractFileName(m_dlParam.m_szUrl, m_dlParam.m_szSaveToFileName);
-		if(!bResult || m_dlParam.m_szSaveToFileName.GetLength() >= 64)
+		if(!bResult || m_dlParam.m_szSaveToFileName.GetLength() >= 64 || m_dlParam.m_szSaveToFileName.IsEmpty())
 		{
 			m_dlParam.m_szSaveToFileName = "data";
 		}
@@ -110,27 +110,31 @@ UINT CDownloaderMgr::StartDownload()
 		return 1;
 	}
 	//2. HTTP return error
-	if(pHeaderInfo->m_nHTTPCode != 200)
+	if(pHeaderInfo->m_nHTTPCode != 200 && pHeaderInfo->m_nHTTPCode != 206)
 	{	
 		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_END_WITH_ERROR, pHeaderInfo->m_szStatusLine);
 
 		return 2;
 	}
 
-	if(pHeaderInfo->m_nContentLength > 0/* && pHeaderInfo->m_bRangeBytes*/)
+	m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
+	if(pHeaderInfo->m_nContentLength > 0 && pHeaderInfo->m_nHTTPCode == 206/* && pHeaderInfo->m_bRangeBytes*/)
 	{
-		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
+		szLog.Format("Segment download support: [Y]. HTTPCode=%d, Content-Length=%d", 
+			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);	
 		
 		m_pDownloader = new CSegmentDownloader();
 	}
 	else
 	{
-		m_dlParam.m_nFileSize = 0;
-		
-		m_pDownloader = new CEasyDownloader();
-	}	
-	m_pDownloader->Init(m_dlParam);
+		szLog.Format("Segment download support: [N]. HTTPCode=%d, Content-Length=%d", 
+			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
 
+		m_pDownloader = new CEasyDownloader();
+	}
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	m_pDownloader->Init(m_dlParam);
 	
 	CTimeCost timeCost;
 
