@@ -83,11 +83,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		nc = sscanf(scratch, "Content-Range: bytes %d-%d/%d", &x, &y, &total);
 		if(nc == 3)
 		{
-			if(x == 0 && y == 0)
-			{
-				pHeaderInfo->m_nContentRangeTotal = total;
-				pHeaderInfo->m_nContentLength = total;
-			}			
+			pHeaderInfo->m_nContentRangeTotal = total;
 			break;
 		}
 

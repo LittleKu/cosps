@@ -998,6 +998,3 @@ CURL* CSegmentDownloader::InitEasyHandle(int nIndex, int nStartPos, int nFinishP
 	
 	return easy_handle;
 }
-
-
-

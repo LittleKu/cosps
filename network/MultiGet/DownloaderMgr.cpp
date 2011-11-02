@@ -117,20 +117,21 @@ UINT CDownloaderMgr::StartDownload()
 		return 2;
 	}
 
-	m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
-	if(pHeaderInfo->m_nContentLength > 0 && pHeaderInfo->m_nHTTPCode == 206/* && pHeaderInfo->m_bRangeBytes*/)
+	if(pHeaderInfo->m_nHTTPCode == 206 && pHeaderInfo->m_nContentRangeTotal > 0)
 	{
-		szLog.Format("Segment download support: [Y]. HTTPCode=%d, Content-Length=%d", 
-			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);	
-		
+		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentRangeTotal;
 		m_pDownloader = new CSegmentDownloader();
+
+		szLog.Format("Segment download support: [Y]. HTTPCode=%d, Content-Length=%d", 
+			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentRangeTotal);
 	}
 	else
 	{
+		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
+		m_pDownloader = new CEasyDownloader();
+
 		szLog.Format("Segment download support: [N]. HTTPCode=%d, Content-Length=%d", 
 			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
-
-		m_pDownloader = new CEasyDownloader();
 	}
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
