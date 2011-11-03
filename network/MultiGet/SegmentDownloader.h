@@ -39,10 +39,10 @@ public:
 	virtual ~CSegmentDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
-	virtual int	 Start();
-	virtual int  Resume();
-	virtual void Stop();
-	virtual void Pause();
+	virtual int Start();
+	virtual int Resume();
+	virtual int Stop();
+	virtual int Pause();
 	virtual BOOL IsResumable();
 private:
 	//Actual download process
@@ -57,7 +57,7 @@ private:
 	//Create a new easy handle connection
 	CURL* StartConnection(int nIndex, int nStartPos, int nFinishPos);
 	//Re-create a easy handle connection that continue previous connections' work
-	CURL* RestartConnection(int nIndex);
+	CURL* RestartConnection(int nIndex, int nRetryOperType);
 	//Create a new multi handle to process all the segment downloading
 	void StartInitMultiHandle();
 	//Re-create a multi handle to resume the download process that has been stopped before
@@ -71,7 +71,7 @@ private:
 
 
 	//Close a connection
-	void CloseConnection(int nIndex, int nCleanType);
+	void CloseConnection(int nIndex);
 	//Close all the connections
 	void CloseAllConnections();
 
@@ -102,8 +102,6 @@ private:
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 protected:
-	CDownloadParam m_dlParam;
-
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
 
@@ -113,7 +111,6 @@ protected:
 	
 	BOOL m_bHeaderChecked;
 	int m_nUsed;
-	
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

@@ -16,14 +16,14 @@ public:
 	CString m_fileName;
 	CString m_fileSize;
 	CString m_progress;
-	CDownloaderMgr* m_lpDownloaderMgr;
-	CTaskInfo() : m_lpDownloaderMgr(0) {}
+	CDownloader* m_lpDownloader;
+	CTaskInfo() : m_lpDownloader(0) {}
 	~CTaskInfo()
 	{
-		if(m_lpDownloaderMgr != NULL)
+		if(m_lpDownloader != NULL)
 		{
-			delete m_lpDownloaderMgr;
-			m_lpDownloaderMgr = NULL;
+			delete m_lpDownloader;
+			m_lpDownloader = NULL;
 		}
 	}
 };

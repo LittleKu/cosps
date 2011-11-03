@@ -11,15 +11,21 @@
 
 #include "Downloader.h"
 
-class CDownloaderMgr  
+class CDownloaderMgr : public CDownloader
 {
 public:
-	CDownloaderMgr(const CDownloadParam& param);
+	CDownloaderMgr();
 	virtual ~CDownloaderMgr();
-	void Start();
-	void Stop();
-	void Pause();
-	void Resume();
+	virtual void Init(const CDownloadParam& param);
+	virtual CStatusChecker* GetStatusChecker();
+	virtual int Start();
+	virtual int Stop();
+	virtual int Pause();
+	virtual int Resume();
+	virtual BOOL IsResumable();
+
+protected:
+	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
 private:
 	static UINT StartDownloadProc(LPVOID lpvData);
 	static UINT ResumeDownloadProc(LPVOID lpvData);
@@ -27,7 +33,6 @@ private:
 	UINT StartDownload();
 	UINT ResumeDownload();
 protected:
-	CDownloadParam m_dlParam;
 	CDownloader* m_pDownloader;
 };
 

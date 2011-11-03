@@ -162,8 +162,6 @@ LRESULT CCommonUtils::SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail)
 	CString szStatusMsg;
 	StatusCodeToStr(dwCode, lpDetail, szStatusMsg);
 
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szStatusMsg)
-
 	return ::SendMessage(hWnd, WM_DOWNLOAD_STATUS, (WPARAM)dwCode, (LPARAM)((LPCTSTR)szStatusMsg));
 }
 
@@ -702,4 +700,34 @@ int CCommonUtils::Intersection(const CRange& r1, const CRange& r2, CRange& rResu
 	rResult.cy = min(r1.cy, r2.cy);
 
 	return 0;
+}
+
+BOOL CCommonUtils::IntegerOper(UINT& nData, int nOperType)
+{
+	BOOL bResult = TRUE;
+	switch(nOperType)
+	{
+	case INT_OPER_RESET:
+		{
+			nData = 0;
+		}
+		break;
+	case INT_OPER_KEEP:
+		{
+			//do nothing
+		}
+		break;
+	case INT_OPER_INCREASE:
+		{
+			nData++;
+		}
+		break;
+	default:
+		{
+			bResult = FALSE;
+			LOG4CPLUS_ERROR(ROOT_LOGGER, "Unkown nOperType: "<<nOperType)
+		}
+		break;
+	}
+	return bResult;
 }

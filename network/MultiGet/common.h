@@ -126,9 +126,9 @@ public:
 	int		m_nIndex;		//index of the segment
 	DWORD64	m_nDlBefore;	//how many bytes this segment has been download before
 	DWORD64	m_nDlNow;		//how many bytes this segment is downloading now
-	int		m_nRetry;		//how many times this connection retried
-	CSize	m_range;		//range
+	UINT	m_nRetry;		//how many times this connection retried
 	int		m_nRemotePos;	//Remote file position
+	CSize	m_range;		//range
 	CString m_szFileHeader;	//header file name
 	CString m_szFileData;	//data file name
 

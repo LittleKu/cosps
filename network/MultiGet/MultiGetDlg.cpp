@@ -285,12 +285,13 @@ void CMultiGetDlg::OnButtonStart1()
 	param.m_szUrl = pTaskInfo->m_url;
 	param.m_nFileSize = 0;
 
-	if(pTaskInfo->m_lpDownloaderMgr == NULL)
+	if(pTaskInfo->m_lpDownloader == NULL)
 	{
-		pTaskInfo->m_lpDownloaderMgr = new CDownloaderMgr(param);
+		pTaskInfo->m_lpDownloader = new CDownloaderMgr();
 	}
+	pTaskInfo->m_lpDownloader->Init(param);
 
-	pTaskInfo->m_lpDownloaderMgr->Start();
+	pTaskInfo->m_lpDownloader->Start();
 }
 
 void CMultiGetDlg::OnButtonPause() 
@@ -299,9 +300,9 @@ void CMultiGetDlg::OnButtonPause()
 	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
 	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
+	ASSERT(pTaskInfo->m_lpDownloader != NULL);
 	
-	pTaskInfo->m_lpDownloaderMgr->Pause();
+	pTaskInfo->m_lpDownloader->Pause();
 }
 
 void CMultiGetDlg::OnButtonStop() 
@@ -310,9 +311,9 @@ void CMultiGetDlg::OnButtonStop()
 	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
 	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
+	ASSERT(pTaskInfo->m_lpDownloader != NULL);
 	
-	pTaskInfo->m_lpDownloaderMgr->Stop();
+	pTaskInfo->m_lpDownloader->Stop();
 }
 
 void CMultiGetDlg::OnButtonResume() 
@@ -321,9 +322,9 @@ void CMultiGetDlg::OnButtonResume()
 	
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
 	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloaderMgr != NULL);
+	ASSERT(pTaskInfo->m_lpDownloader != NULL);
 
-	pTaskInfo->m_lpDownloaderMgr->Resume();
+	pTaskInfo->m_lpDownloader->Resume();
 }
 
 void CMultiGetDlg::OnButtonHeader() 

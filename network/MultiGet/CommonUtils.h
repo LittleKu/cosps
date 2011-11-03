@@ -20,6 +20,16 @@ public:
 		PROXY_SERVER_FTP,
 		PROXY_SERVER_SOCKS
 	};
+	enum
+	{
+		INT_OPER_RESET = 0,
+		INT_OPER_KEEP,
+		INT_OPER_INCREASE
+	};
+	enum
+	{
+		MAX_INTEGER = 0x7FFFFFFF
+	};
 	virtual ~CCommonUtils();
 public:
 	//convert error code to error message
@@ -61,6 +71,8 @@ public:
 	static CString StripInvalidFilenameChars(const CString& strText);
 
 	static int Intersection(const CRange& r1, const CRange& r2, CRange& rResult);
+
+	static BOOL IntegerOper(UINT& nData, int nOperType = INT_OPER_RESET);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();
