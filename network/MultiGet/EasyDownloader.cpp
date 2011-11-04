@@ -40,12 +40,11 @@ CEasyDownloader::CEasyDownloader()
 
 CEasyDownloader::~CEasyDownloader()
 {
-
 }
 
 void CEasyDownloader::Init(const CDownloadParam& param)
 {
-	m_dlParam = param;
+	CDownloader::Init(param);
 }
 
 int CEasyDownloader::Start()
@@ -92,6 +91,31 @@ int CEasyDownloader::Resume()
 BOOL CEasyDownloader::IsResumable()
 {
 	return FALSE;
+}
+
+int CEasyDownloader::Destroy()
+{
+	if(GetCurrentStatus() != TSE_TRANSFERRING)
+	{
+		CString szTempFolder;
+		GetTempFolder(szTempFolder);
+		
+		//delete task related folder
+		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
+		{
+			CCommonUtils::RemoveDirectory(szTempFolder);
+		}
+		
+		CurrentStatusChanged(TSE_INVALID);
+		
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
+		
+		return 0;
+	}
+	
+	m_controller.Destroy();
+	
+	return 0;
 }
 
 int CEasyDownloader::DoDownload()
@@ -253,6 +277,22 @@ void CEasyDownloader::PostDownload(DWORD dwResult)
 	{
 		CurrentStatusChanged(TSE_STOPPED);
 	}
+	else if(nMajor == RC_MAJOR_DESTROYED)
+	{
+		//delete task related folder
+		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
+		{
+			CString szTempFolder;
+			GetTempFolder(szTempFolder);
+			CCommonUtils::RemoveDirectory(szTempFolder);
+		}
+		
+		CurrentStatusChanged(TSE_INVALID);
+		
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
+
+		return;
+	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
 	{		
 		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
@@ -373,7 +413,7 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 	progressInfo.ulnow = (DWORD64)ulnow;
 	progressInfo.retCode = -1;
 	progressInfo.szReason = "";
-	progressInfo.index = m_dlParam.m_nTaskID;
+	progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 	
 	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 

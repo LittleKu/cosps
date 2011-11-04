@@ -17,13 +17,13 @@ public:
 	CDownloaderMgr();
 	virtual ~CDownloaderMgr();
 	virtual void Init(const CDownloadParam& param);
-	virtual CStatusChecker* GetStatusChecker();
+	virtual UINT GetCurrentStatus();
 	virtual int Start();
 	virtual int Stop();
 	virtual int Pause();
 	virtual int Resume();
+	virtual int Destroy();
 	virtual BOOL IsResumable();
-
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
 private:

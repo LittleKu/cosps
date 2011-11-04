@@ -65,13 +65,13 @@ void CDownloaderMgr::Init(const CDownloadParam& param)
 	}
 }
 
-CStatusChecker* CDownloaderMgr::GetStatusChecker()
+UINT CDownloaderMgr::GetCurrentStatus()
 {
 	if(m_pDownloader != NULL)
 	{
-		return m_pDownloader->GetStatusChecker();
+		return m_pDownloader->GetCurrentStatus();
 	}
-	return CDownloader::GetStatusChecker();
+	return CDownloader::GetCurrentStatus();
 }
 int CDownloaderMgr::Start()
 {
@@ -97,6 +97,19 @@ BOOL CDownloaderMgr::IsResumable()
 {
 	ASSERT(m_pDownloader != NULL);
 	return m_pDownloader->IsResumable();
+}
+
+int CDownloaderMgr::Destroy()
+{
+	if(m_pDownloader == NULL)
+	{
+		CDownloader::CurrentStatusChanged(TSE_INVALID);
+		
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
+
+		return 0;
+	}
+	return m_pDownloader->Destroy();
 }
 
 void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
@@ -140,29 +153,33 @@ UINT CDownloaderMgr::StartDownload()
 		return 2;
 	}
 
-	if(pHeaderInfo->m_nHTTPCode == 206 && pHeaderInfo->m_nContentRangeTotal > 0)
+	if(pHeaderInfo->m_nHTTPCode == 206)
 	{
 		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentRangeTotal;
 		m_pDownloader = new CSegmentDownloader();
-
+		
 		szLog.Format("Segment download support: [Y]. HTTPCode=%d, Content-Length=%d", 
 			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentRangeTotal);
 	}
-	else if(pHeaderInfo->m_nHTTPCode == 200 && pHeaderInfo->m_nContentLength > (5 * 1024 * 1024))
+	else if(pHeaderInfo->m_nHTTPCode == 200)
 	{
-		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
-		m_pDownloader = new CSegmentDownloader();
+		//When file size is bigger than 5M, try to segment download
+		if(pHeaderInfo->m_nContentLength > (5 * 1024 * 1024))
+		{
+			m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
+			m_pDownloader = new CSegmentDownloader();
 
-		szLog.Format("Segment download support: [N]. But try to download with segment. "
-			"HTTPCode=%d, Content-Length=%d", pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
-	}
-	else
-	{
-		m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
-		m_pDownloader = new CEasyDownloader();
-		
-		szLog.Format("Segment download support: [N]. HTTPCode=%d, Content-Length=%d", 
-			pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
+			szLog.Format("Segment download support: [N]. But try to download with segment. "
+				"HTTPCode=%d, Content-Length=%d", pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
+		}
+		else
+		{
+			m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
+			m_pDownloader = new CEasyDownloader();
+			
+			szLog.Format("Segment download support: [N]. HTTPCode=%d, Content-Length=%d", 
+				pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
+		}
 	}
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 

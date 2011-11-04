@@ -38,6 +38,7 @@ public:
 	virtual int Stop();
 	virtual int Pause();
 	virtual int Resume();
+	virtual int Destroy();
 	virtual BOOL IsResumable();
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb);

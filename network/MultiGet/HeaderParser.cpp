@@ -111,6 +111,13 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 	curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
 
+	//connect timeout: 10s
+	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 10L);
+	
+	//low speed limit
+	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
+	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, 10L);
+
 	
 	szRange.Format("%d-%d", 0, 0);
 	curl_easy_setopt(m_curl, CURLOPT_RANGE, (LPCTSTR)szRange);

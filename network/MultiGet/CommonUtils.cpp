@@ -20,6 +20,8 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+int CCommonUtils::m_nUniqueID = 0;
+CCriticalSection CCommonUtils::m_idCriticalSection;
 
 CCommonUtils::CCommonUtils()
 {
@@ -59,6 +61,11 @@ void CCommonUtils::FormatErrorMsg(DWORD dwCode, CString& szErrorMsg)
 	case RC_MAJOR_TERMINATED_BY_CURL_CODE:
 		{
 			szErrorMsg.Format("[Transfer Error]: %d - %s", HIWORD(dwCode), curl_easy_strerror((CURLcode)HIWORD(dwCode)));
+		}
+		break;
+	case RC_MAJOR_DESTROYED:
+		{
+			szErrorMsg.Format("Removed");
 		}
 		break;
 	default:
@@ -111,6 +118,11 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	CString szStatus;
 	switch(dwCode)
 	{
+	case TSE_INVALID:
+		{
+			szStatus = "Invalid";
+		}
+		break;
 	case TSE_READY:
 		{
 			szStatus = "Ready";
@@ -155,6 +167,53 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	{
 		szMsg = szStatus;
 	}
+}
+
+DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
+{
+	DWORD dwStatusCode = TSE_READY;
+
+	WORD nMajor = LOWORD(dwResultCode);
+	switch(nMajor)
+	{
+	case RC_MAJOR_OK:
+		{
+			dwStatusCode = TSE_COMPLETE;
+		}
+		break;
+	case RC_MAJOR_PAUSED:
+		{
+			dwStatusCode = TSE_PAUSED;
+		}
+		break;
+	case RC_MAJOR_STOPPED:
+		{
+			dwStatusCode = TSE_STOPPED;
+		}
+		break;
+	case RC_MAJOR_DESTROYED:
+		{
+			dwStatusCode = TSE_INVALID;
+		}
+		break;
+	case RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR:
+		{
+			dwStatusCode = TSE_END_WITH_ERROR;
+		}
+		break;
+	case RC_MAJOR_TERMINATED_BY_CURL_CODE:
+		{
+			dwStatusCode = TSE_END_WITH_ERROR;
+		}
+		break;
+	default:
+		{
+			dwStatusCode = TSE_END_WITH_ERROR;
+		}
+		break;
+	}
+
+	return dwStatusCode;
 }
 
 LRESULT CCommonUtils::SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail)
@@ -558,6 +617,10 @@ BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName)
 
 BOOL CCommonUtils::RemoveDirectory(LPCTSTR lpPathName)
 {
+	if(!::PathFileExists(lpPathName))
+	{
+		return TRUE;
+	}
 	CString sCurFile, sCurFindFileFilter;
 	sCurFindFileFilter.Format("%s\\*", lpPathName);
 
@@ -730,4 +793,27 @@ BOOL CCommonUtils::IntegerOper(UINT& nData, int nOperType)
 		break;
 	}
 	return bResult;
+}
+
+int CCommonUtils::GetUniqueID()
+{
+	m_idCriticalSection.Lock();
+	int nResult = m_nUniqueID++;
+	m_idCriticalSection.Unlock();
+
+	return nResult;
+}
+
+LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if(::IsWindow(hWnd))
+	{
+		return ::SendMessage(hWnd, msg, wParam, lParam);
+	}
+	CString szLog;
+	szLog.Format("Message lost because of invalid hWnd. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X",
+		hWnd, msg, wParam, lParam);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	return (LRESULT)0;
 }

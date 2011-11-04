@@ -18,11 +18,12 @@ public:
 	virtual ~CDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
-	virtual CStatusChecker* GetStatusChecker();
+	virtual UINT GetCurrentStatus();
 	virtual int Start() = 0;
 	virtual int Stop() = 0;
 	virtual int Pause() = 0;
 	virtual int Resume() = 0;
+	virtual int Destroy() = 0;
 	virtual BOOL IsResumable() = 0;	
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);

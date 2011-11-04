@@ -12,12 +12,13 @@
 class CTaskInfo
 {
 public:
+	int		m_nTaskID;
 	CString m_url;
 	CString m_fileName;
 	CString m_fileSize;
 	CString m_progress;
 	CDownloader* m_lpDownloader;
-	CTaskInfo() : m_lpDownloader(0) {}
+	CTaskInfo() : m_nTaskID(-1), m_lpDownloader(0) {}
 	~CTaskInfo()
 	{
 		if(m_lpDownloader != NULL)

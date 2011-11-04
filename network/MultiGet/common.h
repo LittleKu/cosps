@@ -4,12 +4,20 @@
 #define WM_DOWNLOAD_PROGRESS	(WM_USER + 1099)
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
 #define WM_DOWNLOAD_STATUS		(WM_USER + 1101)
+#define WM_DOWNLOAD_DESTROY		(WM_USER + 1102)
+
+// #define MSG_FILTER_NONE			0
+// #define MSG_FILTER_PROGRESS		0x00000001
+// #define MSG_FILTER_COMPLETE		0x00000002
+// #define MSG_FILTER_STATUS		0x00000004
+// #define MSG_FILTER_ALL			0xFFFFFFFF
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
 
 typedef enum
 {
+	TSE_INVALID = -1,	//Task doesn't exist, or has been destroyed
 	TSE_READY	= 0,	//Task has been added, not started yet
 	TSE_TRANSFERRING,	//Task is transferring, no error detected
 	TSE_PAUSED,			//Task has been paused by user
@@ -24,7 +32,8 @@ typedef enum
 	RC_MAJOR_PAUSED,
 	RC_MAJOR_STOPPED,
 	RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR,
-	RC_MAJOR_TERMINATED_BY_CURL_CODE
+	RC_MAJOR_TERMINATED_BY_CURL_CODE,
+	RC_MAJOR_DESTROYED
 } ResultCodeMajor;
 
 typedef enum
@@ -38,6 +47,14 @@ typedef enum
 
 typedef CSize CRange;
 
+
+class CStatusInfo
+{
+public:
+	DWORD	m_dwResultCode;
+	CString m_szDetail;
+	CStatusInfo() : m_dwResultCode (0) {} 
+};
 class CProgressInfo
 {
 public:
@@ -47,8 +64,8 @@ public:
 	DWORD64 ulnow;
 	int retCode;
 	CString szReason;
-	int index;
-	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0), index(-1)
+	int m_nTaskID;
+	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0), m_nTaskID(-1)
 	{
 	}
 };
@@ -66,6 +83,9 @@ public:
 
 	BOOL IsStopped();
 	void Stop();
+
+	BOOL IsDestroyed();
+	void Destroy();
 
 	void Clear();
 private:
@@ -111,11 +131,11 @@ class CDownloadParam
 {
 public:
 	CString m_szUrl;
-	HWND	m_hWnd;
 	int		m_nTaskID;
+	HWND	m_hWnd;
 	UINT	m_nFileSize;
 	CString m_szSaveToFileName;
-	CDownloadParam(LPCTSTR lpszUrl = NULL, HWND hwnd = NULL, int index = -1, UINT nFileSize = 0)
+	CDownloadParam(LPCTSTR lpszUrl = NULL, int index = -1, HWND hwnd = NULL, UINT nFileSize = 0)
 		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nTaskID(index), m_nFileSize(nFileSize) {}
 };
 

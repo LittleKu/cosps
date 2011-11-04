@@ -28,15 +28,19 @@ void CDownloader::Init(const CDownloadParam& param)
 {
 	m_dlParam = param;
 }
-CStatusChecker* CDownloader::GetStatusChecker()
+
+UINT CDownloader::GetCurrentStatus()
 {
-	return &m_statusChecker;
+	return m_statusChecker.GetCurrentStatus();
 }
 
 void CDownloader::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
 {
 //	ASSERT(m_statusChecker.GetCurrentStatus() != nNewStatus);
 	m_statusChecker.SetCurrentStatus(nNewStatus);
-	
-	CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, m_statusChecker.GetCurrentStatus(), lpszDetail);
+
+	if(m_statusChecker.GetCurrentStatus() != TSE_INVALID)
+	{
+		CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, m_statusChecker.GetCurrentStatus(), lpszDetail);
+	}
 }

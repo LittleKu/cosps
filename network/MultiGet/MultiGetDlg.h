@@ -32,6 +32,10 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	//}}AFX_VIRTUAL
 
+	int GetTaskIndex(int nTaskID);
+	CTaskInfo* GetTaskInfo(int nTaskID);
+	BOOL GetTaskInfo(int nTaskID, int& nIndex, CTaskInfo*& pTaskInfo);
+
 // Implementation
 protected:
 	HICON m_hIcon;
@@ -46,6 +50,7 @@ protected:
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnStatusUpdate(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTaskDestroy(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnAdd1();
 	afx_msg void OnButtonStart1();
 	afx_msg void OnButtonPause();

@@ -35,6 +35,8 @@ public:
 	//convert error code to error message
 	static void FormatErrorMsg(DWORD dwCode, CString& szMsg);
 
+	static DWORD ResultCode2StatusCode(DWORD dwResultCode);
+
 	static void	StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg);
 
 	static LRESULT SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail = NULL);
@@ -73,11 +75,18 @@ public:
 	static int Intersection(const CRange& r1, const CRange& r2, CRange& rResult);
 
 	static BOOL IntegerOper(UINT& nData, int nOperType = INT_OPER_RESET);
+
+	static int GetUniqueID();
+
+	static LRESULT SendMessage(HWND hWnd, UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();
 	static void FormatInternalErrorMsg(int nCode, CString& szErrorMsg);
 	static BOOL GetProxyInfo(CMapUInt2String& proxyInfoMap);
+
+	static int m_nUniqueID;
+	static CCriticalSection m_idCriticalSection;
 };
 
 #endif // !defined(AFX_COMMONUTILS_H__D6DA1B18_3212_438C_B5AE_2B05B09C002D__INCLUDED_)

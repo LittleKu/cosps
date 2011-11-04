@@ -43,6 +43,7 @@ public:
 	virtual int Resume();
 	virtual int Stop();
 	virtual int Pause();
+	virtual int Destroy();
 	virtual BOOL IsResumable();
 private:
 	//Actual download process
@@ -88,10 +89,6 @@ private:
 	//Retrieve the temp directory for the download task
 	void GetTempFolder(CString& szTempFolder);
 	void VerifyTempFolderExist();
-
-	//Check connection header
-	int CheckConnectionHeader(int nIndex);
-	void CheckAllConnectionHeaders();
 private:
 	//CURL related callback functions
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb, int index);
@@ -108,9 +105,6 @@ protected:
 	BOOL m_bResumable;
 
 	CController m_controller;
-	
-	BOOL m_bHeaderChecked;
-	int m_nUsed;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

@@ -186,16 +186,20 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 
 int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow, int nIndex)
 {
+	if(m_controller.IsDestroyed())
+	{
+		return 1;
+	}
 	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
-
+	
 	if(pSegmentInfo->m_headerInfo.m_nHTTPCode != 200)
 	{
 		pSegmentInfo->m_nDlNow = (DWORD64)dlnow;
 	}
-
+	
 	DWORD64 nDlNow = GetTotalDownloadNow();
-
+	
 	//Send progress notification
 	CProgressInfo progressInfo;
 	progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
@@ -204,19 +208,19 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	progressInfo.ulnow = (DWORD64)ulnow;
 	progressInfo.retCode = -1;
 	progressInfo.szReason = "";
-	progressInfo.index = m_dlParam.m_nTaskID;
+	progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 	
 	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 
 	//Pause
 	if(m_controller.IsPaused())
 	{
-		return 1;
+		return 2;
 	}
 	//Stop
 	if(m_controller.IsStopped())
 	{
-		return 2;
+		return 3;
 	}
 
 	return 0;
@@ -226,8 +230,7 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE),
-	m_bHeaderChecked(FALSE), m_nUsed(-1)
+CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE)
 {
 	m_statusChecker.SetCurrentStatus(TSE_READY);
 }
@@ -235,13 +238,14 @@ CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NU
 CSegmentDownloader::~CSegmentDownloader()
 {
 	m_curlm = NULL;
-	m_pSegmentInfoArray = NULL;
+
+	RemoveSegmentInfoArray();
 }
 
 void CSegmentDownloader::Init(const CDownloadParam& param)
 {
-	m_dlParam = param;
-
+	CDownloader::Init(param);
+	
 	m_pSegmentInfoArray = new CSegmentInfoArray();
 	CSegmentInfoMap::GetInstance()->AddSegmentInfoArray(m_dlParam.m_szUrl, m_pSegmentInfoArray);
 }
@@ -264,7 +268,7 @@ int CSegmentDownloader::Resume()
 	VerifyTempFolderExist();
 	RestartInitMultiHandle();
 	
-	CCommonUtils::SendStatusMsg(m_dlParam.m_hWnd, TSE_TRANSFERRING);
+	CurrentStatusChanged(TSE_TRANSFERRING);
 	
 	return DoDownload();
 }
@@ -279,6 +283,34 @@ int CSegmentDownloader::Stop()
 int CSegmentDownloader::Pause()
 {
 	m_controller.Pause();
+
+	return 0;
+}
+
+int CSegmentDownloader::Destroy()
+{
+	if(GetCurrentStatus() != TSE_TRANSFERRING)
+	{
+		CString szTempFolder;
+		GetTempFolder(szTempFolder);
+		
+		//delete task related folder
+		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
+		{
+			CCommonUtils::RemoveDirectory(szTempFolder);
+		}
+		
+		//Remove the segment information data
+		RemoveSegmentInfoArray();
+		
+		CurrentStatusChanged(TSE_INVALID);
+		
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
+
+		return 0;
+	}
+
+	m_controller.Destroy();
 
 	return 0;
 }
@@ -401,7 +433,6 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 		//3. Remove the segment information data
 		RemoveSegmentInfoArray();
 
-
 		//Final status: complete
 		CurrentStatusChanged(TSE_COMPLETE);
 	}
@@ -412,6 +443,26 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 	else if(nMajor == RC_MAJOR_STOPPED)
 	{
 		CurrentStatusChanged(TSE_STOPPED);
+	}
+	else if(nMajor == RC_MAJOR_DESTROYED)
+	{
+		CString szTempFolder;
+		GetTempFolder(szTempFolder);
+				
+		//delete task related folder
+		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
+		{
+			CCommonUtils::RemoveDirectory(szTempFolder);
+		}
+		
+		//Remove the segment information data
+		RemoveSegmentInfoArray();
+
+		CurrentStatusChanged(TSE_INVALID);
+
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
+
+		return;
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
 	{
@@ -433,8 +484,11 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 		szErrorMsg.Format("Unknown error: %d", dwResult);
 		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
 	}
-		
-	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szLog), dwResult);
+	
+	if(GetCurrentStatus() != TSE_INVALID)
+	{
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szLog), dwResult);
+	}
 }
 
 
@@ -539,13 +593,12 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 		break;
 	case CURLE_ABORTED_BY_CALLBACK:
 		{
-			//(0). segment download unsupported, stop other connections except m_nUsed
-			//if(m_nUsed >= 0)
-			if(FALSE)
+			//(0). This task been destroyed
+			if(m_controller.IsDestroyed())
 			{
-				ASSERT(m_nUsed != nIndex);
+				dwResult = MAKELONG(RC_MAJOR_DESTROYED, RC_MINOR_OK);
 
-				szLog.Format("(%d) - Connection dropped", nIndex);
+				szLog.Format("(%d) - Connection destroyed", nIndex);
 				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			}
 			//(1). Stop
@@ -587,9 +640,6 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 			{
 				curl_multi_add_handle(m_curlm, retry_handle);
 				still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
-
-				m_bHeaderChecked = FALSE;
-				m_nUsed = -1;
 			}
 		}
 		break;
@@ -604,9 +654,6 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 				{
 					curl_multi_add_handle(m_curlm, retry_handle);
 					still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
-
-					m_bHeaderChecked = FALSE;
-					m_nUsed = -1;
 				}
 			}
 			else
@@ -843,106 +890,16 @@ void CSegmentDownloader::AddSegmentInfo(CSegmentInfoEx* pSegmentInfo)
 
 void CSegmentDownloader::RemoveSegmentInfoArray()
 {
+	if(m_pSegmentInfoArray == NULL)
+	{
+		return;
+	}
 	CSegmentInfoArray* pSegInfoArray = CSegmentInfoMap::GetInstance()->GetSegmentInfoArray(m_dlParam.m_szUrl);
 	ASSERT(pSegInfoArray != NULL && m_pSegmentInfoArray == pSegInfoArray);
 	
 	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_szUrl);
 	
 	m_pSegmentInfoArray = NULL;
-}
-
-void CSegmentDownloader::CheckAllConnectionHeaders()
-{
-	int i, nSize;
-	
-	int n200 = -1;
-	BOOL bHasInvalid = FALSE;
-	BOOL bAll206 = TRUE;
-	int nVC;
-	CString szLog;
-	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
-	{
-		nVC = CheckConnectionHeader(i);
-		if(nVC == VCE_200)
-		{
-			n200 = i;
-			break;
-		}
-		if(nVC == VCE_INVALID)
-		{
-			bHasInvalid = TRUE;
-		}
-		if(nVC != VCE_OK)
-		{
-			bAll206 = FALSE;
-		}
-	}
-	
-	if(n200 >= 0)
-	{
-		szLog.Format("[CheckAllConnectionHeaders]: Connection (%d) return 200, keep this connection only", n200);
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			
-		m_bHeaderChecked = TRUE;
-		m_nUsed = n200;
-	}
-	else if(bHasInvalid)
-	{
-		m_bHeaderChecked = FALSE;
-		m_nUsed = -1;
-	}
-	else if(bAll206)
-	{
-		szLog.Format("[CheckAllConnectionHeaders]: All the connections return 206, best case");
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			
-		m_bHeaderChecked = TRUE;
-		m_nUsed = -1;
-	}
-	//there are 206 and other response, but no 200 and invalid
-	else
-	{
-		szLog.Format("[CheckAllConnectionHeaders]: Some connection return unexpected response, valid but not 206 and 200");
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			
-		m_bHeaderChecked = TRUE;
-		m_nUsed = -1;
-	}
-}
-int CSegmentDownloader::CheckConnectionHeader(int nIndex)
-{
-	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
-	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
-	
-	if(pSegmentInfo->m_headerInfo.m_nHTTPCode <= 0)
-	{
-		return VCE_INVALID;
-	}
-	else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 206)
-	{
-		if( (m_dlParam.m_nFileSize == pSegmentInfo->m_headerInfo.m_nContentRangeTotal)
-			&& (pSegmentInfo->m_range.cx == pSegmentInfo->m_headerInfo.m_nContentRangeX)
-			&& (pSegmentInfo->m_range.cy == pSegmentInfo->m_headerInfo.m_nContentRangeY) )
-		{
-			return VCE_OK;
-		}
-		else
-		{
-			CString szLog;
-			szLog.Format("Connection(%d) return 206, but size validation failed. req(%d-%d/%d), rsp(%d-%d/%d)", 
-				nIndex, pSegmentInfo->m_range.cx, pSegmentInfo->m_range.cy, m_dlParam.m_nFileSize,
-				pSegmentInfo->m_headerInfo.m_nContentRangeTotal, pSegmentInfo->m_headerInfo.m_nContentRangeX,
-				pSegmentInfo->m_headerInfo.m_nContentRangeY);
-			
-			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		}
-	}
-	else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 200)
-	{
-		return VCE_200;
-	}
-	
-	return VCE_OTHER;
 }
 
 CURL* CSegmentDownloader::InitEasyHandle(int nIndex, int nStartPos, int nFinishPos)

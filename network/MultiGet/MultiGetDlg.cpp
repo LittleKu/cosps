@@ -6,8 +6,7 @@
 #include "MultiGetDlg.h"
 #include "TestDownloader.h"
 #include "HeaderParser.h"
-#include "EasyDownloader.h"
-#include "SegmentDownloader.h"
+#include "CommonUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -90,6 +89,7 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_MESSAGE(WM_DOWNLOAD_PROGRESS, OnUpdateProgress)
 	ON_MESSAGE(WM_DOWNLOAD_COMPLETE, OnEnd)
 	ON_MESSAGE(WM_DOWNLOAD_STATUS, OnStatusUpdate)
+	ON_MESSAGE(WM_DOWNLOAD_DESTROY, OnTaskDestroy)
 	ON_BN_CLICKED(IDC_ADD1, OnAdd1)
 	ON_BN_CLICKED(IDC_BUTTON_START1, OnButtonStart1)
 	ON_BN_CLICKED(IDC_BUTTON_PAUSE, OnButtonPause)
@@ -205,8 +205,8 @@ void CMultiGetDlg::OnOK()
 LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 {
 	CProgressInfo* pProgressInfo = (CProgressInfo*)wParam;
-	int index = pProgressInfo->index;
-
+	int index = GetTaskIndex(pProgressInfo->m_nTaskID);
+	
 	ASSERT(index >= 0 && index < m_taskListCtrl.GetItemCount());
 
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(index);
@@ -247,8 +247,28 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 
 LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 {
-	m_taskListCtrl.SetItemText(0, 4, (LPCTSTR)lParam);
-	m_taskListCtrl.InvalidateSubItem(0, 4);
+	int nIndex = 0;
+	CTaskInfo* pTaskInfo = NULL;	
+	if(!GetTaskInfo(wParam, nIndex, pTaskInfo))
+	{
+		return 0L;
+	}
+
+	CStatusInfo* pStatusInfo = (CStatusInfo*)lParam;
+
+	CString szStatusMsg;
+	CCommonUtils::StatusCodeToStr(pStatusInfo->m_dwResultCode, pStatusInfo->m_szDetail, szStatusMsg);
+
+ 	m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
+ 	m_taskListCtrl.InvalidateSubItem(nIndex, 4);
+	
+	return 1L;
+}
+
+LRESULT CMultiGetDlg::OnTaskDestroy(WPARAM wParam, LPARAM lParam)
+{
+	m_taskListCtrl.RemoveSelectedItems();
+
 	return 1L;
 }
 
@@ -266,6 +286,7 @@ void CMultiGetDlg::OnAdd1()
 	CTaskInfo* pTaskInfo = new CTaskInfo();
 	pTaskInfo->m_url = sUrl;
 	pTaskInfo->m_progress = "Ready";
+	pTaskInfo->m_nTaskID = CCommonUtils::GetUniqueID();
 	
 	m_taskListCtrl.AddRow(*pTaskInfo);
 	
@@ -274,57 +295,106 @@ void CMultiGetDlg::OnAdd1()
 
 void CMultiGetDlg::OnButtonStart1() 
 {
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
-
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-
-	CDownloadParam param;
-	param.m_hWnd = GetSafeHwnd();
-	param.m_nTaskID = 0;
-	param.m_szUrl = pTaskInfo->m_url;
-	param.m_nFileSize = 0;
-
-	if(pTaskInfo->m_lpDownloader == NULL)
+	CTaskInfo* pTaskInfo = NULL;
+	//Get all selected items
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+	
+	int nItem = -1;
+	while (pos != NULL)
 	{
-		pTaskInfo->m_lpDownloader = new CDownloaderMgr();
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+		
+		if(pTaskInfo == NULL)
+		{
+			continue;
+		}
+		
+		CDownloadParam param;
+		param.m_hWnd = GetSafeHwnd();
+		param.m_nTaskID = pTaskInfo->m_nTaskID;
+		param.m_szUrl = pTaskInfo->m_url;
+		param.m_nFileSize = 0;
+		
+		if(pTaskInfo->m_lpDownloader == NULL)
+		{
+			pTaskInfo->m_lpDownloader = new CDownloaderMgr();
+		}
+		pTaskInfo->m_lpDownloader->Init(param);
+		
+		pTaskInfo->m_lpDownloader->Start();
 	}
-	pTaskInfo->m_lpDownloader->Init(param);
-
-	pTaskInfo->m_lpDownloader->Start();
 }
 
 void CMultiGetDlg::OnButtonPause() 
 {
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	CTaskInfo* pTaskInfo = NULL;
+	//Get all selected items
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
 	
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloader != NULL);
-	
-	pTaskInfo->m_lpDownloader->Pause();
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+		
+		if(pTaskInfo == NULL)
+		{
+			continue;
+		}
+		
+		pTaskInfo->m_lpDownloader->Pause();
+	}
 }
 
 void CMultiGetDlg::OnButtonStop() 
 {	
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	CTaskInfo* pTaskInfo = NULL;
+	//Get all selected items
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
 	
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloader != NULL);
-	
-	pTaskInfo->m_lpDownloader->Stop();
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+		
+		if(pTaskInfo == NULL)
+		{
+			continue;
+		}
+		
+		pTaskInfo->m_lpDownloader->Stop();
+	}
 }
 
 void CMultiGetDlg::OnButtonResume() 
 {
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	CTaskInfo* pTaskInfo = NULL;
+	//Get all selected items
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
 	
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-	ASSERT(pTaskInfo->m_lpDownloader != NULL);
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
 
-	pTaskInfo->m_lpDownloader->Resume();
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+
+		if(pTaskInfo == NULL)
+		{
+			continue;
+		}
+
+		pTaskInfo->m_lpDownloader->Resume();
+	}
 }
 
 void CMultiGetDlg::OnButtonHeader() 
@@ -345,5 +415,72 @@ void CMultiGetDlg::OnButtonHeader()
 
 void CMultiGetDlg::OnButtonRemove() 
 {
-	m_taskListCtrl.RemoveSelectedItems();
+	ASSERT(m_taskListCtrl.GetItemCount() > 0);
+	
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	ASSERT(pTaskInfo != NULL);
+	
+	if(pTaskInfo->m_lpDownloader == NULL)
+	{
+		m_taskListCtrl.RemoveSelectedItems();
+		return;
+	}	
+	pTaskInfo->m_lpDownloader->Destroy();
+}
+
+int CMultiGetDlg::GetTaskIndex(int nTaskID)
+{
+	int i, nRowCount;
+	CTaskInfo* pTaskInfo = NULL;
+	for(i = 0, nRowCount = m_taskListCtrl.GetItemCount(); i < nRowCount; i++)
+	{
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(i);
+		ASSERT(pTaskInfo != NULL);
+
+		if(pTaskInfo->m_nTaskID == nTaskID)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+CTaskInfo* CMultiGetDlg::GetTaskInfo(int nTaskID)
+{
+	int i, nRowCount;
+	CTaskInfo* pTaskInfo = NULL;
+	for(i = 0, nRowCount = m_taskListCtrl.GetItemCount(); i < nRowCount; i++)
+	{
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(i);
+		ASSERT(pTaskInfo != NULL);
+		
+		if(pTaskInfo->m_nTaskID == nTaskID)
+		{
+			return pTaskInfo;
+		}
+	}
+	
+	return NULL;
+}
+
+BOOL CMultiGetDlg::GetTaskInfo(int nTaskID, int& nIndex, CTaskInfo*& pTaskInfo)
+{
+	int i, nRowCount;
+	CTaskInfo* ptr = NULL;
+	for(i = 0, nRowCount = m_taskListCtrl.GetItemCount(); i < nRowCount; i++)
+	{
+		ptr = (CTaskInfo*)m_taskListCtrl.GetItemData(i);
+		ASSERT(ptr != NULL);
+		
+		if(ptr->m_nTaskID == nTaskID)
+		{
+			nIndex = i;
+			pTaskInfo = ptr;
+
+			return TRUE;
+		}
+	}
+	
+	return FALSE;
 }
