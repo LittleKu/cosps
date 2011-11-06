@@ -24,7 +24,7 @@ CSegmentInfoMap::CSegmentInfoMap()
 CSegmentInfoMap::~CSegmentInfoMap()
 {
 	// Remove the elements
-	CString szKey;
+	int nTaskID;
 	void* ptr = NULL;
 	CSegmentInfoArray* pSegInfoArray = NULL;
 
@@ -33,7 +33,7 @@ CSegmentInfoMap::~CSegmentInfoMap()
 	POSITION pos = m_mapSegmentInfo.GetStartPosition();
 	while(pos != NULL)
 	{
-		m_mapSegmentInfo.GetNextAssoc(pos, szKey, ptr);
+		m_mapSegmentInfo.GetNextAssoc(pos, nTaskID, ptr);
 
 		pSegInfoArray = (CSegmentInfoArray*)ptr;
 		ASSERT(pSegInfoArray != NULL);
@@ -63,6 +63,7 @@ CSegmentInfoMap* CSegmentInfoMap::GetInstance()
 	return ptr.get();
 }
 
+/*
 CSegmentInfoArray* CSegmentInfoMap::GetSegmentInfoArray(LPCTSTR lpszUrl)
 {
 	void* ptr = NULL;
@@ -102,3 +103,45 @@ void CSegmentInfoMap::RemoveSegmentInfoArray(LPCTSTR lpszUrl)
 
 	m_mapSegmentInfo.RemoveKey(lpszUrl);
 }
+*/
+
+CSegmentInfoArray* CSegmentInfoMap::GetSegmentInfoArray(int nTaskID)
+{
+	void* ptr = NULL;
+	if(m_mapSegmentInfo.Lookup(nTaskID, ptr) == FALSE)
+	{
+		CString szLog;
+		szLog.Format("The query taskID is not exist. nTaskID = %d", nTaskID);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			
+		return NULL;
+	}
+	return (CSegmentInfoArray*)ptr;
+}
+
+void CSegmentInfoMap::AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray)
+{
+	m_mapSegmentInfo.SetAt(nTaskID, pSegInfoArray);
+}
+
+void CSegmentInfoMap::RemoveSegmentInfoArray(int nTaskID)
+{
+	CSegmentInfoArray* pSegInfoArray = GetSegmentInfoArray(nTaskID);
+	ASSERT(pSegInfoArray != NULL);
+	
+	int i, size;
+	//Free space of this array
+	for(i = 0, size = pSegInfoArray->GetSize(); i < size; i++)
+	{
+		CSegmentInfo* pSegmentInfo = pSegInfoArray->GetAt(i);
+		ASSERT(pSegmentInfo != NULL);
+		
+		delete pSegmentInfo;
+	}
+	//Free the space of the pointer
+	pSegInfoArray->RemoveAll();
+	delete pSegInfoArray;
+	
+	m_mapSegmentInfo.RemoveKey(nTaskID);
+}
+

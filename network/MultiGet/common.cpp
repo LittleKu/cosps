@@ -84,7 +84,7 @@ BOOL CController::IsDestroyed()
 {
 	m_ctritialSection.Lock();
 	
-	BOOL bResult = (m_dwStatus == TSE_INVALID);
+	BOOL bResult = (m_dwStatus == TSE_DESTROYED);
 	
 	m_ctritialSection.Unlock();
 	return bResult;
@@ -93,7 +93,7 @@ void CController::Destroy()
 {
 	m_ctritialSection.Lock();
 	
-	m_dwStatus = TSE_INVALID;
+	m_dwStatus = TSE_DESTROYED;
 	m_bModified = TRUE;
 	
 	m_ctritialSection.Unlock();

@@ -7,6 +7,7 @@
 #include "TestDownloader.h"
 #include "HeaderParser.h"
 #include "CommonUtils.h"
+#include "DownloaderMap.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -97,6 +98,7 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_RESUME, OnButtonResume)
 	ON_BN_CLICKED(IDC_BUTTON_HEADER, OnButtonHeader)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVE, OnButtonRemove)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -187,6 +189,34 @@ HCURSOR CMultiGetDlg::OnQueryDragIcon()
 
 LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 {
+	int nTaskID = (int)wParam;
+	DWORD dwResult = (DWORD)lParam;
+	
+	int nIndex = 0;
+	CTaskInfo* pTaskInfo = NULL;
+	if(!GetTaskInfo(nTaskID, nIndex, pTaskInfo))
+	{
+		WORD nMajor = LOWORD(dwResult);
+//		ASSERT(nMajor == RC_MAJOR_DESTROYED);
+
+		CString szLog;
+		szLog.Format("[OnEnd]: The task [%d] is in destroying. Result=0x%08X", nTaskID, dwResult);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+//		CDownloaderMap::GetInstance()->RemoveDownloader(nTaskID);
+	}
+	else
+	{
+		CString szStatusMsg;
+		CCommonUtils::ResultCode2StatusStr(dwResult, szStatusMsg);
+		
+		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
+		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
+	}
+
+	return 1L;
+
+	/*
 	const char* pmsg = (char*)wParam;
 
 	CString szMsg = "Transfer End";
@@ -197,6 +227,7 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 	}
 	AfxMessageBox(szMsg);
 	return 1L;
+	*/
 }
 void CMultiGetDlg::OnOK() 
 {
@@ -206,6 +237,15 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 {
 	CProgressInfo* pProgressInfo = (CProgressInfo*)wParam;
 	int index = GetTaskIndex(pProgressInfo->m_nTaskID);
+
+	if(index < 0)
+	{
+		CString szLog;
+		szLog.Format("[OnUpdateProgress]: The task [%d] has been destroyed already.", pProgressInfo->m_nTaskID);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		return (LRESULT)0;
+	}
 	
 	ASSERT(index >= 0 && index < m_taskListCtrl.GetItemCount());
 
@@ -247,20 +287,26 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 
 LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 {
-	int nIndex = 0;
-	CTaskInfo* pTaskInfo = NULL;	
-	if(!GetTaskInfo(wParam, nIndex, pTaskInfo))
-	{
-		return 0L;
-	}
-
+	int nTaskID = (int)wParam;
 	CStatusInfo* pStatusInfo = (CStatusInfo*)lParam;
 
-	CString szStatusMsg;
-	CCommonUtils::StatusCodeToStr(pStatusInfo->m_dwResultCode, pStatusInfo->m_szDetail, szStatusMsg);
-
- 	m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
- 	m_taskListCtrl.InvalidateSubItem(nIndex, 4);
+	int nIndex = 0;
+	CTaskInfo* pTaskInfo = NULL;
+	if(!GetTaskInfo(nTaskID, nIndex, pTaskInfo))
+	{
+		CString szLog;
+		szLog.Format("[OnStatusUpdate]: The task [%d] is in destroying. Status=0x%08X, detail = %s", 
+			nTaskID, pStatusInfo->m_nStatusCode, (LPCTSTR)pStatusInfo->m_szDetail);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	}
+	else
+	{
+		CString szStatusMsg;
+		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nStatusCode, pStatusInfo->m_szDetail, szStatusMsg);
+		
+		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
+ 		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
+	}
 	
 	return 1L;
 }
@@ -413,19 +459,67 @@ void CMultiGetDlg::OnButtonHeader()
 	AfxMessageBox(szMsg);
 }
 
+static UINT RemoveTaskProc(LPVOID lpvData)
+{
+	CArray<CDownloader*, CDownloader*> *pDownloaderArray = (CArray<CDownloader*, CDownloader*> *)lpvData;
+
+	CString szLog;
+	szLog.Format("Start to destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	int i, nSize;
+	CDownloader* pDownloader;
+	/*
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloader != NULL);
+
+		pDownloader->Destroy();
+	}
+	*/
+
+	
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloader != NULL);
+
+		delete pDownloader;
+	}
+
+	delete pDownloaderArray;
+	pDownloaderArray = NULL;
+	
+	szLog.Format("Finished destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	return 0; 
+}
 void CMultiGetDlg::OnButtonRemove() 
 {
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
-	
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-	
-	if(pTaskInfo->m_lpDownloader == NULL)
+	CArray<CDownloader*, CDownloader*> *pDownloaderArray = new CArray<CDownloader*, CDownloader*>();
+	CTaskInfo* pTaskInfo = NULL;
+
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+	int nItem = -1;
+	while (pos != NULL)
 	{
-		m_taskListCtrl.RemoveSelectedItems();
-		return;
-	}	
-	pTaskInfo->m_lpDownloader->Destroy();
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+
+		if(pTaskInfo->m_lpDownloader != NULL)
+		{
+			pTaskInfo->m_lpDownloader->Destroy();
+			pDownloaderArray->Add(pTaskInfo->m_lpDownloader);
+		}
+	}
+
+	m_taskListCtrl.RemoveSelectedItems();
+
+	CWinThread* pThread = AfxBeginThread(RemoveTaskProc, pDownloaderArray);
 }
 
 int CMultiGetDlg::GetTaskIndex(int nTaskID)
@@ -483,4 +577,34 @@ BOOL CMultiGetDlg::GetTaskInfo(int nTaskID, int& nIndex, CTaskInfo*& pTaskInfo)
 	}
 	
 	return FALSE;
+}
+
+void CMultiGetDlg::OnButtonAdd() 
+{
+	static const TCHAR* lpszUrlList[] = {
+	"http://download.httpwatch.com/httpwatch.exe",
+	"http://cn2.php.net/distributions/manual/php_enhanced_en.chm",
+	"http://wiresharkdownloads.riverbed.com/wireshark/win32/wireshark-win32-1.6.2.exe",
+	"http://download.wondershare.com/cbs_down/pdf-converter-pro_full839.exe",
+	"http://70.duote.org:8080/rmdemo.zip",
+	"http://desktop.youku.com/iku2/iku2.1_setup.exe",
+	"http://sc.down.chinaz.com/201108/Mp3ABCut_2.1.0.zip",
+	"http://63.duote.org/winmpgvideoconvert.exe",
+	"http://download.skype.com/SkypeSetupFull.exe",
+	"http://ncu.dl.sourceforge.net/project/aresgalaxy/aresgalaxy/AresRegular217_10272010/aresregular217_installer.exe",
+	"http://labs.renren.com/apache-mirror//httpd/httpd-2.2.20-win32-src.zip",
+	"http://www.youtubeget.com/down/yg.exe",
+	"http://www.any-code-counter.com",
+	"fasfasdfafffffffffffffffffffwefwef",
+	"f43fifasdkfiefkds"};
+	
+	int nCount = sizeof(lpszUrlList)/sizeof(lpszUrlList[0]);
+	for(int i = 0; i < nCount; i++)
+	{
+		CTaskInfo* pTaskInfo = new CTaskInfo();
+		pTaskInfo->m_url = lpszUrlList[i];
+		pTaskInfo->m_progress = "Ready";
+		pTaskInfo->m_nTaskID = CCommonUtils::GetUniqueID();
+		m_taskListCtrl.AddRow(*pTaskInfo);
+	}
 }

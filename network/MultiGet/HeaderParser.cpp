@@ -95,7 +95,31 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 	return (size_t)(size * nmemb);
 }
 
+CHeaderParser::CHeaderParser() : m_curl(NULL)
+{
+}
 CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
+{
+	Start(url);
+}
+
+void CHeaderParser::Stop()
+{
+	int should_stop = 100;
+	if(m_curl)
+		curl_easy_setopt(m_curl, CURLOPT_PRIVATE, (void*)should_stop);
+}
+
+
+CHeaderParser::~CHeaderParser()
+{
+}
+
+CHeaderInfo* CHeaderParser::GetHeaderInfo()
+{
+	return &m_headerInfo;
+}
+void CHeaderParser::Start(const char* url)
 {
 	/* init the curl session */
 	m_curl = curl_easy_init();
@@ -105,56 +129,47 @@ CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
 	}
 	CString szRange;
 	CURLcode res = CURLE_OK;
-
+	
 	curl_easy_setopt(m_curl, CURLOPT_URL, url);
 	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
-
+	
 	//connect timeout: 10s
-	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 10L);
+	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 2L);
 	
 	//low speed limit
 	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
-	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, 10L);
-
+	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, 150L);
+	
 	
 	szRange.Format("%d-%d", 0, 0);
 	curl_easy_setopt(m_curl, CURLOPT_RANGE, (LPCTSTR)szRange);
-
+	
 	//Proxy setting
 	if(SYS_OPTIONS()->GetInstance()->GetProxy() != NULL)
 	{
 		curl_easy_setopt(m_curl, CURLOPT_PROXY, SYS_OPTIONS()->GetInstance()->GetProxy());
 	}
-
+	
 	//Throw away body if it exists
 	curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, ThrowAwayCallback);
 	curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, NULL);
 	
 	curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, &m_headerInfo);	
 	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, HeaderParserCallback);
-
+	
 	res = curl_easy_perform(m_curl);
 	m_headerInfo.m_nCurlResult = res;
-
+	
 	if(res != CURLE_OK)
 	{
 		CString szLog;
 		szLog.Format("Failed to GET header. curl code: %d - %s, url = %s", res, 
 			curl_easy_strerror(res), url);
-
+		
 		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	/* always cleanup */
-    curl_easy_cleanup(m_curl);
-}
-
-CHeaderParser::~CHeaderParser()
-{
-}
-
-CHeaderInfo* CHeaderParser::GetHeaderInfo()
-{
-	return &m_headerInfo;
+    curl_easy_cleanup(m_curl);	
 }

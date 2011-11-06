@@ -6,24 +6,18 @@
 #define WM_DOWNLOAD_STATUS		(WM_USER + 1101)
 #define WM_DOWNLOAD_DESTROY		(WM_USER + 1102)
 
-// #define MSG_FILTER_NONE			0
-// #define MSG_FILTER_PROGRESS		0x00000001
-// #define MSG_FILTER_COMPLETE		0x00000002
-// #define MSG_FILTER_STATUS		0x00000004
-// #define MSG_FILTER_ALL			0xFFFFFFFF
-
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
 
 typedef enum
 {
-	TSE_INVALID = -1,	//Task doesn't exist, or has been destroyed
 	TSE_READY	= 0,	//Task has been added, not started yet
 	TSE_TRANSFERRING,	//Task is transferring, no error detected
 	TSE_PAUSED,			//Task has been paused by user
 	TSE_STOPPED,		//Task has been stopped by user
 	TSE_COMPLETE,		//Task has been completed successfully
-	TSE_END_WITH_ERROR	//Task ended with error
+	TSE_END_WITH_ERROR,	//Task ended with error
+	TSE_DESTROYED   	//Task doesn't exist, or has been destroyed
 } TaskStatusEnum;
 
 typedef enum
@@ -51,9 +45,9 @@ typedef CSize CRange;
 class CStatusInfo
 {
 public:
-	DWORD	m_dwResultCode;
+	DWORD	m_nStatusCode;
 	CString m_szDetail;
-	CStatusInfo() : m_dwResultCode (0) {} 
+	CStatusInfo() : m_nStatusCode (0) {} 
 };
 class CProgressInfo
 {

@@ -118,9 +118,9 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	CString szStatus;
 	switch(dwCode)
 	{
-	case TSE_INVALID:
+	case TSE_DESTROYED:
 		{
-			szStatus = "Invalid";
+			szStatus = "Destroyed";
 		}
 		break;
 	case TSE_READY:
@@ -193,7 +193,7 @@ DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
 		break;
 	case RC_MAJOR_DESTROYED:
 		{
-			dwStatusCode = TSE_INVALID;
+			dwStatusCode = TSE_DESTROYED;
 		}
 		break;
 	case RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR:
@@ -216,12 +216,21 @@ DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
 	return dwStatusCode;
 }
 
-LRESULT CCommonUtils::SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail)
+void  CCommonUtils::ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg)
 {
-	CString szStatusMsg;
-	StatusCodeToStr(dwCode, lpDetail, szStatusMsg);
+	DWORD dwStatusCode = ResultCode2StatusCode(dwResultCode);
 
-	return ::SendMessage(hWnd, WM_DOWNLOAD_STATUS, (WPARAM)dwCode, (LPARAM)((LPCTSTR)szStatusMsg));
+	CString szErrorMsg;
+	CCommonUtils::FormatErrorMsg(dwResultCode, szErrorMsg);
+
+	if(dwStatusCode == TSE_END_WITH_ERROR)
+	{
+		StatusCodeToStr(dwStatusCode, szErrorMsg, szMsg);
+	}
+	else
+	{
+		StatusCodeToStr(dwStatusCode, NULL, szMsg);
+	}
 }
 
 void CCommonUtils::ReplaceCRLF(CString& szStr, LPCTSTR lpCR, LPCTSTR lpLF)
@@ -806,14 +815,22 @@ int CCommonUtils::GetUniqueID()
 
 LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if(::IsWindow(hWnd))
-	{
-		return ::SendMessage(hWnd, msg, wParam, lParam);
-	}
 	CString szLog;
-	szLog.Format("Message lost because of invalid hWnd. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X",
-		hWnd, msg, wParam, lParam);
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
-	return (LRESULT)0;
+	if(::IsWindow(hWnd) == FALSE)
+	{
+		szLog.Format("IsWindow(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
+			hWnd, msg, wParam, lParam);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		return (LRESULT)0;
+	}
+	if(::IsWindowVisible(hWnd) == FALSE)
+	{
+		szLog.Format("IsWindowVisible(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
+			hWnd, msg, wParam, lParam);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		return (LRESULT)0;
+	}	
+
+	return ::SendMessage(hWnd, msg, wParam, lParam);
 }

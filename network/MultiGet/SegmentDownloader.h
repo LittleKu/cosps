@@ -35,7 +35,7 @@ public:
 class CSegmentDownloader : public CDownloader
 {
 public:
-	CSegmentDownloader();
+	CSegmentDownloader(TaskStatusEnum eInitStatus = TSE_READY);
 	virtual ~CSegmentDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);

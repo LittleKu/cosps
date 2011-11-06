@@ -15,9 +15,8 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CStatusChecker::CStatusChecker(UINT nInitStatus)
+CStatusChecker::CStatusChecker(UINT nInitStatus) : m_nCurStatus(nInitStatus)
 {
-	m_nCurStatus = nInitStatus;
 }
 
 CStatusChecker::~CStatusChecker()

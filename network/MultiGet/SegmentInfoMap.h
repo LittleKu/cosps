@@ -10,17 +10,25 @@
 #endif // _MSC_VER > 1000
 
 typedef CArray<CSegmentInfo*, CSegmentInfo*> CSegmentInfoArray;
+typedef CMap<int, int, void*, void*> CMapIntToPtr;
 
 class CSegmentInfoMap  
 {
 public:
 	virtual ~CSegmentInfoMap();
+	/*
 	CSegmentInfoArray* GetSegmentInfoArray(LPCTSTR lpszUrl);
 	void AddSegmentInfoArray(LPCTSTR lpszUrl, CSegmentInfoArray* pSegInfoArray);
 	void RemoveSegmentInfoArray(LPCTSTR lpszUrl);
+	*/
+
+	CSegmentInfoArray* GetSegmentInfoArray(int nTaskID);
+	void AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray);
+	void RemoveSegmentInfoArray(int nTaskID);
 private:
 	CSegmentInfoMap();	
-	CMapStringToPtr m_mapSegmentInfo;
+//	CMapStringToPtr m_mapSegmentInfo;
+	CMapIntToPtr m_mapSegmentInfo;
 public:
 	static CSegmentInfoMap* GetInstance();
 };

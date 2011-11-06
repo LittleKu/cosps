@@ -15,10 +15,12 @@
 class CHeaderParser  
 {
 public:
+	CHeaderParser();
 	CHeaderParser(const char* url);
 	virtual ~CHeaderParser();
 	CHeaderInfo* GetHeaderInfo();
-
+	void Start(const char* url);
+	void Stop();
 private:
 	CURL* m_curl;
 	CHeaderInfo m_headerInfo;

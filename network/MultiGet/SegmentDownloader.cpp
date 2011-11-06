@@ -14,22 +14,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-typedef enum 
-{
-	DLE_OK = 0,
-	DLE_PAUSE = 1,
-	DLE_STOP = 2,
-	DLE_OTHER
-} DLCode;
-
-typedef enum
-{
-	VCE_OK = 0,		//check ok, the response header is same to the request, 206 and the range is also same
-	VCE_200,		//response header is 200 other than 206
-	VCE_INVALID,	//doesn't get a valid response code yet
-	VCE_OTHER		//other cases
-} ValidationCheckCode;
-
 class CCallbackParam
 {
 public:
@@ -210,7 +194,7 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	progressInfo.szReason = "";
 	progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 	
-	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 
 	//Pause
 	if(m_controller.IsPaused())
@@ -230,14 +214,15 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSegmentDownloader::CSegmentDownloader() : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE)
+CSegmentDownloader::CSegmentDownloader(TaskStatusEnum eInitStatus)
+ : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE)
 {
-	m_statusChecker.SetCurrentStatus(TSE_READY);
+	m_statusChecker.SetCurrentStatus(eInitStatus);
 }
 
 CSegmentDownloader::~CSegmentDownloader()
 {
-	m_curlm = NULL;
+	WaitUtilStop();
 
 	RemoveSegmentInfoArray();
 }
@@ -247,16 +232,16 @@ void CSegmentDownloader::Init(const CDownloadParam& param)
 	CDownloader::Init(param);
 	
 	m_pSegmentInfoArray = new CSegmentInfoArray();
-	CSegmentInfoMap::GetInstance()->AddSegmentInfoArray(m_dlParam.m_szUrl, m_pSegmentInfoArray);
+	CSegmentInfoMap::GetInstance()->AddSegmentInfoArray(m_dlParam.m_nTaskID, m_pSegmentInfoArray);
 }
 
 
 int CSegmentDownloader::Start()
 {
+	CurrentStatusChanged(TSE_TRANSFERRING);
+
 	VerifyTempFolderExist();
 	StartInitMultiHandle();
-
-	CurrentStatusChanged(TSE_TRANSFERRING);
 
 	return DoDownload();
 }
@@ -264,11 +249,10 @@ int CSegmentDownloader::Start()
 int CSegmentDownloader::Resume()
 {
 	m_controller.Clear();
-	
-	VerifyTempFolderExist();
-	RestartInitMultiHandle();
-	
 	CurrentStatusChanged(TSE_TRANSFERRING);
+
+	VerifyTempFolderExist();
+	RestartInitMultiHandle();	
 	
 	return DoDownload();
 }
@@ -303,9 +287,7 @@ int CSegmentDownloader::Destroy()
 		//Remove the segment information data
 		RemoveSegmentInfoArray();
 		
-		CurrentStatusChanged(TSE_INVALID);
-		
-		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
+		TaskFinished(MAKELONG(RC_MAJOR_DESTROYED, RC_MINOR_OK));
 
 		return 0;
 	}
@@ -392,11 +374,9 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 	m_curlm = NULL;
 	
 	//Result Msg
-	CString szErrorMsg;
+	CString szLog, szErrorMsg;
 	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
-
-	CString szLog;
-	szLog.Format("Download result: %X - %s", dwResult, szErrorMsg);
+	szLog.Format("Download result: 0x%08X - %s", dwResult, szErrorMsg);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	//2. Post process
@@ -416,7 +396,6 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 		{
 			srcFileNames.Add(GetSegmentInfo(i)->m_szFileData);
 		}
-
 		//destination file
 		CString szDstFile;
 		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szSaveToFileName);
@@ -432,17 +411,14 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 
 		//3. Remove the segment information data
 		RemoveSegmentInfoArray();
-
-		//Final status: complete
-		CurrentStatusChanged(TSE_COMPLETE);
 	}
 	else if(nMajor == RC_MAJOR_PAUSED)
 	{
-		CurrentStatusChanged(TSE_PAUSED);
+//		CurrentStatusChanged(TSE_PAUSED);
 	}
 	else if(nMajor == RC_MAJOR_STOPPED)
 	{
-		CurrentStatusChanged(TSE_STOPPED);
+//		CurrentStatusChanged(TSE_STOPPED);
 	}
 	else if(nMajor == RC_MAJOR_DESTROYED)
 	{
@@ -458,37 +434,41 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 		//Remove the segment information data
 		RemoveSegmentInfoArray();
 
-		CurrentStatusChanged(TSE_INVALID);
-
-		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
-
-		return;
+// 		CurrentStatusChanged(TSE_DESTROYED);
+// 
+// 		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
+// 
+// 		return;
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
 	{
 		//Remove the segment information data, except for Paused or Stopped status
 		RemoveSegmentInfoArray();
 
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+//		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_CURL_CODE)
 	{
 		//Remove the segment information data, except for Paused or Stopped status
 		RemoveSegmentInfoArray();
 
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+//		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
 	}
 	else
 	{
 		//TODO
-		szErrorMsg.Format("Unknown error: %d", dwResult);
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+// 		szErrorMsg.Format("Unknown error: %d", dwResult);
+// 		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
 	}
+
+	TaskFinished(dwResult);
 	
-	if(GetCurrentStatus() != TSE_INVALID)
+	/*
+	if(GetCurrentStatus() != TSE_DESTROYED)
 	{
 		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szLog), dwResult);
 	}
+	*/
 }
 
 
@@ -865,7 +845,7 @@ void CSegmentDownloader::CloseConnection(int nIndex)
 
 void CSegmentDownloader::GetTempFolder(CString& szTempFolder)
 {
-	szTempFolder.Format("%s\\%s_%d", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_szSaveToFileName, m_dlParam.m_nTaskID);
+	szTempFolder.Format("%s\\%02d_%s", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_nTaskID, m_dlParam.m_szSaveToFileName);
 }
 void CSegmentDownloader::VerifyTempFolderExist()
 {
@@ -894,10 +874,10 @@ void CSegmentDownloader::RemoveSegmentInfoArray()
 	{
 		return;
 	}
-	CSegmentInfoArray* pSegInfoArray = CSegmentInfoMap::GetInstance()->GetSegmentInfoArray(m_dlParam.m_szUrl);
+	CSegmentInfoArray* pSegInfoArray = CSegmentInfoMap::GetInstance()->GetSegmentInfoArray(m_dlParam.m_nTaskID);
 	ASSERT(pSegInfoArray != NULL && m_pSegmentInfoArray == pSegInfoArray);
 	
-	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_szUrl);
+	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_nTaskID);
 	
 	m_pSegmentInfoArray = NULL;
 }

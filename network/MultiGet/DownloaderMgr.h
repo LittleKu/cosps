@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Downloader.h"
+#include "HeaderParser.h"
 
 class CDownloaderMgr : public CDownloader
 {
@@ -32,8 +33,15 @@ private:
 
 	UINT StartDownload();
 	UINT ResumeDownload();
+
+	UINT PreDownload();
 protected:
 	CDownloader* m_pDownloader;
+
+	CController m_controller;
+	CCriticalSection m_criticalSection;
+
+	CHeaderParser m_headerParser;
 };
 
 #endif // !defined(AFX_DOWNLOADERMGR_H__4B2D1E2E_DEC4_4320_9E07_2E0E79B7BC1B__INCLUDED_)

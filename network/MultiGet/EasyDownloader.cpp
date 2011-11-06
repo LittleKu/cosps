@@ -106,7 +106,7 @@ int CEasyDownloader::Destroy()
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 		
-		CurrentStatusChanged(TSE_INVALID);
+		CurrentStatusChanged(TSE_DESTROYED);
 		
 		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
 		
@@ -287,7 +287,7 @@ void CEasyDownloader::PostDownload(DWORD dwResult)
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 		
-		CurrentStatusChanged(TSE_INVALID);
+		CurrentStatusChanged(TSE_DESTROYED);
 		
 		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
 

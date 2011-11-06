@@ -36,10 +36,9 @@ public:
 	static void FormatErrorMsg(DWORD dwCode, CString& szMsg);
 
 	static DWORD ResultCode2StatusCode(DWORD dwResultCode);
+	static void  ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg);
 
 	static void	StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg);
-
-	static LRESULT SendStatusMsg(HWND hWnd, DWORD dwCode, LPCTSTR lpDetail = NULL);
 
 	//Replace the CR(\r) char with lpCR and the LF(\n) char with lpNL
 	static void ReplaceCRLF(CString& szStr, LPCTSTR lpCR = _T("[0x0D]"), LPCTSTR lpLF = _T("[0x0A]"));

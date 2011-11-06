@@ -21,11 +21,11 @@ public:
 	CTaskInfo() : m_nTaskID(-1), m_lpDownloader(0) {}
 	~CTaskInfo()
 	{
-		if(m_lpDownloader != NULL)
-		{
-			delete m_lpDownloader;
-			m_lpDownloader = NULL;
-		}
+// 		if(m_lpDownloader != NULL)
+// 		{
+// 			delete m_lpDownloader;
+// 			m_lpDownloader = NULL;
+// 		}
 	}
 };
 

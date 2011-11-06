@@ -12,11 +12,13 @@ Class1=CMultiGetApp
 Class2=CMultiGetDlg
 Class3=CAboutDlg
 
-ResourceCount=3
+ResourceCount=5
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Class4=CTaskListCtrl
 Resource3=IDD_MULTIGET_DIALOG
+Resource4=IDD_ABOUTBOX (English (U.S.))
+Resource5=IDD_MULTIGET_DIALOG (English (U.S.))
 
 [CLS:CMultiGetApp]
 Type=0
@@ -70,4 +72,29 @@ ImplementationFile=TaskListCtrl.cpp
 BaseClass=CListCtrl
 Filter=W
 VirtualFilter=FWC
+
+[DLG:IDD_MULTIGET_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=11
+Control1=IDCANCEL,button,1342242816
+Control2=IDC_LIST_TASK,SysListView32,1350631425
+Control3=IDC_EDIT_URL,edit,1350631552
+Control4=IDC_ADD1,button,1342242816
+Control5=IDC_BUTTON_START1,button,1342242816
+Control6=IDC_BUTTON_PAUSE,button,1342242816
+Control7=IDC_BUTTON_RESUME,button,1342242816
+Control8=IDC_BUTTON_STOP,button,1342242816
+Control9=IDC_BUTTON_HEADER,button,1342242816
+Control10=IDC_BUTTON_REMOVE,button,1342242816
+Control11=IDC_BUTTON_ADD,button,1342242816
+
+[DLG:IDD_ABOUTBOX (English (U.S.))]
+Type=1
+Class=?
+ControlCount=4
+Control1=IDC_STATIC,static,1342177283
+Control2=IDC_STATIC,static,1342308480
+Control3=IDC_STATIC,static,1342308352
+Control4=IDOK,button,1342373889
 

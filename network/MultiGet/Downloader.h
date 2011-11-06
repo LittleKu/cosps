@@ -27,9 +27,13 @@ public:
 	virtual BOOL IsResumable() = 0;	
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
+	virtual void TaskFinished(DWORD dwResult);
+	virtual void WaitUtilStop();
 protected:
 	CDownloadParam m_dlParam;
 	CStatusChecker m_statusChecker;
+
+	HANDLE m_hStopEvent;
 };
 
 #endif // !defined(AFX_DOWNLOADER_H__7AFFE40E_1B65_460E_B5BA_3F1B0265C530__INCLUDED_)
