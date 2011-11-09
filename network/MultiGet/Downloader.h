@@ -11,9 +11,13 @@
 
 #include "StatusChecker.h"
 
+class CDownloader;
+typedef CArray<CDownloader*, CDownloader*> CDownloaderArray;
+
 class CDownloader  
 {
 public:
+	
 	CDownloader();
 	virtual ~CDownloader();
 public:
@@ -24,7 +28,10 @@ public:
 	virtual int Pause() = 0;
 	virtual int Resume() = 0;
 	virtual int Destroy() = 0;
-	virtual BOOL IsResumable() = 0;	
+	virtual BOOL IsResumable() = 0;
+
+	static UINT DeleteProc(LPVOID lpvData);
+	static int Delete(CDownloaderArray* pDownloaderArray);
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
 	virtual void TaskFinished(DWORD dwResult);

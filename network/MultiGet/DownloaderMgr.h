@@ -11,6 +11,7 @@
 
 #include "Downloader.h"
 #include "HeaderParser.h"
+#include "GetHeader.h"
 
 class CDownloaderMgr : public CDownloader
 {
@@ -35,13 +36,15 @@ private:
 	UINT ResumeDownload();
 
 	UINT PreDownload();
+	UINT CheckStatus();
 protected:
 	CDownloader* m_pDownloader;
 
 	CController m_controller;
 	CCriticalSection m_criticalSection;
 
-	CHeaderParser m_headerParser;
+//	CHeaderParser m_headerParser;
+	CGetHeader* m_pHeaderParser;
 };
 
 #endif // !defined(AFX_DOWNLOADERMGR_H__4B2D1E2E_DEC4_4320_9E07_2E0E79B7BC1B__INCLUDED_)

@@ -37,7 +37,7 @@ UINT CDownloaderMgr::ResumeDownloadProc(LPVOID lpvData)
 	return nResult;
 }
 
-CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL)
+CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL)
 {
 }
 
@@ -105,29 +105,47 @@ int CDownloaderMgr::Start()
 }
 int CDownloaderMgr::Stop()
 {
+	int nResult;
+
 	m_criticalSection.Lock();
 	if(m_pDownloader == NULL)
 	{
 		m_controller.Stop();
-		m_headerParser.Stop();
-		m_criticalSection.Unlock();
-		return 0;
+		if(m_pHeaderParser != NULL)
+		{
+			m_pHeaderParser->Stop();
+		}
+		nResult = 0;
+	}
+	else
+	{
+		nResult = m_pDownloader->Stop();
 	}
 	m_criticalSection.Unlock();
-	return m_pDownloader->Stop();
+	
+	return nResult;
 }
 int CDownloaderMgr::Pause()
 {
+	int nResult;
+
 	m_criticalSection.Lock();
 	if(m_pDownloader == NULL)
 	{
 		m_controller.Pause();
-		m_headerParser.Stop();
-		m_criticalSection.Unlock();
-		return 0;
+		if(m_pHeaderParser != NULL)
+		{
+			m_pHeaderParser->Stop();
+		}
+		nResult = 0;
+	}
+	else
+	{
+		nResult = m_pDownloader->Pause();
 	}
 	m_criticalSection.Unlock();
-	return m_pDownloader->Pause();
+
+	return nResult;
 }
 int CDownloaderMgr::Resume()
 {
@@ -142,16 +160,25 @@ BOOL CDownloaderMgr::IsResumable()
 
 int CDownloaderMgr::Destroy()
 {
+	int nResult;
+	
 	m_criticalSection.Lock();
 	if(m_pDownloader == NULL)
 	{
 		m_controller.Destroy();
-		m_headerParser.Stop();
-		m_criticalSection.Unlock();
-		return 0;
+		if(m_pHeaderParser != NULL)
+		{
+			m_pHeaderParser->Stop();
+		}
+		nResult = 0;
+	}
+	else
+	{
+		nResult = m_pDownloader->Destroy();
 	}
 	m_criticalSection.Unlock();
-	return m_pDownloader->Destroy();
+	
+	return nResult;
 }
 
 void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
@@ -159,6 +186,53 @@ void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
 	CDownloader::CurrentStatusChanged(nNewStatus, lpszDetail);
 }
 
+UINT CDownloaderMgr::CheckStatus()
+{
+	UINT nResult = 0;
+	CString szLog;
+
+	do 
+	{
+		if(m_controller.IsDestroyed())
+		{
+			CurrentStatusChanged(TSE_DESTROYED);
+			nResult = 1;
+			
+			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			{
+				szLog.Format("T[%02d]: destroyed.", m_dlParam.m_nTaskID);
+				LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			}
+			break;
+		}
+		if(m_controller.IsPaused())
+		{
+			CurrentStatusChanged(TSE_PAUSED);
+			nResult = 2;
+
+			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			{
+				szLog.Format("T[%02d]: paused.", m_dlParam.m_nTaskID);
+				LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			}
+			break;
+		}
+		if(m_controller.IsStopped())
+		{
+			CurrentStatusChanged(TSE_STOPPED);
+			nResult = 3;
+
+			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			{
+				szLog.Format("T[%02d]: stopped.", m_dlParam.m_nTaskID);
+				LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			}
+			break;
+		}
+	} while (FALSE);
+
+	return nResult;
+}
 UINT CDownloaderMgr::PreDownload()
 {
 	UINT nResult = 0;
@@ -169,51 +243,30 @@ UINT CDownloaderMgr::PreDownload()
 	{
 		if(m_pDownloader != NULL)
 		{
+			szLog.Format("T[%02d]: Restart from start postion.", m_dlParam.m_nTaskID);
+			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
 			delete m_pDownloader;
 			m_pDownloader = NULL;
 		}
-		if(m_controller.IsDestroyed())
+
+		nResult = CheckStatus();
+		if(nResult != 0)
 		{
-			CurrentStatusChanged(TSE_DESTROYED);
-			nResult = 1;
-			break;
-		}
-		if(m_controller.IsPaused())
-		{
-			CurrentStatusChanged(TSE_PAUSED);
-			nResult = 2;
-			break;
-		}
-		if(m_controller.IsStopped())
-		{
-			CurrentStatusChanged(TSE_STOPPED);
-			nResult = 3;
 			break;
 		}
 		m_criticalSection.Unlock();
 
 		//2. phase: GET header
-		//CHeaderParser headerParser(m_dlParam.m_szUrl);
-		m_headerParser.Start(m_dlParam.m_szUrl);
-		CHeaderInfo* pHeaderInfo = m_headerParser.GetHeaderInfo();
+		ASSERT(m_pHeaderParser == NULL);
+		m_pHeaderParser = new CGetHeader();
+		m_pHeaderParser->Start(m_dlParam.m_szUrl);
+		CHeaderInfo* pHeaderInfo = m_pHeaderParser->GetHeaderInfo();
 
 		m_criticalSection.Lock();
-		if(m_controller.IsDestroyed())
+		nResult = CheckStatus();
+		if(nResult != 0)
 		{
-			CurrentStatusChanged(TSE_DESTROYED);
-			nResult = 1;
-			break;
-		}
-		if(m_controller.IsPaused())
-		{
-			CurrentStatusChanged(TSE_PAUSED);
-			nResult = 2;
-			break;
-		}
-		if(m_controller.IsStopped())
-		{
-			CurrentStatusChanged(TSE_STOPPED);
-			nResult = 3;
 			break;
 		}
 
@@ -271,6 +324,11 @@ UINT CDownloaderMgr::PreDownload()
 
 	} while (FALSE);
 
+	if(m_pHeaderParser != NULL)
+	{
+		delete m_pHeaderParser;
+		m_pHeaderParser = NULL;
+	}
 	m_criticalSection.Unlock();
 
 	return nResult;

@@ -222,8 +222,6 @@ CSegmentDownloader::CSegmentDownloader(TaskStatusEnum eInitStatus)
 
 CSegmentDownloader::~CSegmentDownloader()
 {
-	WaitUtilStop();
-
 	RemoveSegmentInfoArray();
 }
 

@@ -20,8 +20,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-int CCommonUtils::m_nUniqueID = 0;
-CCriticalSection CCommonUtils::m_idCriticalSection;
+long CCommonUtils::m_nUniqueID = 0;
 
 CCommonUtils::CCommonUtils()
 {
@@ -806,11 +805,7 @@ BOOL CCommonUtils::IntegerOper(UINT& nData, int nOperType)
 
 int CCommonUtils::GetUniqueID()
 {
-	m_idCriticalSection.Lock();
-	int nResult = m_nUniqueID++;
-	m_idCriticalSection.Unlock();
-
-	return nResult;
+	return InterlockedIncrement(&m_nUniqueID);
 }
 
 LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)

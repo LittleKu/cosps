@@ -498,7 +498,7 @@ static UINT RemoveTaskProc(LPVOID lpvData)
 }
 void CMultiGetDlg::OnButtonRemove() 
 {
-	CArray<CDownloader*, CDownloader*> *pDownloaderArray = new CArray<CDownloader*, CDownloader*>();
+	CDownloaderArray* pDownloaderArray = new CDownloaderArray();
 	CTaskInfo* pTaskInfo = NULL;
 
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
@@ -512,14 +512,13 @@ void CMultiGetDlg::OnButtonRemove()
 
 		if(pTaskInfo->m_lpDownloader != NULL)
 		{
-			pTaskInfo->m_lpDownloader->Destroy();
 			pDownloaderArray->Add(pTaskInfo->m_lpDownloader);
 		}
 	}
 
 	m_taskListCtrl.RemoveSelectedItems();
 
-	CWinThread* pThread = AfxBeginThread(RemoveTaskProc, pDownloaderArray);
+	CDownloader::Delete(pDownloaderArray);
 }
 
 int CMultiGetDlg::GetTaskIndex(int nTaskID)

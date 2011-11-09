@@ -45,21 +45,25 @@ void CDownloader::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
 {
 //	ASSERT(m_statusChecker.GetCurrentStatus() != nNewStatus);
 	m_statusChecker.SetCurrentStatus(nNewStatus);
-	::SetEvent(m_hStopEvent);
+	
 
 	CStatusInfo statusInfo;
 	statusInfo.m_nStatusCode = nNewStatus;
 	statusInfo.m_szDetail = lpszDetail;
 
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&statusInfo));
+
+	::SetEvent(m_hStopEvent);
 }
 
 void CDownloader::TaskFinished(DWORD dwResult)
 {
 	m_statusChecker.SetCurrentStatus(CCommonUtils::ResultCode2StatusCode(dwResult));
-	::SetEvent(m_hStopEvent);
+	
 
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)dwResult);
+
+	::SetEvent(m_hStopEvent);
 }
 
 void CDownloader::WaitUtilStop()
@@ -82,4 +86,53 @@ void CDownloader::WaitUtilStop()
 
 	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, nStatus);
 	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+}
+
+UINT CDownloader::DeleteProc(LPVOID lpvData)
+{
+	CDownloaderArray* pDownloaderArray = (CDownloaderArray*)lpvData;
+
+	CString szLog;
+	szLog.Format("Start to destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	int i, nSize;
+	CDownloader* pDownloader;
+
+	//Send destroy command
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloader != NULL);
+
+		pDownloader->Destroy();
+	}
+	//Wait all task to finish
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloader != NULL);
+
+		pDownloader->WaitUtilStop();
+		delete pDownloader;
+	}
+
+	delete pDownloaderArray;
+	pDownloaderArray = NULL;
+	
+	szLog.Format("Finished destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	return 0;
+}
+int CDownloader::Delete(CDownloaderArray* pDownloaderArray)
+{
+	if(pDownloaderArray == NULL || pDownloaderArray->GetSize() <= 0)
+	{
+		return 0;
+	}
+
+	AfxBeginThread(CDownloader::DeleteProc, pDownloaderArray);
+
+	return 0;
 }

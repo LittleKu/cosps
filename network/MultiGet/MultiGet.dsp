@@ -167,6 +167,10 @@ SOURCE=.\TaskListCtrl.cpp
 
 SOURCE=.\TestDownloader.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\GetHeader.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -246,6 +250,10 @@ SOURCE=.\TaskListCtrl.h
 # Begin Source File
 
 SOURCE=.\TestDownloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GetHeader.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

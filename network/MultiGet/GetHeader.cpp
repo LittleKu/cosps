@@ -1,9 +1,9 @@
-// HeaderParser.cpp: implementation of the CHeaderParser class.
+// GetHeader.cpp: implementation of the CGetHeader class.
 //
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "HeaderParser.h"
+#include "GetHeader.h"
 #include "CommonUtils.h"
 
 #ifdef _DEBUG
@@ -27,18 +27,18 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szMsg)
 	}
 	CHeaderInfo* pHeaderInfo = (CHeaderInfo*)data;
-
+	
 #define SCRATCHSIZE 127
 	char scratch[SCRATCHSIZE+1];
 	int nLineLen = min(SCRATCHSIZE, (size * nmemb));
 	strncpy(scratch, (char*)ptr, nLineLen);
 	scratch[nLineLen] = 0; /* null terminate */
-
+	
 	do 
 	{
 		//1. check if status line
 		int nRspCode = CCommonUtils::GetHTTPStatusCode(scratch);
-
+		
 		//This is a status line
 		if(nRspCode > 0)
 		{
@@ -48,7 +48,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			CCommonUtils::ReplaceCRLF(pHeaderInfo->m_szStatusLine, NULL, NULL);
 			break;
 		}
-
+		
 		
 		//2. check if Content-Length line
 		int nContentLength = -1;
@@ -58,7 +58,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			pHeaderInfo->m_nContentLength = nContentLength;
 			break;
 		}
-
+		
 		//3. check if Accept-Ranges line
 		char buf[128];
 		int nc = sscanf(scratch, "Accept-Ranges: %s", buf);
@@ -70,7 +70,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			}
 			break;
 		}
-
+		
 		//4. check if Content-Type
 		nc = sscanf(scratch, "Content-Type: %s", buf);
 		if(nc > 0)
@@ -78,7 +78,7 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			pHeaderInfo->m_szContentType = buf;
 			break;
 		}
-
+		
 		int x, y, total;
 		nc = sscanf(scratch, "Content-Range: bytes %d-%d/%d", &x, &y, &total);
 		if(nc == 3)
@@ -86,38 +86,58 @@ static size_t HeaderParserCallback(void *ptr, size_t size, size_t nmemb, void *d
 			pHeaderInfo->m_nContentRangeTotal = total;
 			break;
 		}
-
+		
 		//Do nothing now
-
+		
 	} while ( 0 );
-
-
+	
+	
 	return (size_t)(size * nmemb);
 }
 
-CHeaderParser::CHeaderParser() : m_curl(NULL)
+int CGetHeader::ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
-}
-CHeaderParser::CHeaderParser(const char* url) : m_curl(NULL)
-{
-	Start(url);
+	CGetHeader* lpGetHeader = (CGetHeader*)clientp;
+	return lpGetHeader->ProcessProgress(dltotal, dlnow, ultotal, ulnow);
 }
 
-void CHeaderParser::Stop()
+CGetHeader::CGetHeader() : m_curl(NULL)
 {
+
 }
 
-
-CHeaderParser::~CHeaderParser()
+CGetHeader::~CGetHeader()
 {
+
 }
 
-CHeaderInfo* CHeaderParser::GetHeaderInfo()
+void CGetHeader::Stop()
+{
+	m_controller.Stop();
+}
+
+CHeaderInfo* CGetHeader::GetHeaderInfo()
 {
 	return &m_headerInfo;
 }
-void CHeaderParser::Start(const char* url)
+
+int CGetHeader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow)
 {
+	if(m_controller.IsStopped())
+	{
+		CString szLog;
+		szLog.Format("GetHeader [ProcessProgress]: Stopped");
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		return 1;
+	}
+
+	return 0;
+}
+
+void CGetHeader::Start(const char* url)
+{
+	CString szLog;
 	/* init the curl session */
 	m_curl = curl_easy_init();
 	if(m_curl == NULL)
@@ -133,11 +153,11 @@ void CHeaderParser::Start(const char* url)
 	curl_easy_setopt(m_curl, CURLOPT_USERAGENT, USER_AGENT_IE8);
 	
 	//connect timeout: 10s
-	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 10L);
+	curl_easy_setopt(m_curl, CURLOPT_CONNECTTIMEOUT, 15L);
 	
 	//low speed limit
 	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_LIMIT, 1L);
-	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, 15L);
+	curl_easy_setopt(m_curl, CURLOPT_LOW_SPEED_TIME, 20L);
 	
 	
 	szRange.Format("%d-%d", 0, 0);
@@ -153,20 +173,26 @@ void CHeaderParser::Start(const char* url)
 	curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, ThrowAwayCallback);
 	curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, NULL);
 	
-	curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, &m_headerInfo);	
 	curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, HeaderParserCallback);
+	curl_easy_setopt(m_curl, CURLOPT_WRITEHEADER, &m_headerInfo);	
+	
+
+	curl_easy_setopt(m_curl, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(m_curl, CURLOPT_PROGRESSFUNCTION, CGetHeader::ProgressCallback);
+	curl_easy_setopt(m_curl, CURLOPT_PROGRESSDATA, this);
 	
 	res = curl_easy_perform(m_curl);
 	m_headerInfo.m_nCurlResult = res;
 	
 	if(res != CURLE_OK)
 	{
-		CString szLog;
-		szLog.Format("Failed to GET header. curl code: %d - %s, url = %s", res, 
+		szLog.Format("GET header failed. curl code: %d - %s, url = %s", res, 
 			curl_easy_strerror(res), url);
 		
 		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	/* always cleanup */
-    curl_easy_cleanup(m_curl);	
+    curl_easy_cleanup(m_curl);
+
+	m_controller.Clear();
 }

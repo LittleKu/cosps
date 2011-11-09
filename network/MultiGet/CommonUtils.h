@@ -84,8 +84,7 @@ private:
 	static void FormatInternalErrorMsg(int nCode, CString& szErrorMsg);
 	static BOOL GetProxyInfo(CMapUInt2String& proxyInfoMap);
 
-	static int m_nUniqueID;
-	static CCriticalSection m_idCriticalSection;
+	static long m_nUniqueID;
 };
 
 #endif // !defined(AFX_COMMONUTILS_H__D6DA1B18_3212_438C_B5AE_2B05B09C002D__INCLUDED_)
