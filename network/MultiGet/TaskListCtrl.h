@@ -17,8 +17,8 @@ public:
 	CString m_fileName;
 	CString m_fileSize;
 	CString m_progress;
-	CDownloader* m_lpDownloader;
-	CTaskInfo() : m_nTaskID(-1), m_lpDownloader(0) {}
+	CDownloaderMgr* m_lpDownloaderMgr;
+	CTaskInfo() : m_nTaskID(-1), m_lpDownloaderMgr(0) {}
 	~CTaskInfo()
 	{
 // 		if(m_lpDownloader != NULL)

@@ -433,7 +433,7 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 
 void CEasyDownloader::GetTempFolder(CString& szTempFolder)
 {
-	szTempFolder.Format("%s\\%s_%d", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_szSaveToFileName, m_dlParam.m_nTaskID);
+	szTempFolder.Format("%s\\%02d_%s", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_nTaskID, m_dlParam.m_szSaveToFileName);
 }
 void CEasyDownloader::VerifyTempFolderExist()
 {

@@ -66,7 +66,7 @@ void CDownloader::TaskFinished(DWORD dwResult)
 	::SetEvent(m_hStopEvent);
 }
 
-void CDownloader::WaitUtilStop()
+void CDownloader::WaitUntilStop()
 {
 	CString szLog;
 	DWORD dwResult;
@@ -88,51 +88,4 @@ void CDownloader::WaitUtilStop()
 	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
-UINT CDownloader::DeleteProc(LPVOID lpvData)
-{
-	CDownloaderArray* pDownloaderArray = (CDownloaderArray*)lpvData;
 
-	CString szLog;
-	szLog.Format("Start to destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	int i, nSize;
-	CDownloader* pDownloader;
-
-	//Send destroy command
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloader != NULL);
-
-		pDownloader->Destroy();
-	}
-	//Wait all task to finish
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloader != NULL);
-
-		pDownloader->WaitUtilStop();
-		delete pDownloader;
-	}
-
-	delete pDownloaderArray;
-	pDownloaderArray = NULL;
-	
-	szLog.Format("Finished destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	return 0;
-}
-int CDownloader::Delete(CDownloaderArray* pDownloaderArray)
-{
-	if(pDownloaderArray == NULL || pDownloaderArray->GetSize() <= 0)
-	{
-		return 0;
-	}
-
-	AfxBeginThread(CDownloader::DeleteProc, pDownloaderArray);
-
-	return 0;
-}

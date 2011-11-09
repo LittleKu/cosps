@@ -37,8 +37,10 @@ UINT CDownloaderMgr::ResumeDownloadProc(LPVOID lpvData)
 	return nResult;
 }
 
-CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL)
+CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL), m_statusChecker(TSE_READY)
 {
+	//Init no-signal, auto event
+	m_hStopEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 CDownloaderMgr::~CDownloaderMgr()
@@ -48,23 +50,58 @@ CDownloaderMgr::~CDownloaderMgr()
 	
 	bResult = (m_pDownloader == NULL);
 
-	m_criticalSection.Unlock();
-
-	if(bResult)
-	{
-		WaitUtilStop();
-	}
-	else
-	//if(m_pDownloader != NULL)
+	//Just remove the memory, WaitUntilStop is used to stop thread!
+	if(m_pDownloader != NULL)
 	{
 		delete m_pDownloader;
 		m_pDownloader = NULL;
 	}
+
+	m_criticalSection.Unlock();
+
+	if(m_hStopEvent)
+	{
+		::CloseHandle(m_hStopEvent);
+		m_hStopEvent = NULL;
+	}
+}
+
+void CDownloaderMgr::WaitUntilStop()
+{
+	BOOL bResult;
+	m_criticalSection.Lock();
+	bResult = (m_pDownloader != NULL);
+	m_criticalSection.Unlock();
+
+	if(bResult)
+	{
+		m_pDownloader->WaitUntilStop();
+		return;
+	}
+
+	CString szLog;
+	DWORD dwResult;
+	UINT nStatus;
+	while( (nStatus = GetCurrentStatus()) == TSE_TRANSFERRING )
+	{
+		Destroy();
+		
+		szLog.Format("Task [%d] is transferring, wait until it stopped.", m_dlParam.m_nTaskID);
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			
+		dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
+		
+		szLog.Format("Task [%d] WaitForSingleObject returned 0x%08X", m_dlParam.m_nTaskID, dwResult);
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	}
+	
+	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, nStatus);
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
 void CDownloaderMgr::Init(const CDownloadParam& param)
 {
-	CDownloader::Init(param);
+	m_dlParam = param;
 
 	//Empty file name, auto extract
 	if(m_dlParam.m_szSaveToFileName.IsEmpty())
@@ -90,11 +127,26 @@ UINT CDownloaderMgr::GetCurrentStatus()
 	}
 	else
 	{
-		nResult = CDownloader::GetCurrentStatus();
+		nResult = m_statusChecker.GetCurrentStatus();
 	}
 	m_criticalSection.Unlock();
 
 	return nResult;
+}
+
+void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
+{
+	//	ASSERT(m_statusChecker.GetCurrentStatus() != nNewStatus);
+	m_statusChecker.SetCurrentStatus(nNewStatus);
+	
+	
+	CStatusInfo statusInfo;
+	statusInfo.m_nStatusCode = nNewStatus;
+	statusInfo.m_szDetail = lpszDetail;
+	
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&statusInfo));
+	
+	::SetEvent(m_hStopEvent);
 }
 
 int CDownloaderMgr::Start()
@@ -181,9 +233,55 @@ int CDownloaderMgr::Destroy()
 	return nResult;
 }
 
-void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
+UINT CDownloaderMgr::DeleteProc(LPVOID lpvData)
 {
-	CDownloader::CurrentStatusChanged(nNewStatus, lpszDetail);
+	CDownloaderMgrArray* pDownloaderArray = (CDownloaderMgrArray*)lpvData;
+	
+	CString szLog;
+	szLog.Format("Start to destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		
+	int i, nSize;
+	CDownloaderMgr* pDownloaderMgr;
+	
+	//Send destroy command
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloaderMgr = (CDownloaderMgr*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloaderMgr != NULL);
+		
+		pDownloaderMgr->Destroy();
+	}
+	//Wait all task to finish
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloaderMgr = (CDownloaderMgr*)pDownloaderArray->GetAt(i);
+		ASSERT(pDownloaderMgr != NULL);
+		
+		pDownloaderMgr->WaitUntilStop();
+
+		ASSERT(pDownloaderMgr->GetCurrentStatus() != TSE_TRANSFERRING);
+		delete pDownloaderMgr;
+	}
+	
+	delete pDownloaderArray;
+	pDownloaderArray = NULL;
+	
+	szLog.Format("Finished destroy all tasks.");
+	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		
+	return 0;
+}
+int CDownloaderMgr::Delete(CDownloaderMgrArray* pDownloaderArray)
+{
+	if(pDownloaderArray == NULL || pDownloaderArray->GetSize() <= 0)
+	{
+		return 0;
+	}
+	
+	AfxBeginThread(CDownloaderMgr::DeleteProc, pDownloaderArray);
+	
+	return 0;
 }
 
 UINT CDownloaderMgr::CheckStatus()

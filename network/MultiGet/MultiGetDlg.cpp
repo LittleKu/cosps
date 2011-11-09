@@ -364,13 +364,13 @@ void CMultiGetDlg::OnButtonStart1()
 		param.m_szUrl = pTaskInfo->m_url;
 		param.m_nFileSize = 0;
 		
-		if(pTaskInfo->m_lpDownloader == NULL)
+		if(pTaskInfo->m_lpDownloaderMgr == NULL)
 		{
-			pTaskInfo->m_lpDownloader = new CDownloaderMgr();
+			pTaskInfo->m_lpDownloaderMgr = new CDownloaderMgr();
 		}
-		pTaskInfo->m_lpDownloader->Init(param);
+		pTaskInfo->m_lpDownloaderMgr->Init(param);
 		
-		pTaskInfo->m_lpDownloader->Start();
+		pTaskInfo->m_lpDownloaderMgr->Start();
 	}
 }
 
@@ -393,7 +393,7 @@ void CMultiGetDlg::OnButtonPause()
 			continue;
 		}
 		
-		pTaskInfo->m_lpDownloader->Pause();
+		pTaskInfo->m_lpDownloaderMgr->Pause();
 	}
 }
 
@@ -416,7 +416,7 @@ void CMultiGetDlg::OnButtonStop()
 			continue;
 		}
 		
-		pTaskInfo->m_lpDownloader->Stop();
+		pTaskInfo->m_lpDownloaderMgr->Stop();
 	}
 }
 
@@ -439,7 +439,7 @@ void CMultiGetDlg::OnButtonResume()
 			continue;
 		}
 
-		pTaskInfo->m_lpDownloader->Resume();
+		pTaskInfo->m_lpDownloaderMgr->Resume();
 	}
 }
 
@@ -459,46 +459,9 @@ void CMultiGetDlg::OnButtonHeader()
 	AfxMessageBox(szMsg);
 }
 
-static UINT RemoveTaskProc(LPVOID lpvData)
-{
-	CArray<CDownloader*, CDownloader*> *pDownloaderArray = (CArray<CDownloader*, CDownloader*> *)lpvData;
-
-	CString szLog;
-	szLog.Format("Start to destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	int i, nSize;
-	CDownloader* pDownloader;
-	/*
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloader != NULL);
-
-		pDownloader->Destroy();
-	}
-	*/
-
-	
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloader = (CDownloader*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloader != NULL);
-
-		delete pDownloader;
-	}
-
-	delete pDownloaderArray;
-	pDownloaderArray = NULL;
-	
-	szLog.Format("Finished destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	return 0; 
-}
 void CMultiGetDlg::OnButtonRemove() 
 {
-	CDownloaderArray* pDownloaderArray = new CDownloaderArray();
+	CDownloaderMgrArray* pDownloaderArray = new CDownloaderMgrArray();
 	CTaskInfo* pTaskInfo = NULL;
 
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
@@ -510,15 +473,15 @@ void CMultiGetDlg::OnButtonRemove()
 		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
 		ASSERT(pTaskInfo != NULL);
 
-		if(pTaskInfo->m_lpDownloader != NULL)
+		if(pTaskInfo->m_lpDownloaderMgr != NULL)
 		{
-			pDownloaderArray->Add(pTaskInfo->m_lpDownloader);
+			pDownloaderArray->Add(pTaskInfo->m_lpDownloaderMgr);
 		}
 	}
 
 	m_taskListCtrl.RemoveSelectedItems();
 
-	CDownloader::Delete(pDownloaderArray);
+	CDownloaderMgr::Delete(pDownloaderArray);
 }
 
 int CMultiGetDlg::GetTaskIndex(int nTaskID)

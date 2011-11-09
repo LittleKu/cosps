@@ -30,12 +30,11 @@ public:
 	virtual int Destroy() = 0;
 	virtual BOOL IsResumable() = 0;
 
-	static UINT DeleteProc(LPVOID lpvData);
-	static int Delete(CDownloaderArray* pDownloaderArray);
+	virtual void WaitUntilStop();
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
 	virtual void TaskFinished(DWORD dwResult);
-	virtual void WaitUtilStop();
+	
 protected:
 	CDownloadParam m_dlParam;
 	CStatusChecker m_statusChecker;
