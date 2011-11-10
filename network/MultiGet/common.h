@@ -9,6 +9,14 @@
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
 
+#define DL_OPER_FLAG_NONE		(0)
+#define DL_OPER_FLAG_START		(0x0001)
+#define DL_OPER_FLAG_PAUSE		(0x0002)
+#define DL_OPER_FLAG_REMOVE		(0x0004)
+#define DL_OPER_FLAG_REDOWNLOAD	(0x0008)
+#define DL_OPER_FLAG_RESUME		(0x0010)
+#define DL_OPER_FLAG_ALL		(0xFFFFFFFF)
+
 typedef enum
 {
 	TSE_READY	= 0,	//Task has been added, not started yet

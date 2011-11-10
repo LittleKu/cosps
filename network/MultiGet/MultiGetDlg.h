@@ -60,10 +60,15 @@ protected:
 	afx_msg void OnButtonHeader();
 	afx_msg void OnButtonRemove();
 	afx_msg void OnButtonAdd();
+	afx_msg void OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnButtonRedownload();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 	
+private:
+	void EnableButtons(DWORD dwStatus);
+	void ListCtrlSelectionChanged();
 };
 
 //{{AFX_INSERT_LOCATION}}

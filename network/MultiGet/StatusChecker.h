@@ -17,6 +17,8 @@ public:
 	UINT GetCurrentStatus();
 	void SetCurrentStatus(UINT nCurStatus);
 
+	static DWORD GetOperState(UINT nCurStatus);
+
 	BOOL IsStartable();
 	BOOL IsResumable();
 	BOOL IsPausable();

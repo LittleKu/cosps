@@ -29,10 +29,13 @@ public:
 	virtual int Destroy();
 	virtual BOOL IsResumable();
 
+	DWORD GetOperState();
+
 	static UINT DeleteProc(LPVOID lpvData);
 	static int Delete(CDownloaderMgrArray* pDownloaderArray);
 protected:
-	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
+	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL, BOOL bWorkThreadStopped = TRUE, 
+		BOOL bSendMessage = TRUE);
 	virtual void WaitUntilStop();
 private:
 	static UINT StartDownloadProc(LPVOID lpvData);
@@ -41,8 +44,11 @@ private:
 	UINT StartDownload();
 	UINT ResumeDownload();
 
+	UINT PreGetHeader();
+	UINT PostGetHeader(CHeaderInfo* pHeaderInfo, CStatusInfo* pStatusInfo);
 	UINT PreDownload();
 	UINT CheckStatus();
+	void NotifyStopped(BOOL bStopped = TRUE);
 protected:
 	CDownloadParam m_dlParam;
 	CStatusChecker m_statusChecker;

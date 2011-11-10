@@ -62,6 +62,7 @@ public:
 protected:
 	//{{AFX_MSG(CTaskListCtrl)
 	afx_msg void OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

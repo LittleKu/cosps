@@ -33,7 +33,7 @@ ImplementationFile=MultiGetDlg.cpp
 Filter=D
 BaseClass=CDialog
 VirtualFilter=dWC
-LastObject=CMultiGetDlg
+LastObject=IDC_BUTTON_REDOWNLOAD
 
 [CLS:CAboutDlg]
 Type=0
@@ -62,9 +62,9 @@ Control5=IDC_BUTTON_START1,button,1342242816
 Control6=IDC_BUTTON_PAUSE,button,1342242816
 Control7=IDC_BUTTON_RESUME,button,1342242816
 Control8=IDC_BUTTON_STOP,button,1342242816
-Control9=IDC_BUTTON_HEADER,button,1342242816
-Control10=IDC_BUTTON_REMOVE,button,1342242816
-Control11=IDC_BUTTON_ADD,button,1342242816
+Control9=IDC_BUTTON_REMOVE,button,1342242816
+Control10=IDC_BUTTON_ADD,button,1342242816
+Control11=IDC_BUTTON_REDOWNLOAD,button,1342242816
 
 [CLS:CTaskListCtrl]
 Type=0

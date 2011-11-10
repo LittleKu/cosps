@@ -57,3 +57,37 @@ BOOL CStatusChecker::IsStopable()
 {
 	return (m_nCurStatus == TSE_TRANSFERRING);
 }
+
+DWORD CStatusChecker::GetOperState(UINT nCurStatus)
+{
+	DWORD dwResult = DL_OPER_FLAG_NONE;
+
+	//Start
+	if(nCurStatus == TSE_READY || nCurStatus == TSE_COMPLETE || nCurStatus == TSE_END_WITH_ERROR)
+	{
+		dwResult |= DL_OPER_FLAG_START;
+	}
+
+	//Pause
+	if(nCurStatus == TSE_TRANSFERRING)
+	{
+		dwResult |= DL_OPER_FLAG_PAUSE;
+	}
+
+	//Remove
+	dwResult |= DL_OPER_FLAG_REMOVE;
+
+	//Re-download
+	if(nCurStatus == TSE_READY || nCurStatus == TSE_COMPLETE || nCurStatus == TSE_END_WITH_ERROR)
+	{
+		dwResult |= DL_OPER_FLAG_REDOWNLOAD;
+	}
+
+	//Resume
+	if(nCurStatus == TSE_PAUSED)
+	{
+		dwResult |= DL_OPER_FLAG_RESUME;
+	}
+
+	return dwResult;
+}

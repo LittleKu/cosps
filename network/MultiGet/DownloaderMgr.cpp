@@ -134,23 +134,42 @@ UINT CDownloaderMgr::GetCurrentStatus()
 	return nResult;
 }
 
-void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
+DWORD CDownloaderMgr::GetOperState()
 {
-	//	ASSERT(m_statusChecker.GetCurrentStatus() != nNewStatus);
+	DWORD dwResult = CStatusChecker::GetOperState(GetCurrentStatus());
+
+	return dwResult;
+}
+
+void CDownloaderMgr::NotifyStopped(BOOL bStopped)
+{
+	if(bStopped)
+	{
+		::SetEvent(m_hStopEvent);
+	}
+}
+void CDownloaderMgr::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail, BOOL bWorkThreadStopped, BOOL bSendMessage)
+{
 	m_statusChecker.SetCurrentStatus(nNewStatus);
-	
-	
-	CStatusInfo statusInfo;
-	statusInfo.m_nStatusCode = nNewStatus;
-	statusInfo.m_szDetail = lpszDetail;
-	
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&statusInfo));
-	
-	::SetEvent(m_hStopEvent);
+
+	if(bSendMessage)
+	{
+		CStatusInfo statusInfo;
+		statusInfo.m_nStatusCode = nNewStatus;
+		statusInfo.m_szDetail = lpszDetail;
+		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&statusInfo));
+	}
+
+	NotifyStopped(bWorkThreadStopped);
 }
 
 int CDownloaderMgr::Start()
 {
+	CString szLog;
+	CurrentStatusChanged(TSE_TRANSFERRING, NULL, FALSE);
+	szLog.Format("Status changed to transferring.");
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
 	AfxBeginThread(StartDownloadProc, (LPVOID)this);
 
 	return 0;
@@ -274,10 +293,7 @@ UINT CDownloaderMgr::DeleteProc(LPVOID lpvData)
 }
 int CDownloaderMgr::Delete(CDownloaderMgrArray* pDownloaderArray)
 {
-	if(pDownloaderArray == NULL || pDownloaderArray->GetSize() <= 0)
-	{
-		return 0;
-	}
+	ASSERT(pDownloaderArray != NULL && pDownloaderArray->GetSize() > 0);
 	
 	AfxBeginThread(CDownloaderMgr::DeleteProc, pDownloaderArray);
 	
@@ -293,7 +309,7 @@ UINT CDownloaderMgr::CheckStatus()
 	{
 		if(m_controller.IsDestroyed())
 		{
-			CurrentStatusChanged(TSE_DESTROYED);
+			CurrentStatusChanged(TSE_DESTROYED, NULL, TRUE, FALSE);
 			nResult = 1;
 			
 			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
@@ -305,7 +321,7 @@ UINT CDownloaderMgr::CheckStatus()
 		}
 		if(m_controller.IsPaused())
 		{
-			CurrentStatusChanged(TSE_PAUSED);
+			CurrentStatusChanged(TSE_PAUSED, NULL, TRUE, FALSE);
 			nResult = 2;
 
 			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
@@ -317,7 +333,7 @@ UINT CDownloaderMgr::CheckStatus()
 		}
 		if(m_controller.IsStopped())
 		{
-			CurrentStatusChanged(TSE_STOPPED);
+			CurrentStatusChanged(TSE_STOPPED, NULL, TRUE, FALSE);
 			nResult = 3;
 
 			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
@@ -331,44 +347,75 @@ UINT CDownloaderMgr::CheckStatus()
 
 	return nResult;
 }
-UINT CDownloaderMgr::PreDownload()
+
+UINT CDownloaderMgr::PreGetHeader()
 {
 	UINT nResult = 0;
 	CString szLog;
 
 	m_criticalSection.Lock();
-	do 
+
+	if(m_pDownloader != NULL)
 	{
-		if(m_pDownloader != NULL)
-		{
-			szLog.Format("T[%02d]: Restart from start postion.", m_dlParam.m_nTaskID);
-			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		szLog.Format("T[%02d]: Restart from start postion.", m_dlParam.m_nTaskID);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			
+		delete m_pDownloader;
+		m_pDownloader = NULL;
+	}
 
-			delete m_pDownloader;
-			m_pDownloader = NULL;
-		}
+	nResult = CheckStatus();
+	nResult = m_statusChecker.GetCurrentStatus();
 
-		nResult = CheckStatus();
-		if(nResult != 0)
+	m_criticalSection.Unlock();
+
+	if(nResult != TSE_TRANSFERRING)
+	{
+		CStatusInfo statusInfo;
+		statusInfo.m_nStatusCode = nResult;
+		
+		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)&statusInfo);
+	}
+
+	return nResult;
+}
+UINT CDownloaderMgr::PostGetHeader(CHeaderInfo* pHeaderInfo, CStatusInfo* pStatusInfo)
+{
+	ASSERT(pStatusInfo != NULL);
+
+	UINT nResult = 0;
+	CString szLog;
+
+	//lock 1st
+	m_criticalSection.Lock();
+	nResult = CheckStatus();
+	nResult = m_statusChecker.GetCurrentStatus();
+	m_criticalSection.Unlock();
+
+	if(nResult != TSE_TRANSFERRING)
+	{
+		CStatusInfo statusInfo;
+		statusInfo.m_nStatusCode = nResult;
+		
+		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)&statusInfo);
+		
+		m_criticalSection.Lock();
+		if(m_pHeaderParser != NULL)
 		{
-			break;
+			delete m_pHeaderParser;
+			m_pHeaderParser = NULL;
 		}
 		m_criticalSection.Unlock();
 
-		//2. phase: GET header
-		ASSERT(m_pHeaderParser == NULL);
-		m_pHeaderParser = new CGetHeader();
-		m_pHeaderParser->Start(m_dlParam.m_szUrl);
-		CHeaderInfo* pHeaderInfo = m_pHeaderParser->GetHeaderInfo();
+		return nResult;
+	}
 
-		m_criticalSection.Lock();
-		nResult = CheckStatus();
-		if(nResult != 0)
-		{
-			break;
-		}
-
-		CString szStatusMsg;
+	//lock 2
+	CString szStatusMsg;
+	nResult = TSE_TRANSFERRING;
+	m_criticalSection.Lock();
+	do 
+	{
 		//1. CURL return error
 		if(pHeaderInfo->m_nCurlResult != CURLE_OK)
 		{
@@ -376,17 +423,23 @@ UINT CDownloaderMgr::PreDownload()
 			szCurlResult.Format("(%d) %s", pHeaderInfo->m_nCurlResult, 
 				curl_easy_strerror((CURLcode)pHeaderInfo->m_nCurlResult));
 			
-			CurrentStatusChanged(TSE_END_WITH_ERROR, szCurlResult);
+			CurrentStatusChanged(TSE_END_WITH_ERROR, szCurlResult, TRUE, FALSE);
 			
-			nResult = 4;
+			pStatusInfo->m_nStatusCode = TSE_END_WITH_ERROR;
+			pStatusInfo->m_szDetail = szCurlResult;
+			
+			nResult = TSE_END_WITH_ERROR;
 			break;
 		}
 		//2. HTTP return error
 		if(pHeaderInfo->m_nHTTPCode != 200 && pHeaderInfo->m_nHTTPCode != 206)
 		{	
-			CurrentStatusChanged(TSE_END_WITH_ERROR, pHeaderInfo->m_szStatusLine);
+			CurrentStatusChanged(TSE_END_WITH_ERROR, pHeaderInfo->m_szStatusLine, TRUE, FALSE);
 			
-			nResult = 5;
+			pStatusInfo->m_nStatusCode = TSE_END_WITH_ERROR;
+			pStatusInfo->m_szDetail = pHeaderInfo->m_szStatusLine;
+			
+			nResult = TSE_END_WITH_ERROR;
 			break;
 		}
 		
@@ -419,7 +472,6 @@ UINT CDownloaderMgr::PreDownload()
 			}
 		}
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
 	} while (FALSE);
 
 	if(m_pHeaderParser != NULL)
@@ -429,13 +481,53 @@ UINT CDownloaderMgr::PreDownload()
 	}
 	m_criticalSection.Unlock();
 
+	if(nResult != TSE_TRANSFERRING)
+	{
+		ASSERT(pStatusInfo->m_nStatusCode != TSE_TRANSFERRING);
+
+		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)pStatusInfo);
+	}
+	return nResult;
+}
+UINT CDownloaderMgr::PreDownload()
+{
+	UINT nResult = 0;
+	CString szLog;
+
+	//1. pre-GetHeader
+	nResult = PreGetHeader();
+	if(nResult != TSE_TRANSFERRING)
+	{
+		return nResult;
+	}
+
+	//2. in-GetHeader
+	m_criticalSection.Lock();
+	if(m_pHeaderParser != NULL)
+	{
+		ASSERT(m_pHeaderParser == NULL);
+	}
+	m_pHeaderParser = new CGetHeader();
+	m_criticalSection.Unlock();
+
+	m_pHeaderParser->Start(m_dlParam.m_szUrl);
+	CHeaderInfo* pHeaderInfo = m_pHeaderParser->GetHeaderInfo();
+
+	//3. post-GetHeader
+	CStatusInfo statusInfo;
+	nResult = PostGetHeader(pHeaderInfo, &statusInfo);
+	if(nResult != TSE_TRANSFERRING)
+	{
+		return nResult;
+	}
+
 	return nResult;
 }
 UINT CDownloaderMgr::StartDownload()
 {
-	//transfer
-	CurrentStatusChanged(TSE_TRANSFERRING);
+	CurrentStatusChanged(TSE_TRANSFERRING, NULL, FALSE);
 
+	//transfer
 	UINT nResult = 0;
 
 	CString szLog;
@@ -443,7 +535,7 @@ UINT CDownloaderMgr::StartDownload()
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	nResult = PreDownload();
-	if(nResult)
+	if(nResult != TSE_TRANSFERRING)
 	{
 		return nResult;
 	}

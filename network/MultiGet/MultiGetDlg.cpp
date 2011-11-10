@@ -99,6 +99,8 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_HEADER, OnButtonHeader)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVE, OnButtonRemove)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TASK, OnItemchangedListTask)
+	ON_BN_CLICKED(IDC_BUTTON_REDOWNLOAD, OnButtonRedownload)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -214,6 +216,8 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
 	}
 
+	ListCtrlSelectionChanged();
+
 	return 1L;
 
 	/*
@@ -307,6 +311,8 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
  		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
 	}
+
+	ListCtrlSelectionChanged();
 	
 	return 1L;
 }
@@ -481,6 +487,14 @@ void CMultiGetDlg::OnButtonRemove()
 
 	m_taskListCtrl.RemoveSelectedItems();
 
+	if(pDownloaderArray->GetSize() <= 0)
+	{
+		delete pDownloaderArray;
+		pDownloaderArray = NULL;
+
+		return;
+	}
+
 	CDownloaderMgr::Delete(pDownloaderArray);
 }
 
@@ -569,4 +583,104 @@ void CMultiGetDlg::OnButtonAdd()
 		pTaskInfo->m_nTaskID = CCommonUtils::GetUniqueID();
 		m_taskListCtrl.AddRow(*pTaskInfo);
 	}
+}
+
+void CMultiGetDlg::OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+
+	CString szLog;
+	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::TRACE_LOG_LEVEL))
+	{
+		szLog.Format("uChanged = %04x, uNewState = %04x, uOldState = %04x, iItem = %d. ",
+			pNMListView->uChanged, pNMListView->uNewState, pNMListView->uOldState, pNMListView->iItem);
+		LOG4CPLUS_TRACE_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	}
+	if(pNMListView->uChanged == LVIF_STATE)
+    {
+		//1. uNewState & LVIS_SELECTED, there's new items selected
+		//2. uOldState & LVIS_SELECTED, there's old items deselected
+		//we care about both events
+		if((pNMListView->uNewState & LVIS_SELECTED) || (pNMListView->uOldState & LVIS_SELECTED))
+		{
+			ListCtrlSelectionChanged();
+		}
+		else
+		{
+			//AfxTrace("OnItemchanged: selection no change\n");
+		}
+    }
+	else
+	{
+		AfxTrace("OnItemchanged: pNMListView->uChanged != LVIF_STATE\n");
+	}
+	*pResult = 0;
+}
+
+void CMultiGetDlg::ListCtrlSelectionChanged()
+{
+	CString szLog;
+	
+	CDownloaderMgrArray* pDownloaderArray = new CDownloaderMgrArray();
+	CTaskInfo* pTaskInfo = NULL;
+	
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+		
+		//NULL DownloaderMgr should be also included
+		pDownloaderArray->Add(pTaskInfo->m_lpDownloaderMgr);
+	}
+
+	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		//TODO
+	}
+
+	int i, nSize;
+	CDownloaderMgr* pDownloaderMgr;
+
+	DWORD dwStatus = DL_OPER_FLAG_NONE;
+	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
+	{
+		pDownloaderMgr = pDownloaderArray->GetAt(i);
+
+		if(pDownloaderMgr == NULL)
+		{
+			dwStatus |= (DL_OPER_FLAG_START | DL_OPER_FLAG_REMOVE);
+		}
+		else
+		{
+			dwStatus |= pDownloaderMgr->GetOperState();
+		}
+	}
+
+	delete pDownloaderArray;
+	pDownloaderArray = NULL;
+
+	EnableButtons(dwStatus);
+}
+
+void CMultiGetDlg::OnButtonRedownload() 
+{
+	
+	
+}
+
+void CMultiGetDlg::EnableButtons(DWORD dwStatus)
+{
+	GetDlgItem(IDC_BUTTON_START1)->EnableWindow(dwStatus & DL_OPER_FLAG_START);
+	GetDlgItem(IDC_BUTTON_PAUSE)->EnableWindow(dwStatus & DL_OPER_FLAG_PAUSE);
+	GetDlgItem(IDC_BUTTON_REMOVE)->EnableWindow(dwStatus & DL_OPER_FLAG_REMOVE);
+	GetDlgItem(IDC_BUTTON_REDOWNLOAD)->EnableWindow(dwStatus & DL_OPER_FLAG_REDOWNLOAD);
+	GetDlgItem(IDC_BUTTON_RESUME)->EnableWindow(dwStatus & DL_OPER_FLAG_RESUME);
+
+	CString szLog;
+	szLog.Format("EnableButtons called.");
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }

@@ -189,3 +189,8 @@ void CTaskListCtrl::OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult)
 
 	*pResult = 0;
 }
+
+void CTaskListCtrl::OnItemchanged(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+
+}
