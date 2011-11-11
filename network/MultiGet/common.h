@@ -25,7 +25,11 @@ typedef enum
 	TSE_STOPPED,		//Task has been stopped by user
 	TSE_COMPLETE,		//Task has been completed successfully
 	TSE_END_WITH_ERROR,	//Task ended with error
-	TSE_DESTROYED   	//Task doesn't exist, or has been destroyed
+	TSE_DESTROYED,   	//Task doesn't exist, or has been destroyed
+
+	TSE_PAUSING,
+	TSE_STOPPING,
+	TSE_DESTROYING
 } TaskStatusEnum;
 
 typedef enum
@@ -50,12 +54,17 @@ typedef enum
 typedef CSize CRange;
 
 
-class CStatusInfo
+class CDownloadState
 {
 public:
-	DWORD	m_nStatusCode;
+	DWORD	m_nState;
 	CString m_szDetail;
-	CStatusInfo() : m_nStatusCode (0) {} 
+	CDownloadState(DWORD nState = TSE_READY) : m_nState (nState) {}
+
+	void  SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
+	DWORD GetState();
+	DWORD GetOperAccess(DWORD nOperFlags = DL_OPER_FLAG_ALL);
+	static DWORD GetAccess(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
 };
 class CProgressInfo
 {

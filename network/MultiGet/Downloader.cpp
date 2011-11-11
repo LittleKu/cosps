@@ -16,7 +16,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDownloader::CDownloader() : m_statusChecker(TSE_READY), m_hStopEvent(NULL)
+CDownloader::CDownloader() : m_dlSuperState(TSE_READY), m_hStopEvent(NULL)
 {
 	//Init no-signal, auto event
 	m_hStopEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -38,32 +38,44 @@ void CDownloader::Init(const CDownloadParam& param)
 
 UINT CDownloader::GetCurrentStatus()
 {
-	return m_statusChecker.GetCurrentStatus();
+	//TODO
+//	return m_dlSuperState.GetState();
+	return 0;
+}
+void CDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
+{
+//	m_dlSuperState.SetState(nState, lpszDetail);
 }
 
 void CDownloader::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
 {
+	m_dlSuperState.SetState(nNewStatus, lpszDetail);
+	/*
 //	ASSERT(m_statusChecker.GetCurrentStatus() != nNewStatus);
 	m_statusChecker.SetCurrentStatus(nNewStatus);
 	
 
-	CStatusInfo statusInfo;
-	statusInfo.m_nStatusCode = nNewStatus;
+	CDownloadState statusInfo;
+	statusInfo.m_nState = nNewStatus;
 	statusInfo.m_szDetail = lpszDetail;
 
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&statusInfo));
 
 	::SetEvent(m_hStopEvent);
+	*/
 }
 
 void CDownloader::TaskFinished(DWORD dwResult)
 {
+	m_dlSuperState.SetState(CCommonUtils::ResultCode2StatusCode(dwResult));
+	/*
 	m_statusChecker.SetCurrentStatus(CCommonUtils::ResultCode2StatusCode(dwResult));
 	
 
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)dwResult);
 
 	::SetEvent(m_hStopEvent);
+	*/
 }
 
 void CDownloader::WaitUntilStop()

@@ -93,6 +93,15 @@ BOOL CEasyDownloader::IsResumable()
 	return FALSE;
 }
 
+UINT CEasyDownloader::GetCurrentStatus()
+{
+	return CDownloader::GetCurrentStatus();
+}
+void CEasyDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
+{
+	CDownloader::SetState(nState, lpszDetail);
+}
+
 int CEasyDownloader::Destroy()
 {
 	if(GetCurrentStatus() != TSE_TRANSFERRING)

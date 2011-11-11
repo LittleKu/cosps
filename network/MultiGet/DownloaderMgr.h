@@ -21,7 +21,7 @@ public:
 	CDownloaderMgr();
 	virtual ~CDownloaderMgr();
 	virtual void Init(const CDownloadParam& param);
-	virtual UINT GetCurrentStatus();
+	virtual DWORD GetCurrentStatus();
 	virtual int Start();
 	virtual int Pause();
 	virtual int Stop();
@@ -29,13 +29,15 @@ public:
 	virtual int Destroy();
 	virtual BOOL IsResumable();
 
-	DWORD GetOperState();
+	DWORD GetAccess();
 
 	static UINT DeleteProc(LPVOID lpvData);
 	static int Delete(CDownloaderMgrArray* pDownloaderArray);
 protected:
+	/*
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL, BOOL bWorkThreadStopped = TRUE, 
 		BOOL bSendMessage = TRUE);
+	*/
 	virtual void WaitUntilStop();
 private:
 	static UINT StartDownloadProc(LPVOID lpvData);
@@ -45,21 +47,23 @@ private:
 	UINT ResumeDownload();
 
 	UINT PreGetHeader();
-	UINT PostGetHeader(CHeaderInfo* pHeaderInfo, CStatusInfo* pStatusInfo);
+	UINT PostGetHeader();
 	UINT PreDownload();
 	UINT CheckStatus();
-	void NotifyStopped(BOOL bStopped = TRUE);
+
+	BOOL IsDownloaderExist();
 protected:
 	CDownloadParam m_dlParam;
-	CStatusChecker m_statusChecker;
+
+	int m_nPhase;
+	CDownloadState m_dlState;
+
+	CCriticalSection m_criticalSection;
 
 	HANDLE m_hStopEvent;
 
 	CDownloader* m_pDownloader;
 	CGetHeader* m_pHeaderParser;
-
-	CController m_controller;
-	CCriticalSection m_criticalSection;
 };
 
 #endif // !defined(AFX_DOWNLOADERMGR_H__4B2D1E2E_DEC4_4320_9E07_2E0E79B7BC1B__INCLUDED_)

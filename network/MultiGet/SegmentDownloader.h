@@ -45,6 +45,10 @@ public:
 	virtual int Pause();
 	virtual int Destroy();
 	virtual BOOL IsResumable();
+
+	virtual void WaitUntilStop();
+	virtual UINT GetCurrentStatus();
+	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:
 	//Actual download process
 	int DoDownload();
@@ -76,6 +80,7 @@ private:
 	//Close all the connections
 	void CloseAllConnections();
 
+	BOOL IsStillTransferring();
 private:
 	//Helper functions
 	
@@ -104,7 +109,8 @@ protected:
 
 	BOOL m_bResumable;
 
-	CController m_controller;
+	CDownloadState m_dlState;
+	CCriticalSection m_criticalSection;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

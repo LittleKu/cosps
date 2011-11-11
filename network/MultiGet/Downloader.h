@@ -29,7 +29,7 @@ public:
 	virtual int Resume() = 0;
 	virtual int Destroy() = 0;
 	virtual BOOL IsResumable() = 0;
-
+	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 	virtual void WaitUntilStop();
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
@@ -37,7 +37,8 @@ protected:
 	
 protected:
 	CDownloadParam m_dlParam;
-	CStatusChecker m_statusChecker;
+//	CStatusChecker m_statusChecker;
+	CDownloadState m_dlSuperState;
 
 	HANDLE m_hStopEvent;
 };

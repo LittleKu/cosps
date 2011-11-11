@@ -107,26 +107,40 @@ void CSegmentInfoMap::RemoveSegmentInfoArray(LPCTSTR lpszUrl)
 
 CSegmentInfoArray* CSegmentInfoMap::GetSegmentInfoArray(int nTaskID)
 {
+	CSegmentInfoArray* pResult = NULL;
 	void* ptr = NULL;
+
+	m_criticalSection.Lock();
 	if(m_mapSegmentInfo.Lookup(nTaskID, ptr) == FALSE)
 	{
 		CString szLog;
 		szLog.Format("The query taskID is not exist. nTaskID = %d", nTaskID);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
-		return NULL;
+		pResult = NULL;
 	}
-	return (CSegmentInfoArray*)ptr;
+	else
+	{
+		pResult = (CSegmentInfoArray*)ptr;
+	}
+	m_criticalSection.Unlock();
+
+	return pResult;
 }
 
 void CSegmentInfoMap::AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray)
 {
+	m_criticalSection.Lock();
 	m_mapSegmentInfo.SetAt(nTaskID, pSegInfoArray);
+	m_criticalSection.Unlock();
 }
 
 void CSegmentInfoMap::RemoveSegmentInfoArray(int nTaskID)
 {
 	CSegmentInfoArray* pSegInfoArray = GetSegmentInfoArray(nTaskID);
+
+	m_criticalSection.Lock();
+
 	ASSERT(pSegInfoArray != NULL);
 	
 	int i, size;
@@ -143,5 +157,7 @@ void CSegmentInfoMap::RemoveSegmentInfoArray(int nTaskID)
 	delete pSegInfoArray;
 	
 	m_mapSegmentInfo.RemoveKey(nTaskID);
+
+	m_criticalSection.Unlock();
 }
 

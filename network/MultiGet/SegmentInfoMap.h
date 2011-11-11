@@ -16,19 +16,14 @@ class CSegmentInfoMap
 {
 public:
 	virtual ~CSegmentInfoMap();
-	/*
-	CSegmentInfoArray* GetSegmentInfoArray(LPCTSTR lpszUrl);
-	void AddSegmentInfoArray(LPCTSTR lpszUrl, CSegmentInfoArray* pSegInfoArray);
-	void RemoveSegmentInfoArray(LPCTSTR lpszUrl);
-	*/
 
 	CSegmentInfoArray* GetSegmentInfoArray(int nTaskID);
 	void AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray);
 	void RemoveSegmentInfoArray(int nTaskID);
 private:
 	CSegmentInfoMap();	
-//	CMapStringToPtr m_mapSegmentInfo;
 	CMapIntToPtr m_mapSegmentInfo;
+	CCriticalSection m_criticalSection;
 public:
 	static CSegmentInfoMap* GetInstance();
 };

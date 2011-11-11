@@ -292,7 +292,7 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 {
 	int nTaskID = (int)wParam;
-	CStatusInfo* pStatusInfo = (CStatusInfo*)lParam;
+	CDownloadState* pStatusInfo = (CDownloadState*)lParam;
 
 	int nIndex = 0;
 	CTaskInfo* pTaskInfo = NULL;
@@ -300,13 +300,13 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 	{
 		CString szLog;
 		szLog.Format("[OnStatusUpdate]: The task [%d] is in destroying. Status=0x%08X, detail = %s", 
-			nTaskID, pStatusInfo->m_nStatusCode, (LPCTSTR)pStatusInfo->m_szDetail);
+			nTaskID, pStatusInfo->m_nState, (LPCTSTR)pStatusInfo->m_szDetail);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	else
 	{
 		CString szStatusMsg;
-		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nStatusCode, pStatusInfo->m_szDetail, szStatusMsg);
+		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
 		
 		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
  		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
@@ -656,7 +656,7 @@ void CMultiGetDlg::ListCtrlSelectionChanged()
 		}
 		else
 		{
-			dwStatus |= pDownloaderMgr->GetOperState();
+			dwStatus |= pDownloaderMgr->GetAccess();
 		}
 	}
 
@@ -679,8 +679,4 @@ void CMultiGetDlg::EnableButtons(DWORD dwStatus)
 	GetDlgItem(IDC_BUTTON_REMOVE)->EnableWindow(dwStatus & DL_OPER_FLAG_REMOVE);
 	GetDlgItem(IDC_BUTTON_REDOWNLOAD)->EnableWindow(dwStatus & DL_OPER_FLAG_REDOWNLOAD);
 	GetDlgItem(IDC_BUTTON_RESUME)->EnableWindow(dwStatus & DL_OPER_FLAG_RESUME);
-
-	CString szLog;
-	szLog.Format("EnableButtons called.");
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
