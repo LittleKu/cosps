@@ -332,7 +332,7 @@ int CSegmentDownloader::Destroy()
 	return nResult;
 }
 
-UINT CSegmentDownloader::GetCurrentStatus()
+UINT CSegmentDownloader::GetState()
 {
 	UINT nResult;
 
@@ -519,15 +519,11 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 	m_criticalSection.Unlock();
 
 	::SetEvent(m_hStopEvent);
-
-//	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)&m_dlState);
-
-//	TaskFinished(dwResult);
 }
 
-BOOL CSegmentDownloader::IsStillTransferring()
+BOOL CSegmentDownloader::IsRunning()
 {
-	UINT nStatus = GetCurrentStatus();
+	UINT nStatus = GetState();
 	if(nStatus == TSE_TRANSFERRING || nStatus == TSE_PAUSING || nStatus == TSE_STOPPING || nStatus == TSE_DESTROYING)
 	{
 		return TRUE;
@@ -538,7 +534,7 @@ void CSegmentDownloader::WaitUntilStop()
 {
 	CString szLog;
 	DWORD dwResult;
-	while( IsStillTransferring() )
+	while(IsRunning())
 	{
 		Destroy();
 		
@@ -551,7 +547,7 @@ void CSegmentDownloader::WaitUntilStop()
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	
-	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, GetCurrentStatus());
+	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, GetState());
 	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 

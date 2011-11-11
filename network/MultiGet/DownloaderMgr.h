@@ -21,7 +21,7 @@ public:
 	CDownloaderMgr();
 	virtual ~CDownloaderMgr();
 	virtual void Init(const CDownloadParam& param);
-	virtual DWORD GetCurrentStatus();
+	virtual DWORD GetState();
 	virtual int Start();
 	virtual int Pause();
 	virtual int Stop();
@@ -34,10 +34,6 @@ public:
 	static UINT DeleteProc(LPVOID lpvData);
 	static int Delete(CDownloaderMgrArray* pDownloaderArray);
 protected:
-	/*
-	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL, BOOL bWorkThreadStopped = TRUE, 
-		BOOL bSendMessage = TRUE);
-	*/
 	virtual void WaitUntilStop();
 private:
 	static UINT StartDownloadProc(LPVOID lpvData);
@@ -52,6 +48,7 @@ private:
 	UINT CheckStatus();
 
 	BOOL IsDownloaderExist();
+	BOOL IsRunning();
 protected:
 	CDownloadParam m_dlParam;
 

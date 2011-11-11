@@ -22,7 +22,7 @@ public:
 	virtual ~CDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
-	virtual UINT GetCurrentStatus();
+	virtual UINT GetState();
 	virtual int Start() = 0;
 	virtual int Stop() = 0;
 	virtual int Pause() = 0;
@@ -33,7 +33,6 @@ public:
 	virtual void WaitUntilStop();
 protected:
 	virtual void CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail = NULL);
-	virtual void TaskFinished(DWORD dwResult);
 	
 protected:
 	CDownloadParam m_dlParam;

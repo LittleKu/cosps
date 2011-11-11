@@ -41,7 +41,7 @@ public:
 	virtual int Destroy();
 	virtual BOOL IsResumable();
 
-	virtual UINT GetCurrentStatus();
+	virtual UINT GetState();
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:	
 	size_t ProcessHeader(char *ptr, size_t size, size_t nmemb);

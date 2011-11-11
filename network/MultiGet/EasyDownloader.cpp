@@ -93,9 +93,9 @@ BOOL CEasyDownloader::IsResumable()
 	return FALSE;
 }
 
-UINT CEasyDownloader::GetCurrentStatus()
+UINT CEasyDownloader::GetState()
 {
-	return CDownloader::GetCurrentStatus();
+	return CDownloader::GetState();
 }
 void CEasyDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
 {
@@ -104,7 +104,7 @@ void CEasyDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
 
 int CEasyDownloader::Destroy()
 {
-	if(GetCurrentStatus() != TSE_TRANSFERRING)
+	if(GetState() != TSE_TRANSFERRING)
 	{
 		CString szTempFolder;
 		GetTempFolder(szTempFolder);

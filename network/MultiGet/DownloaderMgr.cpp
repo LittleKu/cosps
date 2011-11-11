@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "DownloaderMgr.h"
-#include "HeaderParser.h"
 #include "EasyDownloader.h"
 #include "SegmentDownloader.h"
 #include "CommonUtils.h"
@@ -59,18 +58,13 @@ CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL),
 
 CDownloaderMgr::~CDownloaderMgr()
 {
-	BOOL bResult;
 	m_criticalSection.Lock();
-	
-	bResult = (m_pDownloader == NULL);
-
 	//Just remove the memory, WaitUntilStop is used to stop thread!
 	if(m_pDownloader != NULL)
 	{
 		delete m_pDownloader;
 		m_pDownloader = NULL;
 	}
-
 	m_criticalSection.Unlock();
 
 	if(m_hStopEvent)
@@ -80,6 +74,15 @@ CDownloaderMgr::~CDownloaderMgr()
 	}
 }
 
+BOOL CDownloaderMgr::IsRunning()
+{
+	DWORD nState = GetState();
+	if(nState == TSE_TRANSFERRING || nState == TSE_PAUSING || nState == TSE_STOPPING || nState == TSE_DESTROYING)
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
 void CDownloaderMgr::WaitUntilStop()
 {
 	BOOL bResult;
@@ -88,38 +91,36 @@ void CDownloaderMgr::WaitUntilStop()
 	bResult = IsDownloaderExist();
 	m_criticalSection.Unlock();
 
+	//downloader existed
 	if(bResult)
 	{
 		ASSERT(m_pDownloader != NULL);
 		m_pDownloader->WaitUntilStop();
-		return;
 	}
-
-	CString szLog;
-	DWORD dwResult;
-	UINT nStatus = GetCurrentStatus();
-
-	BOOL bTransferring = (nStatus == TSE_TRANSFERRING || nStatus == TSE_PAUSING
-		|| nStatus == TSE_STOPPING || nStatus == TSE_DESTROYING);
-	while( bTransferring )
+	//downloader mgr manage the state self
+	else
 	{
-		Destroy();
+		CString szLog;
+		DWORD dwResult;
 		
-		szLog.Format("Task [%02d] is transferring, wait until it stopped.", m_dlParam.m_nTaskID);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		while( IsRunning() )
+		{
+			//This is not necessary.
+			Destroy();
 			
-		dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
+			szLog.Format("CDownloaderMgr::Task[%02d] is running", m_dlParam.m_nTaskID);
+			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				
+			dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
+			
+			szLog.Format("CDownloaderMgr::Task[%02d] WaitForSingleObject returned 0x%08X", 
+				m_dlParam.m_nTaskID, dwResult);
+			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
 		
-		szLog.Format("Task [%02d] WaitForSingleObject returned 0x%08X", m_dlParam.m_nTaskID, dwResult);
+		szLog.Format("CDownloaderMgr::Task[%02d] stopped running. state=%d", m_dlParam.m_nTaskID, GetState());
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-		nStatus = GetCurrentStatus();
-		bTransferring = (nStatus == TSE_TRANSFERRING || nStatus == TSE_PAUSING 
-			|| nStatus == TSE_STOPPING || nStatus == TSE_DESTROYING);
 	}
-	
-	szLog.Format("Task [%02d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, nStatus);
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
 void CDownloaderMgr::Init(const CDownloadParam& param)
@@ -137,7 +138,7 @@ void CDownloaderMgr::Init(const CDownloadParam& param)
 	}
 }
 
-DWORD CDownloaderMgr::GetCurrentStatus()
+DWORD CDownloaderMgr::GetState()
 {
 	DWORD nResult = 0;
 
@@ -145,7 +146,7 @@ DWORD CDownloaderMgr::GetCurrentStatus()
 	if(IsDownloaderExist())
 	{
 		ASSERT(m_pDownloader != NULL);
-		nResult = m_pDownloader->GetCurrentStatus();
+		nResult = m_pDownloader->GetState();
 	}
 	else
 	{
@@ -158,9 +159,8 @@ DWORD CDownloaderMgr::GetCurrentStatus()
 
 DWORD CDownloaderMgr::GetAccess()
 {
-	return CDownloadState::GetAccess(GetCurrentStatus(), DL_OPER_FLAG_ALL);
+	return CDownloadState::GetAccess(GetState(), DL_OPER_FLAG_ALL);
 }
-
 
 int CDownloaderMgr::Start()
 {
@@ -179,10 +179,10 @@ int CDownloaderMgr::Start()
 	}
 	if(m_pDownloader != NULL)
 	{
-		ASSERT(m_nPhase == PHASE_DOWNLOADER_END);
-
 		szLog.Format("Task[%02d] has been finished, but downloader not deleted yet. phase=%d", m_dlParam.m_nTaskID, m_nPhase);
 		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+		ASSERT(m_nPhase == PHASE_DOWNLOADER_END);
 
 		delete m_pDownloader;
 		m_pDownloader = NULL;
@@ -371,7 +371,7 @@ UINT CDownloaderMgr::DeleteProc(LPVOID lpvData)
 		
 		pDownloaderMgr->WaitUntilStop();
 
-		ASSERT(pDownloaderMgr->GetCurrentStatus() != TSE_TRANSFERRING);
+		ASSERT(pDownloaderMgr->GetState() != TSE_TRANSFERRING);
 		delete pDownloaderMgr;
 	}
 	
@@ -459,8 +459,6 @@ UINT CDownloaderMgr::PostGetHeader()
 	m_nPhase = PHASE_POST_GET_HEADER;
 	//Get the current state
 	nResult = CheckStatus();
-	
-	m_criticalSection.Unlock();
 
 	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
@@ -471,7 +469,6 @@ UINT CDownloaderMgr::PostGetHeader()
 	if(nResult != TSE_TRANSFERRING)
 	{	
 		//Don't care about the content of header
-		m_criticalSection.Lock();
 
 		ASSERT(m_pHeaderParser != NULL);
 		delete m_pHeaderParser;
@@ -485,8 +482,6 @@ UINT CDownloaderMgr::PostGetHeader()
 
 	//2. Parse Header content
 	CString szDetail;
-	m_criticalSection.Lock();
-
 	CHeaderInfo* pHeaderInfo = m_pHeaderParser->GetHeaderInfo();
 	do 
 	{

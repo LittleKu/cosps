@@ -47,7 +47,7 @@ public:
 	virtual BOOL IsResumable();
 
 	virtual void WaitUntilStop();
-	virtual UINT GetCurrentStatus();
+	virtual UINT GetState();
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:
 	//Actual download process
@@ -79,11 +79,10 @@ private:
 	void CloseConnection(int nIndex);
 	//Close all the connections
 	void CloseAllConnections();
-
-	BOOL IsStillTransferring();
 private:
 	//Helper functions
-	
+	BOOL IsRunning();
+
 	//Calculate the total download size now
 	DWORD64 GetTotalDownloadNow();
 
