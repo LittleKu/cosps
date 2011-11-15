@@ -13,6 +13,7 @@
 #endif
 
 #include "resource.h"		// main symbols
+#include "ThreadMonitor.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CMultiGetApp:
@@ -23,7 +24,9 @@ class CMultiGetApp : public CWinApp
 {
 public:
 	CMultiGetApp();
-
+	CThreadMonitor* GetThreadMonitor();
+private:
+	CThreadMonitor m_threadMonitor;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMultiGetApp)

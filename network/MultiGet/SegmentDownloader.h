@@ -48,6 +48,7 @@ public:
 
 	virtual void WaitUntilStop();
 	virtual UINT GetState();
+	virtual void GetState(CDownloadState& dlState);
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:
 	//Actual download process

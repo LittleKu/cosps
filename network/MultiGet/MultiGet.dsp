@@ -120,6 +120,10 @@ SOURCE=.\EasyDownloader.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GetHeader.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\HeaderParser.cpp
 # End Source File
 # Begin Source File
@@ -169,7 +173,7 @@ SOURCE=.\TestDownloader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.cpp
+SOURCE=.\ThreadMonitor.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -202,6 +206,10 @@ SOURCE=.\DownloaderMgr.h
 # Begin Source File
 
 SOURCE=.\EasyDownloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GetHeader.h
 # End Source File
 # Begin Source File
 
@@ -253,7 +261,7 @@ SOURCE=.\TestDownloader.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.h
+SOURCE=.\ThreadMonitor.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -268,9 +276,5 @@ SOURCE=.\res\MultiGet.ico
 SOURCE=.\res\MultiGet.rc2
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project

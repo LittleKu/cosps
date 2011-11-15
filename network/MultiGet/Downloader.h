@@ -22,6 +22,7 @@ public:
 	virtual ~CDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
+	virtual void GetState(CDownloadState& dlState);
 	virtual UINT GetState();
 	virtual int Start() = 0;
 	virtual int Stop() = 0;

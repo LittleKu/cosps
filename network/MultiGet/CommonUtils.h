@@ -35,6 +35,7 @@ public:
 	//convert error code to error message
 	static void FormatErrorMsg(DWORD dwCode, CString& szMsg);
 
+	static void  ResultCode2State(DWORD dwResultCode, CDownloadState& dlState);
 	static DWORD ResultCode2StatusCode(DWORD dwResultCode);
 	static void  ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg);
 

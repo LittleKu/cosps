@@ -54,7 +54,6 @@ protected:
 	afx_msg void OnAdd1();
 	afx_msg void OnButtonStart1();
 	afx_msg void OnButtonPause();
-	afx_msg void OnButton4();
 	afx_msg void OnButtonStop();
 	afx_msg void OnButtonResume();
 	afx_msg void OnButtonHeader();
@@ -62,6 +61,7 @@ protected:
 	afx_msg void OnButtonAdd();
 	afx_msg void OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnButtonRedownload();
+	afx_msg void OnClose();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

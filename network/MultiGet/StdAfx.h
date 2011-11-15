@@ -46,5 +46,7 @@
 
 #define CURL_STATICLIB
 
+class CThreadMonitor;
+CThreadMonitor* SYS_THREAD_MONITOR();
 
 #endif // !defined(AFX_STDAFX_H__4EBA500D_D4A5_4A10_A389_D54F6FD70C1F__INCLUDED_)

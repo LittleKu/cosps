@@ -36,6 +36,10 @@ void CDownloader::Init(const CDownloadParam& param)
 	m_dlParam = param;
 }
 
+void CDownloader::GetState(CDownloadState& dlState)
+{
+
+}
 UINT CDownloader::GetState()
 {
 	//TODO

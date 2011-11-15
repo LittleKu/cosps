@@ -214,7 +214,19 @@ DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
 
 	return dwStatusCode;
 }
-
+void CCommonUtils::ResultCode2State(DWORD dwResultCode, CDownloadState& dlState)
+{
+	dlState.m_nState = ResultCode2StatusCode(dwResultCode);
+	
+	if(dlState.m_nState == TSE_END_WITH_ERROR)
+	{
+		CCommonUtils::FormatErrorMsg(dwResultCode, dlState.m_szDetail);
+	}
+	else
+	{
+		dlState.m_szDetail.Empty();
+	}
+}
 void  CCommonUtils::ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg)
 {
 	DWORD dwStatusCode = ResultCode2StatusCode(dwResultCode);

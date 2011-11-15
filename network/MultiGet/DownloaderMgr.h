@@ -11,11 +11,12 @@
 
 #include "Downloader.h"
 #include "GetHeader.h"
+#include "ThreadMonitor.h"
 
 class CDownloaderMgr;
 typedef CArray<CDownloaderMgr*, CDownloaderMgr*> CDownloaderMgrArray;
 
-class CDownloaderMgr
+class CDownloaderMgr : public CPostAction
 {
 public:
 	CDownloaderMgr();
@@ -29,6 +30,9 @@ public:
 	virtual int Destroy();
 	virtual BOOL IsResumable();
 
+	virtual int DoAction();
+
+	void GetState(CDownloadState& dlState);
 	DWORD GetAccess();
 
 	static UINT DeleteProc(LPVOID lpvData);
@@ -36,11 +40,11 @@ public:
 protected:
 	virtual void WaitUntilStop();
 private:
-	static UINT StartDownloadProc(LPVOID lpvData);
-	static UINT ResumeDownloadProc(LPVOID lpvData);
+	static DWORD WINAPI StartDownloadProc(LPVOID lpParameter);
+	static DWORD WINAPI ResumeDownloadProc(LPVOID lpParameter);
 
-	UINT StartDownload();
-	UINT ResumeDownload();
+	DWORD StartDownload();
+	DWORD ResumeDownload();
 
 	UINT PreGetHeader();
 	UINT PostGetHeader();
@@ -58,6 +62,8 @@ protected:
 	CCriticalSection m_criticalSection;
 
 	HANDLE m_hStopEvent;
+
+	HANDLE m_hWorkerThread;
 
 	CDownloader* m_pDownloader;
 	CGetHeader* m_pHeaderParser;

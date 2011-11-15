@@ -331,7 +331,12 @@ int CSegmentDownloader::Destroy()
 	
 	return nResult;
 }
-
+void CSegmentDownloader::GetState(CDownloadState& dlState)
+{
+	m_criticalSection.Lock();
+	dlState = m_dlState;
+	m_criticalSection.Unlock();
+}
 UINT CSegmentDownloader::GetState()
 {
 	UINT nResult;

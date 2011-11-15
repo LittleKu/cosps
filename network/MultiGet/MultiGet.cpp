@@ -85,6 +85,8 @@ BOOL CMultiGetApp::InitInstance()
 	//Load system options
 	SYS_OPTIONS()->Init();
 
+	m_threadMonitor.StartMonitor();
+
 	//curl lib global init
 	curl_global_init(CURL_GLOBAL_ALL);
 
@@ -105,4 +107,9 @@ BOOL CMultiGetApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+CThreadMonitor* CMultiGetApp::GetThreadMonitor()
+{
+	return &m_threadMonitor;
 }
