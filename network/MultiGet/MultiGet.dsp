@@ -108,6 +108,10 @@ SOURCE=.\Downloader.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\DownloaderContext.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\DownloaderMap.cpp
 # End Source File
 # Begin Source File
@@ -194,6 +198,10 @@ SOURCE=.\CommonUtils.h
 # Begin Source File
 
 SOURCE=.\Downloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DownloaderContext.h
 # End Source File
 # Begin Source File
 

@@ -32,10 +32,11 @@ public:
 /************************************************************************/
 /* Segment download in 1 thread											*/
 /************************************************************************/
+class CDownloaderContext;
 class CSegmentDownloader : public CDownloader
 {
 public:
-	CSegmentDownloader(TaskStatusEnum eInitStatus = TSE_READY);
+	CSegmentDownloader(CDownloaderContext* pContext);
 	virtual ~CSegmentDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
@@ -44,18 +45,17 @@ public:
 	virtual int Stop();
 	virtual int Pause();
 	virtual int Destroy();
-	virtual BOOL IsResumable();
 	virtual int ReDownload() {return 0;}
 
-	virtual void WaitUntilStop();
-	virtual void GetState(CDownloadState& dlState);
-	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
+//	virtual void WaitUntilStop();
+// 	virtual void GetState(CDownloadState& dlState);
+// 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:
 	//Actual download process
 	int DoDownload();
 
 	//Post process after download finished
-	void PostDownload(DWORD dwResult);
+	int PostDownload(DWORD dwResult);
 
 
 	//Init an easy handle connection
@@ -104,14 +104,13 @@ private:
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 protected:
+	CDownloaderContext* m_pContext;
 	CDownloadParam m_dlParam;
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
 
-	BOOL m_bResumable;
-
-	CDownloadState m_dlState;
-	CCriticalSection m_criticalSection;
+//	CDownloadState m_dlState;
+//	CCriticalSection m_criticalSection;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

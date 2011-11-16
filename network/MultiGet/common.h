@@ -177,13 +177,5 @@ public:
 	virtual ~CSegmentInfo() {}
 };
 
-class CDownloader;
-class CDownloadContext
-{
-public:
-	virtual ~CDownloadContext() {}
-	virtual void ChangeDownloader(CDownloader* pDownloader) = 0;
-};
-
 
 #endif

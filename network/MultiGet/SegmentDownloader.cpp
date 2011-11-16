@@ -7,6 +7,7 @@
 #include "SegmentInfoMap.h"
 #include "CommonUtils.h"
 #include "GenericTools.h"
+#include "DownloaderContext.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -170,7 +171,8 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 
 int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow, int nIndex)
 {
-	if(m_dlState.GetState() == TSE_DESTROYING)
+	DWORD dwState = m_pContext->GetState();
+	if(dwState == TSE_DESTROYING)
 	{
 		return 1;
 	}
@@ -197,14 +199,9 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 
 	//Pause
-	if(m_dlState.GetState() == TSE_PAUSING)
+	if(dwState == TSE_PAUSING)
 	{
 		return 2;
-	}
-	//Stop
-	if(m_dlState.GetState() == TSE_STOPPING)
-	{
-		return 3;
 	}
 
 	return 0;
@@ -214,8 +211,8 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSegmentDownloader::CSegmentDownloader(TaskStatusEnum eInitStatus)
- : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_bResumable(TRUE), m_dlState(eInitStatus)
+CSegmentDownloader::CSegmentDownloader(CDownloaderContext* pContext)
+ : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext)
 {
 }
 
@@ -235,22 +232,23 @@ void CSegmentDownloader::Init(const CDownloadParam& param)
 
 int CSegmentDownloader::Start()
 {
-	m_criticalSection.Lock();
-	ASSERT(m_dlState.GetState() == TSE_TRANSFERRING);
-	m_criticalSection.Unlock();
-
 	VerifyTempFolderExist();
-	StartInitMultiHandle();
 
+	ASSERT(m_pSegmentInfoArray != NULL);
+	if(m_pSegmentInfoArray->GetSize() == 0)
+	{
+		StartInitMultiHandle();
+	}
+	else
+	{
+		RestartInitMultiHandle();
+	}
+	
 	return DoDownload();
 }
 
 int CSegmentDownloader::Resume()
 {
-	m_criticalSection.Lock();
-	m_dlState.SetState(TSE_TRANSFERRING);
-	m_criticalSection.Unlock();
-
 	VerifyTempFolderExist();
 	RestartInitMultiHandle();	
 	
@@ -259,16 +257,7 @@ int CSegmentDownloader::Resume()
 
 int CSegmentDownloader::Stop()
 {
-	int nResult;
-	
-	m_criticalSection.Lock();
-	//Pause is allowed
-	if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
-	{
-		m_dlState.SetState(TSE_PAUSING);
-	}
-	nResult = m_dlState.GetState();
-	m_criticalSection.Unlock();
+	int nResult = 0;
 	
 	return nResult;
 }
@@ -277,14 +266,14 @@ int CSegmentDownloader::Pause()
 {
 	int nResult;
 	
-	m_criticalSection.Lock();
+	m_pContext->Lock();
 	//Pause is allowed
-	if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 	{
-		m_dlState.SetState(TSE_PAUSING);
+		m_pContext->m_dlCurState.SetState(TSE_PAUSING);
 	}
-	nResult = m_dlState.GetState();
-	m_criticalSection.Unlock();
+	nResult = m_pContext->m_dlCurState.GetState();
+	m_pContext->Unlock();
 	
 	return nResult;
 }
@@ -294,19 +283,20 @@ int CSegmentDownloader::Destroy()
 	int nResult;
 	CString szLog;
 
-	m_criticalSection.Lock();
+	m_pContext->Lock();
 	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
-		szLog.Format("Task[%02d]: Destroy - current state = %d", m_dlParam.m_nTaskID, m_dlState.GetState());
+		szLog.Format("Task[%02d]: Destroy - current state = %d", m_dlParam.m_nTaskID, 
+			m_pContext->GetStateNoLock());
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	//Remove is allowed
-	if( (m_dlState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
 	{
 		//Still in transferring
-		if(m_dlState.GetState() == TSE_TRANSFERRING)
+		if(m_pContext->m_dlCurState.GetState() == TSE_TRANSFERRING)
 		{
-			m_dlState.SetState(TSE_DESTROYING);
+			m_pContext->m_dlCurState.SetState(TSE_DESTROYING);
 		}
 		//Already paused or in other states
 		else
@@ -326,28 +316,10 @@ int CSegmentDownloader::Destroy()
 			//No need to notify GUI
 		}
 	}
-	nResult = m_dlState.GetState();
-	m_criticalSection.Unlock();
+	nResult = m_pContext->m_dlCurState.GetState();
+	m_pContext->Unlock();
 	
 	return nResult;
-}
-void CSegmentDownloader::GetState(CDownloadState& dlState)
-{
-	m_criticalSection.Lock();
-	dlState = m_dlState;
-	m_criticalSection.Unlock();
-}
-
-void CSegmentDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
-{
-	m_criticalSection.Lock();
-	m_dlState.SetState(nState, lpszDetail);
-	m_criticalSection.Unlock();
-}
-
-BOOL CSegmentDownloader::IsResumable()
-{
-	return m_bResumable;
 }
 
 int CSegmentDownloader::DoDownload()
@@ -406,12 +378,10 @@ int CSegmentDownloader::DoDownload()
 		}
 	}
 	
-	PostDownload(dwResult);
-
-	return dwResult;
+	return PostDownload(dwResult);
 }
 
-void CSegmentDownloader::PostDownload(DWORD dwResult)
+int CSegmentDownloader::PostDownload(DWORD dwResult)
 {
 	//1. Clean up
 	//Stop all available connections
@@ -510,9 +480,14 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 	}
 
 	//TODO: Set State detail information
-	m_criticalSection.Lock();
-	m_dlState.SetState(CCommonUtils::ResultCode2StatusCode(dwResult));
-	m_criticalSection.Unlock();
+	int nResult;
+
+	m_pContext->Lock();
+	m_pContext->SetStateNoLock(CCommonUtils::ResultCode2StatusCode(dwResult));
+	nResult = m_pContext->GetStateNoLock();
+	m_pContext->Unlock();
+
+	return nResult;
 }
 
 BOOL CSegmentDownloader::IsRunning()
@@ -523,9 +498,6 @@ BOOL CSegmentDownloader::IsRunning()
 		return TRUE;
 	}
 	return FALSE;
-}
-void CSegmentDownloader::WaitUntilStop()
-{
 }
 
 
@@ -630,10 +602,7 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 		break;
 	case CURLE_ABORTED_BY_CALLBACK:
 		{
-			DWORD nState;
-			m_criticalSection.Lock();
-			nState = m_dlState.GetState();
-			m_criticalSection.Unlock();
+			DWORD nState = m_pContext->GetState();
 
 			//(0). This task been destroyed
 			if(nState == TSE_DESTROYING)

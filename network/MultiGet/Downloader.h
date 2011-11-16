@@ -20,9 +20,8 @@ public:
 	virtual int ReDownload() = 0;
 	virtual int Pause() = 0;
 	virtual int Destroy() = 0;
+	virtual CDownloader* GetNextDownloader();
 
-	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL) = 0;
-	virtual void GetState(CDownloadState& dlState) = 0;
 	virtual DWORD GetState();
 	
 

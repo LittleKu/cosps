@@ -8,6 +8,7 @@
 #include "SegmentDownloader.h"
 #include "CommonUtils.h"
 #include "TimeCost.h"
+#include "HeaderDownloader.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -56,21 +57,20 @@ DWORD WINAPI CDownloaderMgr::ResumeDownloadProc(LPVOID lpvData)
 	return nResult;
 }
 
-CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL),
- m_dlState(TSE_READY), m_nPhase(PHASE_INIT), m_hWorkerThread(NULL)
+CDownloaderMgr::CDownloaderMgr() : m_hWorkerThread(NULL)
 {
 }
 
 CDownloaderMgr::~CDownloaderMgr()
 {
-	m_criticalSection.Lock();
-	//Just remove the memory, WaitUntilStop is used to stop thread!
-	if(m_pDownloader != NULL)
+	//Worker thread should be stopped already
+	ASSERT(m_hWorkerThread == NULL);
+
+	if(m_pCurDownloader != NULL)
 	{
-		delete m_pDownloader;
-		m_pDownloader = NULL;
+		delete m_pCurDownloader;
+		m_pCurDownloader = NULL;
 	}
-	m_criticalSection.Unlock();
 }
 
 int CDownloaderMgr::DoAction()
@@ -94,13 +94,13 @@ int CDownloaderMgr::DoAction()
 	}
 
 	//2. close thread handle
-	m_criticalSection.Lock();
+	m_lock.Lock();
 
 	ASSERT(m_hWorkerThread);
 	::CloseHandle(m_hWorkerThread);
 	m_hWorkerThread = NULL;
 
-	m_criticalSection.Unlock();
+	m_lock.Unlock();
 
 	//3. send complete message to GUI
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&dlState);
@@ -123,95 +123,43 @@ void CDownloaderMgr::Init(const CDownloadParam& param)
 	}
 }
 
-void CDownloaderMgr::GetState(CDownloadState& dlState)
-{
-	m_criticalSection.Lock();
-	if(IsDownloaderExist())
-	{
-		ASSERT(m_pDownloader != NULL);
-		m_pDownloader->GetState(dlState);
-	}
-	else
-	{
-		dlState = m_dlState;
-	}
-	m_criticalSection.Unlock();
-}
-DWORD CDownloaderMgr::GetState()
-{
-	DWORD nResult = 0;
-
-	m_criticalSection.Lock();
-	if(IsDownloaderExist())
-	{
-		ASSERT(m_pDownloader != NULL);
-		nResult = m_pDownloader->GetState();
-	}
-	else
-	{
-		nResult = m_dlState.GetState();
-	}
-	m_criticalSection.Unlock();
-
-	return nResult;
-}
-
 int CDownloaderMgr::Start()
 {
 	CString szLog;
 
-	m_criticalSection.Lock();
+	m_lock.Lock();
 	
 	if(m_hWorkerThread != NULL)
 	{
-		szLog.Format("Task[%02d] can't be started, because the thread handle still exist. phase=%d", m_dlParam.m_nTaskID, m_nPhase);
+		szLog.Format("Task[%02d] can't be started, because the thread handle still exist.", m_dlParam.m_nTaskID);
 		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
-		m_criticalSection.Unlock();
-		return m_nPhase;
+		m_lock.Unlock();
+		return 1;
 	}
-	//Only that init or finished phase can be started
-	if(m_nPhase != PHASE_INIT && m_nPhase != PHASE_NEW_OTHER_END && m_nPhase != PHASE_NEW_DOWNLOADER_END)
+
+	//Start is not allowed
+	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_START) & DL_OPER_FLAG_START) == 0 )
 	{
-		szLog.Format("Task[%02d] can't be started, because of wrong phase. phase=%d", m_dlParam.m_nTaskID, m_nPhase);
+		szLog.Format("Task[%02d] can't be started, because of wrong state = %d", m_dlParam.m_nTaskID, m_dlCurState.GetState());
 		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
-		m_criticalSection.Unlock();
-		return m_nPhase;
+		return 2;
 	}
-	if(m_pDownloader != NULL)
-	{
-		szLog.Format("Task[%02d] has been finished, but downloader not deleted yet. phase=%d", m_dlParam.m_nTaskID, m_nPhase);
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
-		ASSERT(m_nPhase == PHASE_NEW_DOWNLOADER_END);
-
-		if(m_pDownloader->GetState() == TSE_PAUSED)
-		{
-			szLog.Format("Task[%02d] can't be started, because it is paused. phase = %d", m_dlParam.m_nTaskID, m_nPhase);
-			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-			m_criticalSection.Unlock();
-			return m_nPhase;
-		}
-
-		delete m_pDownloader;
-		m_pDownloader = NULL;
-	}
-	//In case of the task has been finished
-	m_nPhase = PHASE_NEW_BEFORE_GET_HEADER;
 	//Change the state to transferring
-	m_dlState.SetState(TSE_TRANSFERRING);
+	m_dlCurState.SetState(TSE_TRANSFERRING);
 
-	m_criticalSection.Unlock();
+	m_lock.Unlock();
 
 	//If we can go here, we should send message to GUI to notify it's now in transferring.
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlState));
+	//Don't worry other threads to modify state now. This is still in GUI thread, no other thread can modify it
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlCurState));
 
 	DWORD dwThreadId;
 	m_hWorkerThread = ::CreateThread(NULL, 0, StartDownloadProc, this, CREATE_SUSPENDED, &dwThreadId);
+	//This WILL cause dead-lock
 	SYS_THREAD_MONITOR()->AddMoniteeWaitForExist(m_hWorkerThread, this);
-
 	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
 		szLog.Format("Task[%02d] worker thread started, Thread ID=%d", m_dlParam.m_nTaskID, dwThreadId);
@@ -227,8 +175,10 @@ int CDownloaderMgr::Resume()
 {
 	CString szLog;
 	
-	m_criticalSection.Lock();
 	
+	m_lock.Lock();
+	
+	/*
 	//The download process is paused before real downloading started
 	if(m_nPhase != PHASE_DOWNLOADER_PAUSED)
 	{
@@ -251,16 +201,14 @@ int CDownloaderMgr::Resume()
 			return Start();
 		}
 	}
-
-	ASSERT(m_pDownloader != NULL);
-	m_pDownloader->SetState(TSE_TRANSFERRING);
-	//Change the state to transferring, this is useless because the current state is determined by m_pDownloader
-	m_dlState.SetState(TSE_TRANSFERRING);
-	
-	m_criticalSection.Unlock();
+	*/
+	ASSERT(m_pCurDownloader != NULL);
+	//Change the state to transferring
+	m_dlCurState.SetState(TSE_TRANSFERRING);	
+	m_lock.Unlock();
 	
 	//If we can go here, we should send message to GUI to notify it's now in transferring.
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlState));
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlCurState));
 	
 	//AfxBeginThread(ResumeDownloadProc, (LPVOID)this);
 	m_hWorkerThread = ::CreateThread(NULL, 0, ResumeDownloadProc, this, 0, NULL);
@@ -273,23 +221,14 @@ int CDownloaderMgr::Stop()
 {
 	int nResult;
 
-	m_criticalSection.Lock();
-
-	if(IsDownloaderExist())
+	m_lock.Lock();
+	//Pause is allowed
+	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 	{
-		ASSERT(m_pDownloader != NULL);
-		nResult = m_pDownloader->Pause();
+		m_dlCurState.SetState(TSE_PAUSING);
 	}
-	else
-	{
-		//Pause is allowed
-		if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
-		{
-			m_dlState.SetState(TSE_PAUSING);
-		}
-		nResult = m_dlState.GetState();
-	}
-	m_criticalSection.Unlock();
+	nResult = m_dlCurState.GetState();
+	m_lock.Unlock();
 	
 	return nResult;
 }
@@ -297,23 +236,14 @@ int CDownloaderMgr::Pause()
 {
 	int nResult;
 
-	m_criticalSection.Lock();
-
-	if(IsDownloaderExist())
+	m_lock.Lock();
+	//Pause is allowed
+	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 	{
-		ASSERT(m_pDownloader != NULL);
-		nResult = m_pDownloader->Pause();
+		m_dlCurState.SetState(TSE_PAUSING);
 	}
-	else
-	{
-		//Pause is allowed
-		if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
-		{
-			m_dlState.SetState(TSE_PAUSING);
-		}
-		nResult = m_dlState.GetState();
-	}
-	m_criticalSection.Unlock();
+	nResult = m_dlCurState.GetState();
+	m_lock.Unlock();
 	
 	return nResult;
 }
@@ -321,7 +251,7 @@ int CDownloaderMgr::Destroy()
 {
 	int nResult;
 	
-	m_criticalSection.Lock();
+	m_lock.Lock();
 	//Worker thread already exit
 	if(m_hWorkerThread == NULL)
 	{
@@ -329,77 +259,28 @@ int CDownloaderMgr::Destroy()
 	}
 	else
 	{
-		if(IsDownloaderExist())
+		//Remove is allowed
+		if( (m_dlCurState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
 		{
-			ASSERT(m_pDownloader != NULL);
-			nResult = m_pDownloader->Destroy();
-		}
-		else
-		{
-			//Remove is allowed
-			if( (m_dlState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+			//Still in transferring
+			if(m_dlCurState.GetState() == TSE_TRANSFERRING)
 			{
-				//Still in transferring
-				if(m_dlState.GetState() == TSE_TRANSFERRING)
-				{
-					m_dlState.SetState(TSE_DESTROYING);
-				}
-				//Already paused or in other states
-				else
-				{
-					//...
-				}
+				m_dlCurState.SetState(TSE_DESTROYING);
 			}
-			nResult = m_dlState.GetState();
+			//Already paused or in other states
+			else
+			{
+				//...
+			}
 		}
+		nResult = m_dlCurState.GetState();
 	}
-	m_criticalSection.Unlock();
+	m_lock.Unlock();
 	
 	return nResult;
 }
 
-BOOL CDownloaderMgr::IsResumable()
-{
-	ASSERT(m_pDownloader != NULL);
-	return m_pDownloader->IsResumable();
-}
-
-BOOL CDownloaderMgr::IsDownloaderExist()
-{
-	if(m_nPhase == PHASE_NEW_IN_DOWNLOADING || m_nPhase == PHASE_NEW_DOWNLOADER_END)
-	{
-		ASSERT(m_pDownloader != NULL);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-UINT CDownloaderMgr::CheckStatus()
-{
-	UINT nResult = 0;
-	do 
-	{
-		if(m_dlState.GetState() == TSE_DESTROYING)
-		{
-			m_dlState.SetState(TSE_DESTROYED);
-			break;
-		}
-		if(m_dlState.GetState() == TSE_PAUSING)
-		{
-			m_dlState.SetState(TSE_PAUSED);
-			break;
-		}
-		if(m_dlState.GetState() == TSE_STOPPING)
-		{
-			m_dlState.SetState(TSE_STOPPED);
-			break;
-		}
-	} while (FALSE);
-
-	nResult = m_dlState.GetState();
-	return nResult;
-}
-
+/*
 UINT CDownloaderMgr::PreGetHeader()
 {
 	UINT nResult = 0;
@@ -473,7 +354,7 @@ UINT CDownloaderMgr::PostGetHeader()
 		if(pHeaderInfo->m_nHTTPCode == 206)
 		{
 			m_dlParam.m_nFileSize = pHeaderInfo->m_nContentRangeTotal;
-			m_pDownloader = new CSegmentDownloader(TSE_TRANSFERRING);
+			m_pDownloader = new CSegmentDownloader(this);
 			
 			szLog.Format("Segment download support: [Y]. HTTPCode=%d, Content-Length=%d", 
 				pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentRangeTotal);
@@ -484,7 +365,7 @@ UINT CDownloaderMgr::PostGetHeader()
 			if(pHeaderInfo->m_nContentLength > (5 * 1024 * 1024))
 			{
 				m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
-				m_pDownloader = new CSegmentDownloader(TSE_TRANSFERRING);
+				m_pDownloader = new CSegmentDownloader(this);
 				
 				szLog.Format("Segment download support: [N]. But try to download with segment. "
 					"HTTPCode=%d, Content-Length=%d", pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
@@ -493,7 +374,7 @@ UINT CDownloaderMgr::PostGetHeader()
 			{
 				m_dlParam.m_nFileSize = pHeaderInfo->m_nContentLength;
 				//TODO
-				m_pDownloader = new CSegmentDownloader(TSE_TRANSFERRING);
+				m_pDownloader = new CSegmentDownloader(this);
 				
 				szLog.Format("Segment download support: [N]. HTTPCode=%d, Content-Length=%d", 
 					pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength);
@@ -562,6 +443,54 @@ UINT CDownloaderMgr::PreDownload()
 
 	return nResult;
 }
+*/
+
+DWORD CDownloaderMgr::StartDownload()
+{
+	int dwResult = 0;
+	CString szLog;
+	
+	//Start logging
+	szLog.Format("[StartDownload]: Task[%02d]: ThreadID=%d, URL=%s", m_dlParam.m_nTaskID, GetCurrentThreadId(), 
+		m_dlParam.m_szUrl);
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	//really new start
+	if(m_pCurDownloader == NULL)
+	{
+		m_pCurDownloader = new CHeaderDownloader(this);
+		m_pCurDownloader->Init(m_dlParam);
+	}
+
+	//if m_pDownloader != NULL, that means the previous download was paused or ended with other reasons
+
+	CDownloader* pDownloader = NULL;
+	do 
+	{
+		dwResult = m_pCurDownloader->Start();
+		if(dwResult != TSE_TRANSFERRING)
+		{
+			ASSERT(m_pCurDownloader->GetNextDownloader() == NULL);
+
+			//NOTE: MUST NOT delete the last downloader
+			break;
+		}
+
+		ASSERT(m_pCurDownloader->GetNextDownloader() != NULL);
+		pDownloader = m_pCurDownloader;
+
+		m_pCurDownloader = m_pCurDownloader->GetNextDownloader();
+		//let the previous downloader to init 
+		//m_pCurDownloader->Init(m_dlParam);
+
+		delete pDownloader;
+		pDownloader = NULL;
+
+	} while (TRUE);
+
+	return dwResult;
+}
+/*
 DWORD CDownloaderMgr::StartDownload()
 {
 	DWORD dwResult = 0;
@@ -580,11 +509,11 @@ DWORD CDownloaderMgr::StartDownload()
 		m_nPhase = PHASE_NEW_OTHER_END;
 		m_criticalSection.Unlock();
 
-		/*
+		
 		let the thread monitor to do the works
 		::SetEvent(m_hStopEvent);
 		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)&m_dlState);
-		*/
+		
 
 		return dwResult;
 	}
@@ -611,12 +540,14 @@ DWORD CDownloaderMgr::StartDownload()
 	
 	return dwResult;
 }
+*/
 
 DWORD CDownloaderMgr::ResumeDownload()
 {
 	UINT nResult = 0;
 	CString szLog;
 
+	/*
 	szLog.Format("[ResumeDownload]: Task[%02d]: ThreadID=%d, URL=%s", m_dlParam.m_nTaskID, GetCurrentThreadId(), 
 		m_dlParam.m_szUrl);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
@@ -648,11 +579,11 @@ DWORD CDownloaderMgr::ResumeDownload()
 
 	//Send Msg
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)nResult);
-		
+	*/
 	return nResult;
 }
 
 void CDownloaderMgr::ChangeDownloader(CDownloader* pDownloader)
 {
-	m_pNewDownloader = pDownloader;
+	m_pCurDownloader = pDownloader;
 }

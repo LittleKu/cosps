@@ -11,11 +11,12 @@
 
 #include "Downloader.h"
 #include <curl/curl.h>
+#include "DownloaderContext.h"
 
 class CHeaderDownloader : public CDownloader  
 {
 public:
-	CHeaderDownloader(CDownloadContext* pContext = NULL);
+	CHeaderDownloader(CDownloaderContext* pContext = NULL);
 	virtual ~CHeaderDownloader();
 public:
 	virtual void Init(const CDownloadParam& param);
@@ -23,24 +24,25 @@ public:
 	virtual int ReDownload();
 	virtual int Pause();
 	virtual int Destroy();
-	
-	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
-	virtual void GetState(CDownloadState& dlState);
+
+	virtual CDownloader* GetNextDownloader();
 private:
 	int DoProcess();
 	int PostProcess(CURLcode res);
-	CDownloader* GetNextDownloader();
+	void GenerateNextDownloader();
 	int ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow);
 	size_t ProcessHeader(void *ptr, size_t size, size_t nmemb);
 
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 	static size_t HeaderCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
 private:
-	CDownloadContext* m_pContext;
+	CDownloaderContext* m_pContext;
 	CDownloadParam m_dlParam;
-	CDownloadState m_dlState;
+//	CDownloadState m_dlState;
 
-	CCriticalSection m_lock;
+//	CCriticalSection m_lock;
+
+	CDownloader* m_pNext;
 
 	CURL* m_curl;
 	CHeaderInfo m_headerInfo;

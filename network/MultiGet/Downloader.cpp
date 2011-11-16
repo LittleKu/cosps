@@ -23,12 +23,13 @@ CDownloader::~CDownloader()
 {
 }
 
+CDownloader* CDownloader::GetNextDownloader()
+{
+	return NULL;
+}
 DWORD CDownloader::GetState()
 {
-	CDownloadState dlState;
-	GetState(dlState);
-
-	return dlState.GetState();
+	return 0;
 }
 
 
