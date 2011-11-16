@@ -59,8 +59,6 @@ DWORD WINAPI CDownloaderMgr::ResumeDownloadProc(LPVOID lpvData)
 CDownloaderMgr::CDownloaderMgr() : m_pDownloader(NULL), m_pHeaderParser(NULL),
  m_dlState(TSE_READY), m_nPhase(PHASE_INIT), m_hWorkerThread(NULL)
 {
-	//Init no-signal, auto event
-	m_hStopEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 CDownloaderMgr::~CDownloaderMgr()
@@ -73,22 +71,6 @@ CDownloaderMgr::~CDownloaderMgr()
 		m_pDownloader = NULL;
 	}
 	m_criticalSection.Unlock();
-
-	if(m_hStopEvent)
-	{
-		::CloseHandle(m_hStopEvent);
-		m_hStopEvent = NULL;
-	}
-}
-
-BOOL CDownloaderMgr::IsRunning()
-{
-	DWORD nState = GetState();
-	if(nState == TSE_TRANSFERRING || nState == TSE_PAUSING || nState == TSE_STOPPING || nState == TSE_DESTROYING)
-	{
-		return TRUE;
-	}
-	return FALSE;
 }
 
 int CDownloaderMgr::DoAction()
@@ -105,16 +87,13 @@ int CDownloaderMgr::DoAction()
 	ASSERT( (dlState.GetState() >= TSE_READY && dlState.GetState() <= TSE_DESTROYED) && 
 		dlState.GetState() != TSE_TRANSFERRING );
 
-	//1. send complete message to GUI
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&dlState);
-
-	//2. check if this task was removed
+	//1. check if this task was removed
 	if(dlState.GetState() == TSE_DESTROYED)
 	{
 		rc = DELETE_BY_EXTERNAL;
 	}
 
-	//3. close thread handle
+	//2. close thread handle
 	m_criticalSection.Lock();
 
 	ASSERT(m_hWorkerThread);
@@ -123,46 +102,10 @@ int CDownloaderMgr::DoAction()
 
 	m_criticalSection.Unlock();
 
+	//3. send complete message to GUI
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&dlState);
+
 	return rc;
-}
-void CDownloaderMgr::WaitUntilStop()
-{
-	BOOL bResult;
-
-	m_criticalSection.Lock();
-	bResult = IsDownloaderExist();
-	m_criticalSection.Unlock();
-
-	//downloader existed
-	if(bResult)
-	{
-		ASSERT(m_pDownloader != NULL);
-		m_pDownloader->WaitUntilStop();
-	}
-	//downloader mgr manage the state self
-	else
-	{
-		CString szLog;
-		DWORD dwResult;
-		
-		while( IsRunning() )
-		{
-			//This is not necessary.
-			Destroy();
-			
-			szLog.Format("CDownloaderMgr::Task[%02d] is running", m_dlParam.m_nTaskID);
-			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-				
-			dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
-			
-			szLog.Format("CDownloaderMgr::Task[%02d] WaitForSingleObject returned 0x%08X", 
-				m_dlParam.m_nTaskID, dwResult);
-			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		}
-		
-		szLog.Format("CDownloaderMgr::Task[%02d] stopped running. state=%d", m_dlParam.m_nTaskID, GetState());
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
 }
 
 void CDownloaderMgr::Init(const CDownloadParam& param)
@@ -211,11 +154,6 @@ DWORD CDownloaderMgr::GetState()
 	m_criticalSection.Unlock();
 
 	return nResult;
-}
-
-DWORD CDownloaderMgr::GetAccess()
-{
-	return CDownloadState::GetAccess(GetState(), DL_OPER_FLAG_ALL);
 }
 
 int CDownloaderMgr::Start()
@@ -345,7 +283,7 @@ int CDownloaderMgr::Stop()
 	else
 	{
 		//Pause is allowed
-		if( (m_dlState.GetOperAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+		if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 		{
 			m_dlState.SetState(TSE_PAUSING);
 		}
@@ -369,7 +307,7 @@ int CDownloaderMgr::Pause()
 	else
 	{
 		//Pause is allowed
-		if( (m_dlState.GetOperAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+		if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 		{
 			m_dlState.SetState(TSE_PAUSING);
 		}
@@ -384,29 +322,36 @@ int CDownloaderMgr::Destroy()
 	int nResult;
 	
 	m_criticalSection.Lock();
-	
-	if(IsDownloaderExist())
+	//Worker thread already exit
+	if(m_hWorkerThread == NULL)
 	{
-		ASSERT(m_pDownloader != NULL);
-		nResult = m_pDownloader->Destroy();
+		nResult = DELETE_BY_EXTERNAL;
 	}
 	else
 	{
-		//Remove is allowed
-		if( (m_dlState.GetOperAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+		if(IsDownloaderExist())
 		{
-			//Still in transferring
-			if(m_dlState.GetState() == TSE_TRANSFERRING)
-			{
-				m_dlState.SetState(TSE_DESTROYING);
-			}
-			//Already paused or in other states
-			else
-			{
-				//...
-			}
+			ASSERT(m_pDownloader != NULL);
+			nResult = m_pDownloader->Destroy();
 		}
-		nResult = m_dlState.GetState();
+		else
+		{
+			//Remove is allowed
+			if( (m_dlState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+			{
+				//Still in transferring
+				if(m_dlState.GetState() == TSE_TRANSFERRING)
+				{
+					m_dlState.SetState(TSE_DESTROYING);
+				}
+				//Already paused or in other states
+				else
+				{
+					//...
+				}
+			}
+			nResult = m_dlState.GetState();
+		}
 	}
 	m_criticalSection.Unlock();
 	
@@ -427,54 +372,6 @@ BOOL CDownloaderMgr::IsDownloaderExist()
 		return TRUE;
 	}
 	return FALSE;
-}
-
-UINT CDownloaderMgr::DeleteProc(LPVOID lpvData)
-{
-	CDownloaderMgrArray* pDownloaderArray = (CDownloaderMgrArray*)lpvData;
-	
-	CString szLog;
-	szLog.Format("Start to destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		
-	int i, nSize;
-	CDownloaderMgr* pDownloaderMgr;
-	
-	//Send destroy command
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloaderMgr = (CDownloaderMgr*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloaderMgr != NULL);
-		
-		pDownloaderMgr->Destroy();
-	}
-	//Wait all task to finish
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloaderMgr = (CDownloaderMgr*)pDownloaderArray->GetAt(i);
-		ASSERT(pDownloaderMgr != NULL);
-		
-		pDownloaderMgr->WaitUntilStop();
-
-		ASSERT(pDownloaderMgr->GetState() != TSE_TRANSFERRING);
-		delete pDownloaderMgr;
-	}
-	
-	delete pDownloaderArray;
-	pDownloaderArray = NULL;
-	
-	szLog.Format("Finished destroy all tasks.");
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		
-	return 0;
-}
-int CDownloaderMgr::Delete(CDownloaderMgrArray* pDownloaderArray)
-{
-	ASSERT(pDownloaderArray != NULL && pDownloaderArray->GetSize() > 0);
-	
-	AfxBeginThread(CDownloaderMgr::DeleteProc, pDownloaderArray);
-	
-	return 0;
 }
 
 UINT CDownloaderMgr::CheckStatus()
@@ -753,4 +650,9 @@ DWORD CDownloaderMgr::ResumeDownload()
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)nResult);
 		
 	return nResult;
+}
+
+void CDownloaderMgr::ChangeDownloader(CDownloader* pDownloader)
+{
+	m_pNewDownloader = pDownloader;
 }

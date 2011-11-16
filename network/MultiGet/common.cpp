@@ -119,18 +119,18 @@ DWORD CDownloadState::GetState()
 {
 	return m_nState;
 }
-DWORD CDownloadState::GetOperAccess(DWORD nOperFlags)
+DWORD CDownloadState::GetAccess(DWORD nOperFlags)
 {
-	return GetAccess(m_nState, nOperFlags);
+	return GetAccessPermission(m_nState, nOperFlags);
 }
-DWORD CDownloadState::GetAccess(DWORD nState, DWORD nOperFlags)
+DWORD CDownloadState::GetAccessPermission(DWORD nState, DWORD nOperFlags)
 {
 	ASSERT(nState >= TSE_READY && nState <= TSE_DESTROYING);
 
 	DWORD dwResult = DL_OPER_FLAG_NONE;
 	
 	//Start
-	if(nState == TSE_READY || nState == TSE_COMPLETE || nState == TSE_END_WITH_ERROR)
+	if(nState == TSE_READY || /*nState == TSE_COMPLETE || */nState == TSE_END_WITH_ERROR || nState == TSE_PAUSED)
 	{
 		dwResult |= DL_OPER_FLAG_START;
 	}
@@ -148,7 +148,7 @@ DWORD CDownloadState::GetAccess(DWORD nState, DWORD nOperFlags)
 	}
 	
 	//Re-download
-	if(nState == TSE_READY || nState == TSE_COMPLETE || nState == TSE_END_WITH_ERROR)
+	if(/*nState == TSE_READY || */nState == TSE_COMPLETE || nState == TSE_END_WITH_ERROR || nState == TSE_PAUSED)
 	{
 		dwResult |= DL_OPER_FLAG_REDOWNLOAD;
 	}

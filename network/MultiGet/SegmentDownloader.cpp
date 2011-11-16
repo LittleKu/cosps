@@ -226,7 +226,7 @@ CSegmentDownloader::~CSegmentDownloader()
 
 void CSegmentDownloader::Init(const CDownloadParam& param)
 {
-	CDownloader::Init(param);
+	m_dlParam = param;
 	
 	m_pSegmentInfoArray = new CSegmentInfoArray();
 	CSegmentInfoMap::GetInstance()->AddSegmentInfoArray(m_dlParam.m_nTaskID, m_pSegmentInfoArray);
@@ -263,7 +263,7 @@ int CSegmentDownloader::Stop()
 	
 	m_criticalSection.Lock();
 	//Pause is allowed
-	if( (m_dlState.GetOperAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+	if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 	{
 		m_dlState.SetState(TSE_PAUSING);
 	}
@@ -279,7 +279,7 @@ int CSegmentDownloader::Pause()
 	
 	m_criticalSection.Lock();
 	//Pause is allowed
-	if( (m_dlState.GetOperAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+	if( (m_dlState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
 	{
 		m_dlState.SetState(TSE_PAUSING);
 	}
@@ -301,7 +301,7 @@ int CSegmentDownloader::Destroy()
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 	//Remove is allowed
-	if( (m_dlState.GetOperAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+	if( (m_dlState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
 	{
 		//Still in transferring
 		if(m_dlState.GetState() == TSE_TRANSFERRING)
@@ -337,16 +337,7 @@ void CSegmentDownloader::GetState(CDownloadState& dlState)
 	dlState = m_dlState;
 	m_criticalSection.Unlock();
 }
-UINT CSegmentDownloader::GetState()
-{
-	UINT nResult;
 
-	m_criticalSection.Lock();
-	nResult = m_dlState.GetState();
-	m_criticalSection.Unlock();
-
-	return nResult;
-}
 void CSegmentDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
 {
 	m_criticalSection.Lock();
@@ -522,13 +513,11 @@ void CSegmentDownloader::PostDownload(DWORD dwResult)
 	m_criticalSection.Lock();
 	m_dlState.SetState(CCommonUtils::ResultCode2StatusCode(dwResult));
 	m_criticalSection.Unlock();
-
-	::SetEvent(m_hStopEvent);
 }
 
 BOOL CSegmentDownloader::IsRunning()
 {
-	UINT nStatus = GetState();
+	DWORD nStatus = CDownloader::GetState();
 	if(nStatus == TSE_TRANSFERRING || nStatus == TSE_PAUSING || nStatus == TSE_STOPPING || nStatus == TSE_DESTROYING)
 	{
 		return TRUE;
@@ -537,23 +526,6 @@ BOOL CSegmentDownloader::IsRunning()
 }
 void CSegmentDownloader::WaitUntilStop()
 {
-	CString szLog;
-	DWORD dwResult;
-	while(IsRunning())
-	{
-		Destroy();
-		
-		szLog.Format("Task [%d] is transferring, wait until it stopped.", m_dlParam.m_nTaskID);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			
-		dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
-		
-		szLog.Format("Task [%d] WaitForSingleObject returned 0x%08X", m_dlParam.m_nTaskID, dwResult);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
-	
-	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, GetState());
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
 

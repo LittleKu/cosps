@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "Downloader.h"
-#include "CommonUtils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -16,66 +15,39 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDownloader::CDownloader() : m_dlSuperState(TSE_READY), m_hStopEvent(NULL)
+CDownloader::CDownloader()
 {
-	//Init no-signal, auto event
-	m_hStopEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 CDownloader::~CDownloader()
 {
-	if(m_hStopEvent)
-	{
-		::CloseHandle(m_hStopEvent);
-		m_hStopEvent = NULL;
-	}
 }
 
-void CDownloader::Init(const CDownloadParam& param)
+DWORD CDownloader::GetState()
 {
-	m_dlParam = param;
+	CDownloadState dlState;
+	GetState(dlState);
+
+	return dlState.GetState();
 }
 
-void CDownloader::GetState(CDownloadState& dlState)
-{
 
-}
-UINT CDownloader::GetState()
+
+//@Deprecated
+int CDownloader::Stop()
 {
-	//TODO
-//	return m_dlSuperState.GetState();
 	return 0;
 }
-void CDownloader::SetState(DWORD nState, LPCTSTR lpszDetail)
+int CDownloader::Resume()
 {
-//	m_dlSuperState.SetState(nState, lpszDetail);
+	return 0;
 }
-
-void CDownloader::CurrentStatusChanged(UINT nNewStatus, LPCTSTR lpszDetail)
+BOOL CDownloader::IsResumable()
 {
-	m_dlSuperState.SetState(nNewStatus, lpszDetail);
+	return 0;
 }
-
 void CDownloader::WaitUntilStop()
 {
-	CString szLog;
-	DWORD dwResult;
-	UINT nStatus;
-	while( (nStatus = GetState()) == TSE_TRANSFERRING )
-	{
-		Destroy();
-		
-		szLog.Format("Task [%d] is transferring, wait until it stopped.", m_dlParam.m_nTaskID);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-		dwResult = ::WaitForSingleObject(m_hStopEvent, INFINITE);
-
-		szLog.Format("Task [%d] WaitForSingleObject returned 0x%08X", m_dlParam.m_nTaskID, dwResult);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
-
-	szLog.Format("Task [%d] Stopped succesfully. Current status=%d", m_dlParam.m_nTaskID, nStatus);
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 }
 
 

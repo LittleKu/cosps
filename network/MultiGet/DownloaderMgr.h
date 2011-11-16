@@ -16,7 +16,7 @@
 class CDownloaderMgr;
 typedef CArray<CDownloaderMgr*, CDownloaderMgr*> CDownloaderMgrArray;
 
-class CDownloaderMgr : public CPostAction
+class CDownloaderMgr : public CPostAction, CDownloadContext
 {
 public:
 	CDownloaderMgr();
@@ -32,13 +32,9 @@ public:
 
 	virtual int DoAction();
 
-	void GetState(CDownloadState& dlState);
-	DWORD GetAccess();
+	virtual void ChangeDownloader(CDownloader* pDownloader);
 
-	static UINT DeleteProc(LPVOID lpvData);
-	static int Delete(CDownloaderMgrArray* pDownloaderArray);
-protected:
-	virtual void WaitUntilStop();
+	void GetState(CDownloadState& dlState);
 private:
 	static DWORD WINAPI StartDownloadProc(LPVOID lpParameter);
 	static DWORD WINAPI ResumeDownloadProc(LPVOID lpParameter);
@@ -52,7 +48,6 @@ private:
 	UINT CheckStatus();
 
 	BOOL IsDownloaderExist();
-	BOOL IsRunning();
 protected:
 	CDownloadParam m_dlParam;
 
@@ -61,12 +56,12 @@ protected:
 
 	CCriticalSection m_criticalSection;
 
-	HANDLE m_hStopEvent;
-
 	HANDLE m_hWorkerThread;
 
 	CDownloader* m_pDownloader;
 	CGetHeader* m_pHeaderParser;
+
+	CDownloader* m_pNewDownloader;
 };
 
 #endif // !defined(AFX_DOWNLOADERMGR_H__4B2D1E2E_DEC4_4320_9E07_2E0E79B7BC1B__INCLUDED_)

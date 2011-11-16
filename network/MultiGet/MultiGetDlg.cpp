@@ -206,6 +206,8 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 	}
 	else
 	{
+		pTaskInfo->m_dlState = *pStatusInfo;
+
 		CString szStatusMsg;
 		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
 		
@@ -260,6 +262,8 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 	}
 	else
 	{
+		pTaskInfo->m_dlState = *pStatusInfo;
+
 		CString szStatusMsg;
 		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
 		
@@ -491,7 +495,10 @@ void CMultiGetDlg::OnButtonRemove()
 
 		if(pTaskInfo->m_lpDownloaderMgr != NULL)
 		{
-			pTaskInfo->m_lpDownloaderMgr->Destroy();
+			if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CPostAction::DELETE_BY_EXTERNAL)
+			{
+				delete pTaskInfo->m_lpDownloaderMgr;
+			}
 //			pDownloaderArray->Add(pTaskInfo->m_lpDownloaderMgr);
 		}
 	}
@@ -626,56 +633,28 @@ void CMultiGetDlg::OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult)
     }
 	else
 	{
-		AfxTrace("OnItemchanged: pNMListView->uChanged != LVIF_STATE\n");
+		AfxTrace("OnItemchanged: pNMListView->uChanged != LVIF_STATE. %d\n", pNMListView->uChanged);
 	}
 	*pResult = 0;
 }
 
 void CMultiGetDlg::ListCtrlSelectionChanged()
 {
-	CString szLog;
-	
-	CDownloaderMgrArray* pDownloaderArray = new CDownloaderMgrArray();
-	CTaskInfo* pTaskInfo = NULL;
-	
+	DWORD dwStatus = DL_OPER_FLAG_NONE;
+
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+
 	int nItem = -1;
+	CTaskInfo* pTaskInfo = NULL;
 	while (pos != NULL)
 	{
 		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
 		
 		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
 		ASSERT(pTaskInfo != NULL);
-		
-		//NULL DownloaderMgr should be also included
-		pDownloaderArray->Add(pTaskInfo->m_lpDownloaderMgr);
+
+		dwStatus |= pTaskInfo->m_dlState.GetAccess();
 	}
-
-	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		//TODO
-	}
-
-	int i, nSize;
-	CDownloaderMgr* pDownloaderMgr;
-
-	DWORD dwStatus = DL_OPER_FLAG_NONE;
-	for(i = 0, nSize = pDownloaderArray->GetSize(); i < nSize; i++)
-	{
-		pDownloaderMgr = pDownloaderArray->GetAt(i);
-
-		if(pDownloaderMgr == NULL)
-		{
-			dwStatus |= (DL_OPER_FLAG_START | DL_OPER_FLAG_REMOVE);
-		}
-		else
-		{
-			dwStatus |= pDownloaderMgr->GetAccess();
-		}
-	}
-
-	delete pDownloaderArray;
-	pDownloaderArray = NULL;
 
 	EnableButtons(dwStatus);
 }

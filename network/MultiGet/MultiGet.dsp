@@ -116,11 +116,11 @@ SOURCE=.\DownloaderMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\EasyDownloader.cpp
+SOURCE=.\GetHeader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.cpp
+SOURCE=.\HeaderDownloader.cpp
 # End Source File
 # Begin Source File
 
@@ -205,11 +205,11 @@ SOURCE=.\DownloaderMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\EasyDownloader.h
+SOURCE=.\GetHeader.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.h
+SOURCE=.\HeaderDownloader.h
 # End Source File
 # Begin Source File
 

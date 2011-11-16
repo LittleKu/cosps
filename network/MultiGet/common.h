@@ -63,8 +63,8 @@ public:
 
 	void  SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 	DWORD GetState();
-	DWORD GetOperAccess(DWORD nOperFlags = DL_OPER_FLAG_ALL);
-	static DWORD GetAccess(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
+	DWORD GetAccess(DWORD nOperFlags = DL_OPER_FLAG_ALL);
+	static DWORD GetAccessPermission(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
 };
 class CProgressInfo
 {
@@ -175,6 +175,14 @@ public:
 		m_nRemotePos = 0;
 	}
 	virtual ~CSegmentInfo() {}
+};
+
+class CDownloader;
+class CDownloadContext
+{
+public:
+	virtual ~CDownloadContext() {}
+	virtual void ChangeDownloader(CDownloader* pDownloader) = 0;
 };
 
 

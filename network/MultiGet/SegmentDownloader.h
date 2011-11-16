@@ -45,9 +45,9 @@ public:
 	virtual int Pause();
 	virtual int Destroy();
 	virtual BOOL IsResumable();
+	virtual int ReDownload() {return 0;}
 
 	virtual void WaitUntilStop();
-	virtual UINT GetState();
 	virtual void GetState(CDownloadState& dlState);
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 private:
@@ -104,6 +104,7 @@ private:
 	static size_t DataCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 	static int ProgressCallback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 protected:
+	CDownloadParam m_dlParam;
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
 
