@@ -23,32 +23,14 @@ CDownloader::~CDownloader()
 {
 }
 
-CDownloader* CDownloader::GetNextDownloader()
+CDownloader* CDownloader::GetNext()
 {
 	return NULL;
 }
-DWORD CDownloader::GetState()
-{
-	return 0;
-}
 
-
-
-//@Deprecated
-int CDownloader::Stop()
+LPCTSTR CDownloader::GetName()
 {
-	return 0;
-}
-int CDownloader::Resume()
-{
-	return 0;
-}
-BOOL CDownloader::IsResumable()
-{
-	return 0;
-}
-void CDownloader::WaitUntilStop()
-{
+	return _T("");
 }
 
 

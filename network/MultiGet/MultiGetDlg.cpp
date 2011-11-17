@@ -208,6 +208,8 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 	{
 		pTaskInfo->m_dlState = *pStatusInfo;
 
+		CheckState(nIndex, pStatusInfo->m_nState);
+
 		CString szStatusMsg;
 		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
 		
@@ -263,6 +265,7 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 	else
 	{
 		pTaskInfo->m_dlState = *pStatusInfo;
+		CheckState(nIndex, pStatusInfo->m_nState);
 
 		CString szStatusMsg;
 		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
@@ -294,6 +297,7 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	}
 	
 	ASSERT(index >= 0 && index < m_taskListCtrl.GetItemCount());
+	CheckState(index);
 
 	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(index);
 	ASSERT(pTaskInfo != NULL);
@@ -419,29 +423,11 @@ void CMultiGetDlg::OnButtonPause()
 
 void CMultiGetDlg::OnButtonStop() 
 {	
-	CTaskInfo* pTaskInfo = NULL;
-	//Get all selected items
-	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
-	
-	int nItem = -1;
-	while (pos != NULL)
-	{
-		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
-		
-		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
-		ASSERT(pTaskInfo != NULL);
-		
-		if(pTaskInfo == NULL)
-		{
-			continue;
-		}
-		
-		pTaskInfo->m_lpDownloaderMgr->Stop();
-	}
 }
 
 void CMultiGetDlg::OnButtonResume() 
 {
+	/*
 	CTaskInfo* pTaskInfo = NULL;
 	//Get all selected items
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
@@ -461,6 +447,7 @@ void CMultiGetDlg::OnButtonResume()
 
 		pTaskInfo->m_lpDownloaderMgr->Resume();
 	}
+	*/
 }
 
 void CMultiGetDlg::OnButtonHeader() 
@@ -479,9 +466,30 @@ void CMultiGetDlg::OnButtonHeader()
 	AfxMessageBox(szMsg);
 }
 
+void CMultiGetDlg::OnButtonRedownload() 
+{
+	CTaskInfo* pTaskInfo = NULL;
+	//Get all selected items
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+	
+	int nItem = -1;
+	while (pos != NULL)
+	{
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+		
+		if(pTaskInfo == NULL)
+		{
+			continue;
+		}
+		
+		pTaskInfo->m_lpDownloaderMgr->ReStart();
+	}
+}
 void CMultiGetDlg::OnButtonRemove() 
 {
-	CDownloaderMgrArray* pDownloaderArray = new CDownloaderMgrArray();
 	CTaskInfo* pTaskInfo = NULL;
 
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
@@ -499,24 +507,9 @@ void CMultiGetDlg::OnButtonRemove()
 			{
 				delete pTaskInfo->m_lpDownloaderMgr;
 			}
-//			pDownloaderArray->Add(pTaskInfo->m_lpDownloaderMgr);
 		}
 	}
-
 	m_taskListCtrl.RemoveSelectedItems();
-
-	delete pDownloaderArray;
-	pDownloaderArray = NULL;
-
-// 	if(pDownloaderArray->GetSize() <= 0)
-// 	{
-// 		delete pDownloaderArray;
-// 		pDownloaderArray = NULL;
-// 
-// 		return;
-// 	}
-	
-//	CDownloaderMgr::Delete(pDownloaderArray);
 }
 
 int CMultiGetDlg::GetTaskIndex(int nTaskID)
@@ -659,12 +652,6 @@ void CMultiGetDlg::ListCtrlSelectionChanged()
 	EnableButtons(dwStatus);
 }
 
-void CMultiGetDlg::OnButtonRedownload() 
-{
-	
-	
-}
-
 void CMultiGetDlg::EnableButtons(DWORD dwStatus)
 {
 	GetDlgItem(IDC_BUTTON_START1)->EnableWindow(dwStatus & DL_OPER_FLAG_START);
@@ -692,4 +679,33 @@ void CMultiGetDlg::OnClose()
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	
 	CDialog::OnClose();
+}
+
+void CMultiGetDlg::CheckState(int nIndex, int nState)
+{
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nIndex);
+	ASSERT(pTaskInfo != NULL);
+
+	DWORD dwState1, dwState2;
+
+	dwState1 = pTaskInfo->m_dlState.GetState();
+
+	if(pTaskInfo->m_lpDownloaderMgr != NULL)
+	{
+		if(nState >= 0)
+		{
+			dwState2 = nState;
+			ASSERT(dwState1 == dwState2);
+		}
+
+		dwState2 = pTaskInfo->m_lpDownloaderMgr->GetState();
+		if(dwState2 <= TSE_DESTROYED)
+		{
+			ASSERT(dwState1 == dwState2);
+		}
+	}
+	else
+	{
+		AfxTrace("========================CheckState: m_lpDownloaderMgr = NULL==============\n");
+	}
 }

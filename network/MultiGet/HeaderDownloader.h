@@ -25,7 +25,9 @@ public:
 	virtual int Pause();
 	virtual int Destroy();
 
-	virtual CDownloader* GetNextDownloader();
+	virtual CDownloader* GetNext();
+
+	virtual LPCTSTR GetName() { return _T("HeaderDownloader"); }
 private:
 	int DoProcess();
 	int PostProcess(CURLcode res);
@@ -38,9 +40,6 @@ private:
 private:
 	CDownloaderContext* m_pContext;
 	CDownloadParam m_dlParam;
-//	CDownloadState m_dlState;
-
-//	CCriticalSection m_lock;
 
 	CDownloader* m_pNext;
 

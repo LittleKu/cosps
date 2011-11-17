@@ -91,7 +91,7 @@ int CHeaderDownloader::Destroy()
 	return nResult;
 }
 
-CDownloader* CHeaderDownloader::GetNextDownloader()
+CDownloader* CHeaderDownloader::GetNext()
 {
 	return m_pNext;
 }
@@ -153,7 +153,7 @@ size_t CHeaderDownloader::ProcessHeader(void *ptr, size_t size, size_t nmemb)
 		
 		//2. check if Content-Length line
 		int nContentLength = -1;
-		sscanf(szScratch, "Content-Length: %d", &nContentLength);
+		nc = sscanf(szScratch, "Content-Length: %d", &nContentLength);
 		if(nc > 0)
 		{
 			m_headerInfo.m_nContentLength = nContentLength;
@@ -201,10 +201,14 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 	DWORD dwState;
 	m_pContext->Lock();
 
+	_ASSERTE(_CrtCheckMemory());
+
 	dwState = m_pContext->GetStateNoLock();
 	szLog.Format("Task[%02d] [CHeaderDownloader::PostProcess] state = %d, curl result = %d", 
 		m_dlParam.m_nTaskID, dwState, (int)res);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	_ASSERTE(_CrtCheckMemory());
 
 	if(dwState == TSE_PAUSING)
 	{

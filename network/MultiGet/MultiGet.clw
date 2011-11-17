@@ -17,8 +17,8 @@ Resource1=IDD_ABOUTBOX (English (U.S.))
 Resource2=IDR_MAINFRAME
 Class4=CTaskListCtrl
 Resource3=IDD_ABOUTBOX
-Resource4=IDD_MULTIGET_DIALOG
-Resource5=IDD_MULTIGET_DIALOG (English (U.S.))
+Resource4=IDD_MULTIGET_DIALOG (English (U.S.))
+Resource5=IDD_MULTIGET_DIALOG
 
 [CLS:CMultiGetApp]
 Type=0

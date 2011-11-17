@@ -19,8 +19,6 @@ public:
 	CDownloaderContext();
 	virtual ~CDownloaderContext();
 public:
-	virtual void ChangeDownloader(CDownloader* pDownloader) = 0;
-
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 	virtual void GetState(CDownloadState& dlState);
 	virtual DWORD GetState();

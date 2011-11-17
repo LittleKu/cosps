@@ -20,16 +20,11 @@ public:
 	virtual int ReDownload() = 0;
 	virtual int Pause() = 0;
 	virtual int Destroy() = 0;
-	virtual CDownloader* GetNextDownloader();
 
-	virtual DWORD GetState();
-	
+	virtual CDownloader* GetNext();
 
-	//@Deprecated
-	virtual int Stop();
-	virtual int Resume();
-	virtual BOOL IsResumable();
-	virtual void WaitUntilStop();
+	//For debug use
+	virtual LPCTSTR GetName();
 };
 
 #endif // !defined(AFX_DOWNLOADER_H__7AFFE40E_1B65_460E_B5BA_3F1B0265C530__INCLUDED_)

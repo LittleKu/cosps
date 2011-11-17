@@ -47,9 +47,7 @@ public:
 	virtual int Destroy();
 	virtual int ReDownload() {return 0;}
 
-//	virtual void WaitUntilStop();
-// 	virtual void GetState(CDownloadState& dlState);
-// 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
+	virtual LPCTSTR GetName() { return _T("SegmentDownloader"); }
 private:
 	//Actual download process
 	int DoDownload();
@@ -82,7 +80,6 @@ private:
 	void CloseAllConnections();
 private:
 	//Helper functions
-	BOOL IsRunning();
 
 	//Calculate the total download size now
 	DWORD64 GetTotalDownloadNow();
@@ -108,9 +105,6 @@ protected:
 	CDownloadParam m_dlParam;
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
-
-//	CDownloadState m_dlState;
-//	CCriticalSection m_criticalSection;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

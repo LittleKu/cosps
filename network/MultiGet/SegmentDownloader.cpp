@@ -171,14 +171,22 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 
 int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow, int nIndex)
 {
+	_ASSERTE(_CrtCheckMemory());
+
 	DWORD dwState = m_pContext->GetState();
 	if(dwState == TSE_DESTROYING)
 	{
 		return 1;
 	}
+
+	_ASSERTE(_CrtCheckMemory());
+
 	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 	
+	
+	_ASSERTE(_CrtCheckMemory());
+
 	if(pSegmentInfo->m_headerInfo.m_nHTTPCode != 200)
 	{
 		pSegmentInfo->m_nDlNow = (DWORD64)dlnow;
@@ -394,7 +402,7 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 	//Result Msg
 	CString szLog, szErrorMsg;
 	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
-	szLog.Format("Download result: 0x%08X - %s", dwResult, szErrorMsg);
+	szLog.Format("Task[%02d]: Download result: 0x%08X - %s", m_dlParam.m_nTaskID, dwResult, szErrorMsg);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	//2. Post process
@@ -432,11 +440,9 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 	}
 	else if(nMajor == RC_MAJOR_PAUSED)
 	{
-//		CurrentStatusChanged(TSE_PAUSED);
 	}
 	else if(nMajor == RC_MAJOR_STOPPED)
 	{
-//		CurrentStatusChanged(TSE_STOPPED);
 	}
 	else if(nMajor == RC_MAJOR_DESTROYED)
 	{
@@ -451,32 +457,21 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 		
 		//Remove the segment information data
 		RemoveSegmentInfoArray();
-
-// 		CurrentStatusChanged(TSE_DESTROYED);
-// 
-// 		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
-// 
-// 		return;
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
 	{
 		//Remove the segment information data, except for Paused or Stopped status
-		RemoveSegmentInfoArray();
-
-//		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+		//RemoveSegmentInfoArray();
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_CURL_CODE)
 	{
 		//Remove the segment information data, except for Paused or Stopped status
-		RemoveSegmentInfoArray();
-
-//		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+		//RemoveSegmentInfoArray();
 	}
 	else
 	{
-		//TODO
-// 		szErrorMsg.Format("Unknown error: %d", dwResult);
-// 		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+		szLog.Format("Task[%02d]: Unknown error: %d", m_dlParam.m_nTaskID, dwResult);
+		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 
 	//TODO: Set State detail information
@@ -489,17 +484,6 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 
 	return nResult;
 }
-
-BOOL CSegmentDownloader::IsRunning()
-{
-	DWORD nStatus = CDownloader::GetState();
-	if(nStatus == TSE_TRANSFERRING || nStatus == TSE_PAUSING || nStatus == TSE_STOPPING || nStatus == TSE_DESTROYING)
-	{
-		return TRUE;
-	}
-	return FALSE;
-}
-
 
 DWORD CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout)
 {

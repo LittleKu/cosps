@@ -67,6 +67,7 @@ protected:
 
 	
 private:
+	void CheckState(int nIndex, int nState = -1);
 	void EnableButtons(DWORD dwStatus);
 	void ListCtrlSelectionChanged();
 };
