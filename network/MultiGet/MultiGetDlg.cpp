@@ -200,7 +200,7 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 	if(!GetTaskInfo(nTaskID, nIndex, pTaskInfo))
 	{
 		CString szLog;
-		szLog.Format("[OnStatusUpdate]: The task [%d] is in destroying. Status=0x%08X, detail = %s", 
+		szLog.Format("[OnStatusUpdate]: The task [%02d] is in destroying. Status=0x%08X, detail = %s", 
 			nTaskID, pStatusInfo->m_nState, (LPCTSTR)pStatusInfo->m_szDetail);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
@@ -258,7 +258,7 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 	if(!GetTaskInfo(nTaskID, nIndex, pTaskInfo))
 	{
 		CString szLog;
-		szLog.Format("[OnEnd]: The task [%d] is in destroying. Status=0x%08X, detail = %s", 
+		szLog.Format("[OnEnd]: The task [%02d] is in destroying. Status=0x%08X, detail = %s", 
 			nTaskID, pStatusInfo->m_nState, (LPCTSTR)pStatusInfo->m_szDetail);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
@@ -290,7 +290,7 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	if(index < 0)
 	{
 		CString szLog;
-		szLog.Format("[OnUpdateProgress]: The task [%d] has been destroyed already.", pProgressInfo->m_nTaskID);
+		szLog.Format("[OnUpdateProgress]: The task [%02d] has been destroyed already.", pProgressInfo->m_nTaskID);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 		return (LRESULT)0;

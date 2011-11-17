@@ -118,7 +118,7 @@ int CDownloaderMgr::Start()
 	if(m_hWorkerThread != NULL)
 	{
 		szLog.Format("Task[%02d] can't be started, because the thread handle still exist.", m_dlParam.m_nTaskID);
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
 		m_lock.Unlock();
 		return 1;
@@ -128,7 +128,7 @@ int CDownloaderMgr::Start()
 	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_START) & DL_OPER_FLAG_START) == 0 )
 	{
 		szLog.Format("Task[%02d] can't be started, because of wrong state = %d", m_dlParam.m_nTaskID, m_dlCurState.GetState());
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 		m_lock.Unlock();
 		return 2;
@@ -166,7 +166,7 @@ int CDownloaderMgr::ReStart()
 	if(m_hWorkerThread != NULL)
 	{
 		szLog.Format("Task[%02d] can't be redownloaded, because the thread handle still exist.", m_dlParam.m_nTaskID);
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
 		m_lock.Unlock();
 		return 1;
@@ -176,7 +176,7 @@ int CDownloaderMgr::ReStart()
 	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_REDOWNLOAD) & DL_OPER_FLAG_REDOWNLOAD) == 0 )
 	{
 		szLog.Format("Task[%02d] can't be redownloaded, because of wrong state = %d", m_dlParam.m_nTaskID, m_dlCurState.GetState());
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 		
 		m_lock.Unlock();
 		return 2;

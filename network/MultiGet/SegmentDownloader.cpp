@@ -569,9 +569,11 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 	
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 	
+	DWORD nState = m_pContext->GetState();
 	//log
 	CString szLog;
-	szLog.Format("(%d) - Transfer result: %d - %s", nIndex, resCode, curl_easy_strerror(resCode));
+	szLog.Format("Task[%02d]: (%d) - State: %d, Transfer result: %d - %s", m_dlParam.m_nTaskID, nIndex, 
+		nState, resCode, curl_easy_strerror(resCode));
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	//Firstly close the current connection
@@ -586,36 +588,20 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 		break;
 	case CURLE_ABORTED_BY_CALLBACK:
 		{
-			DWORD nState = m_pContext->GetState();
-
 			//(0). This task been destroyed
 			if(nState == TSE_DESTROYING)
 			{
 				dwResult = MAKELONG(RC_MAJOR_DESTROYED, RC_MINOR_OK);
-
-				szLog.Format("(%d) - Connection destroyed", nIndex);
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			}
-			//(1). Stop
-			else if(nState == TSE_STOPPING)
-			{
-				dwResult = MAKELONG(RC_MAJOR_STOPPED, RC_MINOR_OK);
-
-				szLog.Format("(%d) - Connection stopped", nIndex);
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			}
 			//(2). Pause
 			else if(nState == TSE_PAUSING)
 			{
 				dwResult = MAKELONG(RC_MAJOR_PAUSED, RC_MINOR_OK);
-
-				szLog.Format("(%d) - Connection paused", nIndex);
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			}
 			//other, auto stop. This should not happen
 			else
 			{
-				szLog.Format("(%d) - Connection stopped. Error: this should not happen", nIndex);
+				szLog.Format("Task[%02d]: (%d) - Unexpected State: %d", m_dlParam.m_nTaskID, nIndex, nState);
 				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			}
 		}
@@ -823,11 +809,12 @@ void CSegmentDownloader::CloseConnection(int nIndex)
 {
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 
-	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		CString szLog;
-		szLog.Format("(%d) - StopConnection: m_curl = 0x%08X", nIndex, pSegmentInfo->m_curl);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		szLog.Format("Task[%02d]: (%d) - StopConnection: m_curl = 0x%08X", m_dlParam.m_nTaskID, 
+			nIndex, pSegmentInfo->m_curl);
+		LOG4CPLUS_TRACE_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 
 	if(pSegmentInfo->m_curl == NULL)
