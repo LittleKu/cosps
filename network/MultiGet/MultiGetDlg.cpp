@@ -5,7 +5,6 @@
 #include "MultiGet.h"
 #include "MultiGetDlg.h"
 #include "TestDownloader.h"
-#include "HeaderParser.h"
 #include "CommonUtils.h"
 #include "DownloaderMap.h"
 
@@ -452,18 +451,6 @@ void CMultiGetDlg::OnButtonResume()
 
 void CMultiGetDlg::OnButtonHeader() 
 {
-	ASSERT(m_taskListCtrl.GetItemCount() > 0);
-
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-	ASSERT(pTaskInfo != NULL);
-
-	CHeaderParser headerParser(pTaskInfo->m_url);
-	CHeaderInfo* pHeaderInfo = headerParser.GetHeaderInfo();
-
-	CString szMsg;
-	szMsg.Format("code=%d, size=%d, is_range_bytes=%d", 
-		pHeaderInfo->m_nHTTPCode, pHeaderInfo->m_nContentLength, pHeaderInfo->m_bRangeBytes);
-	AfxMessageBox(szMsg);
 }
 
 void CMultiGetDlg::OnButtonRedownload() 
@@ -619,15 +606,7 @@ void CMultiGetDlg::OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			ListCtrlSelectionChanged();
 		}
-		else
-		{
-			//AfxTrace("OnItemchanged: selection no change\n");
-		}
     }
-	else
-	{
-		AfxTrace("OnItemchanged: pNMListView->uChanged != LVIF_STATE. %d\n", pNMListView->uChanged);
-	}
 	*pResult = 0;
 }
 

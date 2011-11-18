@@ -18,8 +18,8 @@ public:
 	virtual ~CSegmentInfoMap();
 
 	CSegmentInfoArray* GetSegmentInfoArray(int nTaskID);
-	void AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray);
-	void RemoveSegmentInfoArray(int nTaskID);
+	BOOL AddSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray);
+	BOOL RemoveSegmentInfoArray(int nTaskID, CSegmentInfoArray* pSegInfoArray = NULL);
 private:
 	CSegmentInfoMap();	
 	CMapIntToPtr m_mapSegmentInfo;

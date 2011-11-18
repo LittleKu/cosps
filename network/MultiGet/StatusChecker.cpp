@@ -41,14 +41,14 @@ BOOL CStatusChecker::IsStartable()
 	}
 	return TRUE;
 }
-BOOL CStatusChecker::IsResumable()
-{
-	if(m_nCurStatus != TSE_PAUSED && m_nCurStatus != TSE_STOPPED)
-	{
-		return FALSE;
-	}
-	return TRUE;
-}
+// BOOL CStatusChecker::IsResumable()
+// {
+// 	if(m_nCurStatus != TSE_PAUSED && m_nCurStatus != TSE_STOPPED)
+// 	{
+// 		return FALSE;
+// 	}
+// 	return TRUE;
+// }
 BOOL CStatusChecker::IsPausable()
 {
 	return (m_nCurStatus == TSE_TRANSFERRING);

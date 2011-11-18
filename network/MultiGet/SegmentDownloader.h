@@ -41,11 +41,6 @@ public:
 public:
 	virtual void Init(const CDownloadParam& param);
 	virtual int Start();
-	virtual int Resume();
-	virtual int Stop();
-	virtual int Pause();
-	virtual int Destroy();
-	virtual int ReDownload() {return 0;}
 
 	virtual LPCTSTR GetName() { return _T("SegmentDownloader"); }
 private:
@@ -72,7 +67,6 @@ private:
 	DWORD SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout);
 	//process when a easy handle connection finished its transfer
 	int ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult);
-
 
 	//Close a connection
 	void CloseConnection(int nIndex);

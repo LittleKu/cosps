@@ -20,7 +20,7 @@ public:
 	static DWORD GetOperState(UINT nCurStatus);
 
 	BOOL IsStartable();
-	BOOL IsResumable();
+//	BOOL IsResumable();
 	BOOL IsPausable();
 	BOOL IsStopable();
 protected:

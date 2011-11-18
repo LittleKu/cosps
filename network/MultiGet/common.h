@@ -21,22 +21,19 @@ typedef enum
 {
 	TSE_READY	= 0,	//Task has been added, not started yet
 	TSE_TRANSFERRING,	//Task is transferring, no error detected
-	TSE_PAUSED,			//Task has been paused by user
-	TSE_STOPPED,		//Task has been stopped by user
 	TSE_COMPLETE,		//Task has been completed successfully
 	TSE_END_WITH_ERROR,	//Task ended with error
+	TSE_PAUSED,			//Task has been paused by user
 	TSE_DESTROYED,   	//Task doesn't exist, or has been destroyed
-
-	TSE_PAUSING,
-	TSE_STOPPING,
-	TSE_DESTROYING
+	
+	TSE_PAUSING,		//Task is in pausing progress
+	TSE_DESTROYING		//Task is in destroying progress
 } TaskStatusEnum;
 
 typedef enum
 {
 	RC_MAJOR_OK = 0,
 	RC_MAJOR_PAUSED,
-	RC_MAJOR_STOPPED,
 	RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR,
 	RC_MAJOR_TERMINATED_BY_CURL_CODE,
 	RC_MAJOR_DESTROYED
@@ -79,30 +76,6 @@ public:
 	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0), m_nTaskID(-1)
 	{
 	}
-};
-
-class CController
-{
-public:
-	CController();
-	virtual ~CController();
-	BOOL IsModified();
-	void SetModified(BOOL bModified);
-
-	BOOL IsPaused();
-	void Pause();
-
-	BOOL IsStopped();
-	void Stop();
-
-	BOOL IsDestroyed();
-	void Destroy();
-
-	void Clear();
-private:
-	BOOL m_bModified;
-	DWORD m_dwStatus;
-	CCriticalSection m_ctritialSection;
 };
 
 class CHeaderInfo

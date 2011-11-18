@@ -63,7 +63,6 @@ private:
 protected:
 	CURL* m_curl;
 	CConnectionInfo m_connInfo;
-	CController m_controller;
 };
 
 #endif // !defined(AFX_EASYDOWNLOADER_H__FDE4BCE2_0E7E_474E_9B1A_8B515287CAD2__INCLUDED_)

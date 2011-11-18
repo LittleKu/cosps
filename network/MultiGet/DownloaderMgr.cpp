@@ -81,7 +81,7 @@ int CDownloaderMgr::DoAction()
 
 	//Case: when the task has been paused/completed, try to destroy it but the thread handle still exist,
 	//failed to delete the CDownloaderMgr
-	if(m_dlCurState.GetState() == TSE_DESTROYED)
+	if(NoLockGetState() == TSE_DESTROYED)
 	{
 		rc = DELETE_BY_EXTERNAL;
 	}
@@ -125,9 +125,10 @@ int CDownloaderMgr::Start()
 	}
 
 	//Start is not allowed
-	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_START) & DL_OPER_FLAG_START) == 0 )
+	if( !NoLockIsOperEnabled(DL_OPER_FLAG_START) )
 	{
-		szLog.Format("Task[%02d] can't be started, because of wrong state = %d", m_dlParam.m_nTaskID, m_dlCurState.GetState());
+		szLog.Format("Task[%02d] can't be started, because of wrong state = %d", m_dlParam.m_nTaskID, 
+			NoLockGetState());
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 		m_lock.Unlock();
@@ -135,7 +136,7 @@ int CDownloaderMgr::Start()
 	}
 
 	//Change the state to transferring
-	m_dlCurState.SetState(TSE_TRANSFERRING);
+	NoLockSetState(TSE_TRANSFERRING);
 
 	m_lock.Unlock();
 
@@ -173,9 +174,10 @@ int CDownloaderMgr::ReStart()
 	}
 	
 	//ReStart is not allowed
-	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_REDOWNLOAD) & DL_OPER_FLAG_REDOWNLOAD) == 0 )
+	if( !NoLockIsOperEnabled(DL_OPER_FLAG_REDOWNLOAD) )
 	{
-		szLog.Format("Task[%02d] can't be redownloaded, because of wrong state = %d", m_dlParam.m_nTaskID, m_dlCurState.GetState());
+		szLog.Format("Task[%02d] can't be redownloaded, because of wrong state = %d", m_dlParam.m_nTaskID, 
+			NoLockGetState());
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 		
 		m_lock.Unlock();
@@ -183,8 +185,7 @@ int CDownloaderMgr::ReStart()
 	}
 	
 	//Change the state to transferring
-	m_dlCurState.SetState(TSE_TRANSFERRING);
-	
+	NoLockSetState(TSE_TRANSFERRING);
 	m_lock.Unlock();
 	
 	//If we can go here, we should send message to GUI to notify it's now in transferring.
@@ -212,11 +213,11 @@ int CDownloaderMgr::Pause()
 
 	m_lock.Lock();
 	//Pause is allowed
-	if( (m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
+	if( NoLockIsOperEnabled(DL_OPER_FLAG_PAUSE) )
 	{
-		m_dlCurState.SetState(TSE_PAUSING);
+		NoLockSetState(TSE_PAUSING);
 	}
-	nResult = m_dlCurState.GetState();
+	nResult = NoLockGetState();
 	m_lock.Unlock();
 	
 	return nResult;
@@ -234,22 +235,22 @@ int CDownloaderMgr::Destroy()
 	else
 	{
 		//Remove is allowed
-		if( (m_dlCurState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
+		if( NoLockIsOperEnabled(DL_OPER_FLAG_REMOVE) )
 		{
 			//Still in transferring
-			if(m_dlCurState.GetState() == TSE_TRANSFERRING)
+			if(NoLockGetState() == TSE_TRANSFERRING || NoLockGetState() == TSE_PAUSING)
 			{
-				m_dlCurState.SetState(TSE_DESTROYING);
+				NoLockSetState(TSE_DESTROYING);
 			}
 			//The states maybe: paused, completed, end with error.
 			//change the state to let the thread monitor to delete downloader manager.
 			else
 			{
 				//TODO?
-				m_dlCurState.SetState(TSE_DESTROYED);
+				NoLockSetState(TSE_DESTROYED);
 			}
 		}
-		nResult = m_dlCurState.GetState();
+		nResult = NoLockGetState();
 	}
 	m_lock.Unlock();
 	

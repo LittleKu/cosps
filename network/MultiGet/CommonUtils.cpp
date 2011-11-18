@@ -47,11 +47,6 @@ void CCommonUtils::FormatErrorMsg(DWORD dwCode, CString& szErrorMsg)
 			szErrorMsg = "Paused";
 		}
 		break;
-	case RC_MAJOR_STOPPED:
-		{
-			szErrorMsg = "Stopped";
-		}
-		break;
 	case RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR:
 		{
 			FormatInternalErrorMsg(HIWORD(dwCode), szErrorMsg);
@@ -117,29 +112,9 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	CString szStatus;
 	switch(dwCode)
 	{
-	case TSE_DESTROYED:
-		{
-			szStatus = "Destroyed";
-		}
-		break;
 	case TSE_READY:
 		{
 			szStatus = "Ready";
-		}
-		break;
-	case TSE_TRANSFERRING:
-		{
-			szStatus = "Transferring";
-		}
-		break;
-	case TSE_PAUSED:
-		{
-			szStatus = "Paused";
-		}
-		break;
-	case TSE_STOPPED:
-		{
-			szStatus = "Stopped";
 		}
 		break;
 	case TSE_COMPLETE:
@@ -150,6 +125,31 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	case TSE_END_WITH_ERROR:
 		{
 			szStatus = "End with error";
+		}
+		break;
+	case TSE_PAUSED:
+		{
+			szStatus = "Paused";
+		}
+		break;
+	case TSE_DESTROYED:
+		{
+			szStatus = "Destroyed";
+		}
+		break;
+	case TSE_TRANSFERRING:
+		{
+			szStatus = "Transferring";
+		}
+		break;
+	case TSE_PAUSING:
+		{
+			szStatus = "Pausing";
+		}
+		break;
+	case TSE_DESTROYING:
+		{
+			szStatus = "Destroying";
 		}
 		break;
 	default:
@@ -168,6 +168,17 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 	}
 }
 
+CString CCommonUtils::GetStatusStr(DWORD dwCode)
+{
+	CString szMsg;
+	StatusCodeToStr(dwCode, NULL, szMsg);
+
+	CString szResult;
+	szResult.Format("%d-%s", dwCode, (LPCTSTR)szMsg);
+
+	return szResult;
+}
+
 DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
 {
 	DWORD dwStatusCode = TSE_READY;
@@ -183,11 +194,6 @@ DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
 	case RC_MAJOR_PAUSED:
 		{
 			dwStatusCode = TSE_PAUSED;
-		}
-		break;
-	case RC_MAJOR_STOPPED:
-		{
-			dwStatusCode = TSE_STOPPED;
 		}
 		break;
 	case RC_MAJOR_DESTROYED:

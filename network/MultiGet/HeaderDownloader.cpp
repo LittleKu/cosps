@@ -46,6 +46,7 @@ int CHeaderDownloader::Start()
 {
 	return DoProcess();
 }
+/*
 int CHeaderDownloader::ReDownload()
 {
 	m_headerInfo.Reset();
@@ -90,6 +91,7 @@ int CHeaderDownloader::Destroy()
 	
 	return nResult;
 }
+*/
 
 CDownloader* CHeaderDownloader::GetNext()
 {
@@ -203,7 +205,7 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 
 	_ASSERTE(_CrtCheckMemory());
 
-	dwState = m_pContext->GetStateNoLock();
+	dwState = m_pContext->NoLockGetState();
 	szLog.Format("Task[%02d] [CHeaderDownloader::PostProcess] state = %d, curl result = %d", 
 		m_dlParam.m_nTaskID, dwState, (int)res);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
@@ -212,11 +214,11 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 
 	if(dwState == TSE_PAUSING)
 	{
-		m_pContext->m_dlCurState.SetState(TSE_PAUSED);		
+		m_pContext->NoLockSetState(TSE_PAUSED);		
 	}
 	else if(dwState == TSE_DESTROYING)
 	{
-		m_pContext->m_dlCurState.SetState(TSE_DESTROYED);
+		m_pContext->NoLockSetState(TSE_DESTROYED);
 	}
 	else if(dwState == TSE_TRANSFERRING)
 	{
@@ -241,7 +243,7 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 			{
 				CString szDetail;
 				szDetail.Format("(%d) %s", res, curl_easy_strerror(res));
-				m_pContext->m_dlCurState.SetState(TSE_END_WITH_ERROR, szDetail);
+				m_pContext->NoLockSetState(TSE_END_WITH_ERROR, szDetail);
 			}
 			break;
 		}
@@ -254,7 +256,7 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 		ASSERT(FALSE);
 	}
 	
-	nResult = m_pContext->m_dlCurState.GetState();
+	nResult = m_pContext->NoLockGetState();
 	m_pContext->Unlock();
 
 	return nResult;
@@ -270,7 +272,7 @@ void CHeaderDownloader::GenerateNextDownloader()
 		//2. HTTP return error
 		if(m_headerInfo.m_nHTTPCode != 200 && m_headerInfo.m_nHTTPCode != 206)
 		{
-			m_pContext->m_dlCurState.SetState(TSE_END_WITH_ERROR, m_headerInfo.m_szStatusLine);
+			m_pContext->NoLockSetState(TSE_END_WITH_ERROR, m_headerInfo.m_szStatusLine);
 			break;
 		}
 		

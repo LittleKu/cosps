@@ -49,7 +49,7 @@ size_t CSegmentDownloader::ProcessHeader(char* ptr, size_t size, size_t nmemb, i
 		CCommonUtils::ReplaceCRLF(szLine);
 		
 		CString szMsg;
-		szMsg.Format("%d - %s", index, szLine);
+		szMsg.Format("Task[%02d]: %d - %s", m_dlParam.m_nTaskID, index, szLine);
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szMsg)
 	}
 	
@@ -255,81 +255,6 @@ int CSegmentDownloader::Start()
 	return DoDownload();
 }
 
-int CSegmentDownloader::Resume()
-{
-	VerifyTempFolderExist();
-	RestartInitMultiHandle();	
-	
-	return DoDownload();
-}
-
-int CSegmentDownloader::Stop()
-{
-	int nResult = 0;
-	
-	return nResult;
-}
-
-int CSegmentDownloader::Pause()
-{
-	int nResult;
-	
-	m_pContext->Lock();
-	//Pause is allowed
-	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
-	{
-		m_pContext->m_dlCurState.SetState(TSE_PAUSING);
-	}
-	nResult = m_pContext->m_dlCurState.GetState();
-	m_pContext->Unlock();
-	
-	return nResult;
-}
-
-int CSegmentDownloader::Destroy()
-{
-	int nResult;
-	CString szLog;
-
-	m_pContext->Lock();
-	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		szLog.Format("Task[%02d]: Destroy - current state = %d", m_dlParam.m_nTaskID, 
-			m_pContext->GetStateNoLock());
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
-	//Remove is allowed
-	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
-	{
-		//Still in transferring
-		if(m_pContext->m_dlCurState.GetState() == TSE_TRANSFERRING)
-		{
-			m_pContext->m_dlCurState.SetState(TSE_DESTROYING);
-		}
-		//Already paused or in other states
-		else
-		{
-			CString szTempFolder;
-			GetTempFolder(szTempFolder);
-			
-			//delete task related folder
-			if(!(SYS_OPTIONS()->m_bKeepTempFiles))
-			{
-				CCommonUtils::RemoveDirectory(szTempFolder);
-			}
-			
-			//Remove the segment information data
-			RemoveSegmentInfoArray();
-
-			//No need to notify GUI
-		}
-	}
-	nResult = m_pContext->m_dlCurState.GetState();
-	m_pContext->Unlock();
-	
-	return nResult;
-}
-
 int CSegmentDownloader::DoDownload()
 {
 	fd_set fdread;
@@ -438,17 +363,11 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 		//3. Remove the segment information data
 		RemoveSegmentInfoArray();
 	}
-	else if(nMajor == RC_MAJOR_PAUSED)
-	{
-	}
-	else if(nMajor == RC_MAJOR_STOPPED)
-	{
-	}
 	else if(nMajor == RC_MAJOR_DESTROYED)
 	{
 		CString szTempFolder;
 		GetTempFolder(szTempFolder);
-				
+		
 		//delete task related folder
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
 		{
@@ -458,15 +377,14 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 		//Remove the segment information data
 		RemoveSegmentInfoArray();
 	}
+	else if(nMajor == RC_MAJOR_PAUSED)
+	{
+	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
 	{
-		//Remove the segment information data, except for Paused or Stopped status
-		//RemoveSegmentInfoArray();
 	}
 	else if(nMajor == RC_MAJOR_TERMINATED_BY_CURL_CODE)
 	{
-		//Remove the segment information data, except for Paused or Stopped status
-		//RemoveSegmentInfoArray();
 	}
 	else
 	{
@@ -478,8 +396,8 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 	int nResult;
 
 	m_pContext->Lock();
-	m_pContext->SetStateNoLock(CCommonUtils::ResultCode2StatusCode(dwResult));
-	nResult = m_pContext->GetStateNoLock();
+	m_pContext->NoLockSetState(CCommonUtils::ResultCode2StatusCode(dwResult));
+	nResult = m_pContext->NoLockGetState();
 	m_pContext->Unlock();
 
 	return nResult;
@@ -876,11 +794,8 @@ void CSegmentDownloader::RemoveSegmentInfoArray()
 	{
 		return;
 	}
-	CSegmentInfoArray* pSegInfoArray = CSegmentInfoMap::GetInstance()->GetSegmentInfoArray(m_dlParam.m_nTaskID);
-	ASSERT(pSegInfoArray != NULL && m_pSegmentInfoArray == pSegInfoArray);
-	
-	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_nTaskID);
-	
+
+	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_nTaskID, m_pSegmentInfoArray);
 	m_pSegmentInfoArray = NULL;
 }
 

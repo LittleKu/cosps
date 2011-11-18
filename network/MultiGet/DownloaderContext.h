@@ -26,14 +26,16 @@ protected:
 	void Lock();
 	void Unlock();
 	
-	virtual void SetStateNoLock(DWORD nState, LPCTSTR lpszDetail = NULL);
-	virtual void GetStateNoLock(CDownloadState& dlState);
-	virtual DWORD GetStateNoLock();
+	BOOL NoLockIsOperEnabled(DWORD nOperFlags);
+	void NoLockSetState(DWORD nState, LPCTSTR lpszDetail = NULL);
+	void NoLockGetState(CDownloadState& dlState);
+	DWORD NoLockGetState();
 protected:
 	friend class CDownloader;
 	friend class CHeaderDownloader;
 	friend class CSegmentDownloader;
 
+	CDownloadParam	m_dlParam;
 	CDownloadState	m_dlCurState;
 	CDownloader*	m_pCurDownloader;
 

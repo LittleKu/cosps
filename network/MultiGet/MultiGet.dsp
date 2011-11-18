@@ -120,15 +120,7 @@ SOURCE=.\DownloaderMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\HeaderDownloader.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\HeaderParser.cpp
 # End Source File
 # Begin Source File
 
@@ -213,15 +205,7 @@ SOURCE=.\DownloaderMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\GetHeader.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\HeaderDownloader.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\HeaderParser.h
 # End Source File
 # Begin Source File
 
