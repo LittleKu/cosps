@@ -7,6 +7,7 @@
 #include <log4cplus/configurator.h>
 #include <curl/curl.h>
 #include "Options.h"
+#include "SegmentInfoMap.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -84,6 +85,9 @@ BOOL CMultiGetApp::InitInstance()
 
 	//Load system options
 	SYS_OPTIONS()->Init();
+
+	//Make sure the singleton was initialized.
+	CSegmentInfoMap::GetInstance();
 
 	m_threadMonitor.StartMonitor();
 

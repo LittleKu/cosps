@@ -50,26 +50,26 @@ protected:
 	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnStatusUpdate(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTaskDestroy(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnAdd1();
 	afx_msg void OnButtonStart1();
 	afx_msg void OnButtonPause();
-	afx_msg void OnButtonStop();
-	afx_msg void OnButtonResume();
-	afx_msg void OnButtonHeader();
 	afx_msg void OnButtonRemove();
 	afx_msg void OnButtonAdd();
 	afx_msg void OnItemchangedListTask(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnButtonRedownload();
 	afx_msg void OnClose();
+	virtual void OnCancel();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 	
 private:
+	void StopAllTasks(BOOL bHideWindow = TRUE);
 	void CheckState(int nIndex, int nState = -1);
 	void EnableButtons(DWORD dwStatus);
 	void ListCtrlSelectionChanged();
+
+	BOOL m_bTaskCleaned;
 };
 
 //{{AFX_INSERT_LOCATION}}

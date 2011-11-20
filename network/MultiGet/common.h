@@ -4,7 +4,6 @@
 #define WM_DOWNLOAD_PROGRESS	(WM_USER + 1099)
 #define WM_DOWNLOAD_COMPLETE	(WM_USER + 1100)
 #define WM_DOWNLOAD_STATUS		(WM_USER + 1101)
-#define WM_DOWNLOAD_DESTROY		(WM_USER + 1102)
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
@@ -14,7 +13,6 @@
 #define DL_OPER_FLAG_PAUSE		(0x0002)
 #define DL_OPER_FLAG_REMOVE		(0x0004)
 #define DL_OPER_FLAG_REDOWNLOAD	(0x0008)
-#define DL_OPER_FLAG_RESUME		(0x0010)
 #define DL_OPER_FLAG_ALL		(0xFFFFFFFF)
 
 typedef enum
@@ -150,5 +148,7 @@ public:
 	virtual ~CSegmentInfo() {}
 };
 
+size_t ThrowAwayCallback(void *ptr, size_t size, size_t nmemb, void *data);
+size_t WriteFileCallback(void *ptr, size_t size, size_t nmemb, void *data);
 
 #endif

@@ -32,7 +32,6 @@ private:
 	DWORD StartDownload();
 	DWORD ReDownload();
 protected:
-//	CDownloadParam m_dlParam;
 	HANDLE m_hWorkerThread;
 };
 

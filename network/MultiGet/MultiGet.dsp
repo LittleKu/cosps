@@ -96,10 +96,6 @@ SOURCE=.\common.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\common_utils.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CommonUtils.cpp
 # End Source File
 # Begin Source File
@@ -109,10 +105,6 @@ SOURCE=.\Downloader.cpp
 # Begin Source File
 
 SOURCE=.\DownloaderContext.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\DownloaderMap.cpp
 # End Source File
 # Begin Source File
 
@@ -148,10 +140,6 @@ SOURCE=.\SegmentInfoMap.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\StatusChecker.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
@@ -181,10 +169,6 @@ SOURCE=.\common.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\common_utils.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\CommonUtils.h
 # End Source File
 # Begin Source File
@@ -194,10 +178,6 @@ SOURCE=.\Downloader.h
 # Begin Source File
 
 SOURCE=.\DownloaderContext.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DownloaderMap.h
 # End Source File
 # Begin Source File
 
@@ -230,10 +210,6 @@ SOURCE=.\SegmentDownloader.h
 # Begin Source File
 
 SOURCE=.\SegmentInfoMap.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\StatusChecker.h
 # End Source File
 # Begin Source File
 

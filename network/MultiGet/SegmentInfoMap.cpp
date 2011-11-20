@@ -19,7 +19,7 @@ DECLARE_THE_LOGGER_NAME("SEGM")
 
 CSegmentInfoMap::CSegmentInfoMap()
 {
-
+	LOG4CPLUS_INFO_STR(THE_LOGGER, "CSegmentInfoMap::CSegmentInfoMap() constructed.")
 }
 
 CSegmentInfoMap::~CSegmentInfoMap()
@@ -64,7 +64,8 @@ CSegmentInfoMap::~CSegmentInfoMap()
 CSegmentInfoMap* CSegmentInfoMap::GetInstance()
 {
 	//This is the std way to make singleton
-	static std::auto_ptr<CSegmentInfoMap> ptr(new CSegmentInfoMap);	
+	static std::auto_ptr<CSegmentInfoMap> ptr(new CSegmentInfoMap);
+	ASSERT(ptr.get());
 	return ptr.get();
 }
 

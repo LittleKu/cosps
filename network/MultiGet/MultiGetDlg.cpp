@@ -6,7 +6,6 @@
 #include "MultiGetDlg.h"
 #include "TestDownloader.h"
 #include "CommonUtils.h"
-#include "DownloaderMap.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,6 +69,8 @@ CMultiGetDlg::CMultiGetDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	m_bTaskCleaned = FALSE;
 }
 
 void CMultiGetDlg::DoDataExchange(CDataExchange* pDX)
@@ -89,13 +90,9 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_MESSAGE(WM_DOWNLOAD_PROGRESS, OnUpdateProgress)
 	ON_MESSAGE(WM_DOWNLOAD_COMPLETE, OnEnd)
 	ON_MESSAGE(WM_DOWNLOAD_STATUS, OnStatusUpdate)
-	ON_MESSAGE(WM_DOWNLOAD_DESTROY, OnTaskDestroy)
 	ON_BN_CLICKED(IDC_ADD1, OnAdd1)
 	ON_BN_CLICKED(IDC_BUTTON_START1, OnButtonStart1)
 	ON_BN_CLICKED(IDC_BUTTON_PAUSE, OnButtonPause)
-	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStop)
-	ON_BN_CLICKED(IDC_BUTTON_RESUME, OnButtonResume)
-	ON_BN_CLICKED(IDC_BUTTON_HEADER, OnButtonHeader)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVE, OnButtonRemove)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, OnButtonAdd)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TASK, OnItemchangedListTask)
@@ -327,19 +324,9 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	m_taskListCtrl.SetItemText(index, 3, szProgress);
 	m_taskListCtrl.InvalidateSubItem(index, 3);
 
-// 	m_taskListCtrl.SetItemText(index, 4, szResult);
-// 	m_taskListCtrl.InvalidateSubItem(index, 4);
-
-
 	return 1L;
 }
 
-LRESULT CMultiGetDlg::OnTaskDestroy(WPARAM wParam, LPARAM lParam)
-{
-	m_taskListCtrl.RemoveSelectedItems();
-
-	return 1L;
-}
 
 void CMultiGetDlg::OnAdd1() 
 {
@@ -418,39 +405,6 @@ void CMultiGetDlg::OnButtonPause()
 		
 		pTaskInfo->m_lpDownloaderMgr->Pause();
 	}
-}
-
-void CMultiGetDlg::OnButtonStop() 
-{	
-}
-
-void CMultiGetDlg::OnButtonResume() 
-{
-	/*
-	CTaskInfo* pTaskInfo = NULL;
-	//Get all selected items
-	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
-	
-	int nItem = -1;
-	while (pos != NULL)
-	{
-		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
-
-		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
-		ASSERT(pTaskInfo != NULL);
-
-		if(pTaskInfo == NULL)
-		{
-			continue;
-		}
-
-		pTaskInfo->m_lpDownloaderMgr->Resume();
-	}
-	*/
-}
-
-void CMultiGetDlg::OnButtonHeader() 
-{
 }
 
 void CMultiGetDlg::OnButtonRedownload() 
@@ -637,25 +591,11 @@ void CMultiGetDlg::EnableButtons(DWORD dwStatus)
 	GetDlgItem(IDC_BUTTON_PAUSE)->EnableWindow(dwStatus & DL_OPER_FLAG_PAUSE);
 	GetDlgItem(IDC_BUTTON_REMOVE)->EnableWindow(dwStatus & DL_OPER_FLAG_REMOVE);
 	GetDlgItem(IDC_BUTTON_REDOWNLOAD)->EnableWindow(dwStatus & DL_OPER_FLAG_REDOWNLOAD);
-	GetDlgItem(IDC_BUTTON_RESUME)->EnableWindow(dwStatus & DL_OPER_FLAG_RESUME);
 }
 
 void CMultiGetDlg::OnClose() 
 {
-	//1. Hide main window
-	ASSERT(AfxGetMainWnd());
-	AfxGetMainWnd()->ShowWindow(SW_HIDE);
-	
-	CString szLog;
-	szLog.Format("[OnClose]: Main window hide");
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	//2. Wait thread monitor thread ends
-	//TODO: switch off the message receive of HWND
-	SYS_THREAD_MONITOR()->StopMonitor(TRUE);
-
-	szLog.Format("[OnClose]: Thread monitor stopped");
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	StopAllTasks();
 	
 	CDialog::OnClose();
 }
@@ -687,4 +627,41 @@ void CMultiGetDlg::CheckState(int nIndex, int nState)
 	{
 		AfxTrace("========================CheckState: m_lpDownloaderMgr = NULL==============\n");
 	}
+}
+
+void CMultiGetDlg::OnCancel() 
+{
+	StopAllTasks();
+
+	CDialog::OnCancel();
+}
+
+void CMultiGetDlg::StopAllTasks(BOOL bHideWindow)
+{
+	if(m_bTaskCleaned)
+	{
+		return;
+	}
+	CString szLog;
+	if(bHideWindow)
+	{
+		//1. Hide main window
+		ASSERT(AfxGetMainWnd());
+		AfxGetMainWnd()->ShowWindow(SW_HIDE);
+
+		szLog.Format("[StopAllTasks]: Main window hide");
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	}
+
+	//Send Remove command
+	OnButtonRemove();
+		
+	//2. Wait thread monitor thread ends
+	//TODO: switch off the message receive of HWND
+	SYS_THREAD_MONITOR()->StopMonitor(TRUE);
+	
+	szLog.Format("[StopAllTasks]: Thread monitor stopped");
+	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
+	m_bTaskCleaned = TRUE;
 }

@@ -4,11 +4,9 @@
 
 #include "stdafx.h"
 #include "DownloaderMgr.h"
-#include "HeaderDownloader.h"
-#include "EasyDownloader.h"
-#include "SegmentDownloader.h"
 #include "CommonUtils.h"
-#include "TimeCost.h"
+#include "HeaderDownloader.h"
+#include "SegmentDownloader.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -16,6 +14,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+DECLARE_THE_LOGGER_NAME("DMGR")
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -39,6 +38,12 @@ DWORD WINAPI CDownloaderMgr::ReDownloadProc(LPVOID lpvData)
 
 CDownloaderMgr::CDownloaderMgr() : m_hWorkerThread(NULL)
 {
+	CString szLog;
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: DMGR(0x%08X)", m_dlParam.m_nTaskID, (int)this);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
 }
 
 CDownloaderMgr::~CDownloaderMgr()
@@ -46,10 +51,25 @@ CDownloaderMgr::~CDownloaderMgr()
 	//Worker thread should be stopped already
 	ASSERT(m_hWorkerThread == NULL);
 
+	CString szLog;
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: Before ~DMGR(0x%08X), m_pCurDownloader=0x%08X", m_dlParam.m_nTaskID, (int)this, 
+			(int)m_pCurDownloader);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
+
 	if(m_pCurDownloader != NULL)
 	{
 		delete m_pCurDownloader;
 		m_pCurDownloader = NULL;
+	}
+
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: After  ~DMGR(0x%08X), m_pCurDownloader=0x%08X", m_dlParam.m_nTaskID, (int)this, 
+			(int)m_pCurDownloader);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 }
 
@@ -67,13 +87,7 @@ int CDownloaderMgr::DoAction()
 	ASSERT( (dlState.GetState() >= TSE_READY && dlState.GetState() <= TSE_DESTROYED) && 
 		dlState.GetState() != TSE_TRANSFERRING );
 
-	//1. check if this task was removed
-	if(dlState.GetState() == TSE_DESTROYED)
-	{
-		rc = DELETE_BY_EXTERNAL;
-	}
-
-	//3. send complete message to GUI
+	//1. send complete message to GUI
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&dlState);
 
 	//2. close thread handle
@@ -230,7 +244,15 @@ int CDownloaderMgr::Destroy()
 	//Worker thread already exit
 	if(m_hWorkerThread == NULL)
 	{
-		nResult = DELETE_BY_EXTERNAL;
+		//If this task is already paused/completed/end-with-error
+		if(NoLockGetState() != TSE_DESTROYED)
+		{
+			nResult = DELETE_BY_EXTERNAL;
+		}
+		else
+		{
+			nResult = NoLockGetState();
+		}
 	}
 	else
 	{

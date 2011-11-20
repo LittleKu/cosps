@@ -37,11 +37,8 @@
 #undef ENABLE_LOG4CPLUS
 #endif
 
-
 #include "log4cplus_config.h"
-
 #include "common.h"
-#include "common_utils.h"
 #include "Options.h"
 
 #define CURL_STATICLIB

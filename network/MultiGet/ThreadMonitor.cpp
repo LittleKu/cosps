@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "ThreadMonitor.h"
 
+DECLARE_THE_LOGGER_NAME("MNTR")
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -170,6 +172,12 @@ DWORD CThreadMonitor::AddMoniteeWaitForExist(HANDLE handle, CPostAction* pPostAc
 
 DWORD CThreadMonitor::DoMonitor()
 {
+	CString szLog;
+
+	//Start logging
+	szLog.Format("[DoMonitor]: ThreadID=%d", GetCurrentThreadId());
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
 	DWORD dwResult = 0, dwWaitResult = 0;
 
 	int nCount = 0;
@@ -178,13 +186,23 @@ DWORD CThreadMonitor::DoMonitor()
 
 	while(TRUE)
 	{
-		AfxTrace("WaitForMultipleObjects count = %d\n", nCount);
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		{
+			szLog.Format("WaitForMultipleObjects count = %d", nCount);
+			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+		}
+		
 		if(nCount == 0)
 		{
 			ASSERT(m_bMonitoring == FALSE);
 
 			dwResult = RC_EXIT_ALL_MONITEE_EXITED;
-			AfxTrace("Stopped monitorring. Result code=%d\n", dwResult);
+
+			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			{
+				szLog.Format("Stopped monitoring. Result code=%d", dwResult);
+				LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			}
 
 			return dwResult;
 		}
@@ -197,7 +215,11 @@ DWORD CThreadMonitor::DoMonitor()
 			dwResult = ProcessSignaled(dwWaitResult, nCount);
 			if(dwResult != 0)
 			{
-				AfxTrace("Stopped monitorring. Result code=%d\n", dwResult);
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("Stopped monitoring. Result code=%d", dwResult);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
 				return dwResult;
 			}
 
@@ -227,15 +249,20 @@ DWORD CThreadMonitor::ProcessSignaled(DWORD dwRet, int nCount)
 
 	GetSignaledObjects(dwRet, nCount, pSingaledIndex, &nSingaledCount);
 	ASSERT(nSingaledCount > 0 && nSingaledCount <= nCount);
+
 	//Debug Code
-	CString szLog, szTemp;
-	szLog.Format("[Signaled Objects]: count=%d, ", nSingaledCount);
-	for(int i = 0; i < nSingaledCount; i++)
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
-		szTemp.Format("%d ", pSingaledIndex[i]);
-		szLog += szTemp;
+		CString szLog, szTemp;
+		szLog.Format("[Signaled Objects]: count=%d, ", nSingaledCount);
+		for(int i = 0; i < nSingaledCount; i++)
+		{
+			szTemp.Format("%d ", pSingaledIndex[i]);
+			szLog += szTemp;
+		}
+
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
-	AfxTrace("%s\n", szLog);
 	
 	nFirstMonitee = FindFirstMonitee(pSingaledIndex, nSingaledCount);
 	if(nFirstMonitee >= 0)
@@ -454,7 +481,9 @@ DWORD CThreadMonitor::ProcessAbnormal(int nCount, DWORD dwResult)
 		szErrorMsg.Format("Unkown result (%d)", dwResult);
 	}
 
-	AfxTrace("WaitForMultipleObjects return abnormal. Details: %s\n", szErrorMsg);
+	CString szLog;
+	szLog.Format("WaitForMultipleObjects return abnormal. Details: %s", szErrorMsg);
+	LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
 
 	return 0;
 }

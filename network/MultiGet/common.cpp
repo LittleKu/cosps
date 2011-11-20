@@ -44,11 +44,21 @@ DWORD CDownloadState::GetAccessPermission(DWORD nState, DWORD nOperFlags)
 		dwResult |= DL_OPER_FLAG_REDOWNLOAD;
 	}
 	
-	//Resume
-	if(nState == TSE_PAUSED)
-	{
-		dwResult |= DL_OPER_FLAG_RESUME;
-	}
-	
 	return dwResult;
+}
+
+size_t ThrowAwayCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	(void)ptr;
+	(void)data;
+	
+	return (size_t)(size * nmemb);
+}
+size_t WriteFileCallback(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	FILE* fp = (FILE*)data;
+	
+	fwrite(ptr, size, nmemb, fp);
+	
+	return (size_t)(size * nmemb);
 }

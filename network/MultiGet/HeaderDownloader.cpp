@@ -46,52 +46,6 @@ int CHeaderDownloader::Start()
 {
 	return DoProcess();
 }
-/*
-int CHeaderDownloader::ReDownload()
-{
-	m_headerInfo.Reset();
-	return DoProcess();
-}
-
-int CHeaderDownloader::Pause()
-{
-	int nResult;
-
-	m_pContext->Lock();
-	//Pause is allowed
-	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_PAUSE) & DL_OPER_FLAG_PAUSE) )
-	{
-		m_pContext->m_dlCurState.SetState(TSE_PAUSING);
-	}
-	nResult = m_pContext->m_dlCurState.GetState();
-	m_pContext->Unlock();
-
-	return nResult;
-}
-int CHeaderDownloader::Destroy()
-{
-	int nResult;
-
-	m_pContext->Lock();
-	if( (m_pContext->m_dlCurState.GetAccess(DL_OPER_FLAG_REMOVE) & DL_OPER_FLAG_REMOVE) )
-	{
-		//Still in transferring
-		if(m_pContext->m_dlCurState.GetState() == TSE_TRANSFERRING)
-		{
-			m_pContext->m_dlCurState.SetState(TSE_DESTROYING);
-		}
-		//Already paused or in other states
-		else
-		{
-			//Do nothing
-		}
-	}
-	nResult = m_pContext->m_dlCurState.GetState();
-	m_pContext->Unlock();
-	
-	return nResult;
-}
-*/
 
 CDownloader* CHeaderDownloader::GetNext()
 {
@@ -269,26 +223,32 @@ void CHeaderDownloader::GenerateNextDownloader()
 	CString szLog;
 	do 
 	{
-		//2. HTTP return error
-		if(m_headerInfo.m_nHTTPCode != 200 && m_headerInfo.m_nHTTPCode != 206)
+		//1. HTTP return error
+		if(m_headerInfo.m_nHTTPCode != 200 && m_headerInfo.m_nHTTPCode != 206 && m_headerInfo.m_nHTTPCode != 416)
 		{
 			m_pContext->NoLockSetState(TSE_END_WITH_ERROR, m_headerInfo.m_szStatusLine);
 			break;
 		}
-		
+
+		//2. Error if there's no valid content length field when HTTP response is 416
+		if(m_headerInfo.m_nHTTPCode == 416 && m_headerInfo.m_nContentLength <= 0)
+		{
+			m_pContext->NoLockSetState(TSE_END_WITH_ERROR, m_headerInfo.m_szStatusLine);
+			break;
+		}
+
+		szLog.Format("Task[%02d]: HTTPCode=%d, Content-Range(Total)=%d, Content-Length=%d", m_dlParam.m_nTaskID,
+			m_headerInfo.m_nHTTPCode, m_headerInfo.m_nContentRangeTotal, m_headerInfo.m_nContentLength);
+		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+
 		if(m_headerInfo.m_nHTTPCode == 206)
 		{
-			szLog.Format("Task[%02d]: Segment support: [Y]. HTTPCode=%d, Content-Length=%d", m_dlParam.m_nTaskID,
-				m_headerInfo.m_nHTTPCode, m_headerInfo.m_nContentRangeTotal);
-
 			m_dlParam.m_nFileSize = m_headerInfo.m_nContentRangeTotal;
+
 			m_pNext = new CSegmentDownloader(m_pContext);
 		}
-		else if(m_headerInfo.m_nHTTPCode == 200)
+		else if(m_headerInfo.m_nHTTPCode == 200 || m_headerInfo.m_nHTTPCode == 416)
 		{
-			szLog.Format("Task[%02d]: Segment support: [N]. HTTPCode=%d, Content-Length=%d", m_dlParam.m_nTaskID,
-				m_headerInfo.m_nHTTPCode, m_headerInfo.m_nContentLength);
-
 			m_dlParam.m_nFileSize = m_headerInfo.m_nContentLength;
 
 			//When file size is bigger than 5M, try to segment download
@@ -301,10 +261,9 @@ void CHeaderDownloader::GenerateNextDownloader()
 				m_pNext = new CSegmentDownloader(m_pContext);
 			}
 		}
+
 		ASSERT(m_pNext != NULL);
 		m_pNext->Init(m_dlParam);
-
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	} while (FALSE);
 }
 

@@ -12,6 +12,7 @@
 #include "Downloader.h"
 #include "SegmentInfoMap.h"
 #include <curl/curl.h>
+#include "TimeCost.h"
 
 class CSegmentInfoEx : public CSegmentInfo
 {
@@ -99,6 +100,8 @@ protected:
 	CDownloadParam m_dlParam;
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
+
+	CTimeCost m_progTimer;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

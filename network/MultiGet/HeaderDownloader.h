@@ -21,9 +21,6 @@ public:
 public:
 	virtual void Init(const CDownloadParam& param);
 	virtual int Start();
-// 	virtual int ReDownload();
-// 	virtual int Pause();
-// 	virtual int Destroy();
 
 	virtual CDownloader* GetNext();
 

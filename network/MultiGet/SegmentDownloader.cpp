@@ -15,6 +15,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+DECLARE_THE_LOGGER_NAME("SEGD")
+
 class CCallbackParam
 {
 public:
@@ -191,20 +193,26 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	{
 		pSegmentInfo->m_nDlNow = (DWORD64)dlnow;
 	}
-	
+
 	DWORD64 nDlNow = GetTotalDownloadNow();
-	
-	//Send progress notification
-	CProgressInfo progressInfo;
-	progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
-	progressInfo.dlnow = (DWORD64)nDlNow;
-	progressInfo.ultotal = (DWORD64)ultotal;
-	progressInfo.ulnow = (DWORD64)ulnow;
-	progressInfo.retCode = -1;
-	progressInfo.szReason = "";
-	progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
-	
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
+
+	m_progTimer.UpdateCurrClock();
+	if(m_progTimer.IsTimeOut() || nDlNow == (DWORD64)m_dlParam.m_nFileSize)
+	{
+		m_progTimer.Reset();
+
+		//Send progress notification
+		CProgressInfo progressInfo;
+		progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
+		progressInfo.dlnow = (DWORD64)nDlNow;
+		progressInfo.ultotal = (DWORD64)ultotal;
+		progressInfo.ulnow = (DWORD64)ulnow;
+		progressInfo.retCode = -1;
+		progressInfo.szReason = "";
+		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
+		
+		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
+	}
 
 	//Pause
 	if(dwState == TSE_PAUSING)
@@ -220,13 +228,29 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 //////////////////////////////////////////////////////////////////////
 
 CSegmentDownloader::CSegmentDownloader(CDownloaderContext* pContext)
- : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext)
+ : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext), m_progTimer(200)
 {
 }
 
 CSegmentDownloader::~CSegmentDownloader()
 {
+	CString szLog;
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: Before ~SEGD, m_curlm=0x%08X, m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, 
+			(int)m_curlm, (int)m_pSegmentInfoArray);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
+
+	ASSERT(m_curlm == NULL);
 	RemoveSegmentInfoArray();
+
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: After  ~SEGD, m_curlm=0x%08X, m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, 
+			(int)m_curlm, (int)m_pSegmentInfoArray);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
 }
 
 void CSegmentDownloader::Init(const CDownloadParam& param)
@@ -790,13 +814,30 @@ void CSegmentDownloader::AddSegmentInfo(CSegmentInfoEx* pSegmentInfo)
 
 void CSegmentDownloader::RemoveSegmentInfoArray()
 {
+	CString szLog;
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: Before REMOVE_SEGM m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, (int)m_pSegmentInfoArray);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
+
 	if(m_pSegmentInfoArray == NULL)
 	{
 		return;
 	}
 
+	_ASSERTE(_CrtCheckMemory());
+
 	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_nTaskID, m_pSegmentInfoArray);
 	m_pSegmentInfoArray = NULL;
+	
+	_ASSERTE(_CrtCheckMemory());
+
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: After  REMOVE_SEGM m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, (int)m_pSegmentInfoArray);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
 }
 
 CURL* CSegmentDownloader::InitEasyHandle(int nIndex, int nStartPos, int nFinishPos)
