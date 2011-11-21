@@ -73,13 +73,13 @@ void CDownloaderContext::NoLockSetState(DWORD nState, LPCTSTR lpszDetail)
 			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 	}
-	if(m_dlCurState.GetState() == TSE_DESTROYING && nState == TSE_PAUSED)
+	if(m_dlCurState.GetState() == TSE_DESTROYING && nState != TSE_DESTROYED)
 	{
-		nState = TSE_DESTROYED;
-
 		CString szLog, szOldState, szNewState;
 		szOldState = CCommonUtils::GetStatusStr(TSE_DESTROYING);
-		szNewState = CCommonUtils::GetStatusStr(TSE_PAUSED);
+		szNewState = CCommonUtils::GetStatusStr(nState);
+
+		nState = TSE_DESTROYED;
 
 		szLog.Format("Task[%02d]: [%s]->[%s] changed to [%s]-[%s]", m_dlParam.m_nTaskID, 
 			(LPCTSTR)szOldState, (LPCTSTR)szNewState, (LPCTSTR)szOldState, 

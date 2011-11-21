@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "common.h"
+#include "CommonUtils.h"
 
 void  CDownloadState::SetState(DWORD nState, LPCTSTR lpszDetail)
 {
@@ -10,6 +11,28 @@ DWORD CDownloadState::GetState()
 {
 	return m_nState;
 }
+CString CDownloadState::ToString(BOOL bWithValue)
+{
+	CString szStr;
+	ToString(szStr, bWithValue);
+
+	return szStr;
+}
+void CDownloadState::ToString(CString& szStr, BOOL bWithValue)
+{
+	CString szStatusStr;
+	CCommonUtils::StatusCodeToStr(m_nState, m_szDetail, szStatusStr);
+
+	if(bWithValue)
+	{
+		szStr.Format("(%d)%s", m_nState, (LPCTSTR)szStatusStr);
+	}
+	else
+	{
+		szStr = szStatusStr;
+	}
+}
+
 DWORD CDownloadState::GetAccess(DWORD nOperFlags)
 {
 	return GetAccessPermission(m_nState, nOperFlags);

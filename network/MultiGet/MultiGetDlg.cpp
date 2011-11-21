@@ -98,6 +98,7 @@ BEGIN_MESSAGE_MAP(CMultiGetDlg, CDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_TASK, OnItemchangedListTask)
 	ON_BN_CLICKED(IDC_BUTTON_REDOWNLOAD, OnButtonRedownload)
 	ON_WM_CLOSE()
+	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -207,7 +208,7 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 		CheckState(nIndex, pStatusInfo->m_nState);
 
 		CString szStatusMsg;
-		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
+		pStatusInfo->ToString(szStatusMsg);
 		
 		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
 		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
@@ -219,32 +220,6 @@ LRESULT CMultiGetDlg::OnStatusUpdate(WPARAM wParam, LPARAM lParam)
 }
 LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 {
-	/*
-	int nTaskID = (int)wParam;
-	DWORD dwResult = (DWORD)lParam;
-	
-	int nIndex = 0;
-	CTaskInfo* pTaskInfo = NULL;
-	if(!GetTaskInfo(nTaskID, nIndex, pTaskInfo))
-	{
-		WORD nMajor = LOWORD(dwResult);
-
-		CString szLog;
-		szLog.Format("[OnEnd]: The task [%d] is in destroying. Result=0x%08X", nTaskID, dwResult);
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
-	else
-	{
-		CString szStatusMsg;
-		CCommonUtils::ResultCode2StatusStr(dwResult, szStatusMsg);
-		
-		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
-		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
-	}
-
-	ListCtrlSelectionChanged();
-	*/
-
 	//Same process with OnStatusUpdate
 	int nTaskID = (int)wParam;
 	CDownloadState* pStatusInfo = (CDownloadState*)lParam;
@@ -264,7 +239,7 @@ LRESULT CMultiGetDlg::OnEnd(WPARAM wParam, LPARAM lParam)
 		CheckState(nIndex, pStatusInfo->m_nState);
 
 		CString szStatusMsg;
-		CCommonUtils::StatusCodeToStr(pStatusInfo->m_nState, pStatusInfo->m_szDetail, szStatusMsg);
+		pStatusInfo->ToString(szStatusMsg);
 		
 		m_taskListCtrl.SetItemText(nIndex, 4, (LPCTSTR)szStatusMsg);
 		m_taskListCtrl.InvalidateSubItem(nIndex, 4);
@@ -594,9 +569,7 @@ void CMultiGetDlg::EnableButtons(DWORD dwStatus)
 }
 
 void CMultiGetDlg::OnClose() 
-{
-	StopAllTasks();
-	
+{	
 	CDialog::OnClose();
 }
 
@@ -631,37 +604,55 @@ void CMultiGetDlg::CheckState(int nIndex, int nState)
 
 void CMultiGetDlg::OnCancel() 
 {
-	StopAllTasks();
-
 	CDialog::OnCancel();
 }
 
 void CMultiGetDlg::StopAllTasks(BOOL bHideWindow)
 {
+	ASSERT(!m_bTaskCleaned);
 	if(m_bTaskCleaned)
 	{
 		return;
 	}
 	CString szLog;
-	if(bHideWindow)
-	{
-		//1. Hide main window
-		ASSERT(AfxGetMainWnd());
-		AfxGetMainWnd()->ShowWindow(SW_HIDE);
-
-		szLog.Format("[StopAllTasks]: Main window hide");
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
+// 
+// 	if(bHideWindow)
+// 	{
+// 		//1. Hide main window
+// 		ASSERT(AfxGetMainWnd());
+// 		AfxGetMainWnd()->ShowWindow(SW_HIDE);
+// 
+// 		szLog.Format("[StopAllTasks]: Main window hide");
+// 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+// 	}
 
 	//Send Remove command
-	OnButtonRemove();
-		
-	//2. Wait thread monitor thread ends
-	//TODO: switch off the message receive of HWND
-	SYS_THREAD_MONITOR()->StopMonitor(TRUE);
+
+	CTaskInfo* pTaskInfo = NULL;
 	
-	szLog.Format("[StopAllTasks]: Thread monitor stopped");
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	int nItem, nRowCount = m_taskListCtrl.GetItemCount();
+	for(nItem = 0; nItem < nRowCount; nItem++)
+	{
+		pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo != NULL);
+
+		if(pTaskInfo->m_lpDownloaderMgr == NULL)
+		{
+			continue;
+		}
+		if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CPostAction::DELETE_BY_EXTERNAL)
+		{
+			delete pTaskInfo->m_lpDownloaderMgr;
+		}
+	}
+
+	m_taskListCtrl.DeleteAllItems();
 
 	m_bTaskCleaned = TRUE;
+}
+
+void CMultiGetDlg::OnDestroy() 
+{
+	StopAllTasks();
+	CDialog::OnDestroy();
 }

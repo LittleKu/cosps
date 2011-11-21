@@ -32,82 +32,7 @@ CCommonUtils::~CCommonUtils()
 
 }
 
-void CCommonUtils::FormatErrorMsg(DWORD dwCode, CString& szErrorMsg)
-{
-	WORD nMajor = LOWORD(dwCode);
-	switch(nMajor)
-	{
-	case RC_MAJOR_OK:
-		{
-			szErrorMsg = "OK";
-		}
-		break;
-	case RC_MAJOR_PAUSED:
-		{
-			szErrorMsg = "Paused";
-		}
-		break;
-	case RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR:
-		{
-			FormatInternalErrorMsg(HIWORD(dwCode), szErrorMsg);
-		}
-		break;
-	case RC_MAJOR_TERMINATED_BY_CURL_CODE:
-		{
-			szErrorMsg.Format("[Transfer Error]: %d - %s", HIWORD(dwCode), curl_easy_strerror((CURLcode)HIWORD(dwCode)));
-		}
-		break;
-	case RC_MAJOR_DESTROYED:
-		{
-			szErrorMsg.Format("Removed");
-		}
-		break;
-	default:
-		{
-			szErrorMsg.Format("Unkonwn error - %d", dwCode);
-		}
-		break;
-	}
-}
-
-void CCommonUtils::FormatInternalErrorMsg(int nCode, CString& szErrorMsg)
-{
-	switch(nCode)
-	{
-	case RC_MINOR_OK:
-		{
-			szErrorMsg = "[Internal Error]: no error";
-		}
-		break;
-	case RC_MINOR_MULTI_FDSET_ERROR:
-		{
-			szErrorMsg = "[Internal Error]: multi_fdset error";
-		}
-		break;
-	case RC_MINOR_MULTI_TIMEOUT_ERROR:
-		{
-			szErrorMsg = "[Internal Error]: multi_timout error";
-		}
-		break;
-	case RC_MINOR_SELECT_ERROR:
-		{
-			szErrorMsg = "[Internal Error]: select error";
-		}
-		break;
-	case RC_MINOR_RETRY_OVER_ERROR:
-		{
-			szErrorMsg = "[Internal Error]: retry over error";
-		}
-		break;
-	default:
-		{
-			szErrorMsg.Format("[Internal Error]: Unkonwn error - %d", nCode);
-		}
-		break;
-	}
-}
-
-void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg)
+void CCommonUtils::StatusCodeToStr(DWORD dwCode, const CString& szDetail, CString& szMsg)
 {
 	CString szStatus;
 	switch(dwCode)
@@ -158,9 +83,9 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 		}
 		break;
 	}
-	if(lpDetail != NULL)
+	if(!szDetail.IsEmpty())
 	{
-		szMsg.Format("%s - %s", szStatus, lpDetail);
+		szMsg.Format("%s - %s", szStatus, szDetail);
 	}
 	else
 	{
@@ -171,83 +96,13 @@ void CCommonUtils::StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMs
 CString CCommonUtils::GetStatusStr(DWORD dwCode)
 {
 	CString szMsg;
-	StatusCodeToStr(dwCode, NULL, szMsg);
+	CString szTemp = "";
+	StatusCodeToStr(dwCode, szTemp, szMsg);
 
 	CString szResult;
 	szResult.Format("%d-%s", dwCode, (LPCTSTR)szMsg);
 
 	return szResult;
-}
-
-DWORD CCommonUtils::ResultCode2StatusCode(DWORD dwResultCode)
-{
-	DWORD dwStatusCode = TSE_READY;
-
-	WORD nMajor = LOWORD(dwResultCode);
-	switch(nMajor)
-	{
-	case RC_MAJOR_OK:
-		{
-			dwStatusCode = TSE_COMPLETE;
-		}
-		break;
-	case RC_MAJOR_PAUSED:
-		{
-			dwStatusCode = TSE_PAUSED;
-		}
-		break;
-	case RC_MAJOR_DESTROYED:
-		{
-			dwStatusCode = TSE_DESTROYED;
-		}
-		break;
-	case RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR:
-		{
-			dwStatusCode = TSE_END_WITH_ERROR;
-		}
-		break;
-	case RC_MAJOR_TERMINATED_BY_CURL_CODE:
-		{
-			dwStatusCode = TSE_END_WITH_ERROR;
-		}
-		break;
-	default:
-		{
-			dwStatusCode = TSE_END_WITH_ERROR;
-		}
-		break;
-	}
-
-	return dwStatusCode;
-}
-void CCommonUtils::ResultCode2State(DWORD dwResultCode, CDownloadState& dlState)
-{
-	dlState.m_nState = ResultCode2StatusCode(dwResultCode);
-	
-	if(dlState.m_nState == TSE_END_WITH_ERROR)
-	{
-		CCommonUtils::FormatErrorMsg(dwResultCode, dlState.m_szDetail);
-	}
-	else
-	{
-		dlState.m_szDetail.Empty();
-	}
-}
-void  CCommonUtils::ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg)
-{
-	DWORD dwStatusCode = ResultCode2StatusCode(dwResultCode);
-
-	CString szErrorMsg;
-	CCommonUtils::FormatErrorMsg(dwResultCode, szErrorMsg);
-
-	if(dwStatusCode == TSE_END_WITH_ERROR)
-	{
-		StatusCodeToStr(dwStatusCode, szErrorMsg, szMsg);
-	}
-	else
-	{
-		StatusCodeToStr(dwStatusCode, NULL, szMsg);
-	}
 }
 
 void CCommonUtils::ReplaceCRLF(CString& szStr, LPCTSTR lpCR, LPCTSTR lpLF)
@@ -845,5 +700,7 @@ LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 		return (LRESULT)0;
 	}	
 
-	return ::SendMessage(hWnd, msg, wParam, lParam);
+	LRESULT lr = ::SendMessage(hWnd, msg, wParam, lParam);
+
+	return lr;
 }

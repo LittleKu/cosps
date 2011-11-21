@@ -187,7 +187,7 @@ void CTaskListCtrl::OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult)
 	delete pTaskInfo;
 	pTaskInfo = NULL;
 
-	SetItemData(pNMListView->iItem, 0);
+//	SetItemData(pNMListView->iItem, 0);
 
 	*pResult = 0;
 }

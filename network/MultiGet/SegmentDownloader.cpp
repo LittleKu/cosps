@@ -45,14 +45,14 @@ int CSegmentDownloader::ProgressCallback(void *clientp, double dltotal, double d
 
 size_t CSegmentDownloader::ProcessHeader(char* ptr, size_t size, size_t nmemb, int index)
 {
-	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
+	if( IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
 	{
 		CString szLine(ptr, size * nmemb);
 		CCommonUtils::ReplaceCRLF(szLine);
 		
 		CString szMsg;
 		szMsg.Format("Task[%02d]: %d - %s", m_dlParam.m_nTaskID, index, szLine);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szMsg)
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szMsg)
 	}
 	
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(index);
@@ -118,11 +118,11 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 		int rc = CCommonUtils::Intersection(rLocal, rRemote, rResult);
 		CString szLog;
 
-		if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::TRACE_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 		{
 			szLog.Format("%d - rc=%d, local(%d-%d), remote(%d-%d), result(%d-%d)", index, rc, 
 				rLocal.cx, rLocal.cy, rRemote.cx, rRemote.cy, rResult.cx, rResult.cy);
-			LOG4CPLUS_TRACE_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		pSegmentInfo->m_nRemotePos += nBytes;
@@ -135,10 +135,10 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 		//reach out, stop this connection
 		else if(rc < 0)
 		{
-			if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 			{
 				szLog.Format("%d - range reach out, stop connection", index);
-				LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 			}
 			
 			return -1;
@@ -154,10 +154,13 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 			//The data has move over the required block range
 			if(pSegmentInfo->m_nRemotePos > pSegmentInfo->m_range.cy)
 			{
-				szLog.Format("%d - move over. m_nRemotePos=%d, m_nDlNow=%I64d, rangeX=%d, rangeY=%d", 
-					index, pSegmentInfo->m_nRemotePos, pSegmentInfo->m_nDlNow, pSegmentInfo->m_range.cx, 
-					pSegmentInfo->m_range.cy);
-				LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("%d - move over. m_nRemotePos=%d, m_nDlNow=%I64d, rangeX=%d, rangeY=%d", 
+						index, pSegmentInfo->m_nRemotePos, pSegmentInfo->m_nDlNow, pSegmentInfo->m_range.cx, 
+						pSegmentInfo->m_range.cy);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
 
 				return -1;
 			}
@@ -173,21 +176,14 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 
 int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow, int nIndex)
 {
-	_ASSERTE(_CrtCheckMemory());
-
 	DWORD dwState = m_pContext->GetState();
 	if(dwState == TSE_DESTROYING)
 	{
 		return 1;
 	}
 
-	_ASSERTE(_CrtCheckMemory());
-
 	ASSERT(nIndex >= 0 && nIndex < m_pSegmentInfoArray->GetSize());
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
-	
-	
-	_ASSERTE(_CrtCheckMemory());
 
 	if(pSegmentInfo->m_headerInfo.m_nHTTPCode != 200)
 	{
@@ -228,29 +224,14 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 //////////////////////////////////////////////////////////////////////
 
 CSegmentDownloader::CSegmentDownloader(CDownloaderContext* pContext)
- : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext), m_progTimer(200)
+ : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext), m_progTimer(100)
 {
 }
 
 CSegmentDownloader::~CSegmentDownloader()
 {
-	CString szLog;
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		szLog.Format("Task[%02d]: Before ~SEGD, m_curlm=0x%08X, m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, 
-			(int)m_curlm, (int)m_pSegmentInfoArray);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
-	}
-
 	ASSERT(m_curlm == NULL);
 	RemoveSegmentInfoArray();
-
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		szLog.Format("Task[%02d]: After  ~SEGD, m_curlm=0x%08X, m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, 
-			(int)m_curlm, (int)m_pSegmentInfoArray);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
-	}
 }
 
 void CSegmentDownloader::Init(const CDownloadParam& param)
@@ -292,7 +273,8 @@ int CSegmentDownloader::DoDownload()
 	int msgs_left; /* how many messages are left */
 
 	int rc = 0;	//return value
-	DWORD dwResult = 0;
+	BOOL bResult = FALSE;
+	CDownloadState dlState(TSE_COMPLETE);
 	CString szLog;
 
 	while (still_running) 
@@ -302,11 +284,11 @@ int CSegmentDownloader::DoDownload()
 		if(still_running)
 		{
 			//select
-			dwResult = SelectFDSet(fdread, fdwrite, fdexcep, maxfd, curl_timeout);
-			if(dwResult != 0)
+			bResult = SelectFDSet(fdread, fdwrite, fdexcep, maxfd, curl_timeout, dlState);
+			if(!bResult)
 			{
-				szLog.Format("[SelectFDSet] error: dwResult = %d", dwResult);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				szLog.Format("[SelectFDSet] error: result state = %s", dlState.ToString(TRUE));
+				LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
 				break;
 			}	
 		}
@@ -318,13 +300,13 @@ int CSegmentDownloader::DoDownload()
 			//Done
 			if (msg->msg == CURLMSG_DONE) 
 			{
-				rc = ProcessTransferDone(msg, still_running, dwResult);
+				rc = ProcessTransferDone(msg, still_running, dlState);
 			}
 			//error
 			else 
 			{
 				szLog.Format("[curl_multi_info_read] error: msg->msg = %d", msg->msg);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
 			}
 		}
 
@@ -335,10 +317,10 @@ int CSegmentDownloader::DoDownload()
 		}
 	}
 	
-	return PostDownload(dwResult);
+	return PostDownload(dlState);
 }
 
-int CSegmentDownloader::PostDownload(DWORD dwResult)
+int CSegmentDownloader::PostDownload(CDownloadState& dlState)
 {
 	//1. Clean up
 	//Stop all available connections
@@ -349,16 +331,23 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 	m_curlm = NULL;
 	
 	//Result Msg
-	CString szLog, szErrorMsg;
-	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
-	szLog.Format("Task[%02d]: Download result: 0x%08X - %s", m_dlParam.m_nTaskID, dwResult, szErrorMsg);
+	CString szLog;
+	szLog.Format("Task[%02d]: Download result: %s", m_dlParam.m_nTaskID, dlState.ToString(TRUE));
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	//2. Post process
-	WORD nMajor = LOWORD(dwResult);
+	DWORD dwResultState = dlState.GetState();
 
-	//Merge files when successfully
-	if(nMajor == RC_MAJOR_OK)
+	BOOL bValidateResult = (dwResultState == TSE_COMPLETE || dwResultState == TSE_PAUSED || dwResultState == TSE_END_WITH_ERROR
+		|| dwResultState == TSE_DESTROYED);
+
+	if(!bValidateResult)
+	{
+		ASSERT(FALSE);
+	}
+
+	//(1). Complete successfully
+	if(dwResultState == TSE_COMPLETE)
 	{
 		CString szTempFolder;
 		GetTempFolder(szTempFolder);
@@ -387,7 +376,8 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 		//3. Remove the segment information data
 		RemoveSegmentInfoArray();
 	}
-	else if(nMajor == RC_MAJOR_DESTROYED)
+	//(2). Destroyed
+	else if(dwResultState == TSE_DESTROYED)
 	{
 		CString szTempFolder;
 		GetTempFolder(szTempFolder);
@@ -401,36 +391,34 @@ int CSegmentDownloader::PostDownload(DWORD dwResult)
 		//Remove the segment information data
 		RemoveSegmentInfoArray();
 	}
-	else if(nMajor == RC_MAJOR_PAUSED)
-	{
-	}
-	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
-	{
-	}
-	else if(nMajor == RC_MAJOR_TERMINATED_BY_CURL_CODE)
-	{
-	}
-	else
-	{
-		szLog.Format("Task[%02d]: Unknown error: %d", m_dlParam.m_nTaskID, dwResult);
-		LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-	}
-
-	//TODO: Set State detail information
+	//Nothing to do with other cases
+	
 	int nResult;
-
 	m_pContext->Lock();
-	m_pContext->NoLockSetState(CCommonUtils::ResultCode2StatusCode(dwResult));
+
+	//Special case for destroy case
+	if(m_pContext->NoLockGetState() == TSE_DESTROYING && dwResultState != TSE_DESTROYED)
+	{
+		szLog.Format("Task[%02d]: PostDownload, explicitly change state from %s to %d(Destroyed)", 
+			m_dlParam.m_nTaskID, dlState.ToString(TRUE), TSE_DESTROYED);
+		LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+		dlState.SetState(TSE_DESTROYED);
+	}
+
+	//update the task state
+	m_pContext->NoLockSetState(dlState.GetState(), dlState.m_szDetail);
 	nResult = m_pContext->NoLockGetState();
+
 	m_pContext->Unlock();
 
 	return nResult;
 }
 
-DWORD CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout)
+BOOL CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout, CDownloadState& dlState)
 {
 	int rc = 0;
-	DWORD dwResult = 0;
+	BOOL bResult = FALSE;
 
 	CString szLog;
 	struct timeval timeout;
@@ -445,9 +433,9 @@ DWORD CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& f
 		if(rc != CURLM_OK)
 		{
 			szLog.Format("[curl_multi_fdset] error: (%d)", rc);
-			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
 
-			dwResult = MAKELONG(RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR, RC_MINOR_MULTI_FDSET_ERROR);
+			dlState.SetState(TSE_END_WITH_ERROR, _T("[Internal Error]: multi_fdset error"));
 			break;
 		}
 		
@@ -455,9 +443,9 @@ DWORD CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& f
 		if(rc != CURLM_OK)
 		{
 			szLog.Format("[curl_multi_timeout] error: (%d)", rc);
-			LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)	
-			
-			dwResult = MAKELONG(RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR, RC_MINOR_MULTI_TIMEOUT_ERROR);
+			LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+			dlState.SetState(TSE_END_WITH_ERROR, _T("[Internal Error]: multi_timout error"));
 			break;
 		}
 		if (curl_timeout == -1)
@@ -484,18 +472,21 @@ DWORD CSegmentDownloader::SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& f
 			{
 				szLog.Format("[select] error: maxfd = %d, curl_timeout = %ld, %d - %s", maxfd, curl_timeout, 
 					errno, strerror(errno));
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
 
-				dwResult = MAKELONG(RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR, RC_MINOR_SELECT_ERROR);
+				dlState.SetState(TSE_END_WITH_ERROR, _T("[Internal Error]: select error"));
 
 				break;
 			}
 		}
+
+		bResult = TRUE;
+
 	} while (FALSE);
 
-	return dwResult;
+	return bResult;
 }
-int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult)
+int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, CDownloadState& dlResultState)
 {
 	int rc = 0;
 	//Get the current connection information
@@ -511,67 +502,56 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 	
 	CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(nIndex);
 	
-	DWORD nState = m_pContext->GetState();
+	DWORD dwCurrState = m_pContext->GetState();
 	//log
 	CString szLog;
 	szLog.Format("Task[%02d]: (%d) - State: %d, Transfer result: %d - %s", m_dlParam.m_nTaskID, nIndex, 
-		nState, resCode, curl_easy_strerror(resCode));
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		dwCurrState, resCode, curl_easy_strerror(resCode));
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 
 	//Firstly close the current connection
 	CloseConnection(nIndex);
-		
-	switch(resCode)
+	
+	//Default make the state to complete
+	dlResultState.SetState(TSE_COMPLETE);
+
+	if(dwCurrState == TSE_DESTROYING)
 	{
-	case CURLE_OK:
+		dlResultState.SetState(TSE_DESTROYED);
+	}
+	else if(dwCurrState == TSE_PAUSING)
+	{
+		dlResultState.SetState(TSE_PAUSED);
+	}
+	else if(dwCurrState == TSE_TRANSFERRING)
+	{
+		switch(resCode)
 		{
-			//Do nothing
-		}
-		break;
-	case CURLE_ABORTED_BY_CALLBACK:
-		{
-			//(0). This task been destroyed
-			if(nState == TSE_DESTROYING)
+		case CURLE_OK:
 			{
-				dwResult = MAKELONG(RC_MAJOR_DESTROYED, RC_MINOR_OK);
+				dlResultState.SetState(TSE_COMPLETE);
 			}
-			//(2). Pause
-			else if(nState == TSE_PAUSING)
+			break;
+		case CURLE_ABORTED_BY_CALLBACK:
 			{
-				dwResult = MAKELONG(RC_MAJOR_PAUSED, RC_MINOR_OK);
+				szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Connection stopped by abort callback. "
+					"Unexpected State: %d", m_dlParam.m_nTaskID, nIndex, dwCurrState);
+				LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
+					
+				ASSERT(FALSE);
 			}
-			//other, auto stop. This should not happen
-			else
+			break;
+		case CURLE_WRITE_ERROR:
 			{
-				szLog.Format("Task[%02d]: (%d) - Unexpected State: %d", m_dlParam.m_nTaskID, nIndex, nState);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Connection stopped by write data function", 
+					m_dlParam.m_nTaskID, nIndex);
+				LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 			}
-		}
-		break;
-	case CURLE_WRITE_ERROR:
-		{
-			szLog.Format("(%d) - Connection stopped by write data function", nIndex);
-			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		}
-		break;
-	case CURLE_OPERATION_TIMEDOUT:
-		{
-			//Always try to retry
-			CURL* retry_handle = RestartConnection(nIndex, CCommonUtils::INT_OPER_KEEP);
-			
-			if(retry_handle != NULL)
+			break;
+		case CURLE_OPERATION_TIMEDOUT:
 			{
-				curl_multi_add_handle(m_curlm, retry_handle);
-				still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
-			}
-		}
-		break;
-		//other cases: should be actual error, retry
-	default:
-		{			
-			if(pSegmentInfo->m_nRetry < SYS_OPTIONS()->m_nMaxRetryTimes)
-			{							 
-				CURL* retry_handle = RestartConnection(nIndex, CCommonUtils::INT_OPER_INCREASE);
+				//Always try to retry
+				CURL* retry_handle = RestartConnection(nIndex, CCommonUtils::INT_OPER_KEEP);
 				
 				if(retry_handle != NULL)
 				{
@@ -579,17 +559,43 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, DW
 					still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
 				}
 			}
-			else
-			{
-				rc = resCode;
-
-				szLog.Format("(%d) - Retry times more than %d, abort download", nIndex, SYS_OPTIONS()->m_nMaxRetryTimes);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			break;
+			//other cases: should be actual error, retry
+		default:
+			{			
+				if(pSegmentInfo->m_nRetry < SYS_OPTIONS()->m_nMaxRetryTimes)
+				{							 
+					CURL* retry_handle = RestartConnection(nIndex, CCommonUtils::INT_OPER_INCREASE);
 					
-				dwResult = MAKELONG(RC_MAJOR_TERMINATED_BY_CURL_CODE, resCode);
+					if(retry_handle != NULL)
+					{
+						curl_multi_add_handle(m_curlm, retry_handle);
+						still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+					}
+				}
+				else
+				{
+					rc = resCode;
+					
+					szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Retry times more than %d, abort download", 
+						m_dlParam.m_nTaskID, nIndex, SYS_OPTIONS()->m_nMaxRetryTimes);
+					LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+					CString szCurlError;
+					szCurlError.Format("%d(%s)", (int)resCode, curl_easy_strerror(resCode));
+
+					dlResultState.SetState(TSE_END_WITH_ERROR, szCurlError);
+				}
 			}
+			break;
 		}
-		break;
+	}
+	else
+	{
+		szLog.Format("Task[%02d]: [ProcessTransferDone] Unexpected state = %d", m_dlParam.m_nTaskID, dwCurrState);
+		LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
+			
+		ASSERT(FALSE);
 	}
 	
 	return rc;
@@ -689,7 +695,7 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex, int nRetryOperType)
 	if(nStartPos > nFinishPos)
 	{
 		CString szLog;
-		szLog.Format("(%d) - Transfer ended. %d - %d", nIndex, nStartPos, nFinishPos);
+		szLog.Format("Task[%02d]: (%d) - Transfer ended. %d - %d", m_dlParam.m_nTaskID, nIndex, nStartPos, nFinishPos);
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
 		return NULL;
@@ -814,30 +820,13 @@ void CSegmentDownloader::AddSegmentInfo(CSegmentInfoEx* pSegmentInfo)
 
 void CSegmentDownloader::RemoveSegmentInfoArray()
 {
-	CString szLog;
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		szLog.Format("Task[%02d]: Before REMOVE_SEGM m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, (int)m_pSegmentInfoArray);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
-	}
-
 	if(m_pSegmentInfoArray == NULL)
 	{
 		return;
 	}
 
-	_ASSERTE(_CrtCheckMemory());
-
 	CSegmentInfoMap::GetInstance()->RemoveSegmentInfoArray(m_dlParam.m_nTaskID, m_pSegmentInfoArray);
 	m_pSegmentInfoArray = NULL;
-	
-	_ASSERTE(_CrtCheckMemory());
-
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
-	{
-		szLog.Format("Task[%02d]: After  REMOVE_SEGM m_pSegmentInfoArray=0x%08X", m_dlParam.m_nTaskID, (int)m_pSegmentInfoArray);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
-	}
 }
 
 CURL* CSegmentDownloader::InitEasyHandle(int nIndex, int nStartPos, int nFinishPos)

@@ -28,26 +28,7 @@ typedef enum
 	TSE_DESTROYING		//Task is in destroying progress
 } TaskStatusEnum;
 
-typedef enum
-{
-	RC_MAJOR_OK = 0,
-	RC_MAJOR_PAUSED,
-	RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR,
-	RC_MAJOR_TERMINATED_BY_CURL_CODE,
-	RC_MAJOR_DESTROYED
-} ResultCodeMajor;
-
-typedef enum
-{
-	RC_MINOR_OK = 0,
-	RC_MINOR_MULTI_FDSET_ERROR,
-	RC_MINOR_MULTI_TIMEOUT_ERROR,
-	RC_MINOR_SELECT_ERROR,
-	RC_MINOR_RETRY_OVER_ERROR
-} ResultCodeMinor;
-
 typedef CSize CRange;
-
 
 class CDownloadState
 {
@@ -59,6 +40,9 @@ public:
 	void  SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 	DWORD GetState();
 	DWORD GetAccess(DWORD nOperFlags = DL_OPER_FLAG_ALL);
+	CString ToString(BOOL bWithValue = FALSE);
+	void ToString(CString& szStr, BOOL bWithValue = FALSE);
+
 	static DWORD GetAccessPermission(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
 };
 class CProgressInfo

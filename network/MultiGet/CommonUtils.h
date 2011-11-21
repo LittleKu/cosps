@@ -33,13 +33,7 @@ public:
 	virtual ~CCommonUtils();
 public:
 	//convert error code to error message
-	static void FormatErrorMsg(DWORD dwCode, CString& szMsg);
-
-	static void  ResultCode2State(DWORD dwResultCode, CDownloadState& dlState);
-	static DWORD ResultCode2StatusCode(DWORD dwResultCode);
-	static void  ResultCode2StatusStr(DWORD dwResultCode, CString& szMsg);
-
-	static void	StatusCodeToStr(DWORD dwCode, LPCTSTR lpDetail, CString& szMsg);
+	static void	StatusCodeToStr(DWORD dwCode, const CString& szDetail, CString& szMsg);
 	static CString GetStatusStr(DWORD dwCode);
 
 	//Replace the CR(\r) char with lpCR and the LF(\n) char with lpNL
@@ -83,7 +77,6 @@ public:
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();
-	static void FormatInternalErrorMsg(int nCode, CString& szErrorMsg);
 	static BOOL GetProxyInfo(CMapUInt2String& proxyInfoMap);
 
 	static long m_nUniqueID;

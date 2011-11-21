@@ -59,6 +59,7 @@ protected:
 	afx_msg void OnButtonRedownload();
 	afx_msg void OnClose();
 	virtual void OnCancel();
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

@@ -155,16 +155,13 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 	CString szLog;
 
 	DWORD dwState;
-	m_pContext->Lock();
 
-	_ASSERTE(_CrtCheckMemory());
+	m_pContext->Lock();
 
 	dwState = m_pContext->NoLockGetState();
 	szLog.Format("Task[%02d] [CHeaderDownloader::PostProcess] state = %d, curl result = %d", 
 		m_dlParam.m_nTaskID, dwState, (int)res);
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-
-	_ASSERTE(_CrtCheckMemory());
 
 	if(dwState == TSE_PAUSING)
 	{
@@ -186,7 +183,7 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 			break;
 		case CURLE_ABORTED_BY_CALLBACK:
 			{
-				szLog.Format("Task[%02d]: Unexpected state when callback aborted. TSE_TRANSFERRING", 
+				szLog.Format("Task[%02d]: [CHeaderDownloader::PostProcess] Unexpected state when callback aborted. TSE_TRANSFERRING", 
 					m_dlParam.m_nTaskID);
 				LOG4CPLUS_FATAL_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 					
@@ -198,13 +195,15 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 				CString szDetail;
 				szDetail.Format("(%d) %s", res, curl_easy_strerror(res));
 				m_pContext->NoLockSetState(TSE_END_WITH_ERROR, szDetail);
+
+				//TODO: retry?
 			}
 			break;
 		}
 	}
 	else
 	{
-		szLog.Format("Task[%02d]: Unexpected state = %d", m_dlParam.m_nTaskID, dwState);
+		szLog.Format("Task[%02d]: [CHeaderDownloader::PostProcess] Unexpected state = %d", m_dlParam.m_nTaskID, dwState);
 		LOG4CPLUS_FATAL_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 			
 		ASSERT(FALSE);

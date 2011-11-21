@@ -89,10 +89,10 @@ BOOL CMultiGetApp::InitInstance()
 	//Make sure the singleton was initialized.
 	CSegmentInfoMap::GetInstance();
 
-	m_threadMonitor.StartMonitor();
-
 	//curl lib global init
 	curl_global_init(CURL_GLOBAL_ALL);
+
+	m_threadMonitor.StartMonitor();
 
 	CMultiGetDlg dlg;
 	m_pMainWnd = &dlg;
@@ -107,6 +107,11 @@ BOOL CMultiGetApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
+	ASSERT(m_pMainWnd->GetSafeHwnd() == NULL);
+
+	//Wait thread monitor thread ends
+	SYS_THREAD_MONITOR()->StopMonitor(TRUE);
+
 	curl_global_cleanup();
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.

@@ -49,7 +49,7 @@ private:
 	int DoDownload();
 
 	//Post process after download finished
-	int PostDownload(DWORD dwResult);
+	int PostDownload(CDownloadState& dlState);
 
 
 	//Init an easy handle connection
@@ -65,9 +65,9 @@ private:
 
 
 	//download sub process, a wrapper for function select()
-	DWORD SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout);
+	BOOL SelectFDSet(fd_set& fdread, fd_set& fdwrite, fd_set& fdexcep, int& maxfd, long curl_timeout, CDownloadState& dlState);
 	//process when a easy handle connection finished its transfer
-	int ProcessTransferDone(CURLMsg *msg, int& still_running, DWORD& dwResult);
+	int ProcessTransferDone(CURLMsg *msg, int& still_running, CDownloadState& dlState);
 
 	//Close a connection
 	void CloseConnection(int nIndex);
