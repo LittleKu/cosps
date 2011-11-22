@@ -30,11 +30,12 @@ public:
 	{
 		MAX_INTEGER = 0x7FFFFFFF
 	};
-	virtual ~CCommonUtils();
+	~CCommonUtils();
 public:
 	//convert error code to error message
-	static void	StatusCodeToStr(DWORD dwCode, const CString& szDetail, CString& szMsg);
-	static CString GetStatusStr(DWORD dwCode);
+	static void State2Str(CString& szMsg, DWORD dwState, LPCTSTR lpszDetail = NULL, BOOL bWithValue = FALSE);
+	static CString State2Str(DWORD dwState);
+	static CString CurlCode2Str(DWORD dwCurlCode); 
 
 	//Replace the CR(\r) char with lpCR and the LF(\n) char with lpNL
 	static void ReplaceCRLF(CString& szStr, LPCTSTR lpCR = _T("[0x0D]"), LPCTSTR lpLF = _T("[0x0A]"));

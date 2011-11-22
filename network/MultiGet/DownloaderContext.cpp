@@ -18,9 +18,9 @@ DECLARE_THE_LOGGER_NAME("CTXT")
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDownloaderContext::CDownloaderContext() : m_pCurDownloader(NULL)
+CDownloaderContext::CDownloaderContext() : m_pCurDownloader(NULL), m_nMaxCount(-1)
 {
-
+	m_nMaxCount = SYS_OPTIONS()->m_nMaxConnectionCount;
 }
 
 CDownloaderContext::~CDownloaderContext()
@@ -65,8 +65,8 @@ void CDownloaderContext::NoLockSetState(DWORD nState, LPCTSTR lpszDetail)
 		if(m_dlCurState.GetState() != nState)
 		{
 			CString szLog, szOldState, szNewState;
-			szOldState = CCommonUtils::GetStatusStr(m_dlCurState.GetState());
-			szNewState = CCommonUtils::GetStatusStr(nState);
+			szOldState = CCommonUtils::State2Str(m_dlCurState.GetState());
+			szNewState = CCommonUtils::State2Str(nState);
 			szLog.Format("Task[%02d]: StateChanged from [%s] to [%s]", m_dlParam.m_nTaskID, 
 				(LPCTSTR)szOldState, (LPCTSTR)szNewState);
 
@@ -76,14 +76,14 @@ void CDownloaderContext::NoLockSetState(DWORD nState, LPCTSTR lpszDetail)
 	if(m_dlCurState.GetState() == TSE_DESTROYING && nState != TSE_DESTROYED)
 	{
 		CString szLog, szOldState, szNewState;
-		szOldState = CCommonUtils::GetStatusStr(TSE_DESTROYING);
-		szNewState = CCommonUtils::GetStatusStr(nState);
+		szOldState = CCommonUtils::State2Str(TSE_DESTROYING);
+		szNewState = CCommonUtils::State2Str(nState);
 
 		nState = TSE_DESTROYED;
 
 		szLog.Format("Task[%02d]: [%s]->[%s] changed to [%s]-[%s]", m_dlParam.m_nTaskID, 
 			(LPCTSTR)szOldState, (LPCTSTR)szNewState, (LPCTSTR)szOldState, 
-			(LPCTSTR)(CCommonUtils::GetStatusStr(TSE_DESTROYED)));
+			(LPCTSTR)(CCommonUtils::State2Str(TSE_DESTROYED)));
 		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 	m_dlCurState.SetState(nState, lpszDetail);

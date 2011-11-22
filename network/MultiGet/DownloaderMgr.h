@@ -12,7 +12,7 @@
 #include "ThreadMonitor.h"
 #include "DownloaderContext.h"
 
-class CDownloaderMgr : public CPostAction, public CDownloaderContext
+class CDownloaderMgr : public CFinalizer, public CDownloaderContext
 {
 public:
 	CDownloaderMgr();
@@ -24,7 +24,7 @@ public:
 	virtual int ReStart();
 	virtual int Destroy();
 
-	virtual int DoAction();
+	virtual int Finalize();
 private:
 	static DWORD WINAPI StartDownloadProc(LPVOID lpParameter);
 	static DWORD WINAPI ReDownloadProc(LPVOID lpParameter);

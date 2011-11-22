@@ -287,16 +287,20 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 		szProgress.Format("N/A - %I64d of N/A", pProgressInfo->dlnow);
 	}
 
-	CString szResult;
-	if(pProgressInfo->retCode >= 0)
-	{
-		szResult.Format("%d - %s", pProgressInfo->retCode, pProgressInfo->szReason);
-	}
-
 	
 	pTaskInfo->m_progress = szProgress;
-
 	m_taskListCtrl.SetItemText(index, 3, szProgress);
+
+	if(pProgressInfo->m_nSpeed >= 0)
+	{
+		CString szSpeed;
+		double dSpeed = (double)(pProgressInfo->m_nSpeed) / 1000;
+
+		szSpeed.Format("%.3f KB/s", dSpeed);
+
+		m_taskListCtrl.SetItemText(index, 5, szSpeed);
+		m_taskListCtrl.InvalidateSubItem(index, 5);
+	}
 	m_taskListCtrl.InvalidateSubItem(index, 3);
 
 	return 1L;
@@ -419,7 +423,7 @@ void CMultiGetDlg::OnButtonRemove()
 
 		if(pTaskInfo->m_lpDownloaderMgr != NULL)
 		{
-			if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CPostAction::DELETE_BY_EXTERNAL)
+			if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CFinalizer::DELETE_BY_EXTERNAL)
 			{
 				delete pTaskInfo->m_lpDownloaderMgr;
 			}
@@ -640,7 +644,7 @@ void CMultiGetDlg::StopAllTasks(BOOL bHideWindow)
 		{
 			continue;
 		}
-		if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CPostAction::DELETE_BY_EXTERNAL)
+		if(pTaskInfo->m_lpDownloaderMgr->Destroy() == CFinalizer::DELETE_BY_EXTERNAL)
 		{
 			delete pTaskInfo->m_lpDownloaderMgr;
 		}

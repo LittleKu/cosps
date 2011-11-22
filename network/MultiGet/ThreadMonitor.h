@@ -9,18 +9,18 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CPostAction
+class CFinalizer
 {
 public:
 	enum
 	{
 		DELETE_BY_EXTERNAL = 0x80000000
 	};
-	virtual ~CPostAction() {}
-	virtual int DoAction() = 0;
+	virtual ~CFinalizer() {}
+	virtual int Finalize() = 0;
 };
 
-typedef CMap<HANDLE, HANDLE, CPostAction*, CPostAction*> CMapHandle2Action;
+typedef CMap<HANDLE, HANDLE, CFinalizer*, CFinalizer*> CMapHandle2Finalizer;
 
 /*Best case. When ThreadMonitor receive quit command, there's no 
 available handles in the waiting queue, quit right away.*/
@@ -54,11 +54,11 @@ public:
 	void StopMonitor(BOOL bWait = FALSE, DWORD dwTimeOut = INFINITE);
 
 	//Add handle to monitor
-	DWORD AddMonitee(HANDLE handle, CPostAction* pPostAction);
+	DWORD AddMonitee(HANDLE handle, CFinalizer* pPostAction);
 
 	//Special case: when the same handle already exists in the monitor thread,
 	//this function will wait until the previous handle was removed
-	DWORD AddMoniteeWaitForExist(HANDLE handle, CPostAction* pPostAction);
+	DWORD AddMoniteeWaitForExist(HANDLE handle, CFinalizer* pPostAction);
 
 	//Check if the monitor thread is running at now
 	BOOL IsRunning();
@@ -97,7 +97,7 @@ private:
 	int  FindFirstMonitee(int array[], int nLength);
 
 	//Get related post-action for the handle, thread-safe
-	BOOL GetPostAction(HANDLE handle, CPostAction** pPostAction);
+	BOOL GetPostAction(HANDLE handle, CFinalizer** pPostAction);
 	//Remove related post-action for the handle, thread-safe
 	BOOL RemovePostAction(HANDLE handle);
 
@@ -114,7 +114,7 @@ private:
 	//Monitor thread handle
 	HANDLE m_hMonitor;
 
-	CMapHandle2Action m_mapAction;
+	CMapHandle2Finalizer m_mapFinalizer;
 	CCriticalSection m_criticalSection;
 };
 

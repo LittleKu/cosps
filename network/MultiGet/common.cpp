@@ -20,17 +20,7 @@ CString CDownloadState::ToString(BOOL bWithValue)
 }
 void CDownloadState::ToString(CString& szStr, BOOL bWithValue)
 {
-	CString szStatusStr;
-	CCommonUtils::StatusCodeToStr(m_nState, m_szDetail, szStatusStr);
-
-	if(bWithValue)
-	{
-		szStr.Format("(%d)%s", m_nState, (LPCTSTR)szStatusStr);
-	}
-	else
-	{
-		szStr = szStatusStr;
-	}
+	CCommonUtils::State2Str(szStr, m_nState, m_szDetail, bWithValue);
 }
 
 DWORD CDownloadState::GetAccess(DWORD nOperFlags)

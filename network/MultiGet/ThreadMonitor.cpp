@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "ThreadMonitor.h"
+#include "TimeCost.h"
 
 DECLARE_THE_LOGGER_NAME("MNTR")
 
@@ -58,7 +59,7 @@ CThreadMonitor::~CThreadMonitor()
 	}
 
 	//Let the other thread to delete the left post-action
-	m_mapAction.RemoveAll();
+	m_mapFinalizer.RemoveAll();
 }
 
 void CThreadMonitor::StartMonitor()
@@ -71,6 +72,12 @@ void CThreadMonitor::StartMonitor()
 
 void CThreadMonitor::StopMonitor(BOOL bWait, DWORD dwTimeOut)
 {
+	CTimeCost timeCost;
+
+	CString szLog;
+	szLog.Format("Before [StopMonitor]: bWait=%d, dwTimeOut=0x%08X", bWait, dwTimeOut);
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
 	::SetEvent(m_hQuitEvent);
 
 	if(m_hMonitor)
@@ -84,7 +91,11 @@ void CThreadMonitor::StopMonitor(BOOL bWait, DWORD dwTimeOut)
 			if(dwResult == WAIT_ABANDONED || dwResult == WAIT_TIMEOUT)
 			{
 				BOOL bResult = TerminateThread(m_hMonitor, RC_EXIT_TERMINATED);
-				AfxTrace("TerminateThread result = %d, dwResult = %d\n", bResult, dwResult);
+
+				szLog.Format("Force shutdown monitor.  TerminateThread result = %d, dwResult = %d",
+					bResult, dwResult);
+				LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
+
 			}
 			//There's nothing to do with WAIT_OBJECT_0 and WAIT_FAILED
 		}
@@ -93,6 +104,11 @@ void CThreadMonitor::StopMonitor(BOOL bWait, DWORD dwTimeOut)
 		::CloseHandle(m_hMonitor);
 		m_hMonitor = NULL;
 	}
+
+	timeCost.UpdateCurrClock();
+
+	szLog.Format("After  [StopMonitor]: ThreadMonitor Stopped. Time Cost (%u)ms", timeCost.GetTimeCost());
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 }
 
 BOOL CThreadMonitor::IsRunning()
@@ -112,12 +128,12 @@ BOOL CThreadMonitor::IsRunning()
 	return FALSE;
 }
 
-DWORD CThreadMonitor::AddMonitee(HANDLE handle, CPostAction* pPostAction)
+DWORD CThreadMonitor::AddMonitee(HANDLE handle, CFinalizer* pPostAction)
 {
 	DWORD dwResult = RC_ADD_OK;
 
 	m_criticalSection.Lock();
-	if(m_mapAction.GetCount() >= MAX_MONITEE_COUNT)
+	if(m_mapFinalizer.GetCount() >= MAX_MONITEE_COUNT)
 	{
 		dwResult = RC_MAX_CAPACITY_REACHED;
 	}
@@ -125,14 +141,14 @@ DWORD CThreadMonitor::AddMonitee(HANDLE handle, CPostAction* pPostAction)
 	{
 		if(m_bMonitoring)
 		{
-			CPostAction* pTemp;
-			if(m_mapAction.Lookup(handle, pTemp))
+			CFinalizer* pTemp;
+			if(m_mapFinalizer.Lookup(handle, pTemp))
 			{
 				dwResult = RC_ADD_EXIST;
 			}
 			else
 			{
-				m_mapAction.SetAt(handle, pPostAction);
+				m_mapFinalizer.SetAt(handle, pPostAction);
 				::SetEvent(m_hAddEvent);
 			}
 		}
@@ -146,7 +162,7 @@ DWORD CThreadMonitor::AddMonitee(HANDLE handle, CPostAction* pPostAction)
 	return dwResult;
 }
 
-DWORD CThreadMonitor::AddMoniteeWaitForExist(HANDLE handle, CPostAction* pPostAction)
+DWORD CThreadMonitor::AddMoniteeWaitForExist(HANDLE handle, CFinalizer* pPostAction)
 {
 	DWORD dwResult;
 	
@@ -186,10 +202,10 @@ DWORD CThreadMonitor::DoMonitor()
 
 	while(TRUE)
 	{
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 		{
 			szLog.Format("WaitForMultipleObjects count = %d", nCount);
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 		
 		if(nCount == 0)
@@ -198,10 +214,10 @@ DWORD CThreadMonitor::DoMonitor()
 
 			dwResult = RC_EXIT_ALL_MONITEE_EXITED;
 
-			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 			{
 				szLog.Format("Stopped monitoring. Result code=%d", dwResult);
-				LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 			}
 
 			return dwResult;
@@ -215,10 +231,10 @@ DWORD CThreadMonitor::DoMonitor()
 			dwResult = ProcessSignaled(dwWaitResult, nCount);
 			if(dwResult != 0)
 			{
-				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 				{
 					szLog.Format("Stopped monitoring. Result code=%d", dwResult);
-					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+					LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 				}
 				return dwResult;
 			}
@@ -251,7 +267,7 @@ DWORD CThreadMonitor::ProcessSignaled(DWORD dwRet, int nCount)
 	ASSERT(nSingaledCount > 0 && nSingaledCount <= nCount);
 
 	//Debug Code
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		CString szLog, szTemp;
 		szLog.Format("[Signaled Objects]: count=%d, ", nSingaledCount);
@@ -261,7 +277,7 @@ DWORD CThreadMonitor::ProcessSignaled(DWORD dwRet, int nCount)
 			szLog += szTemp;
 		}
 
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_TRACE_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 	
 	nFirstMonitee = FindFirstMonitee(pSingaledIndex, nSingaledCount);
@@ -285,7 +301,7 @@ void CThreadMonitor::ProcessSignaledMonitees(int pSingaledIndex[], int nSingaled
 {
 	ASSERT(nFirstMonitee >= 0 && nFirstMonitee < nSingaledCount);
 
-	CPostAction* pPostAction = NULL;
+	CFinalizer* pPostAction = NULL;
 	BOOL bResult;
 	int i;
 	
@@ -296,13 +312,13 @@ void CThreadMonitor::ProcessSignaledMonitees(int pSingaledIndex[], int nSingaled
 		
 		//IMPORTANT: 
 		//MUST first delete the handle from map. Why?
-		//Because DoAction always will CloseHandle of the thread, if a thread handle was closed,
+		//Because Finalize always will CloseHandle of the thread, if a thread handle was closed,
 		//System can re-assign the handle value to a new created thread. When the new created thread
 		//try to add it to be monitored, if we don't remove the closed handle, AddMonitee will give 
 		//the caller a RC_ADD_EXIST return value. This prevents the normal cases not accepted by Monitor
 		RemovePostAction(m_hWaitObjects[pSingaledIndex[i]]);
 
-		if(pPostAction->DoAction() == CPostAction::DELETE_BY_EXTERNAL)
+		if(pPostAction->Finalize() == CFinalizer::DELETE_BY_EXTERNAL)
 		{
 			delete pPostAction;
 		}
@@ -323,7 +339,7 @@ DWORD CThreadMonitor::ProcessSignaledControlEvents(int pSingaledIndex[], int nCo
 
 			ASSERT(m_bMonitoring);
 			m_bMonitoring = FALSE;
-			if(m_mapAction.GetCount() <= 0)
+			if(m_mapFinalizer.GetCount() <= 0)
 			{
 				//No monitored threads now, and we received Quit command
 				m_criticalSection.Unlock();
@@ -358,7 +374,7 @@ void CThreadMonitor::RefreshWaitObjects(int* pCount)
 
 	int nCount = 0;
 	HANDLE handle;
-	CPostAction* pAction;
+	CFinalizer* pAction;
 	
 	m_criticalSection.Lock();
 
@@ -369,10 +385,10 @@ void CThreadMonitor::RefreshWaitObjects(int* pCount)
 		m_hWaitObjects[nCount++] = m_hAddEvent;
 	}
 
-	POSITION pos = m_mapAction.GetStartPosition();
+	POSITION pos = m_mapFinalizer.GetStartPosition();
 	while (pos != NULL)
 	{
-		m_mapAction.GetNextAssoc(pos, handle, pAction);
+		m_mapFinalizer.GetNextAssoc(pos, handle, pAction);
 		m_hWaitObjects[nCount++] = handle;
 	}
 
@@ -418,14 +434,14 @@ void CThreadMonitor::GetSignaledObjects(DWORD dwRet, int nCount, int lpSignaledI
 }
 
 
-BOOL CThreadMonitor::GetPostAction(HANDLE handle, CPostAction** ppPostAction)
+BOOL CThreadMonitor::GetPostAction(HANDLE handle, CFinalizer** ppPostAction)
 {
 	ASSERT(ppPostAction != NULL);
 
 	BOOL bResult;
 
 	m_criticalSection.Lock();
-	bResult = m_mapAction.Lookup(handle, *ppPostAction);
+	bResult = m_mapFinalizer.Lookup(handle, *ppPostAction);
 	m_criticalSection.Unlock();
 
 	return bResult;
@@ -435,7 +451,7 @@ BOOL CThreadMonitor::RemovePostAction(HANDLE handle)
 	BOOL bResult;
 
 	m_criticalSection.Lock();
-	bResult = m_mapAction.RemoveKey(handle);
+	bResult = m_mapFinalizer.RemoveKey(handle);
 	ASSERT(bResult);
 
 	if(bResult)

@@ -26,6 +26,7 @@ static ColumnInfo columns[] =
     { _T("File Size"),			25, LVCFMT_RIGHT },
     { _T("Progress"),			50},
 	{ _T("Status"),				50},
+	{ _T("Speed"),				50},
 	{ _T("Index"),				10}
 };
 
@@ -92,6 +93,8 @@ int CTaskListCtrl::AddRow(const CTaskInfo &taskInfo)
     SetItemText(lvi.iItem, ++iSubItem, taskInfo.m_progress);
 
 	SetItemText(lvi.iItem, ++iSubItem, "Ready");
+
+	SetItemText(lvi.iItem, ++iSubItem, "");
 
 	char buf[10];
 	sprintf(buf, "%d", nRes);

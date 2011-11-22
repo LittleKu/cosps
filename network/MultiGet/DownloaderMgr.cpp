@@ -39,10 +39,10 @@ DWORD WINAPI CDownloaderMgr::ReDownloadProc(LPVOID lpvData)
 CDownloaderMgr::CDownloaderMgr() : m_hWorkerThread(NULL)
 {
 	CString szLog;
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		szLog.Format("Task[%02d]: Constructor called. DMGR(0x%08X)", m_dlParam.m_nTaskID, (int)this);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_TRACE_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 }
 
@@ -73,7 +73,7 @@ CDownloaderMgr::~CDownloaderMgr()
 	}
 }
 
-int CDownloaderMgr::DoAction()
+int CDownloaderMgr::Finalize()
 {
 	CString szLog;
 	
@@ -83,7 +83,7 @@ int CDownloaderMgr::DoAction()
 
 	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
-		szLog.Format("Task[%02d]: DoAction: state=%d", m_dlParam.m_nTaskID, dlState.GetState());
+		szLog.Format("Task[%02d]: Finalize: state=%d", m_dlParam.m_nTaskID, dlState.GetState());
 		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 	}
 
@@ -304,6 +304,8 @@ DWORD CDownloaderMgr::StartDownload()
 		m_dlParam.m_szUrl);
 	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 
+	CTimeCost timeCost;
+
 	//really new start
 	if(m_pCurDownloader == NULL)
 	{
@@ -315,19 +317,19 @@ DWORD CDownloaderMgr::StartDownload()
 	CDownloader* pDownloader = NULL;
 	do 
 	{
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 		{
 			szLog.Format("Task[%02d]: [StartDownload] - Before [%s] Start", m_dlParam.m_nTaskID, m_pCurDownloader->GetName());
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		dwResult = m_pCurDownloader->Start();
 
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 		{
-			szLog.Format("Task[%02d]: [StartDownload] - After  [%s] Start. Result = %d", m_dlParam.m_nTaskID, 
-				m_pCurDownloader->GetName(), dwResult);
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			szLog.Format("Task[%02d]: [StartDownload] - After  [%s] Start. Result = %s", m_dlParam.m_nTaskID, 
+				m_pCurDownloader->GetName(), CCommonUtils::State2Str(dwResult));
+			LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		if(dwResult != TSE_TRANSFERRING)
@@ -350,6 +352,13 @@ DWORD CDownloaderMgr::StartDownload()
 
 	} while (TRUE);
 
+	if( IS_LOG_ENABLED(GET_LOGGER(TIME_COST_NAME), log4cplus::INFO_LOG_LEVEL) )
+	{
+		timeCost.UpdateCurrClock();
+		
+		szLog.Format("Task[%02d]: [StartDownload] - TimeCost %u(ms)", m_dlParam.m_nTaskID, timeCost.GetTimeCost());
+		LOG4CPLUS_INFO_STR(GET_LOGGER(TIME_COST_NAME), (LPCTSTR)szLog)
+	}
 	return dwResult;
 }
 
@@ -362,6 +371,8 @@ DWORD CDownloaderMgr::ReDownload()
 	szLog.Format("Task[%02d]: [ReDownload] - ThreadID=%d, URL=%s", m_dlParam.m_nTaskID, GetCurrentThreadId(), 
 		m_dlParam.m_szUrl);
 	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+	CTimeCost timeCost;
 
 	//if m_pDownloader != NULL, that means the previous download was paused or ended with other reasons
 	//The previous downloader exist, delete it. Start from the beginning
@@ -377,19 +388,19 @@ DWORD CDownloaderMgr::ReDownload()
 	CDownloader* pDownloader = NULL;
 	do 
 	{
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 		{
 			szLog.Format("Task[%02d]: [ReDownload] - Before [%s] Start", m_dlParam.m_nTaskID, m_pCurDownloader->GetName());
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		dwResult = m_pCurDownloader->Start();
 
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 		{
-			szLog.Format("Task[%02d]: [ReDownload] - After  [%s] Start. Result = %d", m_dlParam.m_nTaskID, 
-				m_pCurDownloader->GetName(), dwResult);
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+			szLog.Format("Task[%02d]: [ReDownload] - After  [%s] Start. Result = %s", m_dlParam.m_nTaskID, 
+				m_pCurDownloader->GetName(), CCommonUtils::State2Str(dwResult));
+			LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		if(dwResult != TSE_TRANSFERRING)
@@ -411,6 +422,14 @@ DWORD CDownloaderMgr::ReDownload()
 		pDownloader = NULL;
 		
 	} while (TRUE);
+
+	if( IS_LOG_ENABLED(GET_LOGGER(TIME_COST_NAME), log4cplus::INFO_LOG_LEVEL) )
+	{
+		timeCost.UpdateCurrClock();
+		
+		szLog.Format("Task[%02d]: [StartDownload] - TimeCost %u(ms)", m_dlParam.m_nTaskID, timeCost.GetTimeCost());
+		LOG4CPLUS_INFO_STR(GET_LOGGER(TIME_COST_NAME), (LPCTSTR)szLog)
+	}
 	
 	return dwResult;
 }

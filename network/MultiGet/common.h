@@ -7,6 +7,7 @@
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
 #define THE_APP_NAME	"MultiGet"
+#define TIME_COST_NAME	"TIME"
 
 #define DL_OPER_FLAG_NONE		(0)
 #define DL_OPER_FLAG_START		(0x0001)
@@ -48,14 +49,13 @@ public:
 class CProgressInfo
 {
 public:
+	int m_nTaskID;
+	int m_nSpeed;	//How much bytes per seconds: B/s
 	DWORD64 dltotal;
 	DWORD64 dlnow;
 	DWORD64 ultotal;
 	DWORD64 ulnow;
-	int retCode;
-	CString szReason;
-	int m_nTaskID;
-	CProgressInfo() : dltotal(0), dlnow(0), ultotal(0), ulnow(0), m_nTaskID(-1)
+	CProgressInfo() : m_nTaskID(-1), m_nSpeed(-1), dltotal(0), dlnow(0), ultotal(0), ulnow(0)
 	{
 	}
 };
@@ -112,6 +112,7 @@ public:
 	int		m_nIndex;		//index of the segment
 	DWORD64	m_nDlBefore;	//how many bytes this segment has been download before
 	DWORD64	m_nDlNow;		//how many bytes this segment is downloading now
+	DWORD64	m_nDlLastMoment;//how many bytes this segment is downloading at last udpate moment
 	UINT	m_nRetry;		//how many times this connection retried
 	int		m_nRemotePos;	//Remote file position
 	CSize	m_range;		//range

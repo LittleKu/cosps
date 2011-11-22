@@ -203,8 +203,6 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 		progressInfo.dlnow = (DWORD64)nDlNow;
 		progressInfo.ultotal = (DWORD64)ultotal;
 		progressInfo.ulnow = (DWORD64)ulnow;
-		progressInfo.retCode = -1;
-		progressInfo.szReason = "";
 		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 		
 		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
@@ -333,7 +331,7 @@ int CSegmentDownloader::PostDownload(CDownloadState& dlState)
 	//Result Msg
 	CString szLog;
 	szLog.Format("Task[%02d]: Download result: %s", m_dlParam.m_nTaskID, dlState.ToString(TRUE));
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 
 	//2. Post process
 	DWORD dwResultState = dlState.GetState();
@@ -505,9 +503,13 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, CD
 	DWORD dwCurrState = m_pContext->GetState();
 	//log
 	CString szLog;
-	szLog.Format("Task[%02d]: (%d) - State: %d, Transfer result: %d - %s", m_dlParam.m_nTaskID, nIndex, 
-		dwCurrState, resCode, curl_easy_strerror(resCode));
-	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: (%d) - State: %d, Transfer result: %d - %s", m_dlParam.m_nTaskID, nIndex, 
+			dwCurrState, resCode, curl_easy_strerror(resCode));
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
 
 	//Firstly close the current connection
 	CloseConnection(nIndex);
@@ -543,9 +545,12 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, CD
 			break;
 		case CURLE_WRITE_ERROR:
 			{
-				szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Connection stopped by write data function", 
-					m_dlParam.m_nTaskID, nIndex);
-				LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Connection stopped by write data function", 
+						m_dlParam.m_nTaskID, nIndex);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
 			}
 			break;
 		case CURLE_OPERATION_TIMEDOUT:
@@ -581,10 +586,7 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, CD
 						m_dlParam.m_nTaskID, nIndex, SYS_OPTIONS()->m_nMaxRetryTimes);
 					LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 
-					CString szCurlError;
-					szCurlError.Format("%d(%s)", (int)resCode, curl_easy_strerror(resCode));
-
-					dlResultState.SetState(TSE_END_WITH_ERROR, szCurlError);
+					dlResultState.SetState(TSE_END_WITH_ERROR, CCommonUtils::CurlCode2Str(resCode));
 				}
 			}
 			break;
@@ -695,8 +697,11 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex, int nRetryOperType)
 	if(nStartPos > nFinishPos)
 	{
 		CString szLog;
-		szLog.Format("Task[%02d]: (%d) - Transfer ended. %d - %d", m_dlParam.m_nTaskID, nIndex, nStartPos, nFinishPos);
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		{
+			szLog.Format("Task[%02d]: (%d) - Transfer ended. %d - %d", m_dlParam.m_nTaskID, nIndex, nStartPos, nFinishPos);
+			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
 			
 		return NULL;
 	}
@@ -742,6 +747,19 @@ DWORD64 CSegmentDownloader::GetTotalDownloadNow()
 		nDlNow += pSegmentInfo->m_nDlNow + pSegmentInfo->m_nDlBefore;
 	}
 
+	return nDlNow;
+}
+
+DWORD64 CSegmentDownloader::GetTotalDownloadLastMoment()
+{
+	DWORD64 nDlNow = 0;
+	int i, nSize;	
+	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
+	{
+		CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(i);
+		nDlNow += pSegmentInfo->m_nDlLastMoment;
+	}
+	
 	return nDlNow;
 }
 

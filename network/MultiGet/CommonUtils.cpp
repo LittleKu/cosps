@@ -31,78 +31,96 @@ CCommonUtils::~CCommonUtils()
 {
 
 }
-
-void CCommonUtils::StatusCodeToStr(DWORD dwCode, const CString& szDetail, CString& szMsg)
+void CCommonUtils::State2Str(CString& szMsg, DWORD dwState, LPCTSTR lpszDetail, BOOL bWithValue)
 {
-	CString szStatus;
-	switch(dwCode)
+	CString szState, szStateDetail;
+
+	//1. State code to string
+	switch(dwState)
 	{
 	case TSE_READY:
 		{
-			szStatus = "Ready";
+			szState = "Ready";
 		}
 		break;
 	case TSE_COMPLETE:
 		{
-			szStatus = "Complete";
+			szState = "Complete";
 		}
 		break;
 	case TSE_END_WITH_ERROR:
 		{
-			szStatus = "End with error";
+			szState = "End with error";
 		}
 		break;
 	case TSE_PAUSED:
 		{
-			szStatus = "Paused";
+			szState = "Paused";
 		}
 		break;
 	case TSE_DESTROYED:
 		{
-			szStatus = "Destroyed";
+			szState = "Destroyed";
 		}
 		break;
 	case TSE_TRANSFERRING:
 		{
-			szStatus = "Transferring";
+			szState = "Transferring";
 		}
 		break;
 	case TSE_PAUSING:
 		{
-			szStatus = "Pausing";
+			szState = "Pausing";
 		}
 		break;
 	case TSE_DESTROYING:
 		{
-			szStatus = "Destroying";
+			szState = "Destroying";
 		}
 		break;
 	default:
 		{
-			szStatus.Format("Unknown status code: %d", dwCode);
+			szState.Format("Unknown status code: %d", dwState);
 		}
 		break;
 	}
-	if(!szDetail.IsEmpty())
+
+	//2. State with details
+	//Not empty
+	if(lpszDetail != NULL && (*lpszDetail) != _T('\0'))
 	{
-		szMsg.Format("%s - %s", szStatus, szDetail);
+		szStateDetail.Format("%s: %s", szState, lpszDetail);
 	}
 	else
 	{
-		szMsg = szStatus;
+		szStateDetail = szState;
+	}
+
+	//3. Prepends state code
+	if(bWithValue)
+	{
+		szMsg.Format("%d - %s", dwState, szStateDetail);
+	}
+	else
+	{
+		szMsg = szStateDetail;
 	}
 }
 
-CString CCommonUtils::GetStatusStr(DWORD dwCode)
+CString CCommonUtils::State2Str(DWORD dwState)
 {
-	CString szMsg;
-	CString szTemp = "";
-	StatusCodeToStr(dwCode, szTemp, szMsg);
-
 	CString szResult;
-	szResult.Format("%d-%s", dwCode, (LPCTSTR)szMsg);
+	State2Str(szResult, dwState, NULL, TRUE);
 
 	return szResult;
+}
+
+CString CCommonUtils::CurlCode2Str(DWORD dwCurlCode)
+{
+	CString szStr;
+	szStr.Format("(%d)%s", dwCurlCode, curl_easy_strerror((CURLcode)dwCurlCode));
+
+	return szStr;
 }
 
 void CCommonUtils::ReplaceCRLF(CString& szStr, LPCTSTR lpCR, LPCTSTR lpLF)
@@ -687,16 +705,22 @@ LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 	if(::IsWindow(hWnd) == FALSE)
 	{
-		szLog.Format("IsWindow(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
-			hWnd, msg, wParam, lParam);
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		{
+			szLog.Format("IsWindow(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
+				hWnd, msg, wParam, lParam);
+			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
 		return (LRESULT)0;
 	}
 	if(::IsWindowVisible(hWnd) == FALSE)
 	{
-		szLog.Format("IsWindowVisible(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
-			hWnd, msg, wParam, lParam);
-		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		{
+			szLog.Format("IsWindowVisible(hWnd) = FALSE. hWnd=0x%08X, msg=%d, wParam=%d, lParam=0x%08X", 
+				hWnd, msg, wParam, lParam);
+			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		}
 		return (LRESULT)0;
 	}	
 

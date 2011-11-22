@@ -11,6 +11,7 @@
 
 class CDownloader;
 class CHeaderDownloader;
+class CEasyDownloader;
 class CSegmentDownloader;
 
 class CDownloaderContext  
@@ -22,6 +23,9 @@ public:
 	virtual void SetState(DWORD nState, LPCTSTR lpszDetail = NULL);
 	virtual void GetState(CDownloadState& dlState);
 	virtual DWORD GetState();
+
+	void SetMaxConnection(int nMaxCount = -1) { m_nMaxCount = nMaxCount; }
+	int  GetMaxConnection() { return m_nMaxCount; }
 protected:
 	void Lock();
 	void Unlock();
@@ -33,11 +37,13 @@ protected:
 protected:
 	friend class CDownloader;
 	friend class CHeaderDownloader;
+	friend class CEasyDownloader;
 	friend class CSegmentDownloader;
 
 	CDownloadParam	m_dlParam;
 	CDownloadState	m_dlCurState;
 	CDownloader*	m_pCurDownloader;
+	int m_nMaxCount;
 
 	CCriticalSection m_lock;
 };

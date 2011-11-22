@@ -116,6 +116,10 @@ SOURCE=.\HeaderDownloader.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\EasyDownloader.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MultiGet.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +190,10 @@ SOURCE=.\DownloaderMgr.h
 # Begin Source File
 
 SOURCE=.\HeaderDownloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\EasyDownloader.h
 # End Source File
 # Begin Source File
 

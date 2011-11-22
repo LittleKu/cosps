@@ -5,12 +5,15 @@
 #include "stdafx.h"
 #include "EasyDownloader.h"
 #include "CommonUtils.h"
+#include "DownloaderContext.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+DECLARE_THE_LOGGER_NAME("ESYD")
 
 size_t CEasyDownloader::HeaderCallback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -34,7 +37,8 @@ int CEasyDownloader::ProgressCallback(void *clientp, double dltotal, double dlno
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CEasyDownloader::CEasyDownloader()
+CEasyDownloader::CEasyDownloader(CDownloaderContext* pContext)
+ : m_pContext(pContext), m_curl(NULL), m_progTimer(100)
 {
 }
 
@@ -44,211 +48,176 @@ CEasyDownloader::~CEasyDownloader()
 
 void CEasyDownloader::Init(const CDownloadParam& param)
 {
-	CDownloader::Init(param);
+	m_dlParam = param;
 }
 
 int CEasyDownloader::Start()
 {
 	VerifyTempFolderExist();
-	StartConnection();
 
-	CurrentStatusChanged(TSE_TRANSFERRING);
-
-	DoDownload();
-
-	return 0;
-}
-
-int CEasyDownloader::Stop()
-{
-	m_controller.Stop();
-
-	return 0;
-}
-
-int CEasyDownloader::Pause()
-{
-	m_controller.Pause();
-
-	return 0;
-}
-
-int CEasyDownloader::Resume()
-{
-	m_controller.Clear();
-
-	VerifyTempFolderExist();
-	//Restart because of pause or stop. Don't change retry times, and alway retry
-	RestartConnection(CCommonUtils::INT_OPER_RESET, CCommonUtils::MAX_INTEGER);
-	
-	CurrentStatusChanged(TSE_TRANSFERRING);
-
-	DoDownload();
-
-	return 0;
-}
-
-BOOL CEasyDownloader::IsResumable()
-{
-	return FALSE;
-}
-
-int CEasyDownloader::Destroy()
-{
-	if(GetState() != TSE_TRANSFERRING)
+	if(m_connInfo.m_nDlNow <= 0)
 	{
-		CString szTempFolder;
-		GetTempFolder(szTempFolder);
-		
-		//delete task related folder
-		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
-		{
-			CCommonUtils::RemoveDirectory(szTempFolder);
-		}
-		
-		CurrentStatusChanged(TSE_DESTROYED);
-		
-		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)NULL, (LPARAM)NULL);
-		
-		return 0;
+		StartConnection();
 	}
-	
-	m_controller.Destroy();
-	
-	return 0;
+	else
+	{
+		m_connInfo.m_nRetry = 0;
+		RestartConnection(CCommonUtils::INT_OPER_KEEP, CCommonUtils::MAX_INTEGER);
+	}
+
+	return DoDownload();
 }
+
 
 int CEasyDownloader::DoDownload()
 {
-	CURLcode res;
-	DWORD dwResult;
-	BOOL bRetry;
+	CDownloadState dlState;
 
+	CURLcode res;
+	BOOL bRetry;
 	do 
 	{
 		//transfer
 		res = curl_easy_perform(m_curl);
 
 		//process when the transfer done, check if we should retry to download?
-		bRetry = ProcessTransferDone(res, dwResult);
+		bRetry = ProcessTransferDone(res, dlState);
 
 	} while (bRetry);
 	
-	PostDownload(dwResult);
-
-	return 0;
+	return PostDownload(dlState);
 }
 
-BOOL CEasyDownloader::ProcessTransferDone(CURLcode res, DWORD& dwResult)
+BOOL CEasyDownloader::ProcessTransferDone(CURLcode res, CDownloadState& dlResultState)
 {
 	BOOL bRetry = FALSE;
-	dwResult = 0;
+	DWORD dwCurrState = m_pContext->GetState();
+	//log
+	CString szLog;
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: State: %s, Transfer result: %s", m_dlParam.m_nTaskID, 
+			CCommonUtils::State2Str(dwCurrState), CCommonUtils::CurlCode2Str(res));
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
 
 	//First close connection, this function doesn't change "m_dlInfo" data
 	CloseConnection();
-
-	//log
-	CString szLog;
-	szLog.Format("Transfer result: %d - %s", res, curl_easy_strerror(res));
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)	
 	
-	switch(res)
+	dlResultState.SetState(TSE_COMPLETE);
+
+	if(dwCurrState == TSE_DESTROYING)
 	{
-	case CURLE_OK:
+		dlResultState.SetState(TSE_DESTROYED);
+	}
+	else if(dwCurrState == TSE_PAUSING)
+	{
+		dlResultState.SetState(TSE_PAUSED);
+	}
+	else if(dwCurrState == TSE_TRANSFERRING)
+	{
+		switch(res)
 		{
-			//This case should rarely happen
-			if(m_connInfo.m_headerInfo.m_nHTTPCode != 200)
+		case CURLE_OK:
+			{
+				//This case should rarely happen
+				if(m_connInfo.m_headerInfo.m_nHTTPCode != 200)
+				{
+					bRetry = RestartConnection(CCommonUtils::INT_OPER_INCREASE);
+					
+					if(!bRetry)
+					{
+						dlResultState.SetState(TSE_END_WITH_ERROR, m_connInfo.m_headerInfo.m_szStatusLine);
+					}
+					szLog.Format("Task[%02d]: [Server Error]: %s. Retry=%d", m_dlParam.m_nTaskID, 
+						m_connInfo.m_headerInfo.m_szStatusLine, bRetry);
+					LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
+			}
+			break;
+		case CURLE_ABORTED_BY_CALLBACK:
+			{
+				szLog.Format("Task[%02d]: Connection stopped by abort callback. Unexpected State: %d", 
+					m_dlParam.m_nTaskID, dwCurrState);
+				LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
+					
+				ASSERT(FALSE);
+			}
+			break;
+		case CURLE_WRITE_ERROR:
+			{
+				if(m_connInfo.m_headerInfo.m_nHTTPCode != 200)
+				{
+					dlResultState.SetState(TSE_END_WITH_ERROR, m_connInfo.m_headerInfo.m_szStatusLine);
+				}
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("Task[%02d]: Connection stopped by write data function", m_dlParam.m_nTaskID);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
+			}
+			break;
+		case CURLE_OPERATION_TIMEDOUT:
+			{
+				//Always retry
+				bRetry = RestartConnection(CCommonUtils::INT_OPER_KEEP, CCommonUtils::MAX_INTEGER);
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("Task[%02d]: Timeout, retry [%d]", m_dlParam.m_nTaskID, (int)bRetry);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
+			}
+			break;
+		default:
 			{
 				bRetry = RestartConnection(CCommonUtils::INT_OPER_INCREASE);
+				if(!bRetry)
+				{
+					dlResultState.SetState(TSE_END_WITH_ERROR, CCommonUtils::CurlCode2Str(res));
+				}
 
-				szLog.Format("[Server Error]: %s. Try to retry", m_connInfo.m_headerInfo.m_szStatusLine);
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+				if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+				{
+					szLog.Format("Task[%02d]: Retry=[%d], times = %d", m_dlParam.m_nTaskID, (int)bRetry, m_connInfo.m_nRetry);
+					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
 			}
+			break;
 		}
-		break;
-	case CURLE_ABORTED_BY_CALLBACK:
-		{
-			//(1). Stop
-			if(m_controller.IsStopped())
-			{
-				dwResult = MAKELONG(RC_MAJOR_STOPPED, RC_MINOR_OK);
-
-				szLog.Format("Connection stopped");
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)				
-			}
-			//(2). Pause
-			else if(m_controller.IsPaused())
-			{
-				dwResult = MAKELONG(RC_MAJOR_PAUSED, RC_MINOR_OK);
-
-				szLog.Format("Connection paused");
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			}
-			//(3). This should not happen.
-			else
-			{
-				szLog.Format("Connection aborted by other reason. This should be an error.");
-				LOG4CPLUS_ERROR_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			}
-		}
-		break;
-	case CURLE_WRITE_ERROR:
-		{
-			//This should not happen
-			szLog.Format("Connection stopped by write data function");
-			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		}
-		break;
-	case CURLE_OPERATION_TIMEDOUT:
-		{
-			//Always retry
-			bRetry = RestartConnection(CCommonUtils::INT_OPER_KEEP, CCommonUtils::MAX_INTEGER);
-
-			szLog.Format("Timeout, retry [%d]", (int)bRetry);
-			LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-		}
-		break;
-	default:
-		{
-			bRetry = RestartConnection(CCommonUtils::INT_OPER_INCREASE);
-
-			if(bRetry)
-			{
-				szLog.Format("Retry [Y], times = %d", m_connInfo.m_nRetry);
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			}
-			else
-			{
-				dwResult = MAKELONG(RC_MAJOR_TERMINATED_BY_CURL_CODE, res);
-
-				szLog.Format("Retry [N], times = %d", m_connInfo.m_nRetry);
-				LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
-			}
-		}
-		break;
+	}
+	else
+	{
+		szLog.Format("Task[%02d]: [ProcessTransferDone] Unexpected state = %d", m_dlParam.m_nTaskID, dwCurrState);
+		LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
+			
+		ASSERT(FALSE);
 	}
 
 	return bRetry;
 }
 
-void CEasyDownloader::PostDownload(DWORD dwResult)
+int CEasyDownloader::PostDownload(CDownloadState& dlState)
 {
 	//1. Clean up
 	m_curl = NULL;
 	
 	//Result Msg
-	CString szErrorMsg;
-	CCommonUtils::FormatErrorMsg(dwResult, szErrorMsg);
-	
 	CString szLog;
-	szLog.Format("Download result: %X - %s", dwResult, szErrorMsg);
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+	szLog.Format("Task[%02d]: Download result: %s", m_dlParam.m_nTaskID, dlState.ToString(TRUE));
+	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		
 	//2. Post process
-	WORD nMajor = LOWORD(dwResult);
+	DWORD dwResultState = dlState.GetState();
 	
-	//Merge files when successfully
-	if(nMajor == RC_MAJOR_OK)
+	BOOL bValidateResult = (dwResultState == TSE_COMPLETE || dwResultState == TSE_PAUSED
+		|| dwResultState == TSE_END_WITH_ERROR || dwResultState == TSE_DESTROYED);
+	if(!bValidateResult)
+	{
+		ASSERT(FALSE);
+	}
+	
+	//(1). Complete successfully
+	if(dwResultState == TSE_COMPLETE)
 	{
 		//1. copy file
 		CString szTempFolder;
@@ -265,19 +234,9 @@ void CEasyDownloader::PostDownload(DWORD dwResult)
 		{
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
-		
-		//Final status: complete
-		CurrentStatusChanged(TSE_COMPLETE);
 	}
-	else if(nMajor == RC_MAJOR_PAUSED)
-	{
-		CurrentStatusChanged(TSE_PAUSED);
-	}
-	else if(nMajor == RC_MAJOR_STOPPED)
-	{
-		CurrentStatusChanged(TSE_STOPPED);
-	}
-	else if(nMajor == RC_MAJOR_DESTROYED)
+	//(2). Destroyed
+	else if(dwResultState == TSE_DESTROYED)
 	{
 		//delete task related folder
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
@@ -286,37 +245,41 @@ void CEasyDownloader::PostDownload(DWORD dwResult)
 			GetTempFolder(szTempFolder);
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
-		
-		CurrentStatusChanged(TSE_DESTROYED);
-		
-		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_DESTROY, (WPARAM)((LPCSTR)szLog), dwResult);
-
-		return;
 	}
-	else if(nMajor == RC_MAJOR_TERMINATED_BY_INTERNAL_ERROR)
-	{		
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
-	}
-	else if(nMajor == RC_MAJOR_TERMINATED_BY_CURL_CODE)
+	//Nothing to do with other cases
+	
+	int nResult;
+	m_pContext->Lock();
+	
+	//Special case for destroy case
+	if(m_pContext->NoLockGetState() == TSE_DESTROYING && dwResultState != TSE_DESTROYED)
 	{
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
-	}
-	else
-	{
-		szErrorMsg.Format("Unknown error: %d", dwResult);
-		CurrentStatusChanged(TSE_END_WITH_ERROR, szErrorMsg);
+		szLog.Format("Task[%02d]: PostDownload, explicitly change state from %s to %d(Destroyed)", 
+			m_dlParam.m_nTaskID, dlState.ToString(TRUE), TSE_DESTROYED);
+		LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+			
+		dlState.SetState(TSE_DESTROYED);
 	}
 	
-	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, (WPARAM)((LPCSTR)szLog), dwResult);
+	//update the task state
+	m_pContext->NoLockSetState(dlState.GetState(), dlState.m_szDetail);
+	nResult = m_pContext->NoLockGetState();
+	
+	m_pContext->Unlock();
+	
+	return nResult;
 }
 
 size_t CEasyDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb)
 {
-	if( IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
+	if( IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL) )
 	{
 		CString szLine(ptr, size * nmemb);
 		CCommonUtils::ReplaceCRLF(szLine);
-		LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLine)
+
+		CString szMsg;
+		szMsg.Format("Task[%02d]: %s", m_dlParam.m_nTaskID, szLine);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szMsg)
 	}
 
 	fwrite(ptr, size, nmemb, m_connInfo.lpFileHeader);
@@ -344,10 +307,14 @@ size_t CEasyDownloader::ProcessHeader(char *ptr, size_t size, size_t nmemb)
 
 size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 {
+	CString szLog;
 	if(m_connInfo.m_headerInfo.m_nHTTPCode != 200)
 	{
-		fwrite(ptr, size, nmemb, m_connInfo.lpFileData);
-		return (size_t)(size * nmemb);
+		szLog.Format("Task[%02d]: HTTP failed. Status=%s", m_dlParam.m_nTaskID, 
+			m_connInfo.m_headerInfo.m_szStatusLine);
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+		return -1;
 	}
 
 	//When the HTTP response code is 200
@@ -362,13 +329,12 @@ size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 	CRange rResult;
 
 	int rc = CCommonUtils::Intersection(rLocal, rRemote, rResult);
-
-	CString szLog;
-	if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::TRACE_LOG_LEVEL))
+	
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		szLog.Format("rc=%d, local(%d-%d), remote(%d-%d), result(%d-%d)", rc, 
 			rLocal.cx, rLocal.cy, rRemote.cx, rRemote.cy, rResult.cx, rResult.cy);
-		LOG4CPLUS_TRACE_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+		LOG4CPLUS_TRACE_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 	
 	m_connInfo.m_nRemotePos += nBytes;
@@ -381,10 +347,10 @@ size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 	//reach out, stop this connection, this should not happen in easy handle
 	else if(rc < 0)
 	{
-		if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 		{
 			szLog.Format("range reach out, stop connection");
-			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 		
 		return -1;
@@ -403,27 +369,48 @@ size_t CEasyDownloader::ProcessData(char *ptr, size_t size, size_t nmemb)
 
 int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultotal, double ulnow)
 {
-	//Send progress notification
-	CProgressInfo progressInfo;
-	progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
-
-	//The current downloaded data length is stored in m_dlInfo.m_nDlNow
-	progressInfo.dlnow = (DWORD64)m_connInfo.m_nDlNow; 
-	progressInfo.ultotal = (DWORD64)ultotal;
-	progressInfo.ulnow = (DWORD64)ulnow;
-	progressInfo.retCode = -1;
-	progressInfo.szReason = "";
-	progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
-	
-	::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
-
-	//Pause
-	if(m_controller.IsPaused())
+	DWORD dwState = m_pContext->GetState();
+	if(dwState == TSE_DESTROYING)
 	{
 		return 1;
 	}
-	//Stop
-	if(m_controller.IsStopped())
+
+	m_progTimer.UpdateCurrClock();
+	if(m_progTimer.IsTimeOut() || m_connInfo.m_nDlNow == (DWORD64)m_dlParam.m_nFileSize)
+	{
+		//Send progress notification
+		CProgressInfo progressInfo;
+
+		UINT nGrowth = m_connInfo.m_nDlNow - m_connInfo.m_nDlLastMoment;
+		UINT nTimeCost = m_progTimer.GetTimeCost();
+		if(nTimeCost > 0)
+		{
+			progressInfo.m_nSpeed = (nGrowth * 1000) / nTimeCost;
+		}
+		else
+		{
+			progressInfo.m_nSpeed = -1;
+		}
+
+		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
+		
+		progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
+		//The current downloaded data length is stored in m_dlInfo.m_nDlNow
+		progressInfo.dlnow = (DWORD64)m_connInfo.m_nDlNow;
+		
+		progressInfo.ultotal = (DWORD64)ultotal;
+		progressInfo.ulnow = (DWORD64)ulnow;
+
+		//Reset timer ASAP for faster update
+		m_progTimer.Reset();
+
+		m_connInfo.m_nDlLastMoment = m_connInfo.m_nDlNow;
+
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
+	}
+
+	//Pause
+	if(dwState == TSE_PAUSING)
 	{
 		return 2;
 	}
@@ -470,12 +457,12 @@ BOOL CEasyDownloader::RestartConnection(int nRetryOperType, int nMaxRetryLimit)
 	
 	if(m_connInfo.m_nRetry >= nMaxRetryLimit)
 	{
-		if(IS_LOG_ENABLED(ROOT_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 		{
 			CString szLog;
 			szLog.Format("Retry times over, RestartConnection failed. retry=%d, max retry=%d", 
 				m_connInfo.m_nRetry, nMaxRetryLimit);
-			LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, (LPCTSTR)szLog)
+			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
 		return FALSE;

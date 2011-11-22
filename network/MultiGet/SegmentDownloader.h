@@ -78,6 +78,7 @@ private:
 
 	//Calculate the total download size now
 	DWORD64 GetTotalDownloadNow();
+	DWORD64 GetTotalDownloadLastMoment();
 
 	CSegmentInfoEx* GetSegmentInfo(int nIndex);
 	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);

@@ -6,6 +6,7 @@
 #include "HeaderDownloader.h"
 #include "CommonUtils.h"
 #include "SegmentDownloader.h"
+#include "EasyDownloader.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -159,8 +160,8 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 	m_pContext->Lock();
 
 	dwState = m_pContext->NoLockGetState();
-	szLog.Format("Task[%02d] [CHeaderDownloader::PostProcess] state = %d, curl result = %d", 
-		m_dlParam.m_nTaskID, dwState, (int)res);
+	szLog.Format("Task[%02d]: [HeaderDownloader] - Result = %s, state = %s", 
+		m_dlParam.m_nTaskID, CCommonUtils::CurlCode2Str(res), CCommonUtils::State2Str(dwState));
 	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	if(dwState == TSE_PAUSING)
@@ -192,10 +193,7 @@ int CHeaderDownloader::PostProcess(CURLcode res)
 			break;
 		default:
 			{
-				CString szDetail;
-				szDetail.Format("(%d) %s", res, curl_easy_strerror(res));
-				m_pContext->NoLockSetState(TSE_END_WITH_ERROR, szDetail);
-
+				m_pContext->NoLockSetState(TSE_END_WITH_ERROR, CCommonUtils::CurlCode2Str(res));
 				//TODO: retry?
 			}
 			break;
@@ -236,28 +234,52 @@ void CHeaderDownloader::GenerateNextDownloader()
 			break;
 		}
 
-		szLog.Format("Task[%02d]: HTTPCode=%d, Content-Range(Total)=%d, Content-Length=%d", m_dlParam.m_nTaskID,
-			m_headerInfo.m_nHTTPCode, m_headerInfo.m_nContentRangeTotal, m_headerInfo.m_nContentLength);
+		szLog.Format("Task[%02d]: HTTPCode=%d, Content-Range(Total)=%d, Content-Length=%d, Max-Connection=%d", 
+			m_dlParam.m_nTaskID,m_headerInfo.m_nHTTPCode, m_headerInfo.m_nContentRangeTotal, 
+			m_headerInfo.m_nContentLength, m_pContext->GetMaxConnection());
 		LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 		if(m_headerInfo.m_nHTTPCode == 206)
 		{
 			m_dlParam.m_nFileSize = m_headerInfo.m_nContentRangeTotal;
-
-			m_pNext = new CSegmentDownloader(m_pContext);
 		}
 		else if(m_headerInfo.m_nHTTPCode == 200 || m_headerInfo.m_nHTTPCode == 416)
 		{
 			m_dlParam.m_nFileSize = m_headerInfo.m_nContentLength;
+		}
 
-			//When file size is bigger than 5M, try to segment download
-			if(m_headerInfo.m_nContentLength > (5 * 1024 * 1024))
+		//Single connection
+		if(m_pContext->GetMaxConnection() == 1)
+		{
+			m_pNext = new CEasyDownloader(m_pContext);
+		}
+		//Auto select and Multiple select
+		else
+		{
+			if(m_headerInfo.m_nHTTPCode == 206)
 			{
-				m_pNext = new CSegmentDownloader(m_pContext);
+				//At least more than 1 segment
+				if(m_dlParam.m_nFileSize > SYS_OPTIONS()->m_nMinSegmentSize)
+				{
+					m_pNext = new CSegmentDownloader(m_pContext);
+					
+				}
+				else
+				{
+					m_pNext = new CEasyDownloader(m_pContext);
+				}
 			}
 			else
 			{
-				m_pNext = new CSegmentDownloader(m_pContext);
+				//When file size is bigger than 5M, try to segment download
+				if(m_dlParam.m_nFileSize > (5 * 1024 * 1024))
+				{
+					m_pNext = new CSegmentDownloader(m_pContext);
+				}
+				else
+				{
+					m_pNext = new CEasyDownloader(m_pContext);
+				}
 			}
 		}
 
@@ -317,8 +339,6 @@ int CHeaderDownloader::DoProcess()
 	res = curl_easy_perform(m_curl);
 
 	m_headerInfo.m_nCurlResult = res;
-	szLog.Format("Task[%02d]: HeaderDownloader result: %d - %s", m_dlParam.m_nTaskID, res, curl_easy_strerror(res));
-	LOG4CPLUS_INFO_STR(ROOT_LOGGER, (LPCTSTR)szLog)
 
 	/* always cleanup */
     curl_easy_cleanup(m_curl);

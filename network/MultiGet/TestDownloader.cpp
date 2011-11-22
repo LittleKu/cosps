@@ -174,8 +174,6 @@ int MyProgressCB(void *clientp,double dltotal,double dlnow,double ultotal,double
 	progressInfo.dlnow = (DWORD64)dlnow;
 	progressInfo.ultotal = (DWORD64)ultotal;
 	progressInfo.ulnow = (DWORD64)ulnow;
-	progressInfo.retCode = -1;
-	progressInfo.szReason = "";
 
 	if((DWORD64)dltotal == 0 && dlnow > dltotal)
 	{
@@ -318,8 +316,6 @@ int CTestDownloader::download(HWND hwnd)
 				CProgressInfo progressInfo;
 				progressInfo.dltotal = pHeader->pBody->offset;
 				progressInfo.dlnow = pHeader->pBody->offset;
-				progressInfo.retCode = msg->data.result;
-				progressInfo.szReason = curl_easy_strerror(msg->data.result);
 				
 				::SendMessage(pHeader->pBody->hwnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, pHeader->pBody->index);
 
@@ -337,8 +333,6 @@ int CTestDownloader::download(HWND hwnd)
 				AfxTrace("%s\n", szReason);
 
 				CProgressInfo progressInfo;
-				progressInfo.retCode = 2999;
-				progressInfo.szReason = szReason;
 				
 				::SendMessage(pHeader->pBody->hwnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, pHeader->pBody->index);
 			}
