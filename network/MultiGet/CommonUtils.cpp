@@ -728,3 +728,30 @@ LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 	return lr;
 }
+
+CString CCommonUtils::FormatSpeed(DWORD dwBytesPerSeconds)
+{
+#define ONE_KB  (1024)
+#define ONE_MB	(1024 * 1024)
+
+	CString szSpeed;
+	//less than 100 bytes
+	if(dwBytesPerSeconds < 100)
+	{
+		szSpeed.Format("%u Bytes/s", dwBytesPerSeconds);
+	}
+	//less than 1M
+	else if(dwBytesPerSeconds < ONE_MB)
+	{
+		double dSpeed = ((double)dwBytesPerSeconds / ONE_KB);
+		szSpeed.Format("%.3f KB/s", dSpeed);
+	}
+	//Greater than 1M
+	else
+	{
+		double dSpeed = ((double)dwBytesPerSeconds / ONE_MB);
+		szSpeed.Format("%.3f MB/s", dSpeed);
+	}
+
+	return szSpeed;
+}

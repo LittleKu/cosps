@@ -12,19 +12,19 @@
 #include <curl/curl.h>
 #include "Downloader.h"
 #include "TimeCost.h"
+#include "ProgressMeter.h"
 
 class CConnectionInfo
 {
 public:
 	UINT	m_nDlNow;
-	UINT	m_nDlLastMoment;	//used for speed calculate
 	UINT	m_nRetry;
 	UINT	m_nRemotePos;
 	FILE*	lpFileHeader;
 	FILE*	lpFileData;
 	CHeaderInfo m_headerInfo;
 
-	CConnectionInfo() : m_nDlNow(0), m_nDlLastMoment(0), m_nRetry(0), m_nRemotePos(0), lpFileHeader(0), lpFileData(0)
+	CConnectionInfo() : m_nDlNow(0), m_nRetry(0), m_nRemotePos(0), lpFileHeader(0), lpFileData(0)
 	{
 	}
 };
@@ -67,6 +67,7 @@ protected:
 	CConnectionInfo m_connInfo;
 	
 	CTimeCost m_progTimer;
+	CProgressMeter m_progressMeter;
 };
 
 #endif // !defined(AFX_EASYDOWNLOADER_H__FDE4BCE2_0E7E_474E_9B1A_8B515287CAD2__INCLUDED_)

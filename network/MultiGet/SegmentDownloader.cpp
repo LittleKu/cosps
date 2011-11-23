@@ -193,17 +193,19 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	DWORD64 nDlNow = GetTotalDownloadNow();
 
 	m_progTimer.UpdateCurrClock();
+	m_progressMeter.UpdateData(nDlNow, (DWORD)clock());
 	if(m_progTimer.IsTimeOut() || nDlNow == (DWORD64)m_dlParam.m_nFileSize)
 	{
 		m_progTimer.Reset();
 
 		//Send progress notification
 		CProgressInfo progressInfo;
+		progressInfo.m_nSpeed = m_progressMeter.GetSpeed();
+		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 		progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
 		progressInfo.dlnow = (DWORD64)nDlNow;
 		progressInfo.ultotal = (DWORD64)ultotal;
 		progressInfo.ulnow = (DWORD64)ulnow;
-		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 		
 		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
 	}
@@ -747,19 +749,6 @@ DWORD64 CSegmentDownloader::GetTotalDownloadNow()
 		nDlNow += pSegmentInfo->m_nDlNow + pSegmentInfo->m_nDlBefore;
 	}
 
-	return nDlNow;
-}
-
-DWORD64 CSegmentDownloader::GetTotalDownloadLastMoment()
-{
-	DWORD64 nDlNow = 0;
-	int i, nSize;	
-	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
-	{
-		CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(i);
-		nDlNow += pSegmentInfo->m_nDlLastMoment;
-	}
-	
 	return nDlNow;
 }
 

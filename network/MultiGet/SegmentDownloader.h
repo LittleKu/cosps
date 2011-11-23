@@ -13,6 +13,7 @@
 #include "SegmentInfoMap.h"
 #include <curl/curl.h>
 #include "TimeCost.h"
+#include "ProgressMeter.h"
 
 class CSegmentInfoEx : public CSegmentInfo
 {
@@ -78,7 +79,6 @@ private:
 
 	//Calculate the total download size now
 	DWORD64 GetTotalDownloadNow();
-	DWORD64 GetTotalDownloadLastMoment();
 
 	CSegmentInfoEx* GetSegmentInfo(int nIndex);
 	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
@@ -103,6 +103,7 @@ protected:
 	CSegmentInfoArray* m_pSegmentInfoArray;
 
 	CTimeCost m_progTimer;
+	CProgressMeter m_progressMeter;
 };
 
 #endif // !defined(AFX_SEGMENTDOWNLOADER_H__08611C16_1255_458C_BA90_0293742718F4__INCLUDED_)

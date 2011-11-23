@@ -75,6 +75,8 @@ public:
 	static int GetUniqueID();
 
 	static LRESULT SendMessage(HWND hWnd, UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
+
+	static CString FormatSpeed(DWORD dwBytesPerSeconds);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

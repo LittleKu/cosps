@@ -112,11 +112,11 @@ SOURCE=.\DownloaderMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\HeaderDownloader.cpp
+SOURCE=.\EasyDownloader.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\EasyDownloader.cpp
+SOURCE=.\HeaderDownloader.cpp
 # End Source File
 # Begin Source File
 
@@ -133,6 +133,10 @@ SOURCE=.\MultiGetDlg.cpp
 # Begin Source File
 
 SOURCE=.\Options.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProgressMeter.cpp
 # End Source File
 # Begin Source File
 
@@ -189,11 +193,11 @@ SOURCE=.\DownloaderMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\HeaderDownloader.h
+SOURCE=.\EasyDownloader.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\EasyDownloader.h
+SOURCE=.\HeaderDownloader.h
 # End Source File
 # Begin Source File
 
@@ -206,6 +210,10 @@ SOURCE=.\MultiGetDlg.h
 # Begin Source File
 
 SOURCE=.\Options.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProgressMeter.h
 # End Source File
 # Begin Source File
 

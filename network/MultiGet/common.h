@@ -50,12 +50,12 @@ class CProgressInfo
 {
 public:
 	int m_nTaskID;
-	int m_nSpeed;	//How much bytes per seconds: B/s
+	DWORD	m_nSpeed;	//How much bytes per seconds: B/s
 	DWORD64 dltotal;
 	DWORD64 dlnow;
 	DWORD64 ultotal;
 	DWORD64 ulnow;
-	CProgressInfo() : m_nTaskID(-1), m_nSpeed(-1), dltotal(0), dlnow(0), ultotal(0), ulnow(0)
+	CProgressInfo() : m_nTaskID(-1), m_nSpeed(0), dltotal(0), dlnow(0), ultotal(0), ulnow(0)
 	{
 	}
 };
@@ -112,7 +112,6 @@ public:
 	int		m_nIndex;		//index of the segment
 	DWORD64	m_nDlBefore;	//how many bytes this segment has been download before
 	DWORD64	m_nDlNow;		//how many bytes this segment is downloading now
-	DWORD64	m_nDlLastMoment;//how many bytes this segment is downloading at last udpate moment
 	UINT	m_nRetry;		//how many times this connection retried
 	int		m_nRemotePos;	//Remote file position
 	CSize	m_range;		//range

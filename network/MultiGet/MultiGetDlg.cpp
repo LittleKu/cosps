@@ -290,18 +290,9 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 	
 	pTaskInfo->m_progress = szProgress;
 	m_taskListCtrl.SetItemText(index, 3, szProgress);
-
-	if(pProgressInfo->m_nSpeed >= 0)
-	{
-		CString szSpeed;
-		double dSpeed = (double)(pProgressInfo->m_nSpeed) / 1000;
-
-		szSpeed.Format("%.3f KB/s", dSpeed);
-
-		m_taskListCtrl.SetItemText(index, 5, szSpeed);
-		m_taskListCtrl.InvalidateSubItem(index, 5);
-	}
+	m_taskListCtrl.SetItemText(index, 5, CCommonUtils::FormatSpeed(pProgressInfo->m_nSpeed));
 	m_taskListCtrl.InvalidateSubItem(index, 3);
+	m_taskListCtrl.InvalidateSubItem(index, 5);
 
 	return 1L;
 }
