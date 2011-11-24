@@ -287,12 +287,27 @@ LRESULT CMultiGetDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
 		szProgress.Format("N/A - %I64d of N/A", pProgressInfo->dlnow);
 	}
 
-	
+	CString szTemp;
 	pTaskInfo->m_progress = szProgress;
 	m_taskListCtrl.SetItemText(index, 3, szProgress);
-	m_taskListCtrl.SetItemText(index, 5, CCommonUtils::FormatSpeed(pProgressInfo->m_nSpeed));
+
+	szTemp = CCommonUtils::FormatSpeed(pProgressInfo->m_pProgressMetric->GetCurrentSpeed());
+	m_taskListCtrl.SetItemText(index, 5, szTemp);
+
+	szTemp = CCommonUtils::FormatSpeed(pProgressInfo->m_pProgressMetric->GetAverageSpeed());
+	m_taskListCtrl.SetItemText(index, 6, szTemp);
+
+	szTemp.Format("%d", pProgressInfo->m_pProgressMetric->GetCostTime() / 1000);
+	m_taskListCtrl.SetItemText(index, 7, szTemp);
+
+	szTemp.Format("%d", pProgressInfo->m_pProgressMetric->GetLeftTime() / 1000);
+	m_taskListCtrl.SetItemText(index, 8, szTemp);
+
 	m_taskListCtrl.InvalidateSubItem(index, 3);
 	m_taskListCtrl.InvalidateSubItem(index, 5);
+	m_taskListCtrl.InvalidateSubItem(index, 6);
+	m_taskListCtrl.InvalidateSubItem(index, 7);
+	m_taskListCtrl.InvalidateSubItem(index, 8);
 
 	return 1L;
 }

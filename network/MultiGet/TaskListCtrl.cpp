@@ -27,6 +27,9 @@ static ColumnInfo columns[] =
     { _T("Progress"),			50},
 	{ _T("Status"),				50},
 	{ _T("Speed"),				50},
+	{ _T("Speed-Avg"),			50},
+	{ _T("Cost"),				50},
+	{ _T("Left"),				50},
 	{ _T("Index"),				10}
 };
 
@@ -93,7 +96,14 @@ int CTaskListCtrl::AddRow(const CTaskInfo &taskInfo)
     SetItemText(lvi.iItem, ++iSubItem, taskInfo.m_progress);
 
 	SetItemText(lvi.iItem, ++iSubItem, "Ready");
-
+	
+	//current speed
+	SetItemText(lvi.iItem, ++iSubItem, "");
+	//average speed
+	SetItemText(lvi.iItem, ++iSubItem, "");
+	//cost time
+	SetItemText(lvi.iItem, ++iSubItem, "");
+	//left time
 	SetItemText(lvi.iItem, ++iSubItem, "");
 
 	char buf[10];

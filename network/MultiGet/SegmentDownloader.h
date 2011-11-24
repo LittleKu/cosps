@@ -12,7 +12,6 @@
 #include "Downloader.h"
 #include "SegmentInfoMap.h"
 #include <curl/curl.h>
-#include "TimeCost.h"
 #include "ProgressMeter.h"
 
 class CSegmentInfoEx : public CSegmentInfo
@@ -78,7 +77,7 @@ private:
 	//Helper functions
 
 	//Calculate the total download size now
-	DWORD64 GetTotalDownloadNow();
+	void GetTotalDownloadNow(DWORD64* lpTotalNow, DWORD64* lpCurrentNow = NULL);
 
 	CSegmentInfoEx* GetSegmentInfo(int nIndex);
 	void AddSegmentInfo(CSegmentInfoEx* pSegmentInfo);
@@ -102,7 +101,6 @@ protected:
 	CURLM*	m_curlm;
 	CSegmentInfoArray* m_pSegmentInfoArray;
 
-	CTimeCost m_progTimer;
 	CProgressMeter m_progressMeter;
 };
 

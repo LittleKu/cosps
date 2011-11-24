@@ -38,7 +38,7 @@ int CEasyDownloader::ProgressCallback(void *clientp, double dltotal, double dlno
 //////////////////////////////////////////////////////////////////////
 
 CEasyDownloader::CEasyDownloader(CDownloaderContext* pContext)
- : m_pContext(pContext), m_curl(NULL), m_progTimer(100)
+ : m_pContext(pContext), m_curl(NULL)
 {
 }
 
@@ -77,7 +77,7 @@ int CEasyDownloader::DoDownload()
 	BOOL bRetry;
 	do 
 	{
-		m_progressMeter.Reset();
+		m_progressMeter.Reset(clock(), m_dlParam.m_nFileSize, m_connInfo.m_nDlNow);
 
 		//transfer
 		res = curl_easy_perform(m_curl);
@@ -377,18 +377,13 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 		return 1;
 	}
 
-	m_progTimer.UpdateCurrClock();
-	m_progressMeter.UpdateData(m_connInfo.m_nDlNow, (DWORD)clock());
-
-	if(m_progTimer.IsTimeOut() || m_connInfo.m_nDlNow == (DWORD64)m_dlParam.m_nFileSize)
+	m_progressMeter.UpdateSample(clock(), m_connInfo.m_nDlNow, (DWORD64)dlnow);
+	if(m_progressMeter.IsProgressTimeOut() || m_connInfo.m_nDlNow == (DWORD64)m_dlParam.m_nFileSize)
 	{
-		//Reset timer ASAP for faster update
-		m_progTimer.Reset();
-
 		//Send progress notification
 		CProgressInfo progressInfo;
 
-		progressInfo.m_nSpeed = m_progressMeter.GetSpeed();
+		progressInfo.m_pProgressMetric = &m_progressMeter;
 		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 		progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
 		//The current downloaded data length is stored in m_dlInfo.m_nDlNow

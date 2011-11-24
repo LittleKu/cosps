@@ -7,6 +7,7 @@
 #include "CommonUtils.h"
 #include "HeaderDownloader.h"
 #include "SegmentDownloader.h"
+#include "TimeCost.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -121,7 +122,7 @@ void CDownloaderMgr::Init(const CDownloadParam& param)
 		BOOL bResult = CCommonUtils::ExtractFileName(m_dlParam.m_szUrl, m_dlParam.m_szSaveToFileName);
 		if(!bResult || m_dlParam.m_szSaveToFileName.GetLength() >= 64 || m_dlParam.m_szSaveToFileName.IsEmpty())
 		{
-			m_dlParam.m_szSaveToFileName = "data";
+			m_dlParam.m_szSaveToFileName = "index.html";
 		}
 	}
 }

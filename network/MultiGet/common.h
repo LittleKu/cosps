@@ -46,16 +46,28 @@ public:
 
 	static DWORD GetAccessPermission(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
 };
+
+class CProgressMetric
+{
+public:
+	CProgressMetric() {}
+	virtual ~CProgressMetric() {}
+	virtual DWORD	GetCurrentSpeed() = 0;
+	virtual DWORD	GetAverageSpeed() = 0;
+	virtual DWORD	GetLeftTime() = 0;
+	virtual	DWORD	GetCostTime() = 0;
+};
+
 class CProgressInfo
 {
 public:
 	int m_nTaskID;
-	DWORD	m_nSpeed;	//How much bytes per seconds: B/s
 	DWORD64 dltotal;
 	DWORD64 dlnow;
 	DWORD64 ultotal;
 	DWORD64 ulnow;
-	CProgressInfo() : m_nTaskID(-1), m_nSpeed(0), dltotal(0), dlnow(0), ultotal(0), ulnow(0)
+	CProgressMetric* m_pProgressMetric;
+	CProgressInfo() : m_nTaskID(-1), m_pProgressMetric(0), dltotal(0), dlnow(0), ultotal(0), ulnow(0)
 	{
 	}
 };

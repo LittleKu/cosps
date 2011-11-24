@@ -190,20 +190,18 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 		pSegmentInfo->m_nDlNow = (DWORD64)dlnow;
 	}
 
-	DWORD64 nDlNow = GetTotalDownloadNow();
+	DWORD64 dwTotalNow, dwCurrentNow;
+	GetTotalDownloadNow(&dwTotalNow, &dwCurrentNow);
 
-	m_progTimer.UpdateCurrClock();
-	m_progressMeter.UpdateData(nDlNow, (DWORD)clock());
-	if(m_progTimer.IsTimeOut() || nDlNow == (DWORD64)m_dlParam.m_nFileSize)
+	m_progressMeter.UpdateSample(clock(), dwTotalNow, dwCurrentNow);
+	if(m_progressMeter.IsProgressTimeOut() || dwTotalNow == (DWORD64)m_dlParam.m_nFileSize)
 	{
-		m_progTimer.Reset();
-
 		//Send progress notification
 		CProgressInfo progressInfo;
-		progressInfo.m_nSpeed = m_progressMeter.GetSpeed();
+		progressInfo.m_pProgressMetric = &m_progressMeter;
 		progressInfo.m_nTaskID = m_dlParam.m_nTaskID;
 		progressInfo.dltotal = (DWORD64)m_dlParam.m_nFileSize;
-		progressInfo.dlnow = (DWORD64)nDlNow;
+		progressInfo.dlnow = (DWORD64)dwTotalNow;
 		progressInfo.ultotal = (DWORD64)ultotal;
 		progressInfo.ulnow = (DWORD64)ulnow;
 		
@@ -224,7 +222,7 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 //////////////////////////////////////////////////////////////////////
 
 CSegmentDownloader::CSegmentDownloader(CDownloaderContext* pContext)
- : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext), m_progTimer(100)
+ : m_curlm(NULL), m_pSegmentInfoArray(NULL), m_pContext(pContext)
 {
 }
 
@@ -248,6 +246,7 @@ int CSegmentDownloader::Start()
 	VerifyTempFolderExist();
 
 	ASSERT(m_pSegmentInfoArray != NULL);
+	DWORD64 dwTotalNow = 0;
 	if(m_pSegmentInfoArray->GetSize() == 0)
 	{
 		StartInitMultiHandle();
@@ -255,7 +254,9 @@ int CSegmentDownloader::Start()
 	else
 	{
 		RestartInitMultiHandle();
+		GetTotalDownloadNow(&dwTotalNow);
 	}
+	m_progressMeter.Reset(clock(), m_dlParam.m_nFileSize, dwTotalNow);
 	
 	return DoDownload();
 }
@@ -739,17 +740,30 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex, int nRetryOperType)
 	return easy_handle;
 }
 
-DWORD64 CSegmentDownloader::GetTotalDownloadNow()
+void CSegmentDownloader::GetTotalDownloadNow(DWORD64* lpTotalNow, DWORD64* lpCurrentNow)
 {	
-	DWORD64 nDlNow = 0;
+	if(lpTotalNow != NULL)
+	{
+		*lpTotalNow = 0;
+	}
+	if(lpCurrentNow != NULL)
+	{
+		*lpCurrentNow = 0;
+	}
+
 	int i, nSize;	
 	for(i = 0, nSize = m_pSegmentInfoArray->GetSize(); i < nSize; i++)
 	{
 		CSegmentInfoEx* pSegmentInfo = GetSegmentInfo(i);
-		nDlNow += pSegmentInfo->m_nDlNow + pSegmentInfo->m_nDlBefore;
+		if(lpTotalNow != NULL)
+		{
+			*lpTotalNow += pSegmentInfo->m_nDlNow + pSegmentInfo->m_nDlBefore;
+		}
+		if(lpCurrentNow != NULL)
+		{
+			*lpCurrentNow += pSegmentInfo->m_nDlNow;
+		}
 	}
-
-	return nDlNow;
 }
 
 void CSegmentDownloader::CloseAllConnections()

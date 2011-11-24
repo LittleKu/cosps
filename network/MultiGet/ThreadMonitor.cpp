@@ -166,6 +166,7 @@ DWORD CThreadMonitor::AddMoniteeWaitForExist(HANDLE handle, CFinalizer* pPostAct
 {
 	DWORD dwResult;
 	
+	//For debug use
 	BOOL bWait = FALSE;
 	do 
 	{
@@ -174,12 +175,20 @@ DWORD CThreadMonitor::AddMoniteeWaitForExist(HANDLE handle, CFinalizer* pPostAct
 		{
 			if(bWait)
 			{
-				AfxTrace("=========================END WAIT=======================\n");
+				CString szLog;
+				szLog.Format("AddMonitee finish hanging now. dwResult = %d, handle = %0x08X, pPostAction = 0x%08X",
+					dwResult, handle, pPostAction);
+				LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
 			}
 			break;
 		}
+
 		bWait = TRUE;
-		AfxTrace("=========================WAIT NOW=======================\n");
+		CString szLog;
+		szLog.Format("AddMonitee start hanging now. dwResult = %d, handle = %0x08X, pPostAction = 0x%08X", 
+			dwResult, handle, pPostAction);
+		LOG4CPLUS_FATAL_STR(THE_LOGGER, (LPCTSTR)szLog)
+
 		::WaitForSingleObject(m_hRemoveEvent, INFINITE);
 	} while (TRUE);
 

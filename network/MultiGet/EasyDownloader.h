@@ -11,7 +11,6 @@
 
 #include <curl/curl.h>
 #include "Downloader.h"
-#include "TimeCost.h"
 #include "ProgressMeter.h"
 
 class CConnectionInfo
@@ -66,7 +65,6 @@ protected:
 	CURL* m_curl;
 	CConnectionInfo m_connInfo;
 	
-	CTimeCost m_progTimer;
 	CProgressMeter m_progressMeter;
 };
 
