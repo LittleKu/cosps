@@ -187,8 +187,29 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 	
 	int nSubItem = pNMListView->iSubItem;
-	AfxTrace("OnColumnClick %d\n", nSubItem);
+
+	//1. Check if there's check box in the header column
+	CRect rcCheckBox;
+	if(!m_HeaderCtrl.GetCheckBoxRect(nSubItem, rcCheckBox))
+	{
+		return FALSE;
+	}
+
+	//2. Check if clicked a check box in header
+	CPoint pt;
+	::GetCursorPos(&pt);
+	ScreenToClient(&pt);
 	
+	HWND hPtInWnd = ::ChildWindowFromPoint(GetSafeHwnd(), pt);
+	if(hPtInWnd && (hPtInWnd == m_HeaderCtrl.GetSafeHwnd()))
+	{
+		if(!rcCheckBox.PtInRect(pt))
+		{
+			return FALSE;
+		}
+    }
+	
+	//3. Clicked check box in header
 	int nCheckedState = GetHeaderCheckedState(nSubItem);
 	
 	// CHECK_LIST_CTRL_NO_IMAGE = no checkbox
@@ -213,7 +234,7 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	return FALSE;
 }
 
-void CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)
+BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)
 {
 	CRect rect;
 	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
@@ -221,6 +242,22 @@ void CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BO
 	CRect boundRect = rect;
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
 
+	BOOL bResult = CTools::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
+	if(bResult)
+	{
+		CRect rcTemp;
+		if(m_HeaderCtrl.GetCheckBoxRect(nSubItem, rcTemp))
+		{
+			ASSERT(rcTemp.Width() == chkboxrect.Width());
+			m_HeaderCtrl.ClientToScreen(&rcTemp);
+			ScreenToClient(&rcTemp);
+
+			chkboxrect.left = rcTemp.left;
+			chkboxrect.right = rcTemp.right;
+		}
+	}
+	return bResult;
+	/*
 	if(boundRect.Height() >= 13)
 	{
 		CTools::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
@@ -237,6 +274,7 @@ void CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BO
 		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
 		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
 	}
+	*/
 }
 void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark)
 {
@@ -254,25 +292,11 @@ void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText
 	BOOL bCenter = str.IsEmpty();
 
 	CRect chkboxrect;
-	CalcCheckBoxRect(nItem, nSubItem, chkboxrect, bCenter);
-	/*
-	CRect boundRect = rect;
-	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
-
-	CRect chkboxrect;
-	chkboxrect = boundRect;
-	chkboxrect.bottom -= 1;
-	chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;	// width = height
-	
-	if(bCenter)
+	if(CalcCheckBoxRect(nItem, nSubItem, chkboxrect, bCenter))
 	{
-		// center the checkbox		
-		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
-		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
+		CTools::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	}
-	*/
 	
-	CTools::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	
 	if (!str.IsEmpty())
 	{
@@ -705,12 +729,15 @@ int CSListCtrl::SwitchCheckedState(int nCheckedState)
 
 BOOL CSListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 {
+	BOOL bResult = FALSE;
 	CString sText = GetItemText(nItem, nSubItem);
 	
 	CRect checkboxRect;
-	CalcCheckBoxRect(nItem, nSubItem, checkboxRect, sText.IsEmpty());
+	if(CalcCheckBoxRect(nItem, nSubItem, checkboxRect, sText.IsEmpty()))
+	{
+		bResult = checkboxRect.PtInRect(pt);
+	}
 
-	BOOL bResult = checkboxRect.PtInRect(pt);
 	AfxTrace("IsPtInSubItemCheckBox: %d\n", bResult);
 	return bResult;
 }

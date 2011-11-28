@@ -22,7 +22,8 @@ static SrcDirColumnInfo srcDirColumns[] =
 {
     { _T("C1"),				SHC_UNCHECKED | (SHC_SORT_ASC << 2),			50   },
     { _T("Directory"),		SHC_NONE_CHECK_BOX | (SHC_SORT_DES << 2),		100  },
-	{ _T(""),				SHC_CHECKED | (SHC_SORT_ASC << 3),			100  }
+	{ _T(""),				SHC_CHECKED | (SHC_SORT_ASC << 2),			100  },
+	{ _T("aaaa"),				SHC_NONE_CHECK_BOX | (SHC_NONE_SORT <<2),			100  }
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ CMyListCtrl::~CMyListCtrl()
 
 BEGIN_MESSAGE_MAP(CMyListCtrl, CSListCtrl)
 	//{{AFX_MSG_MAP(CMyListCtrl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
+	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -80,6 +81,19 @@ void CMyListCtrl::Init()
 		hditem.mask = HDI_IMAGE | HDI_FORMAT;
 		GetHeaderCtrl()->GetItem(i, &hditem);
 		hditem.fmt |=  HDF_IMAGE;
+// 		if(i % 3 == 0)
+// 		{
+// 			hditem.fmt |=  HDF_LEFT;
+// 		}
+// 		else if(i %3 == 1)
+// 		{
+// 			hditem.fmt |= HDF_CENTER;
+// 		}
+// 		else
+// 		{
+// 			hditem.fmt |= HDF_RIGHT;
+// 		}
+		hditem.fmt |= HDF_RIGHT;
 		hditem.iImage = srcDirColumns[i].nType;
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
@@ -90,6 +104,8 @@ void CMyListCtrl::Init()
 		pRowData->m_nC1 = i + 4;
 		pRowData->m_szDir.Format("Hello %d", i);
 		pRowData->m_nC3 = i + 11;
+
+		pRowData->m_szReserved.Format("adcdefd %d", i);
 
 		AddRow(pRowData);
 	}
@@ -116,4 +132,24 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 	SetItemText(nItem, 1, pRowData->m_szDir);
 	
 	SetItemCheckedState(nItem, 2, (pRowData->m_nC3 % 2) + 1, FALSE);
+
+	SetItemText(nItem, 3, pRowData->m_szReserved);
+}
+
+void CMyListCtrl::OnDestroy() 
+{
+	int n = GetItemCount();
+	for (int i = 0; i < n; i++)
+	{
+		CRowData* pRowData = (CRowData*)GetItemData(i);
+		ASSERT(pRowData);
+
+		if(pRowData)
+		{
+			delete pRowData;
+			pRowData = NULL;
+		}
+	}
+
+	CSListCtrl::OnDestroy();	
 }

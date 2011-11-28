@@ -18,11 +18,13 @@ public:
 	int m_nC1;
 	CString m_szDir;
 	int m_nC3;
+	CString m_szReserved;
 	CRowData()
 	{
 		m_nC1 = 0;
 		m_nC3 = 0;
 		m_szDir = "";
+		m_szReserved = "";
 	}
 };
 
@@ -52,7 +54,7 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CMyListCtrl)
-		// NOTE - the ClassWizard will add and remove member functions here.
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

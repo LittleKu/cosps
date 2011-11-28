@@ -25,6 +25,7 @@ CSHeaderCtrl::CSHeaderCtrl()
 	m_rgbText         = m_crBtnText;
 
 	m_crBorder		  = RGB(127, 157, 185);
+//	m_crBorder		  = RGB(0, 59, 153);
 	
 	m_nFormat         = DT_DEFAULT;
 	m_bDividerLines   = TRUE;
@@ -32,7 +33,7 @@ CSHeaderCtrl::CSHeaderCtrl()
 	m_sizeImage.cx    = 0;
 	m_sizeImage.cy    = 0;
 	
-	m_nHeight         = 30; //-1 means use the default height
+	m_nHeight         = -1; //-1 means use the default height
 }
 
 CSHeaderCtrl::~CSHeaderCtrl()
@@ -214,8 +215,8 @@ void CSHeaderCtrl::DrawCtrl(CDC* pDC)
 		iWidth += hditem.cxy;
 	}
 	
-	//Draw Border: TODO
-	pDC->FillSolidRect(rectClient.left, rectClient.bottom, rectClient.Width(), -1, m_crBorder);
+	//Draw Border: bottom only
+	pDC->FillSolidRect(rectClient.left, rectClient.bottom, rectClient.Width(), -1, m_crBorder);	
 	
 	pDC->SetBkColor(oldBkColor);
 	pDC->SelectObject(pOldFont);
@@ -243,20 +244,35 @@ void CSHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 	//1. Draw CheckBox
 	iWidth = DrawCheckBox(pDC, rect, lphdi);
 	rect.left += (iWidth != 0) ? iWidth + m_nSpace : 0;
-	
+	//int r = rect.right;
+
+	int nSortImage = ((lphdi->iImage >> 2) & 3);
+	CImageList* pImageList = GetImageList();
+	BOOL bHasSortImage = (nSortImage != SHC_NONE_SORT && pImageList != NULL);
+	//Reserve the space for sort image
+	if(bHasSortImage)
+	{
+		rect.right -= (m_sizeImage.cx + m_nSpace);
+	}
+
 	//2. Draw Text
 	iWidth = DrawText(pDC, rect, lphdi);
 	rect.left += (iWidth != 0) ? iWidth + m_nSpace : 0;
 
-	//3. Draw Sort image
-	iWidth = DrawSortImage(pDC, rect, lphdi);
-	rect.left += (iWidth != 0) ? iWidth + m_nSpace : 0;
+	if(bHasSortImage)
+	{
+		rect.right += (m_sizeImage.cx + m_nSpace);
+
+		//3. Draw Sort image
+		iWidth = DrawSortImage(pDC, rect, lphdi);
+		rect.left += (iWidth != 0) ? iWidth + m_nSpace : 0;
+	}
 }
 
 int  CSHeaderCtrl::DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 {
 	int iWidth = 0;
-
+	/*
 	if (rect.Width() > 0)
 	{
 		int nCheckBox = (lphdi->iImage & 3);
@@ -266,12 +282,22 @@ int  CSHeaderCtrl::DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 			BOOL bCenter = (lstrlen(lphdi->pszText) == 0);
 			
 			CRect chkboxrect;
-			CTools::CalcCheckBoxRect(rect, chkboxrect, bCenter);
-			CTools::DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
-			iWidth = chkboxrect.right - rect.left;
+			if(CTools::CalcCheckBoxRect(rect, chkboxrect, bCenter))
+			{
+				CTools::DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
+				iWidth = chkboxrect.right - rect.left;
+			}
 		}
 		
 	}
+	*/
+	CRect chkboxRect;
+	if(GetCheckBoxRect(rect, lphdi, chkboxRect))
+	{
+		CTools::DrawCheckBox(pDC, &chkboxRect, lphdi->iImage == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
+		iWidth = chkboxRect.right - rect.left;
+	}
+	
 	return iWidth;
 }
 
@@ -320,9 +346,9 @@ int CSHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 		if (nFormat == DT_DEFAULT)
 		{
 			// default to whatever alignment the column is set to
-			if (lphdi->fmt & LVCFMT_CENTER)
+			if (lphdi->fmt & HDF_CENTER)
 				nFormat = DT_CENTER;
-			else if (lphdi->fmt & LVCFMT_RIGHT)
+			else if (lphdi->fmt & HDF_RIGHT)
 				nFormat = DT_RIGHT;
 			else
 				nFormat = DT_LEFT;
@@ -334,7 +360,7 @@ int CSHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 		pDC->SetBkMode(nOldBkMode);
 	}
 	
-	size.cx = rect.Width() > size.cx ? size.cx : rect.Width();
+	size.cx = rect.Width() > (size.cx) ? size.cx : rect.Width();
 	
 	return size.cx > 0 ? size.cx : 0;
 }
@@ -348,4 +374,40 @@ void CSHeaderCtrl::SetHeight(int nHeight)
 int  CSHeaderCtrl::GetHeight() 
 { 
 	return m_nHeight; 
+}
+
+BOOL CSHeaderCtrl::GetCheckBoxRect(int nSubItem, CRect& chkboxRect)
+{
+	TCHAR szText[FLATHEADER_TEXT_MAX];
+	
+	HDITEM hditem;
+	hditem.mask = HDI_FORMAT|HDI_TEXT|HDI_IMAGE;
+	hditem.pszText = szText;
+	hditem.cchTextMax = sizeof(szText);
+	VERIFY(GetItem(nSubItem, &hditem));
+
+	CRect rectItem;
+	VERIFY(GetItemRect(nSubItem, rectItem));
+	rectItem.DeflateRect(m_nSpace, 0);
+
+	return GetCheckBoxRect(rectItem, &hditem, chkboxRect);
+}
+
+BOOL CSHeaderCtrl::GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect& chkboxRect)
+{
+	int nCheckBox = (lphdi->iImage & 3);
+	//None CheckBox
+	if(nCheckBox == SHC_NONE_CHECK_BOX)
+	{
+		return FALSE;
+	}
+	
+	if(rectItem.Width() <= 0)
+	{
+		return FALSE;
+	}
+	
+	BOOL bResult = CTools::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
+	
+	return bResult;
 }

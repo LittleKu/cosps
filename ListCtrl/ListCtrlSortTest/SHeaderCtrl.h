@@ -27,7 +27,7 @@ class CSHeaderCtrl : public CHeaderCtrl
 // Construction
 public:
 	CSHeaderCtrl();
-
+	virtual ~CSHeaderCtrl();
 // Attributes
 public:
 	COLORREF m_rgbText;
@@ -48,7 +48,7 @@ public:
 public:
 	void SetHeight(int nHeight);
 	int  GetHeight();
-	void CalcCheckBoxRect(int nSubItem, CRect& checkboxRect, BOOL bCenter = FALSE, int h = 13);
+	BOOL GetCheckBoxRect(int nSubItem, CRect& chkboxRect);
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSHeaderCtrl)
@@ -56,13 +56,12 @@ public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT);
 	virtual void DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi);
 	// Implementation
-public:
-	virtual ~CSHeaderCtrl();
+private:
 	void DrawCtrl  (CDC* pDC);
 	int  DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi);
 	int  DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi);
 	int  DrawText  (CDC* pDC, CRect rect, LPHDITEM lphdi);
-
+	BOOL GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect& chkboxRect);
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CSHeaderCtrl)

@@ -27,6 +27,7 @@ CTools::~CTools()
 
 void CTools::DrawCheckBox(CDC* pDC, LPCRECT lpcRect, BOOL bDrawMark, COLORREF crBkg, COLORREF crBorder, COLORREF crMark)
 {
+	ASSERT( (lpcRect->right - lpcRect->left >= 13) && (lpcRect->bottom - lpcRect->top >= 13));
 	//Backup BkColor
 	COLORREF oldBkColor = pDC->GetBkColor();
 	

@@ -12,13 +12,15 @@ Class1=CListCtrlSortTestApp
 Class2=CListCtrlSortTestDlg
 Class3=CAboutDlg
 
-ResourceCount=3
+ResourceCount=5
 Resource1=IDD_ABOUTBOX
 Resource2=IDR_MAINFRAME
 Class5=CSListCtrl
 Class6=CMyListCtrl
 Class4=CSHeaderCtrl
 Resource3=IDD_LISTCTRLSORTTEST_DIALOG
+Resource4=IDD_ABOUTBOX (English (U.S.))
+Resource5=IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))
 
 [CLS:CListCtrlSortTestApp]
 Type=0
@@ -78,6 +80,24 @@ VirtualFilter=FWC
 Type=0
 HeaderFile=MyListCtrl.h
 ImplementationFile=MyListCtrl.cpp
-BaseClass=CListCtrl
+BaseClass=CSListCtrl
 Filter=W
+VirtualFilter=FWC
+
+[DLG:IDD_ABOUTBOX (English (U.S.))]
+Type=1
+Class=?
+ControlCount=4
+Control1=IDC_STATIC,static,1342177283
+Control2=IDC_STATIC,static,1342308480
+Control3=IDC_STATIC,static,1342308352
+Control4=IDOK,button,1342373889
+
+[DLG:IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=3
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_LIST_MAIN,SysListView32,1350631425
 
