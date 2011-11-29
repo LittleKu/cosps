@@ -6,6 +6,7 @@
 #include "MemDC.h"
 #include "Tools.h"
 #include "gtb.h"
+#include "SortSupport.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

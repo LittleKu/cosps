@@ -36,7 +36,7 @@ CSListCtrl::CSListCtrl()
 	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
 
 	m_comparator = NULL;
-	m_pSortable = new CSortable(this);
+	m_pSortable = new CSorter(this);
 }
 
 CSListCtrl::~CSListCtrl()

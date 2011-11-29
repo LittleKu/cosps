@@ -17,10 +17,6 @@
 #define SHC_UNCHECKED	            1
 #define SHC_CHECKED	                2
 
-#define SHC_NONE_SORT				0
-#define SHC_SORT_ASC				1
-#define SHC_SORT_DES				2
-
 #define SHCF_IMAGE_STATE_CHECK		0x00000003
 #define SHCF_IMAGE_STATE_SORT		0x0000000C
 #define SHCF_IAMGE_STATE_ALL		0x0000000F

@@ -115,11 +115,7 @@ SOURCE=.\SListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\Sortable.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\SortCondition.cpp
+SOURCE=.\Sorter.cpp
 # End Source File
 # Begin Source File
 
@@ -164,11 +160,7 @@ SOURCE=.\SListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Sortable.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\SortCondition.h
+SOURCE=.\Sorter.h
 # End Source File
 # Begin Source File
 

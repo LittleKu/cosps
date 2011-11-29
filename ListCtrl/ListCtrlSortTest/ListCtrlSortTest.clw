@@ -18,9 +18,9 @@ Resource2=IDR_MAINFRAME
 Class5=CSListCtrl
 Class6=CMyListCtrl
 Class4=CSHeaderCtrl
-Resource3=IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))
-Resource4=IDD_ABOUTBOX (English (U.S.))
-Resource5=IDD_LISTCTRLSORTTEST_DIALOG
+Resource3=IDD_ABOUTBOX (English (U.S.))
+Resource4=IDD_LISTCTRLSORTTEST_DIALOG
+Resource5=IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))
 
 [CLS:CListCtrlSortTestApp]
 Type=0

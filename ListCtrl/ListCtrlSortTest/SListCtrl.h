@@ -8,9 +8,8 @@
 //
 
 #include "SHeaderCtrl.h"
-#include "SortCondition.h"
 #include "SortSupport.h"
-#include "Sortable.h"
+#include "Sorter.h"
 
 extern UINT WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED;
 
