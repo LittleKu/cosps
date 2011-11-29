@@ -17,10 +17,21 @@
 #define SHC_UNCHECKED	            1
 #define SHC_CHECKED	                2
 
-#define SHC_NONE_SORT				3
-#define SHC_SORT_ASC				0
-#define SHC_SORT_DES				1
+#define SHC_NONE_SORT				0
+#define SHC_SORT_ASC				1
+#define SHC_SORT_DES				2
 
+#define SHCF_IMAGE_STATE_CHECK		0x00000003
+#define SHCF_IMAGE_STATE_SORT		0x0000000C
+#define SHCF_IAMGE_STATE_ALL		0x0000000F
+
+#define SHC_INDEX_TO_STATE_CHECK(i)	((i) & SHCF_IMAGE_STATE_CHECK)
+#define SHC_STATE_TO_INDEX_CHECK(i)	((i) & SHCF_IMAGE_STATE_CHECK)
+
+#define SHC_INDEX_TO_STATE_SORT(i)	(((i) << 2) & SHCF_IMAGE_STATE_SORT)
+#define SHC_STATE_TO_INDEX_SORT(i)	(((i) >> 2) & 3)
+
+#define SHC_INDEX_TO_STATE(iCheck, iSort)	(SHC_INDEX_TO_STATE_CHECK(iCheck) | SHC_INDEX_TO_STATE_SORT(iSort))
 
 class CSHeaderCtrl : public CHeaderCtrl
 {
@@ -42,19 +53,29 @@ public:
 	BOOL m_bDividerLines;
 	int  m_nSpace;
 	SIZE m_sizeImage;
-	BOOL m_bTrack;
 	int  m_nHeight;
 // Operations
 public:
 	void SetHeight(int nHeight);
 	int  GetHeight();
 	BOOL GetCheckBoxRect(int nSubItem, CRect& chkboxRect);
+	BOOL IsClickedCheckBox(int nSubItem);
+
+	UINT GetCheckBoxState(int nSubItem);
+	void SetCheckBoxState(int nSubItem, UINT nCheckIndex);
+	UINT GetSortState(int nSubItem);
+	void SetSortState(int nSubItem, UINT nSortIndex);
+	void RemoveAllSortImages();
+
+	UINT GetImageState(int nSubItem, UINT nStateMask);
+	void SetImageState(int nSubItem, UINT nState, UINT nStateMask);
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSHeaderCtrl)
 	//}}AFX_VIRTUAL
 	virtual void DrawItem(LPDRAWITEMSTRUCT);
 	virtual void DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi);
+	virtual int  GetIndexOfImageList(int nSortState);
 	// Implementation
 private:
 	void DrawCtrl  (CDC* pDC);
@@ -62,6 +83,7 @@ private:
 	int  DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi);
 	int  DrawText  (CDC* pDC, CRect rect, LPHDITEM lphdi);
 	BOOL GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect& chkboxRect);
+	BOOL HasSortImage(int iImageState);
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CSHeaderCtrl)

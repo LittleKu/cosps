@@ -34,10 +34,15 @@ CSListCtrl::CSListCtrl()
 	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
 	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
 	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
+
+	m_comparator = NULL;
+	m_pSortable = new CSortable(this);
 }
 
 CSListCtrl::~CSListCtrl()
 {
+	delete m_pSortable;
+	m_pSortable = NULL;
 }
 
 
@@ -47,6 +52,8 @@ BEGIN_MESSAGE_MAP(CSListCtrl, CListCtrl)
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_NOTIFY_REFLECT_EX(NM_CLICK, OnClick)
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
+// 	ON_NOTIFY(HDN_ITEMCLICKA, 0, OnHeaderClick) 
+//	ON_NOTIFY(HDN_ITEMCLICKW, 0, OnHeaderClick)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -185,31 +192,20 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	*pResult = 0;
+
+	AfxTrace("[OnColumnClick]: iItem=%d\n", pNMListView->iSubItem);
 	
 	int nSubItem = pNMListView->iSubItem;
 
-	//1. Check if there's check box in the header column
-	CRect rcCheckBox;
-	if(!m_HeaderCtrl.GetCheckBoxRect(nSubItem, rcCheckBox))
+	//1. Check if clicked a check box in header
+	if(!m_HeaderCtrl.IsClickedCheckBox(nSubItem))
 	{
+		//CTRL key is pressed
+		m_pSortable->SortColumn(nSubItem, ::GetKeyState( VK_CONTROL ) < 0);
 		return FALSE;
 	}
-
-	//2. Check if clicked a check box in header
-	CPoint pt;
-	::GetCursorPos(&pt);
-	ScreenToClient(&pt);
 	
-	HWND hPtInWnd = ::ChildWindowFromPoint(GetSafeHwnd(), pt);
-	if(hPtInWnd && (hPtInWnd == m_HeaderCtrl.GetSafeHwnd()))
-	{
-		if(!rcCheckBox.PtInRect(pt))
-		{
-			return FALSE;
-		}
-    }
-	
-	//3. Clicked check box in header
+	//2. Clicked check box in header
 	int nCheckedState = GetHeaderCheckedState(nSubItem);
 	
 	// CHECK_LIST_CTRL_NO_IMAGE = no checkbox
@@ -232,6 +228,51 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 		UpdateWindow();
 	}
 	return FALSE;
+}
+
+void CSListCtrl::OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	HD_NOTIFY *phdn = (HD_NOTIFY *) pNMHDR;
+	
+	AfxTrace("[OnHeaderClick]: iItem=%d, iButton=%d\n", phdn->iItem, phdn->iButton);
+	
+	*pResult = 1;
+}
+
+int CALLBACK CSListCtrl::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	CSListCtrl* pThis = (CSListCtrl*)lParamSort;
+	return pThis->Compare(lParam1, lParam2);
+}
+
+int CSListCtrl::Compare(LPARAM lParam1, LPARAM lParam2)
+{
+	ASSERT(m_comparator != NULL);
+	
+	CCheckListItemData* pData1 = (CCheckListItemData*)lParam1;
+	CCheckListItemData* pData2 = (CCheckListItemData*)lParam2;
+	return m_comparator->Compare(pData1->dwItemData, pData2->dwItemData);
+}
+
+CComparator* CSListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
+{
+	return NULL;
+}
+void CSListCtrl::Sort(CSortCondition* pSortCondtions, int nCount)
+{
+	m_comparator = CreateComparator(pSortCondtions, nCount);
+	if(m_comparator == NULL)
+	{
+		return;
+	}
+
+	SortItems(CSListCtrl::CompareFunc, (LPARAM)this);
+
+	if(m_comparator != NULL)
+	{
+		delete m_comparator;
+		m_comparator = NULL;
+	}
 }
 
 BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)
@@ -257,24 +298,6 @@ BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BO
 		}
 	}
 	return bResult;
-	/*
-	if(boundRect.Height() >= 13)
-	{
-		CTools::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
-		return;
-	}
-	
-	chkboxrect = boundRect;
-	chkboxrect.bottom -= 1;
-	chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;	// width = height
-	
-	if(bCenter)
-	{
-		// center the checkbox		
-		chkboxrect.left = boundRect.left + boundRect.Width()/2 - chkboxrect.Height()/2 - 1;
-		chkboxrect.right = chkboxrect.left + chkboxrect.Height() + 1;
-	}
-	*/
 }
 void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark)
 {
@@ -581,25 +604,15 @@ BOOL CSListCtrl::GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect)
 int	 CSListCtrl::GetHeaderCheckedState(int nSubItem)
 {
 	ASSERT_COL_COUNT(nSubItem);
-	HDITEM hditem;
 	
-	// use the image index (0 or 1) to indicate the checked status
-	hditem.mask = HDI_IMAGE;
-	m_HeaderCtrl.GetItem(nSubItem, &hditem);
-	return (hditem.iImage & 3);
+	return m_HeaderCtrl.GetCheckBoxState(nSubItem);
 }
 void CSListCtrl::SetHeaderCheckedState(int nSubItem, int nCheckedState)
 {
 	ASSERT_COL_COUNT(nSubItem);
 	ASSERT(nCheckedState >= SHC_NONE_CHECK_BOX && nCheckedState <= SHC_CHECKED);
 	
-	HDITEM hditem;
-	hditem.mask = HDI_IMAGE;
-	m_HeaderCtrl.GetItem(nSubItem, &hditem);
-
-
-	hditem.iImage = ((hditem.iImage & (~3)) | nCheckedState);
-	m_HeaderCtrl.SetItem(nSubItem, &hditem);
+	m_HeaderCtrl.SetCheckBoxState(nSubItem, nCheckedState);
 }
 
 void CSListCtrl::SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader)

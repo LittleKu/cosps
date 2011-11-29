@@ -13,6 +13,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CSHeaderCtrl
 
@@ -244,12 +245,10 @@ void CSHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 	//1. Draw CheckBox
 	iWidth = DrawCheckBox(pDC, rect, lphdi);
 	rect.left += (iWidth != 0) ? iWidth + m_nSpace : 0;
-	//int r = rect.right;
 
-	int nSortImage = ((lphdi->iImage >> 2) & 3);
-	CImageList* pImageList = GetImageList();
-	BOOL bHasSortImage = (nSortImage != SHC_NONE_SORT && pImageList != NULL);
 	//Reserve the space for sort image
+	int r = rect.right;
+	BOOL bHasSortImage = HasSortImage(lphdi->iImage);
 	if(bHasSortImage)
 	{
 		rect.right -= (m_sizeImage.cx + m_nSpace);
@@ -261,7 +260,7 @@ void CSHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 
 	if(bHasSortImage)
 	{
-		rect.right += (m_sizeImage.cx + m_nSpace);
+		rect.right = r;
 
 		//3. Draw Sort image
 		iWidth = DrawSortImage(pDC, rect, lphdi);
@@ -272,29 +271,11 @@ void CSHeaderCtrl::DrawItem(CDC* pDC, CRect rect, LPHDITEM lphdi)
 int  CSHeaderCtrl::DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 {
 	int iWidth = 0;
-	/*
-	if (rect.Width() > 0)
-	{
-		int nCheckBox = (lphdi->iImage & 3);
-		if(nCheckBox != SHC_NONE_CHECK_BOX)
-		{
-			//draw checkbox
-			BOOL bCenter = (lstrlen(lphdi->pszText) == 0);
-			
-			CRect chkboxrect;
-			if(CTools::CalcCheckBoxRect(rect, chkboxrect, bCenter))
-			{
-				CTools::DrawCheckBox(pDC, &chkboxrect, lphdi->iImage == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
-				iWidth = chkboxrect.right - rect.left;
-			}
-		}
-		
-	}
-	*/
+
 	CRect chkboxRect;
 	if(GetCheckBoxRect(rect, lphdi, chkboxRect))
 	{
-		CTools::DrawCheckBox(pDC, &chkboxRect, lphdi->iImage == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
+		CTools::DrawCheckBox(pDC, &chkboxRect, SHC_STATE_TO_INDEX_CHECK(lphdi->iImage) == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
 		iWidth = chkboxRect.right - rect.left;
 	}
 	
@@ -307,9 +288,9 @@ int  CSHeaderCtrl::DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 	
 	if (rect.Width() > 0)
 	{
-		int nSortImage = ((lphdi->iImage >> 2) & 3);
+		UINT nSortIndex = SHC_STATE_TO_INDEX_SORT(lphdi->iImage);
 		CImageList* pImageList = GetImageList();
-		if(nSortImage != SHC_NONE_SORT && pImageList != NULL)
+		if(nSortIndex != SHC_NONE_SORT && pImageList != NULL)
 		{
 			POINT point;
 			point.y = rect.CenterPoint().y - ((m_sizeImage.cy+1) >> 1);
@@ -323,7 +304,7 @@ int  CSHeaderCtrl::DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 			COLORREF rgb = pImageList->GetBkColor();
 			
 			// set image list background color to same as header control
-			pImageList->DrawIndirect(pDC, nSortImage, point, size, CPoint(0, 0));
+			pImageList->DrawIndirect(pDC, GetIndexOfImageList(nSortIndex), point, size, CPoint(0, 0));
 			
 			iWidth = size.cx;
 		}
@@ -337,7 +318,15 @@ int  CSHeaderCtrl::DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 int CSHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 {
 	CSize size = pDC->GetTextExtent(lphdi->pszText);
-	if(rect.Width() > 0 && (lphdi->mask & HDI_TEXT) && (lphdi->fmt & HDF_STRING))
+	//No need to draw text, or no space at all
+	if(size.cx <= 0 || rect.Width() <= 0)
+	{
+		return 0;
+	}
+
+	int iWidth = 0;
+	//have space, and need to draw
+	if((lphdi->mask & HDI_TEXT) && (lphdi->fmt & HDF_STRING))
 	{
 		int nOldBkMode = pDC->SetBkMode(TRANSPARENT);
 		COLORREF crOldTextColor = pDC->SetTextColor(m_rgbText);
@@ -347,11 +336,20 @@ int CSHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 		{
 			// default to whatever alignment the column is set to
 			if (lphdi->fmt & HDF_CENTER)
+			{
 				nFormat = DT_CENTER;
+				iWidth = (rect.Width() + size.cx) / 2;
+			}
 			else if (lphdi->fmt & HDF_RIGHT)
+			{
 				nFormat = DT_RIGHT;
+				iWidth = rect.Width();
+			}
 			else
+			{
 				nFormat = DT_LEFT;
+				iWidth = size.cx;
+			}
 		}
 		
 		pDC->DrawText(lphdi->pszText, -1, rect, nFormat | DT_END_ELLIPSIS | DT_SINGLELINE | DT_VCENTER);
@@ -360,9 +358,13 @@ int CSHeaderCtrl::DrawText(CDC* pDC, CRect rect, LPHDITEM lphdi)
 		pDC->SetBkMode(nOldBkMode);
 	}
 	
-	size.cx = rect.Width() > (size.cx) ? size.cx : rect.Width();
+	//space is not enough, all the rectangle will be occupied
+	if(rect.Width() <= size.cx)
+	{
+		iWidth = rect.Width();
+	}
 	
-	return size.cx > 0 ? size.cx : 0;
+	return iWidth > 0 ? iWidth : 0;
 }
 
 void CSHeaderCtrl::SetHeight(int nHeight)
@@ -395,7 +397,7 @@ BOOL CSHeaderCtrl::GetCheckBoxRect(int nSubItem, CRect& chkboxRect)
 
 BOOL CSHeaderCtrl::GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect& chkboxRect)
 {
-	int nCheckBox = (lphdi->iImage & 3);
+	int nCheckBox = SHC_STATE_TO_INDEX_CHECK(lphdi->iImage);
 	//None CheckBox
 	if(nCheckBox == SHC_NONE_CHECK_BOX)
 	{
@@ -410,4 +412,91 @@ BOOL CSHeaderCtrl::GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect&
 	BOOL bResult = CTools::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
 	
 	return bResult;
+}
+
+BOOL CSHeaderCtrl::IsClickedCheckBox(int nSubItem)
+{
+	//1. Check if there's check box in the header column
+	CRect rcCheckBox;
+	if(!GetCheckBoxRect(nSubItem, rcCheckBox))
+	{
+		return FALSE;
+	}
+	
+	//2. Check if clicked a check box in header
+	CPoint pt;
+	::GetCursorPos(&pt);
+	ScreenToClient(&pt);
+	
+	return rcCheckBox.PtInRect(pt);
+}
+
+UINT CSHeaderCtrl::GetImageState(int nSubItem, UINT nStateMask)
+{
+	HDITEM hditem;
+	hditem.mask = HDI_IMAGE;
+	VERIFY(GetItem(nSubItem, &hditem));
+
+	return (hditem.iImage & nStateMask);
+}
+void  CSHeaderCtrl::SetImageState(int nSubItem, UINT nState, UINT nStateMask)
+{
+	HDITEM hditem;
+	hditem.mask = HDI_IMAGE;
+	VERIFY(GetItem(nSubItem, &hditem));
+	
+	hditem.iImage = ( (hditem.iImage & (~nStateMask)) | (nState & nStateMask) );
+	SetItem(nSubItem, &hditem);
+}
+
+UINT CSHeaderCtrl::GetCheckBoxState(int nSubItem)
+{
+	UINT nState = GetImageState(nSubItem, SHCF_IMAGE_STATE_CHECK);
+	return SHC_STATE_TO_INDEX_CHECK(nState);
+}
+void CSHeaderCtrl::SetCheckBoxState(int nSubItem, UINT nCheckIndex)
+{
+	UINT nState = SHC_INDEX_TO_STATE_CHECK(nCheckIndex);
+	SetImageState(nSubItem, nState, SHCF_IMAGE_STATE_CHECK);
+}
+UINT CSHeaderCtrl::GetSortState(int nSubItem)
+{
+	UINT nState = GetImageState(nSubItem, SHCF_IMAGE_STATE_SORT);
+	return SHC_STATE_TO_INDEX_SORT(nState);
+}
+void CSHeaderCtrl::SetSortState(int nSubItem, UINT nSortIndex)
+{
+	UINT nState = SHC_INDEX_TO_STATE_SORT(nSortIndex);
+	SetImageState(nSubItem, nState, SHCF_IMAGE_STATE_SORT);
+}
+void CSHeaderCtrl::RemoveAllSortImages()
+{
+	int iCount = GetItemCount();
+	for( int i = 0; i < iCount; i++ )
+		SetSortState( i, SHC_NONE_SORT);
+}
+
+BOOL CSHeaderCtrl::HasSortImage(int iImageState)
+{
+	UINT nIndex = SHC_STATE_TO_INDEX_SORT(iImageState);
+	if(nIndex != SHC_SORT_ASC && nIndex != SHC_SORT_DES)
+	{
+		return FALSE;
+	}
+	return GetImageList() != NULL;
+}
+int  CSHeaderCtrl::GetIndexOfImageList(int nSortState)
+{
+	ASSERT(nSortState == SHC_SORT_ASC || nSortState == SHC_SORT_DES);
+
+	int nIndex = 0;
+	if(nSortState == SHC_SORT_ASC)
+	{
+		nIndex = 0;
+	}
+	else if(nSortState == SHC_SORT_DES)
+	{
+		nIndex = 1;
+	}
+	return nIndex;
 }

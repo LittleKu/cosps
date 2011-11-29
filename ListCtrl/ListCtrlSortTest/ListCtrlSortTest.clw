@@ -18,9 +18,9 @@ Resource2=IDR_MAINFRAME
 Class5=CSListCtrl
 Class6=CMyListCtrl
 Class4=CSHeaderCtrl
-Resource3=IDD_LISTCTRLSORTTEST_DIALOG
+Resource3=IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))
 Resource4=IDD_ABOUTBOX (English (U.S.))
-Resource5=IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))
+Resource5=IDD_LISTCTRLSORTTEST_DIALOG
 
 [CLS:CListCtrlSortTestApp]
 Type=0
@@ -86,7 +86,7 @@ VirtualFilter=FWC
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=?
+Class=CAboutDlg
 ControlCount=4
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_STATIC,static,1342308480
@@ -95,7 +95,7 @@ Control4=IDOK,button,1342373889
 
 [DLG:IDD_LISTCTRLSORTTEST_DIALOG (English (U.S.))]
 Type=1
-Class=?
+Class=CListCtrlSortTestDlg
 ControlCount=3
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816

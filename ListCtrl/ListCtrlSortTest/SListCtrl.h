@@ -8,6 +8,9 @@
 //
 
 #include "SHeaderCtrl.h"
+#include "SortCondition.h"
+#include "SortSupport.h"
+#include "Sortable.h"
 
 extern UINT WM_CHECK_LIST_CTRL_CHECKBOX_CLICKED;
 
@@ -53,6 +56,12 @@ public:
 	CImageList      m_ILRowHeight;
 // Operations
 public:
+	virtual void Sort(CSortCondition* pSortCondtions, int nCount);
+
+	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
+	int Compare(LPARAM lParam1, LPARAM lParam2);
+	static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
 	int  InsertItem( int nItem, LPCTSTR lpszItem );
 	int  InsertItem(const LVITEM* pItem, BOOL bVirgin = FALSE);
 	BOOL DeleteItem(int nItem);
@@ -78,6 +87,9 @@ private:
 	void SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader = TRUE);
 	BOOL IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt);
 	inline int SwitchCheckedState(int nCheckedState);
+
+	CSortable* m_pSortable;
+	CComparator* m_comparator;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSListCtrl)
@@ -96,6 +108,7 @@ protected:
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);	
 	afx_msg BOOL OnClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
