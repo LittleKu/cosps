@@ -26,50 +26,16 @@ public:
 		m_szDir = "";
 		m_szReserved = "";
 	}
-	static int Compare(CRowData* p1, CRowData* p2, int nCol, int nDir)
-	{
-		int nResult = 0;
-		switch(nCol)
-		{
-		case 0:
-			{
-				nResult = p1->m_nC1 - p2->m_nC1;
-			}
-			break;
-		case 1:
-			{
-				nResult = p1->m_szDir.Compare(p2->m_szDir);
-			}
-			break;
-		case 2:
-			{
-				nResult = p1->m_nC3 - p2->m_nC3;
-			}
-			break;
-		case 3:
-			{
-				nResult = p1->m_szReserved.Compare(p2->m_szReserved);
-			}
-		default:
-			{
-				AfxTrace("Unexpected column index: %d\n", nCol);
-			}
-			break;
-		}
-
-		if(nDir == 1)
-		{
-			nResult *= (-1);
-		}
-		return nResult;
-	}
 };
 
 class CMyComparator : public CComparator
 {
 public:
 	CMyComparator(CSortCondition* pSortCondtions, int nCount);
+	void Init(CSortCondition* pSortCondtions, int nCount);
 	int Compare(LPARAM lParam1, LPARAM lParam2);
+
+	static int Compare(CRowData* p1, CRowData* p2, int nCol, int nDir);
 private:
 	CSortCondition* m_sortConditions;
 	int m_nCount;
@@ -98,7 +64,8 @@ public:
 	void Init();
 	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
 	virtual ~CMyListCtrl();
-
+private:
+	CMyComparator* m_pComparator;
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CMyListCtrl)

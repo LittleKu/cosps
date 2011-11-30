@@ -16,6 +16,22 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+int CALLBACK CSorter::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	CSorter* pThis = (CSorter*)lParamSort;
+	return pThis->Compare(lParam1, lParam2);
+}
+
+int CSorter::Compare(LPARAM lParam1, LPARAM lParam2)
+{
+	if(m_comparator == NULL)
+	{
+		return 0;
+	}
+
+	return m_comparator->Compare(m_pParent->GetAppData(lParam1), m_pParent->GetAppData(lParam2));
+}
+
 
 CSorter::CSorter(CSListCtrl* pParentListCtrl)
  : m_pParent(pParentListCtrl), m_bSorting(FALSE), m_nSortedColCount(0)
@@ -45,7 +61,7 @@ void CSorter::SortColumn( int iSubItem, BOOL bMultiColumns )
 		if( nIndex < 0 )
 		{
 			m_aSortConditions[m_nSortedColCount].m_nCol = iSubItem;
-			m_aSortConditions[m_nSortedColCount].m_nDir = SHC_SORT_DES;
+			m_aSortConditions[m_nSortedColCount].m_nDir = DEFAULT_SORT_DIR;
 			m_nSortedColCount++;
 		}
 		else
@@ -56,7 +72,7 @@ void CSorter::SortColumn( int iSubItem, BOOL bMultiColumns )
 	}
 	else
 	{
-		int nDir = SHC_SORT_DES;
+		int nDir = DEFAULT_SORT_DIR;
 		if(nIndex >= 0)
 		{
 			nDir = m_aSortConditions[nIndex].m_nDir;
@@ -83,8 +99,8 @@ void CSorter::SortCombinedColumns()
 {
 	ASSERT(m_nSortedColCount > 0);
 
-	//Sort now: TODO
-	m_pParent->Sort(m_aSortConditions, m_nSortedColCount);
+	m_comparator = m_pParent->CreateComparator(m_aSortConditions, m_nSortedColCount);
+	m_pParent->SortItems(CSorter::CompareFunc, (LPARAM)this);
 	
 	for( int nIndex = m_nSortedColCount - 1; nIndex >= 0 ; nIndex-- )
 	{

@@ -29,6 +29,11 @@ static SrcDirColumnInfo srcDirColumns[] =
 
 CMyComparator::CMyComparator(CSortCondition* pSortCondtions, int nCount)
 {
+	Init(pSortCondtions, nCount);
+}
+
+void CMyComparator::Init(CSortCondition* pSortCondtions, int nCount)
+{
 	m_sortConditions = pSortCondtions;
 	m_nCount = nCount;
 }
@@ -42,7 +47,7 @@ int CMyComparator::Compare(LPARAM lParam1, LPARAM lParam2)
 	int nResult = 0;
 	for(int i = 0; i < m_nCount; i++)
 	{
-		nResult = CRowData::Compare(pRowData1, pRowData2, m_sortConditions[i].m_nCol, m_sortConditions[i].m_nDir);
+		nResult = Compare(pRowData1, pRowData2, m_sortConditions[i].m_nCol, m_sortConditions[i].m_nDir);
 		if(nResult != 0)
 		{
 			return nResult;
@@ -50,15 +55,59 @@ int CMyComparator::Compare(LPARAM lParam1, LPARAM lParam2)
 	}
 	return nResult;
 }	
+
+int CMyComparator::Compare(CRowData* p1, CRowData* p2, int nCol, int nDir)
+{
+	int nResult = 0;
+	switch(nCol)
+	{
+	case 0:
+		{
+			nResult = p1->m_nC1 - p2->m_nC1;
+		}
+		break;
+	case 1:
+		{
+			nResult = p1->m_szDir.Compare(p2->m_szDir);
+		}
+		break;
+	case 2:
+		{
+			nResult = p1->m_nC3 - p2->m_nC3;
+		}
+		break;
+	case 3:
+		{
+			nResult = p1->m_szReserved.Compare(p2->m_szReserved);
+		}
+		break;
+	default:
+		{
+			AfxTrace("Unexpected column index: %d\n", nCol);
+		}
+		break;
+	}
+	
+	if(nDir == SHC_SORT_DES && nResult != 0)
+	{
+		nResult *= (-1);
+	}
+	return nResult;
+}
 /////////////////////////////////////////////////////////////////////////////
 // CMyListCtrl
 
-CMyListCtrl::CMyListCtrl()
+CMyListCtrl::CMyListCtrl() : m_pComparator(NULL)
 {
 }
 
 CMyListCtrl::~CMyListCtrl()
 {
+	if(m_pComparator != NULL)
+	{
+		delete m_pComparator;
+		m_pComparator = NULL;
+	}
 }
 
 
@@ -167,7 +216,15 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 
 CComparator* CMyListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
 {
-	return new CMyComparator(pSortCondtions, nCount);
+	if(m_pComparator == NULL)
+	{
+		m_pComparator = new CMyComparator(pSortCondtions, nCount);
+	}
+	else
+	{
+		m_pComparator->Init(pSortCondtions, nCount);
+	}
+	return m_pComparator;
 }
 
 void CMyListCtrl::OnDestroy() 

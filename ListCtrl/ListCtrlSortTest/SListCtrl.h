@@ -55,11 +55,8 @@ public:
 	CImageList      m_ILRowHeight;
 // Operations
 public:
-	virtual void Sort(CSortCondition* pSortCondtions, int nCount);
-
+	virtual LPARAM GetAppData(LPARAM lParam);
 	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
-	int Compare(LPARAM lParam1, LPARAM lParam2);
-	static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	int  InsertItem( int nItem, LPCTSTR lpszItem );
 	int  InsertItem(const LVITEM* pItem, BOOL bVirgin = FALSE);
@@ -88,7 +85,6 @@ private:
 	inline int SwitchCheckedState(int nCheckedState);
 
 	CSortable* m_pSortable;
-	CComparator* m_comparator;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSListCtrl)

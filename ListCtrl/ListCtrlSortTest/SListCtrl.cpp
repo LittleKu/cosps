@@ -35,14 +35,16 @@ CSListCtrl::CSListCtrl()
 	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
 	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
 
-	m_comparator = NULL;
 	m_pSortable = new CSorter(this);
 }
 
 CSListCtrl::~CSListCtrl()
 {
-	delete m_pSortable;
-	m_pSortable = NULL;
+	if(m_pSortable != NULL)
+	{
+		delete m_pSortable;
+		m_pSortable = NULL;
+	}
 }
 
 
@@ -239,40 +241,18 @@ void CSListCtrl::OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 1;
 }
 
-int CALLBACK CSListCtrl::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
-{
-	CSListCtrl* pThis = (CSListCtrl*)lParamSort;
-	return pThis->Compare(lParam1, lParam2);
-}
-
-int CSListCtrl::Compare(LPARAM lParam1, LPARAM lParam2)
-{
-	ASSERT(m_comparator != NULL);
-	
-	CCheckListItemData* pData1 = (CCheckListItemData*)lParam1;
-	CCheckListItemData* pData2 = (CCheckListItemData*)lParam2;
-	return m_comparator->Compare(pData1->dwItemData, pData2->dwItemData);
-}
-
 CComparator* CSListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
 {
 	return NULL;
 }
-void CSListCtrl::Sort(CSortCondition* pSortCondtions, int nCount)
+LPARAM CSListCtrl::GetAppData(LPARAM lParam)
 {
-	m_comparator = CreateComparator(pSortCondtions, nCount);
-	if(m_comparator == NULL)
+	if(lParam == NULL)
 	{
-		return;
+		return NULL;
 	}
-
-	SortItems(CSListCtrl::CompareFunc, (LPARAM)this);
-
-	if(m_comparator != NULL)
-	{
-		delete m_comparator;
-		m_comparator = NULL;
-	}
+	CCheckListItemData* pData = (CCheckListItemData*)lParam;
+	return pData->dwItemData;
 }
 
 BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)

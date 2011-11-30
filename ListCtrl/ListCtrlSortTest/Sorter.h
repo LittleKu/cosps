@@ -24,12 +24,17 @@ private:
 	void SortCombinedColumns();
 	int  FindItemInCombinedSortedList( int );
 	void MoveItemInCombinedSortedListToEnd( int );
+	
+	int Compare(LPARAM lParam1, LPARAM lParam2);
+	static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 private:
 	enum
 	{
-		MAX_COLUMNS = 63
+		MAX_COLUMNS = 63,
+		DEFAULT_SORT_DIR = SHC_SORT_ASC
 	};
 	CSListCtrl* m_pParent;
+	CComparator* m_comparator;
 	BOOL m_bSorting;
 	
 	CSortCondition m_aSortConditions[MAX_COLUMNS];
