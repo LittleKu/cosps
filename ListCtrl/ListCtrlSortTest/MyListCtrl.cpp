@@ -129,6 +129,8 @@ void CMyListCtrl::Init()
 	DWORD dwExtendedStyle = GetExtendedStyle();
 	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
 	SetExtendedStyle(dwExtendedStyle);
+
+	ModifyStyle(0, LVS_SHOWSELALWAYS, 0);
 	
 	//2. Insert Columns
     LVCOLUMN    lvc;

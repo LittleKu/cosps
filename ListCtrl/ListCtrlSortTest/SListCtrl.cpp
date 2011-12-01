@@ -107,37 +107,10 @@ void CSListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		// item's text and background colors. Our return value will tell
 		// Windows to draw the subitem itself, but it will use the new colors
 		// we set here.
-		
-		int nItem = static_cast<int> (pLVCD->nmcd.dwItemSpec);
-		int nSubItem = pLVCD->iSubItem;
-		
-		CCheckListItemData *pListCtrlData = (CCheckListItemData *) pLVCD->nmcd.lItemlParam;
-		ASSERT(pListCtrlData);
-		
-		COLORREF crText  = m_crWindowText;
-		COLORREF crBkgnd = m_crWindow;
-		
-		
-		// store the colors back in the NMLVCUSTOMDRAW struct
-		pLVCD->clrText = crText;
-		pLVCD->clrTextBk = crBkgnd;
-		
 		CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-		CRect rect;
-		GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
+		DrawItem(static_cast<int> (pLVCD->nmcd.dwItemSpec), pLVCD->iSubItem, pLVCD->nmcd.lItemlParam, pDC);
 		
-		if(pListCtrlData->pCheckStates[nSubItem] != SHC_NONE_CHECK_BOX)
-		{
-			BOOL bDrawMark = (pListCtrlData->pCheckStates[nSubItem] == SHC_CHECKED);
-			DrawCheckbox(nItem, nSubItem, pDC, crText, crBkgnd, rect, bDrawMark);
-			
-			*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
-		}
-		else
-		{
-			DrawText(nItem, nSubItem, pDC, crText, crBkgnd, rect);
-			*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
-		}
+		*pResult = CDRF_SKIPDEFAULT;	// We've painted everything.
 	}
 }
 
@@ -175,11 +148,9 @@ BOOL CSListCtrl::OnClick(NMHDR* pNMHDR, LRESULT* pResult)
 		
 		if (nSubItem != -1)
 		{
-			int* pCheckStates = GetCheckedState(nItem);
-			if (pCheckStates[nSubItem] != SHC_NONE_CHECK_BOX && IsPtInSubItemCheckBox(nItem, nSubItem, pNMActivate->ptAction))
+			int nChecked = GetItemCheckedState(nItem, nSubItem);
+			if (nChecked != SHC_NONE_CHECK_BOX && IsPtInSubItemCheckBox(nItem, nSubItem, pNMActivate->ptAction))
 			{
-
-				int nChecked = pCheckStates[nSubItem];
 				nChecked = SwitchCheckedState(nChecked);
 				
 				SetItemCheckedStateByClick(nItem, nSubItem, nChecked, TRUE);
@@ -220,11 +191,9 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 		
 		for (int nItem = 0; nItem < GetItemCount(); nItem++)
 		{
-			int* pCheckStates = GetCheckedState(nItem);
-			if (pCheckStates[nSubItem] != SHC_NONE_CHECK_BOX)
+			if (GetItemCheckedState(nItem, nSubItem) != SHC_NONE_CHECK_BOX)
 			{
-				pCheckStates[nSubItem] = nCheckedState;
-				InvalidateSubItem(nItem, nSubItem);
+				SetItemCheckedState(nItem, nSubItem, nCheckedState, FALSE);
 			}
 		}
 		UpdateWindow();
@@ -254,15 +223,172 @@ LPARAM CSListCtrl::GetAppData(LPARAM lParam)
 	CCheckListItemData* pData = (CCheckListItemData*)lParam;
 	return pData->dwItemData;
 }
-
-BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BOOL bCenter, int h)
+void CSListCtrl::DrawItem(int nItem, int nSubItem, LPARAM lItemlParam, CDC* pDC)
 {
+	CCheckListItemData *pListCtrlData = (CCheckListItemData *)lItemlParam;
+	ASSERT(pListCtrlData);
+	
+	COLORREF crText  = m_crWindowText;
+	COLORREF crBkgnd = m_crWindow;
+	//@TODO store the colors back in the NMLVCUSTOMDRAW struct
+// 	pLVCD->clrText = crText;
+// 	pLVCD->clrTextBk = crBkgnd;
+	
+	CRect rect;
+	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
+
+	CListSubItemData* pSubItemData = GetSubItemData(nItem, nSubItem);
+	ASSERT(pSubItemData);
+
+	BOOL bOld = FALSE;
+	if(bOld)
+	{
+		int nItemCheckedState = GetItemCheckedState(nItem, nSubItem);
+		if(nItemCheckedState != SHC_NONE_CHECK_BOX)
+		{
+			BOOL bDrawMark = (nItemCheckedState == SHC_CHECKED);
+			DrawCheckbox(nItem, nSubItem, pDC, crText, crBkgnd, rect, bDrawMark);
+		}
+		else
+		{
+			DrawText(nItem, nSubItem, pDC, crText, crBkgnd, rect);
+		}
+
+		return;
+	}
+	GetDrawColors(nItem, nSubItem, crText, crBkgnd);
+	pDC->FillSolidRect(&rect, crBkgnd);
+	//1. Draw Check Box
+	if(pSubItemData->m_nCheckState != SHC_NONE_CHECK_BOX)
+	{
+		DrawCheckBox(nItem, nSubItem, pDC);
+	}
+
+	//2. Draw Image
+	if(pSubItemData->m_pListImage != NULL)
+	{
+		DrawImage(nItem, nSubItem, pDC);
+	}
+
+	//3. Draw Text or Progress
+	if(pSubItemData->m_pListPrgsBar != NULL)
+	{
+		DrawProgressBar(nItem, nSubItem, pDC);
+	}
+	else
+	{
+		DrawText(nItem, nSubItem, pDC);
+	}	
+}
+
+void CSListCtrl::DrawCheckBox(int nItem, int nSubItem, CDC *pDC)
+{
+	BOOL bDrawMark = (GetItemCheckedState(nItem, nSubItem) == SHC_CHECKED);
+	
+	CRect chkboxrect;
+	if(CalcCheckBoxRect(nItem, nSubItem, chkboxrect))
+	{
+		CTools::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
+	}
+}
+void CSListCtrl::DrawImage(int nItem, int nSubItem, CDC *pDC)
+{
+	CRect imgRect;
+	
+	if(!CalcImageRect(nItem, nSubItem, imgRect))
+	{
+		return;
+	}
+	
+	CListImage* pListImage = GetSubItemData(nItem, nSubItem)->m_pListImage;
+	ASSERT(pListImage != NULL);
+	
+	pListImage->m_imageList->DrawIndirect(pDC, pListImage->m_nImage, imgRect.TopLeft(), imgRect.Size(), CPoint(0, 0));
+}
+void CSListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC)
+{
+	CString str = GetItemText(nItem, nSubItem);
+	if(str.IsEmpty())
+	{
+		return;
+	}
+
+	CRect rcText;
+	if(!CalcTextRect(nItem, nSubItem, rcText))
+	{
+		return;
+	}
+
+	COLORREF crText = m_crWindowText, crBkgnd = m_crWindow;
+	GetDrawColors(nItem, nSubItem, crText, crBkgnd);
+// 	pDC->FillSolidRect(&rcText, crBkgnd);
+	
+	// get text justification
+	HDITEM hditem;
+	hditem.mask = HDI_FORMAT;
+	m_HeaderCtrl.GetItem(nSubItem, &hditem);
+	int nFmt = hditem.fmt & HDF_JUSTIFYMASK;
+	UINT nFormat = DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS;
+	if (nFmt & HDF_CENTER)
+		nFormat |= DT_CENTER;
+	else if (nFmt & HDF_RIGHT)
+		nFormat |= DT_RIGHT;
+	else
+		nFormat |= DT_LEFT;
+	
+	int nOldDC = pDC->SaveDC();
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+	pDC->SetBkColor(crBkgnd);
+
+	pDC->DrawText(str, &rcText, nFormat);
+
+	pDC->RestoreDC(nOldDC);
+}
+void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
+{
+	CRect rcPrgs;
+	if(!CalcProgressRect(nItem, nSubItem, rcPrgs))
+	{
+		return;
+	}
+
+	//1. Draw Border
+	pDC->Draw3dRect(&rcPrgs, RGB(0, 0, 0), RGB(0, 0, 0));
+	rcPrgs.DeflateRect(1, 1);
+
+	//2. Draw whole progress bar
+	pDC->FillSolidRect(rcPrgs, RGB(255, 240, 240));
+
+
+	//3. Draw the actual progress
+	CListProgressBar* pListPrgsBar = GetSubItemData(nItem, nSubItem)->m_pListPrgsBar;
+	ASSERT(pListPrgsBar != NULL && pListPrgsBar->m_maxvalue > 0);
+	ASSERT(pListPrgsBar->m_value <= pListPrgsBar->m_maxvalue);
+
+	int w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_value, pListPrgsBar->m_maxvalue);
+	rcPrgs.right = rcPrgs.left + w;
+
+	pDC->FillSolidRect(rcPrgs, RGB(46, 211, 49));
+
+	//4. Draw Progress Text
+	DrawText(nItem, nSubItem, pDC);
+}
+BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect)
+{
+	int nCheckedState = GetItemCheckedState(nItem, nSubItem);
+	if(nCheckedState != SHC_CHECKED && nCheckedState != SHC_UNCHECKED)
+	{
+		return FALSE;
+	}
 	CRect rect;
 	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
 
 	CRect boundRect = rect;
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
 
+	BOOL bCenter = GetItemText(nItem, nSubItem).IsEmpty();
 	BOOL bResult = CTools::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
 	if(bResult)
 	{
@@ -279,6 +405,98 @@ BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect, BO
 	}
 	return bResult;
 }
+
+BOOL CSListCtrl::CalcImageRect(int nItem, int nSubItem, CRect& rcImage)
+{
+	CListSubItemData* pSubItemData = GetSubItemData(nItem, nSubItem);
+	ASSERT(pSubItemData);
+
+	if(pSubItemData->m_pListImage == NULL || pSubItemData->m_pListImage->m_imageList == NULL
+		|| pSubItemData->m_pListImage->m_nImage < 0)
+	{
+		return FALSE;
+	}
+
+	CRect rcItem, rcCheckBox;
+	
+	//1. Get SubItem Rect
+	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rcItem);
+
+	//2. Check if there's a check box in the left side
+	if(CalcCheckBoxRect(nItem, nSubItem, rcCheckBox))
+	{
+		rcItem.left = rcCheckBox.right + m_HeaderCtrl.m_nSpace;
+	}
+	//no more space
+	if(rcItem.Width() <= 0)
+	{
+		return FALSE;
+	}
+
+	SIZE sizeImage;
+	sizeImage.cx = sizeImage.cy = 0;
+
+	IMAGEINFO info;
+	if(pSubItemData->m_pListImage->m_imageList->GetImageInfo(pSubItemData->m_pListImage->m_nImage, &info))
+	{
+		//if imageOnly we only return the rect of the image.
+		//otherwise we also include area under and below image.
+		sizeImage.cx = info.rcImage.right - info.rcImage.left;
+		sizeImage.cy = info.rcImage.bottom - info.rcImage.top;
+
+		//Real size
+		SIZE size;
+		size.cx = rcItem.Width() < sizeImage.cx ? rcItem.Width() : sizeImage.cx;
+		size.cy = 1+rcItem.Height() < sizeImage.cy ? rcItem.Height() : sizeImage.cy;
+
+		POINT point;
+		int nDiffHalf = (rcItem.Height() - sizeImage.cy ) / 2;
+		point.y = (nDiffHalf > 0) ? rcItem.top + nDiffHalf : rcItem.top;
+		point.x = rcItem.left;
+
+		rcImage = CRect(point, size);
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CSListCtrl::CalcTextRect(int nItem, int nSubItem, CRect& rcText)
+{
+	GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rcText);
+	
+	CRect rcTemp;
+	//Move if image
+	if( CalcImageRect(nItem, nSubItem, rcTemp) )
+	{
+		rcText.left = rcTemp.right;
+	}
+	else if( CalcCheckBoxRect(nItem, nSubItem, rcTemp) )
+	{
+		rcText.left = rcTemp.right;
+	}
+
+	rcText.DeflateRect(m_HeaderCtrl.m_nSpace, 0);
+	if(rcText.IsRectEmpty())
+	{
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+BOOL CSListCtrl::CalcProgressRect(int nItem, int nSubItem, CRect& rcProgress)
+{
+	CListSubItemData* pSubItemData = GetSubItemData(nItem, nSubItem);
+	ASSERT(pSubItemData);
+	
+	if(pSubItemData->m_pListPrgsBar == NULL || pSubItemData->m_pListPrgsBar->m_maxvalue <= 0)
+	{
+		return FALSE;
+	}
+
+	return CalcTextRect(nItem, nSubItem, rcProgress);
+}
 void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText, COLORREF crBkgnd, CRect &rect, BOOL bDrawMark)
 {
 	ASSERT(pDC);
@@ -290,17 +508,14 @@ void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText
 	
 	GetDrawColors(nItem, nSubItem, crText, crBkgnd);
 	pDC->FillSolidRect(&rect, crBkgnd);
-	
-	CString str = GetItemText(nItem, nSubItem);
-	BOOL bCenter = str.IsEmpty();
 
 	CRect chkboxrect;
-	if(CalcCheckBoxRect(nItem, nSubItem, chkboxrect, bCenter))
+	if(CalcCheckBoxRect(nItem, nSubItem, chkboxrect))
 	{
 		CTools::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	}
 	
-	
+	CString str = GetItemText(nItem, nSubItem);
 	if (!str.IsEmpty())
 	{
 		pDC->SetBkMode(TRANSPARENT);
@@ -317,6 +532,7 @@ void CSListCtrl::DrawCheckbox(int nItem, int nSubItem, CDC *pDC, COLORREF crText
 		
 		pDC->DrawText(str, &textrect, nFormat);
 	}
+	
 }
 
 
@@ -440,12 +656,16 @@ int  CSListCtrl::InsertItem( int nItem, LPCTSTR lpszItem )
 	DWORD dwItemData = CListCtrl::GetItemData(index);
 
 	CCheckListItemData *pListCtrlData = new CCheckListItemData;
-	pListCtrlData->pCheckStates = new int[GetHeaderCtrl()->GetItemCount()];
-	for(int i = 0; i < GetHeaderCtrl()->GetItemCount(); i++)
-	{
-		pListCtrlData->pCheckStates[i] = SHC_NONE_CHECK_BOX;
-	}
 	pListCtrlData->dwItemData = dwItemData;
+
+	int nColCount = GetHeaderCtrl()->GetItemCount();
+	int i;
+
+	pListCtrlData->m_pSubItemDatas = new CListSubItemData[nColCount];
+	for(i = 0; i < nColCount; i++)
+	{
+		pListCtrlData->m_pSubItemDatas[i].m_nCheckState = SHC_NONE_CHECK_BOX;
+	}
 
 	CListCtrl::SetItemData(index, (DWORD)pListCtrlData);
 	return index;
@@ -468,12 +688,15 @@ int CSListCtrl::InsertItem(const LVITEM* pItem, BOOL bVirgin)
 	}
 	
 	CCheckListItemData *pListCtrlData = new CCheckListItemData;
-	pListCtrlData->pCheckStates = new int[GetHeaderCtrl()->GetItemCount()];
-	for(int i = 0; i < GetHeaderCtrl()->GetItemCount(); i++)
-	{
-		pListCtrlData->pCheckStates[i] = SHC_NONE_CHECK_BOX;
-	}
 	pListCtrlData->dwItemData = pItem->lParam;
+	
+	int nColCount = GetHeaderCtrl()->GetItemCount();
+	int i;
+	pListCtrlData->m_pSubItemDatas = new CListSubItemData[nColCount];
+	for(i = 0; i < nColCount; i++)
+	{
+		pListCtrlData->m_pSubItemDatas[i].m_nCheckState = SHC_NONE_CHECK_BOX;
+	}
 	
 	CListCtrl::SetItemData(index, (DWORD)pListCtrlData);
 	
@@ -599,15 +822,9 @@ void CSListCtrl::SetItemCheckedStateByClick(int nItem, int nSubItem, int nChecke
 {
 	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	ASSERT(nCheckedState >= SHC_NONE_CHECK_BOX && nCheckedState <= SHC_CHECKED);
-	
-	int* pCheckStates = GetCheckedState(nItem);
 
 	//1. Update data: checked state
-	pCheckStates[nSubItem] = nCheckedState;
-	
-	//2. Update window
-	InvalidateSubItem(nItem, nSubItem);
-	UpdateWindow();
+	SetItemCheckedState(nItem, nSubItem, nCheckedState);
 	
 	//3. Update header
 	if(bUpdateHeader)
@@ -641,11 +858,11 @@ void CSListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState,
 {
 	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
 	ASSERT(nCheckedState >= SHC_NONE_CHECK_BOX && nCheckedState <= SHC_CHECKED);
-	
-	int* pCheckStates = GetCheckedState(nItem);
-	
+
 	//1. Update data: checked state
-	pCheckStates[nSubItem] = nCheckedState;
+	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+	pData->m_pSubItemDatas[nSubItem].m_nCheckState = nCheckedState;
 	
 	//2. Update window
 	InvalidateSubItem(nItem, nSubItem);
@@ -657,8 +874,20 @@ void CSListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState,
 int  CSListCtrl::GetItemCheckedState(int nItem, int nSubItem)
 {
 	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
-	int* pCheckStates = GetCheckedState(nItem);
-	return pCheckStates[nSubItem];
+
+	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+
+	return pData->m_pSubItemDatas[nSubItem].m_nCheckState;
+}
+
+CListSubItemData* CSListCtrl::GetSubItemData(int nItem, int nSubItem)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	CCheckListItemData* pData = (CCheckListItemData*)CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+
+	return &(pData->m_pSubItemDatas[nSubItem]);
 }
 
 void CSListCtrl::ValidateCheck()
@@ -699,12 +928,6 @@ int CSListCtrl::CountCheckedItems(int nSubItem)
 	return nCount;
 }
 
-int* CSListCtrl::GetCheckedState(int nItem)
-{
-	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
-	ASSERT(pData && pData->pCheckStates);
-	return pData->pCheckStates;
-}
 int CSListCtrl::SwitchCheckedState(int nCheckedState)
 {
 	ASSERT(nCheckedState == SHC_CHECKED || nCheckedState == SHC_UNCHECKED);
@@ -723,10 +946,9 @@ int CSListCtrl::SwitchCheckedState(int nCheckedState)
 BOOL CSListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 {
 	BOOL bResult = FALSE;
-	CString sText = GetItemText(nItem, nSubItem);
 	
 	CRect checkboxRect;
-	if(CalcCheckBoxRect(nItem, nSubItem, checkboxRect, sText.IsEmpty()))
+	if(CalcCheckBoxRect(nItem, nSubItem, checkboxRect))
 	{
 		bResult = checkboxRect.PtInRect(pt);
 	}
