@@ -142,6 +142,12 @@ public:
 	int  CountCheckedItems(int nSubItem);
 	void ValidateCheck();
 
+	//Image Related functions
+	void SetItemImage(int nItem, int nSubItem, int nImage, CImageList* pImageList = NULL, BOOL bUpdateImmediately = TRUE);
+
+	//Progress Related functions
+	void SetProgress(int nItem, int nSubItem, int nCurrValue, int nMaxValue = -1, BOOL bUpdateImmediately = TRUE);
+
 	void SetRowHeight(int nRowHeight);
 	int  GetRowHeight();
 private:

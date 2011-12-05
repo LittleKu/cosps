@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "SListCtrl.h"
 #include "Tools.h"
+#include "MemDC.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -303,7 +304,13 @@ void CSListCtrl::DrawImage(int nItem, int nSubItem, CDC *pDC)
 	CListImage* pListImage = GetSubItemData(nItem, nSubItem)->m_pListImage;
 	ASSERT(pListImage != NULL);
 	
+	// save image list background color
+	COLORREF rgb = pListImage->m_imageList->GetBkColor();
+	
+	// set image list background color
+	//pListImage->m_imageList->SetBkColor(RGB(0, 128, 256));
 	pListImage->m_imageList->DrawIndirect(pDC, pListImage->m_nImage, imgRect.TopLeft(), imgRect.Size(), CPoint(0, 0));
+	//pListImage->m_imageList->SetBkColor(rgb);
 }
 void CSListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC)
 {
@@ -353,6 +360,7 @@ void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 	{
 		return;
 	}
+	rcPrgs.DeflateRect(0, 1);
 
 	//1. Draw Border
 	pDC->Draw3dRect(&rcPrgs, RGB(0, 0, 0), RGB(0, 0, 0));
@@ -955,6 +963,60 @@ BOOL CSListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 
 	AfxTrace("IsPtInSubItemCheckBox: %d\n", bResult);
 	return bResult;
+}
+
+//Image Related functions
+void CSListCtrl::SetItemImage(int nItem, int nSubItem, int nImage, CImageList* pImageList, BOOL bUpdateImmediately)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	
+	//1. Update data: checked state
+	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+
+	if(pData->m_pSubItemDatas[nSubItem].m_pListImage == NULL)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListImage = new CListImage();
+	}
+	pData->m_pSubItemDatas[nSubItem].m_pListImage->m_nImage = nImage;
+	if(pImageList)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListImage->m_imageList = pImageList;
+	}
+	
+	//2. Update window
+	InvalidateSubItem(nItem, nSubItem);
+	if(bUpdateImmediately)
+	{
+		UpdateWindow();
+	}
+}
+
+//Progress Related functions
+void CSListCtrl::SetProgress(int nItem, int nSubItem, int nCurrValue, int nMaxValue, BOOL bUpdateImmediately)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	
+	//1. Update data: checked state
+	CCheckListItemData *pData = (CCheckListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+	
+	if(pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar == NULL)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar = new CListProgressBar();
+	}
+	pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_value = nCurrValue;
+	if(nMaxValue > 0)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_maxvalue = nMaxValue;
+	}
+	
+	//2. Update window
+	InvalidateSubItem(nItem, nSubItem);
+	if(bUpdateImmediately)
+	{
+		UpdateWindow();
+	}
 }
 
 void CSListCtrl::SetRowHeight(int nRowHeight)

@@ -190,6 +190,14 @@ SOURCE=.\res\ListCtrlSortTest.ico
 
 SOURCE=.\res\ListCtrlSortTest.rc2
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\TaskCategory.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\TaskStatus.bmp
+# End Source File
 # End Group
 # End Target
 # End Project

@@ -175,6 +175,8 @@ END
 //
 
 IDB_HEAD_SORT           BITMAP  DISCARDABLE     "res\\HeadSort.bmp"
+IDB_TASK_STATUS         BITMAP  DISCARDABLE     "res\\TaskStatus.bmp"
+IDB_TASK_CATEGORY       BITMAP  DISCARDABLE     "res\\TaskCategory.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

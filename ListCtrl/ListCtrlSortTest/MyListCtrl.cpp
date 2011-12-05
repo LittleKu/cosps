@@ -23,7 +23,8 @@ static SrcDirColumnInfo srcDirColumns[] =
     { _T("C1 long name"),	SHC_INDEX_TO_STATE(SHC_UNCHECKED, SHC_SORT_ASC),			50   },
     { _T("Directory"),		SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_SORT_DES),		100  },
 	{ _T(""),				SHC_INDEX_TO_STATE(SHC_CHECKED, SHC_SORT_ASC),				100  },
-	{ _T("aaaa"),			SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),		100  }
+	{ _T("aaaa"),			SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),		100  },
+	{ _T("bbbb"),			SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),		100  }
 };
 
 
@@ -125,6 +126,20 @@ void CMyListCtrl::Init()
 	m_ILSortImages.Create(IDB_HEAD_SORT, 16, 1, RGB(255, 0, 255));
 	GetHeaderCtrl()->SetImageList(&m_ILSortImages);
 
+	m_ILTaskStatus.Create(16, 16, ILC_COLOR24 | ILC_MASK, 0, 1);
+	{
+		CBitmap bmp;
+		bmp.LoadBitmap(IDB_TASK_STATUS);
+		m_ILTaskStatus.Add(&bmp, RGB(255, 0, 255));
+	}
+  
+	m_ILTaskCategory.Create(16, 16, ILC_COLOR24 | ILC_MASK, 0, 1);
+	{
+		CBitmap bmp;
+		bmp.LoadBitmap(IDB_TASK_CATEGORY);
+		m_ILTaskCategory.Add(&bmp, RGB(255, 0, 255));
+	}
+
 	//1. Set Extended Style
 	DWORD dwExtendedStyle = GetExtendedStyle();
 	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
@@ -168,7 +183,7 @@ void CMyListCtrl::Init()
 // 		{
 // 			hditem.fmt |= HDF_RIGHT;
 // 		}
-		hditem.fmt |= HDF_RIGHT;
+		hditem.fmt |= HDF_CENTER;
 		hditem.iImage = srcDirColumns[i].nType;
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
@@ -176,7 +191,7 @@ void CMyListCtrl::Init()
 	for(i = 0; i < 10; i++)
 	{
 		CRowData* pRowData = new CRowData();
-		pRowData->m_nC1 = (i + 4) % 2 + 1;
+		pRowData->m_nC1 = /*(i + 4) % 2 + 1*/i + 4;
 		pRowData->m_szDir.Format("Hello %d", i % 4);
 		pRowData->m_nC3 = (i + 11) % 2 + 1;
 
@@ -208,12 +223,19 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 
 	SetItemText(nItem, 0, szTemp);
 	SetItemCheckedState(nItem, 0, (pRowData->m_nC1 % 2) + 1, FALSE);
+	SetItemImage(nItem, 0, (pRowData->m_nC1 % 12), &m_ILTaskStatus, FALSE);
+//	SetProgress(nItem, 0, pRowData->m_nC1 + 60, 100, FALSE);
+	SetProgress(nItem, 0, 100, 100, FALSE);
 	
 	SetItemText(nItem, 1, pRowData->m_szDir);
 	
 	SetItemCheckedState(nItem, 2, (pRowData->m_nC3 % 2) + 1, FALSE);
+	SetItemImage(nItem, 2, (pRowData->m_nC3 % 4), &m_ILTaskCategory, FALSE);
+	SetProgress(nItem, 2, pRowData->m_nC3 * 30, 100, FALSE);
 
 	SetItemText(nItem, 3, pRowData->m_szReserved);
+
+	SetItemImage(nItem, 4, (pRowData->m_nC1 % 12), &m_ILTaskStatus, FALSE);
 }
 
 CComparator* CMyListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)

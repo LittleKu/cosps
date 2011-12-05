@@ -50,6 +50,8 @@ public:
 // Attributes
 public:
 	CImageList m_ILSortImages;
+	CImageList m_ILTaskStatus;
+	CImageList m_ILTaskCategory;
 // Operations
 public:
 
