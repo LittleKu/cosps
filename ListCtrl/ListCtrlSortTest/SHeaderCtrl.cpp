@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "SHeaderCtrl.h"
 #include "MemDC.h"
-#include "Tools.h"
 #include "gtb.h"
 #include "SortSupport.h"
 
@@ -276,7 +275,7 @@ int  CSHeaderCtrl::DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 	CRect chkboxRect;
 	if(GetCheckBoxRect(rect, lphdi, chkboxRect))
 	{
-		CTools::DrawCheckBox(pDC, &chkboxRect, SHC_STATE_TO_INDEX_CHECK(lphdi->iImage) == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
+		gtb::DrawCheckBox(pDC, &chkboxRect, SHC_STATE_TO_INDEX_CHECK(lphdi->iImage) == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
 		iWidth = chkboxRect.right - rect.left;
 	}
 	
@@ -410,7 +409,7 @@ BOOL CSHeaderCtrl::GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect&
 		return FALSE;
 	}
 	
-	BOOL bResult = CTools::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
+	BOOL bResult = gtb::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
 	
 	return bResult;
 }

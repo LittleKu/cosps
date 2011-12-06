@@ -123,6 +123,8 @@ END_MESSAGE_MAP()
 
 void CMyListCtrl::Init()
 {
+	SetRowHeight(19);
+
 	m_ILSortImages.Create(IDB_HEAD_SORT, 16, 1, RGB(255, 0, 255));
 	GetHeaderCtrl()->SetImageList(&m_ILSortImages);
 
@@ -142,7 +144,7 @@ void CMyListCtrl::Init()
 
 	//1. Set Extended Style
 	DWORD dwExtendedStyle = GetExtendedStyle();
-	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT);
+	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	SetExtendedStyle(dwExtendedStyle);
 
 	ModifyStyle(0, LVS_SHOWSELALWAYS, 0);
@@ -183,7 +185,7 @@ void CMyListCtrl::Init()
 // 		{
 // 			hditem.fmt |= HDF_RIGHT;
 // 		}
-		hditem.fmt |= HDF_CENTER;
+		hditem.fmt |= HDF_RIGHT;
 		hditem.iImage = srcDirColumns[i].nType;
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
@@ -222,20 +224,20 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 	szTemp.Format("abc %d", pRowData->m_nC1);
 
 	SetItemText(nItem, 0, szTemp);
-	SetItemCheckedState(nItem, 0, (pRowData->m_nC1 % 2) + 1, FALSE);
-	SetItemImage(nItem, 0, (pRowData->m_nC1 % 12), &m_ILTaskStatus, FALSE);
+	SetItemCheckedState(nItem, 0, (pRowData->m_nC1 % 2) + 1);
+	SetItemImage(nItem, 0, (pRowData->m_nC1 % 5), &m_ILTaskStatus);
 //	SetProgress(nItem, 0, pRowData->m_nC1 + 60, 100, FALSE);
-	SetProgress(nItem, 0, 100, 100, FALSE);
+	SetItemProgress(nItem, 0, (pRowData->m_nC1 * 20) % 101, 100);
 	
 	SetItemText(nItem, 1, pRowData->m_szDir);
 	
-	SetItemCheckedState(nItem, 2, (pRowData->m_nC3 % 2) + 1, FALSE);
-	SetItemImage(nItem, 2, (pRowData->m_nC3 % 4), &m_ILTaskCategory, FALSE);
-	SetProgress(nItem, 2, pRowData->m_nC3 * 30, 100, FALSE);
+	SetItemCheckedState(nItem, 2, (pRowData->m_nC3 % 2) + 1);
+	SetItemImage(nItem, 2, (pRowData->m_nC3 % 4), &m_ILTaskCategory);
+	SetItemProgress(nItem, 2, pRowData->m_nC3 * 30, 100);
 
 	SetItemText(nItem, 3, pRowData->m_szReserved);
 
-	SetItemImage(nItem, 4, (pRowData->m_nC1 % 12), &m_ILTaskStatus, FALSE);
+	SetItemImage(nItem, 4, (pRowData->m_nC1 % 12), &m_ILTaskStatus);
 }
 
 CComparator* CMyListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
