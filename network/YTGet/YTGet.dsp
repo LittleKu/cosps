@@ -92,6 +92,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\AddTaskDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common.cpp
 # End Source File
 # Begin Source File
@@ -169,6 +173,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TaskListComparator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TaskListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -195,6 +203,10 @@ SOURCE=.\YTGetDlg.cpp
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\AddTaskDlg.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\common.h
@@ -278,6 +290,10 @@ SOURCE=.\ThirdParty\SortSupport.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TaskListComparator.h
 # End Source File
 # Begin Source File
 

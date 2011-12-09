@@ -358,7 +358,7 @@ void CSListCtrl::SetItemImage(int nItem, int nSubItem, int nImage, CImageList* p
 	}
 	
 	//2. Update window
-	InvalidateSubItem(nItem, nSubItem);
+	//InvalidateSubItem(nItem, nSubItem);
 }
 
 //Progress Related functions
@@ -381,7 +381,7 @@ void CSListCtrl::SetItemProgress(int nItem, int nSubItem, int nCurrValue, int nM
 	}
 	
 	//2. Update window
-	InvalidateSubItem(nItem, nSubItem);
+	//InvalidateSubItem(nItem, nSubItem);
 }
 
 void CSListCtrl::SetRowHeight(int nRowHeight)
@@ -421,6 +421,28 @@ void CSListCtrl::InvalidateSubItem(int nItem, int nSubItem)
 	rect.InflateRect(1, 1);
 	
 	InvalidateRect(&rect);
+}
+
+void CSListCtrl::InvalidateSubItems(int nItem, int pSubItems[], int nSubItemCount)
+{
+	ASSERT_ROW_COUNT(nItem);
+
+	CRgn rgnTotal;
+	rgnTotal.CreateRectRgn(0, 0, 0, 0);
+
+	CRect rect;
+	for(int i = 0; i < nSubItemCount; i++)
+	{
+		ASSERT_COL_COUNT(pSubItems[i]);
+		GetSubItemRect(nItem, pSubItems[i], LVIR_BOUNDS, rect);
+
+		CRgn rgnTemp;
+		rgnTemp.CreateRectRgnIndirect(&rect);
+
+		rgnTotal.CombineRgn(&rgnTotal, &rgnTemp, RGN_OR);
+	}
+
+	InvalidateRgn(&rgnTotal);
 }
 ///////////////////////////////////////////////////////////////////////////////
 // GetSubItemRect
@@ -484,6 +506,7 @@ void CSListCtrl::SetItemCheckedStateByClick(int nItem, int nSubItem, int nChecke
 
 	//1. Update data: checked state
 	SetItemCheckedState(nItem, nSubItem, nCheckedState);
+	InvalidateSubItem(nItem, nSubItem);
 	
 	//3. Update header
 	if(bUpdateHeader)
@@ -523,7 +546,7 @@ void CSListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState)
 	pData->m_pSubItemDatas[nSubItem].m_nCheckState = nCheckedState;
 	
 	//2. Update window
-	InvalidateSubItem(nItem, nSubItem);
+	//InvalidateSubItem(nItem, nSubItem);
 }
 int  CSListCtrl::GetItemCheckedState(int nItem, int nSubItem)
 {
@@ -674,9 +697,31 @@ void CSListCtrl::DrawImage(int nItem, int nSubItem, CDC *pDC)
 	}
 	
 	CListImage* pListImage = GetSubItemData(nItem, nSubItem)->m_pListImage;
-	ASSERT(pListImage != NULL);
-	
+	ASSERT(pListImage != NULL && pListImage->m_imageList != NULL);
 	pListImage->m_imageList->DrawIndirect(pDC, pListImage->m_nImage, imgRect.TopLeft(), imgRect.Size(), CPoint(0, 0));
+	/*
+	//Picked up from WINCTRL7.CPP	
+	IMAGELISTDRAWPARAMS drawing;
+	
+	drawing.i = pListImage->m_nImage;
+	drawing.hdcDst = pDC->m_hDC;
+	drawing.x = imgRect.left;
+	drawing.y = imgRect.top;
+	drawing.cx = imgRect.Width();
+	drawing.cy = imgRect.Height();
+	drawing.xBitmap = 0;
+	drawing.yBitmap = 0;
+	drawing.rgbBk = CLR_NONE;
+	drawing.rgbFg = CLR_DEFAULT;
+	drawing.fStyle = ILD_NORMAL;
+	drawing.dwRop = SRCCOPY;
+
+	ASSERT_POINTER(&drawing, IMAGELISTDRAWPARAMS);	
+	drawing.cbSize = sizeof(IMAGELISTDRAWPARAMS);
+	drawing.himl = pListImage->m_hImageList;
+	BOOL bResult = ImageList_DrawIndirect(&drawing);
+	AfxTrace("%d\n", bResult);
+	*/
 }
 void CSListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC, BOOL bProgressText)
 {
@@ -747,10 +792,13 @@ void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 
 	//3. Draw the actual progress
 	CListProgress* pListPrgsBar = GetSubItemData(nItem, nSubItem)->m_pListPrgsBar;
-	ASSERT(pListPrgsBar != NULL && pListPrgsBar->m_nMaxValue > 0);
-	ASSERT(pListPrgsBar->m_nValue <= pListPrgsBar->m_nMaxValue);
+	ASSERT(pListPrgsBar != NULL);
 
-	int w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
+	int w = 0;
+	if(pListPrgsBar->m_nMaxValue > 0 && pListPrgsBar->m_nValue > 0)
+	{
+		w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
+	}
 	rcPrgs.right = rcPrgs.left + w;
 
 //	pDC->FillSolidRect(rcPrgs, RGB(46, 211, 49));
@@ -809,8 +857,10 @@ BOOL CSListCtrl::CalcImageRect(int nItem, int nSubItem, CRect& rcImage)
 	//2. Check if there's a check box in the left side
 	if(CalcCheckBoxRect(nItem, nSubItem, rcCheckBox))
 	{
-		rcItem.left = rcCheckBox.right + m_HeaderCtrl.m_nSpace;
+		rcItem.left = rcCheckBox.right;
 	}
+	rcItem.left += m_HeaderCtrl.m_nSpace;
+
 	//no more space
 	if(rcItem.Width() <= 0)
 	{
@@ -821,6 +871,7 @@ BOOL CSListCtrl::CalcImageRect(int nItem, int nSubItem, CRect& rcImage)
 	sizeImage.cx = sizeImage.cy = 0;
 
 	IMAGEINFO info;
+//	if(ImageList_GetImageInfo(pSubItemData->m_pListImage->m_hImageList, pSubItemData->m_pListImage->m_nImage, &info))
 	if(pSubItemData->m_pListImage->m_imageList->GetImageInfo(pSubItemData->m_pListImage->m_nImage, &info))
 	{
 		//if imageOnly we only return the rect of the image.
@@ -874,7 +925,7 @@ BOOL CSListCtrl::CalcProgressRect(int nItem, int nSubItem, CRect& rcProgress)
 	CListSubItemData* pSubItemData = GetSubItemData(nItem, nSubItem);
 	ASSERT(pSubItemData);
 	
-	if(pSubItemData->m_pListPrgsBar == NULL || pSubItemData->m_pListPrgsBar->m_nMaxValue <= 0)
+	if(pSubItemData->m_pListPrgsBar == NULL)
 	{
 		return FALSE;
 	}

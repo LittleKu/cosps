@@ -728,29 +728,88 @@ LRESULT CCommonUtils::SendMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	return lr;
 }
 
-CString CCommonUtils::FormatSpeed(DWORD dwBytesPerSeconds)
+void CCommonUtils::FormatSpeed(DWORD dwBytesPerSeconds, CString& szOut)
 {
-#define ONE_KB  (1024)
-#define ONE_MB	(1024 * 1024)
-
-	CString szSpeed;
 	//less than 100 bytes
 	if(dwBytesPerSeconds < 100)
 	{
-		szSpeed.Format("%u Bytes/s", dwBytesPerSeconds);
+		szOut.Format("%u Bytes/s", dwBytesPerSeconds);
 	}
 	//less than 1M
 	else if(dwBytesPerSeconds < ONE_MB)
 	{
 		double dSpeed = ((double)dwBytesPerSeconds / ONE_KB);
-		szSpeed.Format("%.3f KB/s", dSpeed);
+		szOut.Format("%.3f KB/s", dSpeed);
 	}
-	//Greater than 1M
-	else
+	//less than 1G
+	else if(dwBytesPerSeconds < ONE_GB)
 	{
 		double dSpeed = ((double)dwBytesPerSeconds / ONE_MB);
-		szSpeed.Format("%.3f MB/s", dSpeed);
+		szOut.Format("%.3f MB/s", dSpeed);
 	}
+	//Greater than 1G
+	else
+	{
+		double dSpeed = ((double)dwBytesPerSeconds / ONE_GB);
+		szOut.Format("%.3f GB/s", dSpeed);
+	}
+}
 
-	return szSpeed;
+void CCommonUtils::FormatFileSize(DWORD dwBytes, CString& szOut)
+{
+	double dSize;
+	if(dwBytes < ONE_KB)
+	{
+		szOut.Format("%u", dwBytes);
+	}
+	else if(dwBytes < ONE_MB)
+	{
+		dSize = ((double)dwBytes / ONE_KB);
+		szOut.Format("%.3f KB", dSize);
+	}
+	else if(dwBytes < ONE_GB)
+	{
+		dSize = ((double)dwBytes / ONE_MB);
+		szOut.Format("%.3f MB", dSize);
+	}
+	else
+	{
+		dSize = ((double)dwBytes / ONE_GB);
+		szOut.Format("%.3f GB", dSize);
+	}
+}
+
+void CCommonUtils::FormatTime(DWORD dwTimeInMs, CString& szOut)
+{
+	szOut.Format("%d", dwTimeInMs / 1000);
+}
+
+void CCommonUtils::FormatPercent(int nCurrent, int nMax, CString& szOut)
+{
+	if(nCurrent > 0 && nMax > 0)
+	{
+		if(nCurrent == nMax)
+		{
+			szOut = "100 %";
+		}
+		else
+		{
+			double d = ((double)nCurrent) * 100 / nMax;
+			szOut.Format("%.2f %c", d, '%');
+		}
+		
+	}
+	else
+	{
+		szOut = "0 %";
+	}
+}
+
+int CCommonUtils::GetIconIndex(LPCTSTR lpszPath, DWORD dwFileAttributes, UINT uFlags)
+{
+	SHFILEINFO sfi;
+	ZeroMemory(&sfi, sizeof(SHFILEINFO));
+	uFlags |= SHGFI_USEFILEATTRIBUTES | SHGFI_SMALLICON | SHGFI_SYSICONINDEX;
+	DWORD dwResult = ::SHGetFileInfo(lpszPath, dwFileAttributes, &sfi, sizeof(SHFILEINFO), uFlags);
+	return sfi.iIcon;
 }

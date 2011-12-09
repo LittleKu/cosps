@@ -103,6 +103,17 @@ BEGIN
                     LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,7,7,644,260
 END
 
+IDD_ADD_TASK_DIALOG DIALOG DISCARDABLE  0, 0, 435, 106
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add New Task"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,158,85,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,227,85,50,14
+    LTEXT           "Address",IDC_TXT_NEW_ADDRESS,21,23,38,8
+    EDITTEXT        IDC_NEW_ADDRESS,77,19,332,12,ES_AUTOHSCROLL
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -177,6 +188,14 @@ BEGIN
         RIGHTMARGIN, 651
         TOPMARGIN, 7
         BOTTOMMARGIN, 267
+    END
+
+    IDD_ADD_TASK_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 428
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 99
     END
 END
 #endif    // APSTUDIO_INVOKED

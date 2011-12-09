@@ -30,6 +30,13 @@ public:
 	{
 		MAX_INTEGER = 0x7FFFFFFF
 	};
+
+	enum
+	{
+		ONE_KB = 1024,
+		ONE_MB = 1024 * 1024,
+		ONE_GB = 1024 * 1024 * 1024
+	};
 	~CCommonUtils();
 public:
 	//convert error code to error message
@@ -76,7 +83,15 @@ public:
 
 	static LRESULT SendMessage(HWND hWnd, UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
 
-	static CString FormatSpeed(DWORD dwBytesPerSeconds);
+	static void FormatSpeed(DWORD dwBytesPerSeconds, CString& szOut);
+
+	static void FormatFileSize(DWORD dwBytes, CString& szOut);
+
+	static void FormatTime(DWORD dwTimeInMs, CString& szOut);
+
+	static void FormatPercent(int nCurrent, int nMax, CString& szOut);
+
+	static int GetIconIndex(LPCTSTR lpszPath, DWORD dwFileAttributes = FILE_ATTRIBUTE_NORMAL, UINT uFlags = 0);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

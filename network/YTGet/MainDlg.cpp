@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "YTGet.h"
 #include "MainDlg.h"
+#include "Constants.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -253,4 +254,54 @@ void CMainDlg::SetMenuBarBkg()
 	{
 		SetMenuInfo(pMenu->m_hMenu, &MenuInfo);
 	}
+}
+
+BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	BOOL bProcessed = TRUE;
+
+	switch(wParam)
+	{
+	case ID_TBBTN_ADD_TASK:
+		{
+			m_pYTGetDlg->AddTask();
+		}
+		break;
+	case ID_TBBTN_ADD_BATCH_TASKS:
+		{
+			m_pYTGetDlg->AddBatchTask();
+		}
+		break;
+	case ID_TBBTN_START:
+		{
+			m_pYTGetDlg->Start();
+		}
+		break;
+	case ID_TBBTN_PAUSE:
+		{
+			m_pYTGetDlg->Pause();
+		}
+		break;
+	case ID_TBBTN_REMOVE:
+		{
+			m_pYTGetDlg->Remove();
+		}
+		break;
+	case ID_TBBTN_RESTART:
+		{
+			m_pYTGetDlg->Restart();
+		}
+		break;
+	default:
+		{
+			bProcessed = FALSE;
+		}
+		break;
+	}
+
+	if(bProcessed)
+	{
+		return TRUE;
+	}
+	return CResizableDialog::OnCommand(wParam, lParam);
 }

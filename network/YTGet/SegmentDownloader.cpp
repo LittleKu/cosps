@@ -196,6 +196,7 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 	m_progressMeter.UpdateSample(clock(), dwTotalNow, dwCurrentNow);
 	if(m_progressMeter.IsProgressTimeOut() || dwTotalNow == (DWORD64)m_dlParam.m_nFileSize)
 	{
+		/*
 		//Send progress notification
 		CProgressInfo progressInfo;
 		progressInfo.m_pProgressMetric = &m_progressMeter;
@@ -206,6 +207,19 @@ int CSegmentDownloader::ProcessProgress(double dltotal, double dlnow, double ult
 		progressInfo.ulnow = (DWORD64)ulnow;
 		
 		CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)&progressInfo, (LPARAM)0);
+		*/
+
+
+		CTaskInfo updateInfo;
+		updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
+		updateInfo.mask = CTaskInfo::TIF_PROGRESS;
+		updateInfo.m_nFileSize = m_dlParam.m_nFileSize;
+		updateInfo.m_nDlNow = dwTotalNow;
+		updateInfo.m_nCurrSpeed = m_progressMeter.GetCurrentSpeed();
+		updateInfo.m_nCostTime = m_progressMeter.GetCostTime();
+		updateInfo.m_nLeftTime = m_progressMeter.GetLeftTime();
+		
+		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)m_dlParam.m_nTaskID, (LPARAM)&updateInfo);
 	}
 
 	//Pause

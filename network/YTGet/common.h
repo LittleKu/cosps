@@ -47,6 +47,61 @@ public:
 	static DWORD GetAccessPermission(DWORD nState, DWORD nOperFlags = DL_OPER_FLAG_ALL);
 };
 
+class CDownloaderMgr;
+class CTaskInfo
+{
+public:
+	enum
+	{
+		COL_STATUS,
+		COL_FILE_NAME,
+		COL_FILE_SIZE,
+		COL_PROGRESS,
+		COL_SPEED,
+		COL_LEFT_TIME,
+		COL_COST_TIME,
+		COL_DETAIL,
+		COL_URL,
+		
+		COL_COUNT
+	};
+
+	enum
+	{
+		TIF_STATE		= 0x0001,
+		TIF_FILE_NAME	= 0x0002,
+		TIF_FILE_SIZE	= 0x0004,
+		TIF_DLNOW		= 0x0008,
+		TIF_CURR_SPEED	= 0x0010,
+		TIF_LEFT_TIME	= 0x0020,
+		TIF_COST_TIME	= 0x0040,
+
+		TIF_PROGRESS	= (TIF_FILE_SIZE | TIF_DLNOW | TIF_CURR_SPEED | TIF_LEFT_TIME | TIF_COST_TIME)
+	};
+	
+	UINT	mask;
+	//internal data
+	int		m_nTaskID;
+	CDownloaderMgr* m_lpDownloaderMgr;
+	
+	//visible data
+	CDownloadState m_dlState;	//State and Detail
+	
+	CString m_szUrl;			//original URL
+	CString m_szFileName;		//File Name
+	
+	DWORD	m_nFileSize;		//Total File Size
+	DWORD	m_nDlNow;			//Progress
+	DWORD	m_nCurrSpeed;		//Speed: bytes/s
+	DWORD	m_nLeftTime;		//Left time in ms
+	DWORD	m_nCostTime;		//Cost time in ms
+	
+	CTaskInfo() : mask(0), m_nTaskID(-1), m_lpDownloaderMgr(0), m_szUrl(""), m_szFileName(""), m_dlState(TSE_READY),
+		m_nFileSize(0), m_nDlNow(0), m_nCurrSpeed(0), m_nLeftTime(0), m_nCostTime(0)
+	{
+	}
+};
+
 class CProgressMetric
 {
 public:

@@ -13,7 +13,10 @@
 #define IDB_MAIN_TOOLBAR_BTN            133
 #define IDB_TASK_STATUS                 134
 #define IDB_HEAD_SORT                   135
+#define IDD_ADD_TASK_DIALOG             136
 #define IDC_TASK_LIST                   1000
+#define IDC_TXT_NEW_ADDRESS             1001
+#define IDC_NEW_ADDRESS                 1002
 #define IDM_FILE_EXIT                   32771
 #define IDM_HELP_ABOUT                  32772
 
@@ -21,9 +24,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
+#define _APS_NEXT_RESOURCE_VALUE        137
 #define _APS_NEXT_COMMAND_VALUE         32773
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

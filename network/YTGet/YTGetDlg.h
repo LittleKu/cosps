@@ -14,6 +14,14 @@ class CYTGetDlg : public CResizableDialog
 {
 // Construction
 public:
+	void ListCtrlSelectionChanged();
+	void AddTask(LPCTSTR lpszAddress);
+	void Restart();
+	void Remove();
+	void Pause();
+	void Start();
+	void AddBatchTask();
+	void AddTask();
 	CYTGetDlg(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
@@ -32,14 +40,20 @@ public:
 
 // Implementation
 protected:
+	BOOL GetTaskInfo(int nTaskID, int* nIndex, CTaskInfo** ppTaskInfo);
 
 	// Generated message map functions
 	//{{AFX_MSG(CYTGetDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg LRESULT OnUpdateStatus(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnItemchangedTaskList(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
+	void EnableButtons(DWORD dwStatus);
 	void InitResizableDlgAnchor();
 	void InitTaskListCtrl();
 };

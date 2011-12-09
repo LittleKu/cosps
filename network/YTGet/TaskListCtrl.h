@@ -7,9 +7,10 @@
 // TaskListCtrl.h : header file
 //
 #include "./ThirdParty/SListCtrl.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTaskListCtrl window
-
+class CTaskListComparator;
 class CTaskListCtrl : public CSListCtrl
 {
 // Construction
@@ -20,6 +21,9 @@ public:
 public:
 	CImageList m_ILSortImages;
 	CImageList m_ILTaskStatus;
+	CImageList* m_pILShell;
+
+	CTaskListComparator* m_pComparator;
 // Operations
 public:
 	void Init();
@@ -27,18 +31,30 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTaskListCtrl)
 	//}}AFX_VIRTUAL
-
+	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
 // Implementation
 public:
+	void StopAllTasks();
+	void RemoveSelectedItems();
+	//Delete Functions
+	BOOL DeleteItem(int nItem);
+	BOOL DeleteAllItems();
+
+	int  AddRow(CTaskInfo* pTaskInfo);
+	void UpdateRow(int nIndex, CTaskInfo* pTaskInfo);
 	virtual ~CTaskListCtrl();
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskListCtrl)
-		// NOTE - the ClassWizard will add and remove member functions here.
+	afx_msg void OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDestroy();
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
+private:
+	void InitShellImageList();
+	int StatusToILIndex(int nStatus);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -91,8 +91,12 @@ int CDownloaderMgr::Finalize()
 	ASSERT( (dlState.GetState() >= TSE_READY && dlState.GetState() <= TSE_DESTROYED) && 
 		dlState.GetState() != TSE_TRANSFERRING );
 
+	CTaskInfo updateInfo;
+	updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
+	updateInfo.mask = CTaskInfo::TIF_STATE;
+	updateInfo.m_dlState = dlState;
 	//1. send complete message to GUI
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&dlState);
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_COMPLETE, m_dlParam.m_nTaskID, (LPARAM)&updateInfo);
 
 	//2. close thread handle
 	m_lock.Lock();
@@ -115,16 +119,6 @@ int CDownloaderMgr::Finalize()
 void CDownloaderMgr::Init(const CDownloadParam& param)
 {
 	m_dlParam = param;
-
-	//Empty file name, auto extract
-	if(m_dlParam.m_szSaveToFileName.IsEmpty())
-	{
-		BOOL bResult = CCommonUtils::ExtractFileName(m_dlParam.m_szUrl, m_dlParam.m_szSaveToFileName);
-		if(!bResult || m_dlParam.m_szSaveToFileName.GetLength() >= 64 || m_dlParam.m_szSaveToFileName.IsEmpty())
-		{
-			m_dlParam.m_szSaveToFileName = "index.html";
-		}
-	}
 }
 
 int CDownloaderMgr::Start()
@@ -166,7 +160,11 @@ int CDownloaderMgr::Start()
 
 	//If we can go here, we should send message to GUI to notify it's now in transferring.
 	//Don't worry other threads to modify state now. This is still in GUI thread, no other thread can modify it
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlCurState));
+	CTaskInfo updateInfo;
+	updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
+	updateInfo.mask = CTaskInfo::TIF_STATE;
+	updateInfo.m_dlState = m_dlCurState;
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&updateInfo));
 
 	DWORD dwThreadId;
 	m_hWorkerThread = ::CreateThread(NULL, 0, StartDownloadProc, this, CREATE_SUSPENDED, &dwThreadId);
@@ -220,7 +218,11 @@ int CDownloaderMgr::ReStart()
 	
 	//If we can go here, we should send message to GUI to notify it's now in transferring.
 	//Don't worry other threads to modify state now. This is still in GUI thread, no other thread can modify it
-	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&m_dlCurState));
+	CTaskInfo updateInfo;
+	updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
+	updateInfo.mask = CTaskInfo::TIF_STATE;
+	updateInfo.m_dlState = m_dlCurState;
+	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&updateInfo));
 	
 	DWORD dwThreadId;
 	m_hWorkerThread = ::CreateThread(NULL, 0, ReDownloadProc, this, CREATE_SUSPENDED, &dwThreadId);

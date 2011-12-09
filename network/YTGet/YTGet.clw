@@ -2,25 +2,26 @@
 
 [General Info]
 Version=1
-LastClass=CTaskListCtrl
-LastTemplate=CListCtrl
+LastClass=CYTGetDlg
+LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "YTGet.h"
 
-ClassCount=6
+ClassCount=7
 Class1=CYTGetApp
 Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=6
-Resource1=IDD_ABOUTBOX
+Resource1=IDD_MAIN_DIALOG
 Resource2=IDR_MAINFRAME
-Resource3=IDD_DIALOG1
-Resource4=IDD_YTGET_DIALOG
-Resource5=IDD_MAIN_DIALOG
+Resource3=IDD_ABOUTBOX
+Resource4=IDD_ADD_TASK_DIALOG
+Resource5=IDD_YTGET_DIALOG
 Class4=CMainToolBarCtrl
 Class5=CYTGetDlg
 Class6=CTaskListCtrl
+Class7=CAddTaskDlg
 Resource6=IDR_MAIN_MENU
 
 [CLS:CYTGetApp]
@@ -35,6 +36,8 @@ HeaderFile=MainDlg.h
 ImplementationFile=MainDlg.cpp
 Filter=D
 LastObject=CMainDlg
+BaseClass=CResizableDialog
+VirtualFilter=dWC
 
 [CLS:CAboutDlg]
 Type=0
@@ -57,13 +60,6 @@ Class=?
 Command1=IDM_FILE_EXIT
 Command2=IDM_HELP_ABOUT
 CommandCount=2
-
-[DLG:IDD_DIALOG1]
-Type=1
-Class=?
-ControlCount=2
-Control1=IDOK,button,1342242817
-Control2=IDCANCEL,button,1342242816
 
 [DLG:IDD_MAIN_DIALOG]
 Type=1
@@ -97,6 +93,26 @@ VirtualFilter=dWC
 Type=0
 HeaderFile=TaskListCtrl.h
 ImplementationFile=TaskListCtrl.cpp
-BaseClass=CListCtrl
+BaseClass=CSListCtrl
 Filter=W
+LastObject=CTaskListCtrl
+VirtualFilter=FWC
+
+[DLG:IDD_ADD_TASK_DIALOG]
+Type=1
+Class=CAddTaskDlg
+ControlCount=4
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_TXT_NEW_ADDRESS,static,1342308352
+Control4=IDC_NEW_ADDRESS,edit,1350631552
+
+[CLS:CAddTaskDlg]
+Type=0
+HeaderFile=AddTaskDlg.h
+ImplementationFile=AddTaskDlg.cpp
+BaseClass=CDialog
+Filter=D
+LastObject=IDC_NEW_ADDRESS
+VirtualFilter=dWC
 

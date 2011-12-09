@@ -54,6 +54,7 @@ public:
 	DWORD GetItemData(int nItem) const;
 	BOOL GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect);
 	void InvalidateSubItem(int nItem, int nSubItem);
+	void InvalidateSubItems(int nItem, int pSubItems[], int nSubItemCount);
 	
 	//Check Box Related functions
 	void SetItemCheckedState(int nItem, int nSubItem, int nCheckedState);

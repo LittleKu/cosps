@@ -37,6 +37,7 @@
 #endif
 
 #include "log4cplus_config.h"
+#include "Constants.h"
 #include "common.h"
 #include "Options.h"
 
