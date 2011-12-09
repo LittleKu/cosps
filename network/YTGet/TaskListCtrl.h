@@ -21,7 +21,7 @@ public:
 public:
 	CImageList m_ILSortImages;
 	CImageList m_ILTaskStatus;
-	CImageList* m_pILShell;
+	CImageList m_ILShell;
 
 	CTaskListComparator* m_pComparator;
 // Operations

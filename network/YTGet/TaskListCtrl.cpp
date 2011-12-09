@@ -44,6 +44,8 @@ CTaskListCtrl::CTaskListCtrl() : m_pComparator(NULL)
 
 CTaskListCtrl::~CTaskListCtrl()
 {
+	m_ILShell.Detach();
+
 	if(m_pComparator != NULL)
 	{
 		delete m_pComparator;
@@ -132,7 +134,7 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFileName);
 	if(!pTaskInfo->m_szFileName.IsEmpty())
 	{
-		SetItemImage(lvi.iItem, iSubItem, CCommonUtils::GetIconIndex(pTaskInfo->m_szFileName), m_pILShell);
+		SetItemImage(lvi.iItem, iSubItem, CCommonUtils::GetIconIndex(pTaskInfo->m_szFileName), &m_ILShell);
 	}
 	iSubItem++;
 
@@ -206,7 +208,7 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		{
 			CString szFullPath;
 			szFullPath.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, pItemData->m_szFileName);
-			SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(szFullPath), m_pILShell);
+			SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(szFullPath), &m_ILShell);
 
 			pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;
 		}
@@ -218,7 +220,7 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
 
 		SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, pItemData->m_szFileName);
-		SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(pItemData->m_szFileName), m_pILShell);
+		SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(pItemData->m_szFileName), &m_ILShell);
 
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;
 	}
@@ -447,7 +449,7 @@ void CTaskListCtrl::InitShellImageList()
 		0, &sfi, sizeof(SHFILEINFO), SHGFI_PIDL | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
 	ImageList_SetBkColor(hShellImageList, CLR_NONE);
 
-	m_pILShell = CImageList::FromHandle(hShellImageList);
+	m_ILShell.Attach(hShellImageList);
 	
 	//Release PIDL
 	IMalloc* pIface = NULL;
