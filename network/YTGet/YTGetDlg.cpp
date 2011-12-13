@@ -207,6 +207,7 @@ void CYTGetDlg::Start()
 		param.m_szUrl = pTaskInfo->m_szUrl;
 		param.m_szSaveToFileName = pTaskInfo->m_szFileName;
 		param.m_nFileSize = 0;
+		param.m_nDlType = CCommonUtils::GetDownloadType(param.m_szUrl);
 		
 		if(pTaskInfo->m_lpDownloaderMgr == NULL)
 		{

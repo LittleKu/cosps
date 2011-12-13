@@ -14,6 +14,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define IDM_TASK_LIST_FIRST				48297
+#define IDM_TASK_LIST_OPEN				(IDM_TASK_LIST_FIRST + 0)
+#define IDM_TASK_LIST_OPEN_DIR			(IDM_TASK_LIST_FIRST + 1)
+
 struct ColumnInfo
 {
 	LPCTSTR     lpszName;
@@ -57,6 +61,7 @@ CTaskListCtrl::~CTaskListCtrl()
 BEGIN_MESSAGE_MAP(CTaskListCtrl, CSListCtrl)
 	//{{AFX_MSG_MAP(CTaskListCtrl)
 	ON_WM_DESTROY()
+	ON_WM_CONTEXTMENU()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -157,16 +162,40 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	iSubItem++;
 
 	//Speed
-	CCommonUtils::FormatSpeed(pTaskInfo->m_nCurrSpeed, szTemp);
-	SetItemText(lvi.iItem, iSubItem++, szTemp);
+	if(pTaskInfo->m_nCurrSpeed > 0)
+	{
+		CCommonUtils::FormatSpeed(pTaskInfo->m_nCurrSpeed, szTemp);
+		SetItemText(lvi.iItem, iSubItem, szTemp);
+	}
+	else
+	{
+		SetItemText(lvi.iItem, iSubItem, "");
+	}
+	iSubItem++;
 
 	//Left Time
-	CCommonUtils::FormatTime(pTaskInfo->m_nLeftTime, szTemp);
-	SetItemText(lvi.iItem, iSubItem++, szTemp);
+	if(pTaskInfo->m_nLeftTime > 0)
+	{
+		CCommonUtils::FormatTime(pTaskInfo->m_nLeftTime, szTemp);
+		SetItemText(lvi.iItem, iSubItem, szTemp);
+	}
+	else
+	{
+		SetItemText(lvi.iItem, iSubItem, "");
+	}
+	iSubItem++;
 
 	//Cost Time
-	CCommonUtils::FormatTime(pTaskInfo->m_nCostTime, szTemp);
-	SetItemText(lvi.iItem, iSubItem++, szTemp);
+	if(pTaskInfo->m_nCostTime > 0)
+	{
+		CCommonUtils::FormatTime(pTaskInfo->m_nCostTime, szTemp);
+		SetItemText(lvi.iItem, iSubItem, szTemp);
+	}
+	else
+	{
+		SetItemText(lvi.iItem, iSubItem, "");
+	}
+	iSubItem++;
 
 	//Detail
 	SetItemText(lvi.iItem, iSubItem++, pTaskInfo->m_dlState.m_szDetail);
@@ -188,6 +217,17 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 	int pSubItems[CTaskInfo::COL_COUNT];
 	int nSubItemCount = 0;
 
+	//File Name
+	if((pNewTaskInfo->mask & CTaskInfo::TIF_FILE_NAME) && pItemData->m_szFileName.Compare(pNewTaskInfo->m_szFileName) != 0)
+	{
+		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
+		
+		SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, pItemData->m_szFileName);
+		SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(pItemData->m_szFileName), &m_ILShell);
+		
+		pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;
+	}
+
 	//State
 	if((pNewTaskInfo->mask & CTaskInfo::TIF_STATE) && (pItemData->m_dlState.m_nState != pNewTaskInfo->m_dlState.m_nState))
 	{
@@ -195,34 +235,30 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 
 		//Status
 		SetItemImage(nIndex, CTaskInfo::COL_STATUS, StatusToILIndex(pItemData->m_dlState.GetState()), &m_ILTaskStatus);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_STATUS;
 
 		//Detail
 		SetItemText(nIndex, CTaskInfo::COL_DETAIL, pItemData->m_dlState.m_szDetail);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_DETAIL;
 
-		//Successfully
+		//Successfully for ".exe" file icon update
 		if(pItemData->m_dlState.m_nState == TSE_COMPLETE)
 		{
 			CString szFullPath;
 			szFullPath.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, pItemData->m_szFileName);
 			SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(szFullPath), &m_ILShell);
-
 			pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;
 		}
 	}
-
-	//File Name
-	if((pNewTaskInfo->mask & CTaskInfo::TIF_FILE_NAME) && pItemData->m_szFileName.Compare(pNewTaskInfo->m_szFileName) != 0)
+	//Only Detail changed
+	else if((pNewTaskInfo->mask & CTaskInfo::TIF_DETAIL) && 
+		pItemData->m_dlState.m_szDetail.Compare(pNewTaskInfo->m_dlState.m_szDetail) != 0)
 	{
-		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
+		pItemData->m_dlState.m_szDetail = pNewTaskInfo->m_dlState.m_szDetail;
 
-		SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, pItemData->m_szFileName);
-		SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(pItemData->m_szFileName), &m_ILShell);
-
-		pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;
+		//Detail
+		SetItemText(nIndex, CTaskInfo::COL_DETAIL, pItemData->m_dlState.m_szDetail);
+		pSubItems[nSubItemCount++] = CTaskInfo::COL_DETAIL;
 	}
 
 	//File Size
@@ -233,7 +269,6 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		CString szTemp;
 		CCommonUtils::FormatFileSize(pItemData->m_nFileSize, szTemp);
 		SetItemText(nIndex, CTaskInfo::COL_FILE_SIZE, szTemp);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_SIZE;
 	}
 
@@ -247,7 +282,6 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		CString szTemp;
 		CCommonUtils::FormatPercent(pItemData->m_nDlNow, pItemData->m_nFileSize, szTemp);
 		SetItemText(nIndex, CTaskInfo::COL_PROGRESS, szTemp);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_PROGRESS;
 	}
 
@@ -259,7 +293,6 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		CString szTemp;
 		CCommonUtils::FormatSpeed(pItemData->m_nCurrSpeed, szTemp);
 		SetItemText(nIndex, CTaskInfo::COL_SPEED, szTemp);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_SPEED;
 	}
 
@@ -271,7 +304,6 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		CString szTemp;
 		CCommonUtils::FormatTime(pItemData->m_nLeftTime, szTemp);
 		SetItemText(nIndex, CTaskInfo::COL_LEFT_TIME, szTemp);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_LEFT_TIME;
 	}
 
@@ -283,23 +315,19 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 		CString szTemp;
 		CCommonUtils::FormatTime(pItemData->m_nCostTime, szTemp);
 		SetItemText(nIndex, CTaskInfo::COL_COST_TIME, szTemp);
-
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_COST_TIME;
 	}
 
-	InvalidateSubItems(nIndex, pSubItems, nSubItemCount);
-}
+	//URL
+	if((pNewTaskInfo->mask & CTaskInfo::TIF_URL) && pItemData->m_szUrl.Compare(pNewTaskInfo->m_szUrl) != 0)
+	{
+		pItemData->m_szUrl = pNewTaskInfo->m_szUrl;
+		
+		SetItemText(nIndex, CTaskInfo::COL_URL, pItemData->m_szUrl);
+		pSubItems[nSubItemCount++] = CTaskInfo::COL_URL;
+	}
 
-void CTaskListCtrl::OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	CTaskInfo* pTaskInfo = (CTaskInfo*)GetItemData(pNMListView->iItem);
-	ASSERT(pTaskInfo != NULL);
-	
-	delete pTaskInfo;
-	pTaskInfo = NULL;
-	
-	*pResult = 0;
+	InvalidateSubItems(nIndex, pSubItems, nSubItemCount);
 }
 
 int CTaskListCtrl::StatusToILIndex(int nStatus)
@@ -460,4 +488,97 @@ void CTaskListCtrl::InitShellImageList()
 		pIface->Release();
 		pIface = NULL;
 	}
+}
+
+void CTaskListCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
+{
+	CMenu ctMenu;
+	ctMenu.CreatePopupMenu();
+	ctMenu.AppendMenu(MF_STRING, IDM_TASK_LIST_OPEN,		_T("Open"));
+	ctMenu.AppendMenu(MF_STRING, IDM_TASK_LIST_OPEN_DIR,	_T("Open Folder"));
+	
+	//Set menu enable status
+	int nCount = GetSelectedCount();
+	if(nCount != 1)
+	{
+		ctMenu.EnableMenuItem(IDM_TASK_LIST_OPEN,		MF_BYCOMMAND | MF_GRAYED);
+		ctMenu.EnableMenuItem(IDM_TASK_LIST_OPEN_DIR,	MF_BYCOMMAND | MF_GRAYED);
+	}
+	
+	ctMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x, point.y, this);
+}
+
+BOOL CTaskListCtrl::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	BOOL bProcessed = TRUE;
+
+	switch(wParam)
+	{
+	case IDM_TASK_LIST_OPEN:
+		{
+			OpenFile();
+		}
+		break;
+	case IDM_TASK_LIST_OPEN_DIR:
+		{
+			OpenFolder();
+		}
+		break;
+	default:
+		{
+			bProcessed = FALSE;
+		}
+		break;
+	}
+	
+	if(bProcessed)
+	{
+		return TRUE;
+	}
+
+	return CSListCtrl::OnCommand(wParam, lParam);
+}
+
+void CTaskListCtrl::OpenFile()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	if(pos == NULL)
+	{
+		return;
+	}
+	int nItem = GetNextSelectedItem(pos);
+	CString szFullPath;
+	GetFileFullPath(nItem, szFullPath);
+
+	HINSTANCE hInst = ::ShellExecute(NULL, _T("open"), szFullPath, NULL, NULL, SW_SHOW);
+	//Failed to Open
+	if((int)hInst < 32)
+	{
+		AfxTrace("Failed to open file %s\n", szFullPath);
+	}
+}
+
+void CTaskListCtrl::OpenFolder()
+{
+	POSITION pos = GetFirstSelectedItemPosition();
+	if(pos == NULL)
+	{
+		return;
+	}
+	int nItem = GetNextSelectedItem(pos);
+
+	CString szFullPath;
+	GetFileFullPath(nItem, szFullPath);
+
+	ShellExecute(NULL, _T("open"), _T("explorer"), _T("/select,\"") + szFullPath + _T("\""), NULL, SW_SHOW);
+}
+
+void CTaskListCtrl::GetFileFullPath(int nItem, CString &szFullPath)
+{
+	CTaskInfo* pTaskInfo = (CTaskInfo*)GetItemData(nItem);
+	if(pTaskInfo == NULL)
+	{
+		return;
+	}
+	szFullPath.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, pTaskInfo->m_szFileName);
 }

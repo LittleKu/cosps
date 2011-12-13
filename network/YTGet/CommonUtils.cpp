@@ -502,6 +502,12 @@ BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName)
 	
 	szFileName = (lpLastSlash + 1);
 
+	int nIndex = szFileName.Find(_T('?'));
+	if(nIndex >= 0)
+	{
+		szFileName = szFileName.Left(nIndex);
+	}
+
 	//check if the length of candidate file is longer than MAX_PATH
 	if(szFileName.GetLength() >= MAX_PATH)
 	{
@@ -781,7 +787,39 @@ void CCommonUtils::FormatFileSize(DWORD dwBytes, CString& szOut)
 
 void CCommonUtils::FormatTime(DWORD dwTimeInMs, CString& szOut)
 {
-	szOut.Format("%d", dwTimeInMs / 1000);
+	DWORD dwSeconds = (dwTimeInMs / 1000);
+	if(dwTimeInMs % 1000 != 0)
+	{
+		dwSeconds++;
+	}
+
+	//less than 1 minute
+	if(dwSeconds < 60)
+	{
+		szOut.Format("00:00:%02d", dwSeconds);
+	}
+	//less than 1 hour
+	else if(dwSeconds < 3600)
+	{
+		DWORD minute = dwSeconds / 60;
+		DWORD second = dwSeconds % 60;
+
+		szOut.Format("00:%02d:%02d", minute, second);
+	}
+	//less than 100 hours
+	else if(dwSeconds < 360000)
+	{
+		DWORD hour = dwSeconds / 3600;
+		DWORD minute = (dwSeconds % 3600) / 60;
+		DWORD second = (dwSeconds % 3600) % 60;
+
+		szOut.Format("%02d:%02d:%02d", hour, minute, second);
+	}
+	//more than 100 hours
+	else
+	{
+		szOut.Format("99:59:59");
+	}
 }
 
 void CCommonUtils::FormatPercent(int nCurrent, int nMax, CString& szOut)
@@ -812,4 +850,55 @@ int CCommonUtils::GetIconIndex(LPCTSTR lpszPath, DWORD dwFileAttributes, UINT uF
 	uFlags |= SHGFI_USEFILEATTRIBUTES | SHGFI_SMALLICON | SHGFI_SYSICONINDEX;
 	DWORD dwResult = ::SHGetFileInfo(lpszPath, dwFileAttributes, &sfi, sizeof(SHFILEINFO), uFlags);
 	return sfi.iIcon;
+}
+
+void CCommonUtils::ConcatString(const char* lpszSrcData, int nSrcLen, CString& szString)
+{
+	if(nSrcLen <= 0)
+	{
+		return;
+	}
+
+	int nDataLength = szString.GetLength();
+	LPTSTR lpBuffer = szString.GetBufferSetLength(nDataLength + nSrcLen);
+	// fast concatenation when buffer big enough
+	memcpy(lpBuffer + nDataLength, lpszSrcData, nSrcLen * sizeof(char));
+
+	ASSERT(szString.GetLength() == nDataLength + nSrcLen);
+}
+
+BOOL CCommonUtils::GetFileContent(LPCTSTR lpFileName, CString& szString)
+{
+	FILE* fp = fopen(lpFileName, "rb");
+	if(fp == NULL)
+	{
+		AfxTrace("Failed to open file %s\n", lpFileName);
+		return FALSE;
+	}
+	char buffer[BUFFER_SIZE];
+
+	size_t nBytesRead;
+	while( (nBytesRead = fread(buffer, sizeof(char), BUFFER_SIZE, fp)) > 0 )
+	{
+		ConcatString(buffer, nBytesRead, szString);
+	}
+
+	fclose(fp);
+
+	return TRUE;
+}
+
+int CCommonUtils::GetDownloadType(const CString& szURL)
+{
+	int nResult = 0;
+
+	int nIndex = -1;
+
+	nIndex = szURL.Find(".com.com/");
+	if(nIndex >= 0)
+	{
+		nResult = DLTE_CNET;
+	}
+
+	return nResult;
 }

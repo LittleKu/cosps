@@ -28,7 +28,8 @@ public:
 	};
 	enum
 	{
-		MAX_INTEGER = 0x7FFFFFFF
+		MAX_INTEGER = 0x7FFFFFFF,
+		BUFFER_SIZE = 4096
 	};
 
 	enum
@@ -92,6 +93,12 @@ public:
 	static void FormatPercent(int nCurrent, int nMax, CString& szOut);
 
 	static int GetIconIndex(LPCTSTR lpszPath, DWORD dwFileAttributes = FILE_ATTRIBUTE_NORMAL, UINT uFlags = 0);
+
+	static void ConcatString(const char* lpszSrcData, int nSrcLen, CString& szString);
+
+	static BOOL GetFileContent(LPCTSTR lpFileName, CString& szString);
+
+	static int GetDownloadType(const CString& szURL);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

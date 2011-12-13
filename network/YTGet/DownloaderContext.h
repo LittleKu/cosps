@@ -26,7 +26,7 @@ public:
 
 	void SetMaxConnection(int nMaxCount = -1) { m_nMaxCount = nMaxCount; }
 	int  GetMaxConnection() { return m_nMaxCount; }
-protected:
+public:
 	void Lock();
 	void Unlock();
 	

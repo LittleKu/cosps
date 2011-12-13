@@ -7,6 +7,7 @@
 #include "CommonUtils.h"
 #include "HeaderDownloader.h"
 #include "SegmentDownloader.h"
+#include "ParserDownloader.h"
 #include "TimeCost.h"
 
 #ifdef _DEBUG
@@ -220,8 +221,13 @@ int CDownloaderMgr::ReStart()
 	//Don't worry other threads to modify state now. This is still in GUI thread, no other thread can modify it
 	CTaskInfo updateInfo;
 	updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
-	updateInfo.mask = CTaskInfo::TIF_STATE;
+	updateInfo.mask = CTaskInfo::TIF_STATE | CTaskInfo::TIF_PROGRESS;
 	updateInfo.m_dlState = m_dlCurState;
+	updateInfo.m_nFileSize = m_dlParam.m_nFileSize;
+	updateInfo.m_nDlNow = 0;
+	updateInfo.m_nCurrSpeed = 0;
+	updateInfo.m_nLeftTime = CCommonUtils::MAX_INTEGER;
+	updateInfo.m_nCostTime = 0;
 	CCommonUtils::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_STATUS, m_dlParam.m_nTaskID, (LPARAM)(&updateInfo));
 	
 	DWORD dwThreadId;
@@ -312,7 +318,14 @@ DWORD CDownloaderMgr::StartDownload()
 	//really new start
 	if(m_pCurDownloader == NULL)
 	{
-		m_pCurDownloader = new CHeaderDownloader(this);
+		if(m_dlParam.m_nDlType > 0)
+		{
+			m_pCurDownloader = new CParserDownloader(this);
+		}
+		else
+		{
+			m_pCurDownloader = new CHeaderDownloader(this);
+		}
 		m_pCurDownloader->Init(m_dlParam);
 	}
 	//if m_pDownloader != NULL, that means the previous download was paused or ended with other reasons
@@ -385,7 +398,14 @@ DWORD CDownloaderMgr::ReDownload()
 		m_pCurDownloader = NULL;
 	}
 	//really new start
-	m_pCurDownloader = new CHeaderDownloader(this);
+	if(m_dlParam.m_nDlType > 0)
+	{
+		m_pCurDownloader = new CParserDownloader(this);
+	}
+	else
+	{
+		m_pCurDownloader = new CHeaderDownloader(this);
+	}
 	m_pCurDownloader->Init(m_dlParam);
 
 	CDownloader* pDownloader = NULL;

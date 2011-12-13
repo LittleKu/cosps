@@ -29,6 +29,14 @@ typedef enum
 	TSE_DESTROYING		//Task is in destroying progress
 } TaskStatusEnum;
 
+typedef enum
+{
+	DLTE_CNET = 1,
+	DLTE_YTB,
+	DLTE_GOOGLE_VIDEO,
+	DLTE_YAHOO
+} DlTypeEnum;
+
 typedef CSize CRange;
 
 class CDownloadState
@@ -75,6 +83,8 @@ public:
 		TIF_CURR_SPEED	= 0x0010,
 		TIF_LEFT_TIME	= 0x0020,
 		TIF_COST_TIME	= 0x0040,
+		TIF_DETAIL		= 0x0080,
+		TIF_URL			= 0x0100,
 
 		TIF_PROGRESS	= (TIF_FILE_SIZE | TIF_DLNOW | TIF_CURR_SPEED | TIF_LEFT_TIME | TIF_COST_TIME)
 	};
@@ -165,11 +175,12 @@ class CDownloadParam
 public:
 	CString m_szUrl;
 	int		m_nTaskID;
+	int		m_nDlType;
 	HWND	m_hWnd;
 	UINT	m_nFileSize;
 	CString m_szSaveToFileName;
 	CDownloadParam(LPCTSTR lpszUrl = NULL, int index = -1, HWND hwnd = NULL, UINT nFileSize = 0)
-		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nTaskID(index), m_nFileSize(nFileSize) {}
+		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nTaskID(index), m_nDlType(0), m_nFileSize(nFileSize) {}
 };
 
 

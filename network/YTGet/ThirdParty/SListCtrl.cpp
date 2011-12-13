@@ -797,7 +797,16 @@ void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 	int w = 0;
 	if(pListPrgsBar->m_nMaxValue > 0 && pListPrgsBar->m_nValue > 0)
 	{
-		w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
+		// <= 100%
+		if(pListPrgsBar->m_nMaxValue >= pListPrgsBar->m_nValue)
+		{
+			w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
+		}
+		// > 100%, abnormal case
+		else
+		{
+			w = rcPrgs.Width();
+		}
 	}
 	rcPrgs.right = rcPrgs.left + w;
 

@@ -167,9 +167,18 @@ size_t CSegmentDownloader::ProcessData(char *ptr, size_t size, size_t nmemb, int
 			return nBytes;
 		}
 	}
-	else
+	else if(pSegmentInfo->m_headerInfo.m_nHTTPCode == 206)
 	{
 		fwrite(ptr, size, nmemb, pSegmentInfo->m_lpFileData);
+	}
+	else
+	{
+		CString szLog;
+		szLog.Format("Task[%02d]: %d - Stop connection because of unexpected HTTP code: %d", m_dlParam.m_nTaskID, 
+			index, pSegmentInfo->m_headerInfo.m_nHTTPCode);
+		LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
+
+		return -1;
 	}
 	return nBytes;
 }
@@ -567,6 +576,17 @@ int CSegmentDownloader::ProcessTransferDone(CURLMsg *msg, int& still_running, CD
 					szLog.Format("Task[%02d]: [ProcessTransferDone] (%d) - Connection stopped by write data function", 
 						m_dlParam.m_nTaskID, nIndex);
 					LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+				}
+				if(pSegmentInfo->m_headerInfo.m_nHTTPCode != 200 && pSegmentInfo->m_headerInfo.m_nHTTPCode != 206)
+				{
+					//Always try to retry
+					CURL* retry_handle = RestartConnection(nIndex, CCommonUtils::INT_OPER_KEEP);
+					
+					if(retry_handle != NULL)
+					{
+						curl_multi_add_handle(m_curlm, retry_handle);
+						still_running++; //just to prevent it from remaining at 0 if there are more URLs to get
+					}
 				}
 			}
 			break;

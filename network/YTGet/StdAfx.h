@@ -26,8 +26,6 @@
 #include <Shlwapi.h>
 
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 #ifdef _DEBUG
 #ifndef ENABLE_LOG4CPLUS
 #define ENABLE_LOG4CPLUS
@@ -47,5 +45,8 @@
 
 class CThreadMonitor;
 CThreadMonitor* SYS_THREAD_MONITOR();
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
 
 #endif // !defined(AFX_STDAFX_H__B8816D45_D21B_4FC5_AA89_0EA1D2E5E673__INCLUDED_)

@@ -30,6 +30,8 @@ public:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTaskListCtrl)
+	protected:
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
 // Implementation
@@ -47,12 +49,15 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTaskListCtrl)
-	afx_msg void OnDeleteitem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 private:
+	void GetFileFullPath(int nItem, CString& szFullPath);
+	void OpenFolder();
+	void OpenFile();
 	void InitShellImageList();
 	int StatusToILIndex(int nStatus);
 };

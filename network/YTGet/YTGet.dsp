@@ -96,6 +96,10 @@ SOURCE=.\AddTaskDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CNETDownloaderCreator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\common.cpp
 # End Source File
 # Begin Source File
@@ -104,11 +108,19 @@ SOURCE=.\CommonUtils.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CreatorFactory.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Downloader.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\DownloaderContext.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\DownloaderCreator.cpp
 # End Source File
 # Begin Source File
 
@@ -137,6 +149,10 @@ SOURCE=.\MainToolBarCtrl.cpp
 # Begin Source File
 
 SOURCE=.\Options.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ParserDownloader.cpp
 # End Source File
 # Begin Source File
 
@@ -189,6 +205,10 @@ SOURCE=.\ThirdParty\ToolBarCtrlEx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\YTDownloaderCreator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\YTGet.cpp
 # End Source File
 # Begin Source File
@@ -199,6 +219,10 @@ SOURCE=.\YTGet.rc
 
 SOURCE=.\YTGetDlg.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\YTParseDownloader.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -206,6 +230,10 @@ SOURCE=.\YTGetDlg.cpp
 # Begin Source File
 
 SOURCE=.\AddTaskDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CNETDownloaderCreator.h
 # End Source File
 # Begin Source File
 
@@ -221,11 +249,19 @@ SOURCE=.\Constants.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\CreatorFactory.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Downloader.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\DownloaderContext.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\DownloaderCreator.h
 # End Source File
 # Begin Source File
 
@@ -254,6 +290,10 @@ SOURCE=.\MainToolBarCtrl.h
 # Begin Source File
 
 SOURCE=.\Options.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ParserDownloader.h
 # End Source File
 # Begin Source File
 
@@ -309,11 +349,19 @@ SOURCE=.\ThirdParty\ToolBarCtrlEx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\YTDownloaderCreator.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\YTGet.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\YTGetDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\YTParseDownloader.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

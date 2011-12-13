@@ -13,11 +13,11 @@ Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=6
-Resource1=IDD_ADD_TASK_DIALOG
+Resource1=IDD_YTGET_DIALOG
 Resource2=IDR_MAINFRAME
-Resource3=IDD_YTGET_DIALOG
-Resource4=IDD_MAIN_DIALOG
-Resource5=IDD_ABOUTBOX
+Resource3=IDD_MAIN_DIALOG
+Resource4=IDD_ABOUTBOX
+Resource5=IDD_ADD_TASK_DIALOG
 Class4=CMainToolBarCtrl
 Class5=CYTGetDlg
 Class6=CTaskListCtrl
