@@ -65,8 +65,7 @@ CDownloader* CCNETDownloaderCreator::CreateDownloader(const CString& szContent, 
 	
 	CTaskInfo updateInfo;
 	updateInfo.m_nTaskID = dlParam.m_nTaskID;
-	updateInfo.mask = CTaskInfo::TIF_FILE_NAME | CTaskInfo::TIF_URL;
-	updateInfo.m_szUrl = dlParam.m_szUrl;
+	updateInfo.mask = CTaskInfo::TIF_FILE_NAME;
 	updateInfo.m_szFileName = dlParam.m_szSaveToFileName;
 	::SendMessage(dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)dlParam.m_nTaskID, (LPARAM)&updateInfo);
 	

@@ -6,11 +6,11 @@
 #if !defined(AFX_STDAFX_H__B8816D45_D21B_4FC5_AA89_0EA1D2E5E673__INCLUDED_)
 #define AFX_STDAFX_H__B8816D45_D21B_4FC5_AA89_0EA1D2E5E673__INCLUDED_
 
-#pragma warning(disable : 4786)
-
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+
+#pragma warning(disable : 4786)
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 

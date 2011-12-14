@@ -48,7 +48,7 @@ CDownloaderCreator* CCreatorFactory::GetCreator(int nType)
 	void* ptr = NULL;
 	if(m_mapCreator.Lookup(nType, ptr) == FALSE)
 	{
-		return NULL;
+		return new CDownloaderCreator();
 	}
 
 	CreatRoutine lpRoutine = (CreatRoutine)ptr;

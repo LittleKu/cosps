@@ -219,10 +219,6 @@ SOURCE=.\YTGet.rc
 
 SOURCE=.\YTGetDlg.cpp
 # End Source File
-# Begin Source File
-
-SOURCE=.\YTParseDownloader.cpp
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -358,10 +354,6 @@ SOURCE=.\YTGet.h
 # Begin Source File
 
 SOURCE=.\YTGetDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\YTParseDownloader.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

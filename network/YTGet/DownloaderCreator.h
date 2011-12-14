@@ -19,7 +19,7 @@ public:
 	virtual ~CDownloaderCreator();
 public:
 	virtual CDownloader* CreateDownloader(const CString& szContent, CDownloaderContext* pContext, 
-		CDownloadParam dlParam) { return NULL; }
+		CDownloadParam dlParam);
 };
 
 #define DECLARE_NEW_CREATOR(T)   static CDownloaderCreator* T::new##T(){ return new T(); }

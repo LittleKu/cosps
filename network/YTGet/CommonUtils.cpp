@@ -900,5 +900,11 @@ int CCommonUtils::GetDownloadType(const CString& szURL)
 		nResult = DLTE_CNET;
 	}
 
+	nIndex = szURL.Find(".youtube.com/");
+	if(nIndex >= 0)
+	{
+		nResult = DLTE_YTB;
+	}
+
 	return nResult;
 }

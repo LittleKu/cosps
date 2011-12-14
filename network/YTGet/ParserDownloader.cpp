@@ -251,13 +251,12 @@ int CParserDownloader::PostDownload(CDownloadState& dlState)
 			m_pDownloaderCreator = NULL;
 		}
 
-		//Update detail
-		CTaskInfo updateInfo;
-		updateInfo.m_nTaskID = m_dlParam.m_nTaskID;
-		updateInfo.mask = CTaskInfo::TIF_DETAIL;
-		updateInfo.m_dlState.m_szDetail = "";
-		
-		::SendMessage(m_dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)m_dlParam.m_nTaskID, (LPARAM)&updateInfo);
+		//Failed to parse html file
+		if(m_pNext == NULL)
+		{
+			dlState.SetState(TSE_END_WITH_ERROR, _T("Failed to parse HTML file"));
+			dwResultState = dlState.GetState();
+		}
 	}
 	//(2). Destroyed
 	else if(dwResultState == TSE_DESTROYED)
