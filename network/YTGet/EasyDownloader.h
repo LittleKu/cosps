@@ -37,7 +37,6 @@ private:
 	BOOL ProcessTransferDone(CURLcode res, CDownloadState& dlState);
 	int PostDownload(CDownloadState& dlState);
 	//Retrieve the temp directory for the download task
-	void GetTempFolder(CString& szTempFolder);
 	void VerifyTempFolderExist();
 
 	void StartConnection();

@@ -374,7 +374,7 @@ int CSegmentDownloader::PostDownload(CDownloadState& dlState)
 	if(dwResultState == TSE_COMPLETE)
 	{
 		CString szTempFolder;
-		GetTempFolder(szTempFolder);
+		CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 
 		//1. merge files
 		//source files
@@ -404,7 +404,7 @@ int CSegmentDownloader::PostDownload(CDownloadState& dlState)
 	else if(dwResultState == TSE_DESTROYED)
 	{
 		CString szTempFolder;
-		GetTempFolder(szTempFolder);
+		CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 		
 		//delete task related folder
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
@@ -706,12 +706,12 @@ CURL* CSegmentDownloader::StartConnection(int nIndex, int nStartPos, int nFinish
 	pSegmentInfo->m_headerInfo.Reset();
 
 	CString szTempFolder;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 
-	pSegmentInfo->m_szFileHeader.Format("%s\\header_%s_%d.txt", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_szFileHeader.Format("%s\\head_%d.txt", szTempFolder, nIndex);
 	pSegmentInfo->m_lpFileHeader = fopen(pSegmentInfo->m_szFileHeader, "wb");
 	
-	pSegmentInfo->m_szFileData.Format("%s\\%s_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_szFileData.Format("%s\\data_%d", szTempFolder, nIndex);
 	pSegmentInfo->m_lpFileData = fopen(pSegmentInfo->m_szFileData, "wb");
 	
 	pSegmentInfo->m_curl = easy_handle;
@@ -759,13 +759,12 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex, int nRetryOperType)
 	pSegmentInfo->m_headerInfo.Reset();
 
 	CString szTempFolder;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
-	pSegmentInfo->m_szFileHeader.Format("%s\\header_%s_%d(%d).txt", szTempFolder,
-		m_dlParam.m_szSaveToFileName, nIndex, pSegmentInfo->m_nRetry);
+	pSegmentInfo->m_szFileHeader.Format("%s\\head_%d(%d).txt", szTempFolder, nIndex, pSegmentInfo->m_nRetry);
 	pSegmentInfo->m_lpFileHeader = fopen(pSegmentInfo->m_szFileHeader, "wb");
 	
-	pSegmentInfo->m_szFileData.Format("%s\\%s_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_szFileData.Format("%s\\data_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
 	pSegmentInfo->m_lpFileData = fopen(pSegmentInfo->m_szFileData, "ab");
 	
 	pSegmentInfo->m_curl = easy_handle;
@@ -848,14 +847,10 @@ void CSegmentDownloader::CloseConnection(int nIndex)
 	}
 }
 
-void CSegmentDownloader::GetTempFolder(CString& szTempFolder)
-{
-	szTempFolder.Format("%s\\%02d_%s", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_nTaskID, m_dlParam.m_szSaveToFileName);
-}
 void CSegmentDownloader::VerifyTempFolderExist()
 {
 	CString szTempFolder;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 
 	CCommonUtils::VerifyDirectoryExist(szTempFolder);
 }

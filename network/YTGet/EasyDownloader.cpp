@@ -223,7 +223,7 @@ int CEasyDownloader::PostDownload(CDownloadState& dlState)
 	{
 		//1. copy file
 		CString szTempFolder;
-		GetTempFolder(szTempFolder);
+		CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 		
 		CString szSrcFile, szDstFile;
 		szSrcFile.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
@@ -244,7 +244,7 @@ int CEasyDownloader::PostDownload(CDownloadState& dlState)
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
 		{
 			CString szTempFolder;
-			GetTempFolder(szTempFolder);
+			CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 	}
@@ -414,14 +414,10 @@ int CEasyDownloader::ProcessProgress(double dltotal, double dlnow, double ultota
 	return 0;
 }
 
-void CEasyDownloader::GetTempFolder(CString& szTempFolder)
-{
-	szTempFolder.Format("%s\\%02d_%s", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_nTaskID, m_dlParam.m_szSaveToFileName);
-}
 void CEasyDownloader::VerifyTempFolderExist()
 {
 	CString szTempFolder;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
 	CCommonUtils::VerifyDirectoryExist(szTempFolder);
 }
@@ -436,12 +432,12 @@ void CEasyDownloader::StartConnection()
 	
 	//File create
 	CString szTempFolder, szFileName;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
-	szFileName.Format("%s\\header_%s.txt", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\head.txt", szTempFolder);
 	m_connInfo.lpFileHeader = fopen(szFileName, "wb");
 
-	szFileName.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\data", szTempFolder);
 	m_connInfo.lpFileData = fopen(szFileName, "wb");
 }
 BOOL CEasyDownloader::RestartConnection(int nRetryOperType, int nMaxRetryLimit)
@@ -472,12 +468,12 @@ BOOL CEasyDownloader::RestartConnection(int nRetryOperType, int nMaxRetryLimit)
 
 	//File create
 	CString szTempFolder, szFileName;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
-	szFileName.Format("%s\\header_%s.txt", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\head.txt", szTempFolder);
 	m_connInfo.lpFileHeader = fopen(szFileName, "wb");
 	
-	szFileName.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\data", szTempFolder);
 	m_connInfo.lpFileData = fopen(szFileName, "ab");
 
 	return TRUE;

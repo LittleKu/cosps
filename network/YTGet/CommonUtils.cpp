@@ -616,6 +616,10 @@ CString CCommonUtils::StripInvalidFilenameChars(const CString& strText)
 		{
 			strDest += *pszSource;
 		}
+		else
+		{
+			strDest += _T("_");
+		}
 		pszSource++;
 	}
 	
@@ -890,21 +894,62 @@ BOOL CCommonUtils::GetFileContent(LPCTSTR lpFileName, CString& szString)
 
 int CCommonUtils::GetDownloadType(const CString& szURL)
 {
-	int nResult = 0;
+	int nResult = DLTE_NORMAL, nIndex = -1;
 
-	int nIndex = -1;
-
+	//CNET
 	nIndex = szURL.Find(".com.com/");
 	if(nIndex >= 0)
 	{
 		nResult = DLTE_CNET;
 	}
 
-	nIndex = szURL.Find(".youtube.com/");
+	//YOUTUBE
+	nIndex = szURL.Find("www.youtube.com/");
 	if(nIndex >= 0)
 	{
 		nResult = DLTE_YTB;
 	}
 
 	return nResult;
+}
+
+void CCommonUtils::Unescape(CString& szURL, int nCount)
+{
+	char* escaped = 0;
+	if(nCount >= 0)
+	{
+		while(nCount-- > 0)
+		{
+			escaped = curl_unescape((LPCTSTR)szURL, szURL.GetLength());
+			szURL = escaped;
+			curl_free(escaped);
+		}
+	}
+	else
+	{
+		CString szOld;
+		do 
+		{
+			szOld = szURL;
+
+			escaped = curl_unescape((LPCTSTR)szURL, szURL.GetLength());
+			szURL = escaped;
+			curl_free(escaped);
+			
+		} while (szOld.Compare(szURL) != 0);
+	}
+}
+
+void CCommonUtils::DecodeSpecialChars(CString& str)
+{
+	str.Replace(_T("&amp;"), _T("&"));
+	str.Replace(_T("&lt;"), _T("<"));
+	str.Replace(_T("&gt;"), _T(">"));
+	str.Replace(_T("&quot;"), _T("\""));
+	str.Replace(_T("&#39;"), _T("'"));
+}
+
+void CCommonUtils::GetTempFolder(CString& szTempFolder, const CDownloadParam& dlParam)
+{
+	szTempFolder.Format("%s\\%03d", SYS_OPTIONS()->m_szTempFolder, dlParam.m_nTaskID);
 }

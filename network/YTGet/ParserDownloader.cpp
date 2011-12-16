@@ -232,7 +232,7 @@ int CParserDownloader::PostDownload(CDownloadState& dlState)
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
 		{
 			CString szTempFolder;
-			GetTempFolder(szTempFolder);
+			CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 
@@ -265,7 +265,7 @@ int CParserDownloader::PostDownload(CDownloadState& dlState)
 		if(!(SYS_OPTIONS()->m_bKeepTempFiles))
 		{
 			CString szTempFolder;
-			GetTempFolder(szTempFolder);
+			CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 			CCommonUtils::RemoveDirectory(szTempFolder);
 		}
 	}
@@ -427,14 +427,10 @@ int CParserDownloader::ProcessProgress(double dltotal, double dlnow, double ulto
 	return 0;
 }
 
-void CParserDownloader::GetTempFolder(CString& szTempFolder)
-{
-	szTempFolder.Format("%s\\%02d_%s", SYS_OPTIONS()->m_szTempFolder, m_dlParam.m_nTaskID, m_dlParam.m_szSaveToFileName);
-}
 void CParserDownloader::VerifyTempFolderExist()
 {
 	CString szTempFolder;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
 	CCommonUtils::VerifyDirectoryExist(szTempFolder);
 }
@@ -449,12 +445,12 @@ void CParserDownloader::StartConnection()
 	
 	//File create
 	CString szTempFolder, szFileName;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
-	szFileName.Format("%s\\header_%s.txt", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\head_parser.txt", szTempFolder);
 	m_connInfo.lpFileHeader = fopen(szFileName, "wb");
 
-	szFileName.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\data_parser.html", szTempFolder);
 	m_connInfo.lpFileData = fopen(szFileName, "wb");
 }
 BOOL CParserDownloader::RestartConnection(int nRetryOperType, int nMaxRetryLimit)
@@ -485,12 +481,12 @@ BOOL CParserDownloader::RestartConnection(int nRetryOperType, int nMaxRetryLimit
 
 	//File create
 	CString szTempFolder, szFileName;
-	GetTempFolder(szTempFolder);
+	CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 	
-	szFileName.Format("%s\\header_%s.txt", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\head_parser.txt", szTempFolder);
 	m_connInfo.lpFileHeader = fopen(szFileName, "wb");
 	
-	szFileName.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
+	szFileName.Format("%s\\data_parser.html", szTempFolder);
 	m_connInfo.lpFileData = fopen(szFileName, "ab");
 
 	return TRUE;

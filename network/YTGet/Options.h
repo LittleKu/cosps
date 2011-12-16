@@ -28,6 +28,19 @@ public:
 public:
 	static COptions* GetInstance();
 
+	enum
+	{
+		QUALITY_COUNT = 3,
+		FORMAT_COUNT = 4
+	};
+
+	static const char* POSSIBLE_QUALITIES[];
+	static const char* POSSIBLE_FORMATS[];
+
+	static void Swap(const char* pArray[], int x, int y);
+
+	int	GetQualityIndex(LPCTSTR lpQuality);
+	int GetFormatIndex(LPCTSTR lpFormat);
 //Attributes
 public:
 	UINT	m_nProxyMode;
@@ -39,6 +52,10 @@ public:
 	UINT	m_nMaxConnectionCount;
 	UINT	m_nMinSegmentSize;
 	UINT	m_nMaxRetryTimes;
+
+	//Preferred output
+	CString m_szQuality;
+	CString m_szFormat;
 
 //Debug options
 	BOOL	m_bKeepTempFiles;

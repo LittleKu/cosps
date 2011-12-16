@@ -84,7 +84,6 @@ private:
 	void RemoveSegmentInfoArray();
 	
 	//Retrieve the temp directory for the download task
-	void GetTempFolder(CString& szTempFolder);
 	void VerifyTempFolderExist();
 private:
 	//CURL related callback functions

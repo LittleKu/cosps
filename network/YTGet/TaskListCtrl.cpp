@@ -136,7 +136,16 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemImage(lvi.iItem, iSubItem++, StatusToILIndex(pTaskInfo->m_dlState.GetState()), &m_ILTaskStatus);
 
 	//File Name
-	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFileName);
+	if(pTaskInfo->m_szFileName.Find(_T('&')) >= 0)
+	{
+		szTemp = pTaskInfo->m_szFileName;
+		szTemp.Replace("&", "&&");
+		SetItemText(lvi.iItem, iSubItem, szTemp);
+	}
+	else
+	{
+		SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFileName);
+	}
 	if(!pTaskInfo->m_szFileName.IsEmpty())
 	{
 		SetItemImage(lvi.iItem, iSubItem, CCommonUtils::GetIconIndex(pTaskInfo->m_szFileName), &m_ILShell);
@@ -222,7 +231,16 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 	{
 		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
 		
-		SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, pItemData->m_szFileName);
+		if(pItemData->m_szFileName.Find(_T('&')) >= 0)
+		{
+			CString szTemp = pItemData->m_szFileName;
+			szTemp.Replace("&", "&&");
+			SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, szTemp);
+		}
+		else
+		{
+			SetItemText(nIndex, CTaskInfo::COL_FILE_NAME, pItemData->m_szFileName);
+		}
 		SetItemImage(nIndex, CTaskInfo::COL_FILE_NAME, CCommonUtils::GetIconIndex(pItemData->m_szFileName), &m_ILShell);
 		
 		pSubItems[nSubItemCount++] = CTaskInfo::COL_FILE_NAME;

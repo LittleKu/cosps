@@ -99,6 +99,12 @@ public:
 	static BOOL GetFileContent(LPCTSTR lpFileName, CString& szString);
 
 	static int GetDownloadType(const CString& szURL);
+
+	static void Unescape(CString& szURL, int nCount = -1);
+
+	static void DecodeSpecialChars(CString& str);
+
+	static void GetTempFolder(CString& szTempFolder, const CDownloadParam& dlParam);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

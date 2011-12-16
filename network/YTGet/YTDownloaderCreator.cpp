@@ -7,6 +7,8 @@
 #include "CommonUtils.h"
 #include "HeaderDownloader.h"
 #include "StringUtils.h"
+#include <vector>
+#include <algorithm>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -18,6 +20,27 @@ DECLARE_THE_LOGGER_NAME("YTDC")
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+bool CYTDownloaderCreator::CURLInfo::operator<(const CURLInfo& other)
+{
+	int nThisIndex, nOtherIndex;
+
+	nThisIndex = SYS_OPTIONS()->GetQualityIndex(quality);
+	nOtherIndex = SYS_OPTIONS()->GetQualityIndex(other.quality);
+	if(nThisIndex != nOtherIndex)
+	{
+		return nThisIndex < nOtherIndex;
+	}
+
+	nThisIndex = SYS_OPTIONS()->GetFormatIndex(format);
+	nOtherIndex = SYS_OPTIONS()->GetFormatIndex(other.format);
+	if(nThisIndex != nOtherIndex)
+	{
+		return nThisIndex < nOtherIndex;
+	}
+
+	return true;
+}
 
 CYTDownloaderCreator::CYTDownloaderCreator()
 {
@@ -65,15 +88,7 @@ BOOL CYTDownloaderCreator::ParseHTMLFile(const CString& szContent, CDownloadPara
 	{
 		return FALSE;
 	}
-	szTitle.TrimLeft(" \t\r\n");
-	szTitle.TrimRight(" \t\r\n");
-
-	int nIndex;
-	nIndex = szTitle.FindOneOf("\r\n");
-	if(nIndex >= 0)
-	{
-		szTitle = szTitle.Left(nIndex);
-	}
+	TrimTitle(szTitle);
 
 	//URLs
 	CString szURLMap;
@@ -88,7 +103,7 @@ BOOL CYTDownloaderCreator::ParseHTMLFile(const CString& szContent, CDownloadPara
 
 	CString szLog;
 
-	CList<CURLInfo, CURLInfo&> urlInfoList;
+	std::vector<CURLInfo> urlInfoList;
 	POSITION pos = szUrlList.GetHeadPosition();
 	while(pos != NULL)
 	{
@@ -100,7 +115,7 @@ BOOL CYTDownloaderCreator::ParseHTMLFile(const CString& szContent, CDownloadPara
 			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
 
-		Unescape(szUrl, 2);
+		CCommonUtils::Unescape(szUrl);
 
 		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 		{
@@ -111,52 +126,37 @@ BOOL CYTDownloaderCreator::ParseHTMLFile(const CString& szContent, CDownloadPara
 		CURLInfo url_info;
 		URLUnescaped2URLInfo(szUrl, url_info);
 		
-		urlInfoList.AddTail(url_info);
+		urlInfoList.push_back(url_info);
 	}
 
-	if(urlInfoList.IsEmpty())
+	if(urlInfoList.empty())
 	{
 		return FALSE;
 	}
 
-	CURLInfo target;
-	pos = urlInfoList.GetHeadPosition();
-	int i = 0;
-	while(pos != NULL)
+	//log
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
 	{
-		CURLInfo& urlInfo = urlInfoList.GetNext(pos);
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		for(int i = 0; i < urlInfoList.size(); i++)
 		{
-			szLog.Format("(%d) - Title=%s, URL=%s", i, szTitle, urlInfo.url);
+			szLog.Format("(%d) - Title=%s, URL=%s", i, szTitle, urlInfoList[i].url);
 			LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 		}
-		if(i == 0)
-		{
-			target = urlInfo;
-		}
-
-		i++;
 	}
 
-	CString szFileExt;
-	GetFileExt(target.type, szFileExt);
-	dlParam.m_szSaveToFileName.Format("%s%s%s", szTitle, ".", szFileExt);
+	std::sort(urlInfoList.begin(), urlInfoList.end());
+	CURLInfo& target = urlInfoList[0];
+
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	{
+		szLog.Format("Task[%02d]: select the url with tag=%s", dlParam.m_nTaskID, target.itag);
+		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
+	}
+
+	dlParam.m_szSaveToFileName.Format("%s%s%s", szTitle, ".", target.format);
 	dlParam.m_szUrl = target.url;
 
 	return TRUE;
-}
-
-void CYTDownloaderCreator::Unescape(CString& szURL, int nCount)
-{
-	char* escaped = 0;
-	while(nCount-- > 0)
-	{
-		escaped = curl_unescape((LPCTSTR)szURL, szURL.GetLength());
-		szURL = escaped;
-		
-		curl_free(escaped);
-		escaped = 0;
-	}
 }
 
 BOOL CYTDownloaderCreator::URLUnescaped2URLInfo(const CString& szURL, CURLInfo& urlInfo)
@@ -196,6 +196,8 @@ BOOL CYTDownloaderCreator::URLUnescaped2URLInfo(const CString& szURL, CURLInfo& 
 	urlInfo.quality = proper_map["quality"];
 	urlInfo.fallback_host = proper_map["fallback_host"];
 	urlInfo.type = proper_map["type"];
+	GetFileExt(urlInfo.type, urlInfo.format);
+
 	urlInfo.itag = proper_map["itag"];
 	return TRUE;
 }
@@ -222,4 +224,20 @@ BOOL CYTDownloaderCreator::GetFileExt(const CString& szType, CString& szFileExt)
 		szFileExt = "flv";
 	}
 	return bResult;
+}
+
+void CYTDownloaderCreator::TrimTitle(CString& szTitle)
+{
+	szTitle.TrimLeft(" \t\r\n");
+	szTitle.TrimRight(" \t\r\n");
+	
+	int nIndex;
+	nIndex = szTitle.FindOneOf("\r\n");
+	if(nIndex >= 0)
+	{
+		szTitle = szTitle.Left(nIndex);
+	}
+
+	CCommonUtils::DecodeSpecialChars(szTitle);
+	szTitle = CCommonUtils::StripInvalidFilenameChars(szTitle);
 }

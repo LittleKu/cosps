@@ -29,15 +29,27 @@ private:
 		CString url;
 		CString quality;
 		CString type;
+
+		CString format;
 		
 		CString fallback_host;
 		CString itag;
+
+		bool operator<(const CURLInfo& other);
+	private:
+		enum
+		{
+			QUALITY_COUNT = 3,
+			FORMAT_COUNT = 4
+		};
+		static CString szQualities[QUALITY_COUNT];
+		static CString szFormats[FORMAT_COUNT];
 	};
 private:
 	BOOL ParseHTMLFile(const CString& szContent, CDownloadParam& dlParam);
-	void Unescape(CString& szURL, int nCount);
-	BOOL URLUnescaped2URLInfo(const CString& szURL, CURLInfo& urlInfo);
 
+	void TrimTitle(CString& str);
+	BOOL URLUnescaped2URLInfo(const CString& szURL, CURLInfo& urlInfo);
 	BOOL GetFileExt(const CString& szType, CString& szFileExt);
 };
 

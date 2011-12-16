@@ -14,6 +14,15 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+const char* COptions::POSSIBLE_QUALITIES[] = {"large", "medium", "small"};
+const char* COptions::POSSIBLE_FORMATS[] = {"flv", "mp4", "webm"};
+
+void COptions::Swap(const char* pArray[], int x, int y)
+{
+	const char* pTemp = pArray[x];
+	pArray[x] = pArray[y];
+	pArray[y] = pTemp;
+}
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -46,6 +55,27 @@ COptions::COptions()
 	m_nMaxConnectionCount = 8;
 	m_nMinSegmentSize = 1024 * 1024;
 	m_nMaxRetryTimes = 5;
+
+	m_szQuality = "large";
+	m_szFormat = "mp4";
+
+	int i;
+	for(i = 0; i < LENGTH_OF(POSSIBLE_QUALITIES); i++)
+	{
+		if(i != 0 && m_szQuality.Compare(POSSIBLE_QUALITIES[i]) == 0)
+		{
+			Swap(POSSIBLE_QUALITIES, 0, i);
+			break;
+		}
+	}
+	for(i = 0; i < LENGTH_OF(POSSIBLE_FORMATS); i++)
+	{
+		if(i != 0 && m_szFormat.Compare(POSSIBLE_FORMATS[i]) == 0)
+		{
+			Swap(POSSIBLE_FORMATS, 0, i);
+			break;
+		}
+	}
 }
 
 COptions::~COptions()
@@ -116,4 +146,27 @@ LPCTSTR COptions::GetProxy()
 		}
 	}
 	return NULL;
+}
+
+int	COptions::GetQualityIndex(LPCTSTR lpQuality)
+{
+	for(int i = 0; i < LENGTH_OF(POSSIBLE_QUALITIES); i++)
+	{
+		if(_tcscmp(lpQuality, POSSIBLE_QUALITIES[i]) == 0)
+		{
+			return i;
+		}
+	}
+	return CCommonUtils::MAX_INTEGER;
+}
+int COptions::GetFormatIndex(LPCTSTR lpFormat)
+{
+	for(int i = 0; i < LENGTH_OF(POSSIBLE_FORMATS); i++)
+	{
+		if(_tcscmp(lpFormat, POSSIBLE_FORMATS[i]) == 0)
+		{
+			return i;
+		}
+	}
+	return CCommonUtils::MAX_INTEGER;
 }
