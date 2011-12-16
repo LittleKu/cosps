@@ -66,7 +66,7 @@ CDownloader* CYTDownloaderCreator::CreateDownloader(const CString& szContent, CD
 	CTaskInfo updateInfo;
 	updateInfo.m_nTaskID = dlParam.m_nTaskID;
 	updateInfo.mask = CTaskInfo::TIF_FILE_NAME | CTaskInfo::TIF_DETAIL;
-	updateInfo.m_szFileName = dlParam.m_szSaveToFileName;
+	updateInfo.m_szFileName = dlParam.m_szFileName;
 	updateInfo.m_dlState.m_szDetail = "";
 	::SendMessage(dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)dlParam.m_nTaskID, (LPARAM)&updateInfo);
 	
@@ -153,7 +153,7 @@ BOOL CYTDownloaderCreator::ParseHTMLFile(const CString& szContent, CDownloadPara
 		LOG4CPLUS_DEBUG_STR(THE_LOGGER, (LPCTSTR)szLog)
 	}
 
-	dlParam.m_szSaveToFileName.Format("%s%s%s", szTitle, ".", target.format);
+	dlParam.m_szFileName.Format("%s%s%s", szTitle, ".", target.format);
 	dlParam.m_szUrl = target.url;
 
 	return TRUE;

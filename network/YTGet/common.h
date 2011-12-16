@@ -180,7 +180,7 @@ public:
 	int		m_nDlType;
 	HWND	m_hWnd;
 	UINT	m_nFileSize;
-	CString m_szSaveToFileName;
+	CString m_szFileName;
 	CDownloadParam(LPCTSTR lpszUrl = NULL, int index = -1, HWND hwnd = NULL, UINT nFileSize = 0)
 		: m_szUrl(lpszUrl), m_hWnd(hwnd), m_nTaskID(index), m_nDlType(0), m_nFileSize(nFileSize) {}
 };

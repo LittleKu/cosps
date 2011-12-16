@@ -386,7 +386,7 @@ int CSegmentDownloader::PostDownload(CDownloadState& dlState)
 		}
 		//destination file
 		CString szDstFile;
-		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szSaveToFileName);
+		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szFileName);
 		
 		//merge source files to destination file
 		CCommonUtils::MergeFiles(srcFileNames, szDstFile);

@@ -226,8 +226,8 @@ int CEasyDownloader::PostDownload(CDownloadState& dlState)
 		CCommonUtils::GetTempFolder(szTempFolder, m_dlParam);
 		
 		CString szSrcFile, szDstFile;
-		szSrcFile.Format("%s\\%s", szTempFolder, m_dlParam.m_szSaveToFileName);
-		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szSaveToFileName);
+		szSrcFile.Format("%s\\data", szTempFolder);
+		szDstFile.Format("%s\\%s", SYS_OPTIONS()->m_szSaveToFolder, m_dlParam.m_szFileName);
 		
 		::CopyFile(szSrcFile, szDstFile, FALSE);
 		
