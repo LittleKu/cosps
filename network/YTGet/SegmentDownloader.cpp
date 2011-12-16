@@ -764,7 +764,7 @@ CURL* CSegmentDownloader::RestartConnection(int nIndex, int nRetryOperType)
 	pSegmentInfo->m_szFileHeader.Format("%s\\head_%d(%d).txt", szTempFolder, nIndex, pSegmentInfo->m_nRetry);
 	pSegmentInfo->m_lpFileHeader = fopen(pSegmentInfo->m_szFileHeader, "wb");
 	
-	pSegmentInfo->m_szFileData.Format("%s\\data_%d", szTempFolder, m_dlParam.m_szSaveToFileName, nIndex);
+	pSegmentInfo->m_szFileData.Format("%s\\data_%d", szTempFolder, nIndex);
 	pSegmentInfo->m_lpFileData = fopen(pSegmentInfo->m_szFileData, "ab");
 	
 	pSegmentInfo->m_curl = easy_handle;
