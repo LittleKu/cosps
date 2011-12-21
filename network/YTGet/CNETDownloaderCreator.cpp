@@ -56,17 +56,13 @@ CDownloader* CCNETDownloaderCreator::CreateDownloader(const CString& szContent, 
 	LOG4CPLUS_INFO_STR(THE_LOGGER, (LPCTSTR)szLog)
 		
 	dlParam.m_szUrl = szURL;
-	//File name
-	BOOL bResult = CCommonUtils::ExtractFileName(dlParam.m_szUrl, dlParam.m_szFileName);
-	if(!bResult || dlParam.m_szFileName.GetLength() >= 64 || dlParam.m_szFileName.IsEmpty())
-	{
-		dlParam.m_szFileName = "index.html";
-	}
+	CCommonUtils::ExtractFileName(dlParam.m_szUrl, dlParam.m_szFileName, TRUE);
 	
 	CTaskInfo updateInfo;
 	updateInfo.m_nTaskID = dlParam.m_nTaskID;
-	updateInfo.mask = CTaskInfo::TIF_FILE_NAME;
+	updateInfo.mask = CTaskInfo::TIF_FILE_NAME | CTaskInfo::TIF_DETAIL;
 	updateInfo.m_szFileName = dlParam.m_szFileName;
+	updateInfo.m_dlState.m_szDetail = "";
 	::SendMessage(dlParam.m_hWnd, WM_DOWNLOAD_PROGRESS, (WPARAM)dlParam.m_nTaskID, (LPARAM)&updateInfo);
 	
 	CHeaderDownloader* pDownloader = new CHeaderDownloader(pContext);

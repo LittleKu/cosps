@@ -9,46 +9,48 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-typedef enum
-{
-	PME_NO_PROXY,
-	PME_SYS_PROXY,
-	PME_USER_PROXY
-}ProxyMode;
-
+class CProperties;
 class COptions  
-{
+{	
 private:
 	COptions();
-	BOOL CreateDefaultFolders();
+	BOOL InitAppDataFolders();
+
+	static void GetUInt(CProperties* pProp, LPCTSTR lpszKey, UINT* pResult, UINT nMin = 0, UINT nMax = 0xFFFFFFFF);
+	static void GetProp(CProperties* pProp, LPCTSTR lpszKey, CString& szResult);
+	static void Swap(const char* pArray[], int x, int y);
 public:
 	virtual ~COptions();
 	BOOL Init();
-	LPCTSTR GetProxy();
-public:
-	static COptions* GetInstance();
-
-	enum
-	{
-		QUALITY_COUNT = 3,
-		FORMAT_COUNT = 4
-	};
-
-	static const char* POSSIBLE_QUALITIES[];
-	static const char* POSSIBLE_FORMATS[];
-
-	static void Swap(const char* pArray[], int x, int y);
+	BOOL Save();
 
 	int	GetQualityIndex(LPCTSTR lpQuality);
 	int GetFormatIndex(LPCTSTR lpFormat);
+
+	LPCTSTR GetProxy();
+public:
+	enum
+	{
+		PME_NO_PROXY,
+		PME_USER_PROXY,
+		PME_SYS_PROXY
+	};
+	static COptions* GetInstance();
+
+	static const char* POSSIBLE_QUALITIES[];
+	static const char* POSSIBLE_FORMATS[];
 //Attributes
 public:
-	UINT	m_nProxyMode;
-	CString	m_szProxy;
+	CString m_szAppDataFolder;
+	CString m_szOptionFile;
 
 	CString	m_szTempFolder;
 	CString m_szSaveToFolder;
 
+	UINT	m_nProxyMode;
+	CString	m_szProxy;
+
+	UINT	m_nMaxTaskCount;
 	UINT	m_nMaxConnectionCount;
 	UINT	m_nMinSegmentSize;
 	UINT	m_nMaxRetryTimes;

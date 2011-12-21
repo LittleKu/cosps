@@ -5,6 +5,7 @@
 #include "YTGet.h"
 #include "MainDlg.h"
 #include "Constants.h"
+#include "OptionDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -290,6 +291,12 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 	case ID_TBBTN_RESTART:
 		{
 			m_pYTGetDlg->Restart();
+		}
+		break;
+	case IDM_TOOLS_OPTIONS:
+		{
+			COptionDlg optionDlg;
+			optionDlg.DoModal();
 		}
 		break;
 	default:

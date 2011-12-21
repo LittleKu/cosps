@@ -6,7 +6,7 @@
 #define WM_DOWNLOAD_STATUS		(WM_USER + 1101)
 
 #define USER_AGENT_IE8	"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; InfoPath.2; MS-RTC LM 8; FDM)"
-#define THE_APP_NAME	"GolentGet"
+#define THE_APP_NAME	"XGet77"
 #define TIME_COST_NAME	"TIME"
 #define LENGTH_OF(A)	(sizeof(A) / sizeof(A[0]))
 

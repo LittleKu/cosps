@@ -1,0 +1,10 @@
+#define AppExeName              "YTGet"
+#define AppExeFullName          "YTGet.exe"
+#define AppName                 "XGet77"
+#define AppWebSite              "http://www.golent.com/"
+#define SetupFileBaseName       "XGet77-Setup"
+
+#define AppExeFilePath          "..\Debug\YTGet.exe"
+#define AppVersion              GetFileVersion("..\Debug\YTGet.exe")
+#define AppCopyRight            GetFileCopyright("..\Debug\YTGet.exe")
+#define AppOrgName              GetFileCompany("..\Debug\YTGet.exe")

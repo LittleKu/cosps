@@ -14,19 +14,36 @@
 #define IDB_TASK_STATUS                 134
 #define IDB_HEAD_SORT                   135
 #define IDD_ADD_TASK_DIALOG             136
+#define IDD_PROPPAGE_GENERAL            137
+#define IDD_PROPPAGE_CONNECTION         138
+#define IDD_PROPPAGE_PROXY              139
 #define IDC_TASK_LIST                   1000
 #define IDC_TXT_NEW_ADDRESS             1001
 #define IDC_NEW_ADDRESS                 1002
+#define IDC_EDIT_OUTPUT_DIR             1003
+#define IDC_BTN_OUTPUT_DIR              1004
+#define IDC_EDIT_TEMP_DIR               1005
+#define IDC_BTN_TEMP_DIR                1006
+#define IDC_EDIT_MAX_TASK_COUNT         1007
+#define IDC_EDIT_MAX_CONNECTION_COUNT   1008
+#define IDC_EDIT_MIN_SEGMENT_SIZE       1009
+#define IDC_EDIT_MAX_RETRY_TIMES        1010
+#define IDC_RADIO_NO_PROXY              1018
+#define IDC_RADIO_PROXY_MANUALLY        1019
+#define IDC_RADIO_PROXY_FROM_IE         1020
+#define IDC_EDIT_PROXY_ADDRESS          1021
+#define IDC_EDIT_PROXY_PORT             1022
 #define IDM_FILE_EXIT                   32771
 #define IDM_HELP_ABOUT                  32772
+#define IDM_TOOLS_OPTIONS               32773
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        137
-#define _APS_NEXT_COMMAND_VALUE         32773
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_COMMAND_VALUE         32774
+#define _APS_NEXT_CONTROL_VALUE         1023
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -480,43 +480,65 @@ int CCommonUtils::GetHTTPStatusCode(const char* buffer)
 	return rsp_code;
 }
 
-BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName)
+BOOL CCommonUtils::ExtractFileName(LPCTSTR lpszUrl, CString& szFileName, BOOL bSetDefault)
 {
-	TCHAR* lpLastSlash = _tcsrchr(lpszUrl, _T('/'));
-	if(lpLastSlash == NULL)
+	BOOL bResult = FALSE;
+	do 
 	{
-		return FALSE;
-	}
+		TCHAR* lpLastSlash = _tcsrchr(lpszUrl, _T('/'));
+		if(lpLastSlash == NULL)
+		{
+			break;
+		}
+		
+		//"/" is the last char, in case of the address like: http://www.yahoo.com/
+		if(*(lpLastSlash + 1) == _T('\0'))
+		{
+			break;
+		}
+		
+		//check if the previous char is '/', in case of the address like: http://www.yahoo.com
+		if(*(lpLastSlash - 1) == _T('/'))
+		{
+			break;
+		}
+		
+		szFileName = (lpLastSlash + 1);
+		
+		int nIndex = szFileName.Find(_T('?'));
+		if(nIndex >= 0)
+		{
+			szFileName = szFileName.Left(nIndex);
+		}
+		
+		//check if the length of candidate file is longer than MAX_PATH
+		if(szFileName.GetLength() >= MAX_PATH)
+		{
+			break;
+		}
+		
+		szFileName = StripInvalidFilenameChars(szFileName);
 
-	//"/" is the last char, in case of the address like: http://www.yahoo.com/
-	if(*(lpLastSlash + 1) == _T('\0'))
-	{
-		return FALSE;
-	}
+		if(szFileName.IsEmpty())
+		{
+			break;
+		}
 
-	//check if the previous char is '/', in case of the address like: http://www.yahoo.com
-	if(*(lpLastSlash - 1) == _T('/'))
-	{
-		return FALSE;
-	}
+		//Should no longer than 64
+		if(szFileName.GetLength() > 64)
+		{
+			szFileName.Left(64);
+		}
+		bResult = TRUE;
+
+	} while (FALSE);
 	
-	szFileName = (lpLastSlash + 1);
-
-	int nIndex = szFileName.Find(_T('?'));
-	if(nIndex >= 0)
+	if(!bResult)
 	{
-		szFileName = szFileName.Left(nIndex);
+		szFileName = "index.html";
 	}
 
-	//check if the length of candidate file is longer than MAX_PATH
-	if(szFileName.GetLength() >= MAX_PATH)
-	{
-		return FALSE;
-	}
-
-	szFileName = StripInvalidFilenameChars(szFileName);
-
-	return TRUE;
+	return bResult;
 }
 
 BOOL CCommonUtils::RemoveDirectory(LPCTSTR lpPathName)
@@ -952,4 +974,27 @@ void CCommonUtils::DecodeSpecialChars(CString& str)
 void CCommonUtils::GetTempFolder(CString& szTempFolder, const CDownloadParam& dlParam)
 {
 	szTempFolder.Format("%s\\%03d", SYS_OPTIONS()->m_szTempFolder, dlParam.m_nTaskID);
+}
+
+BOOL CCommonUtils::GetProxyServerPort(const CString& szProxy, CString& szProxyServer, UINT& nProxyPort)
+{
+	int nIndex = szProxy.Find(_T(':'));
+	if(nIndex < 0)
+	{
+		return FALSE;
+	}	
+
+	szProxyServer = szProxy.Mid(0, nIndex);
+	if(szProxyServer.IsEmpty())
+	{
+		return FALSE;
+	}
+	
+	CString szTemp = szProxy.Mid(nIndex + 1);
+	if(_stscanf(szTemp, "%u", &nProxyPort) != 1)
+	{
+		return FALSE;
+	}
+
+	return TRUE;
 }

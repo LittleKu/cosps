@@ -114,6 +114,58 @@ BEGIN
     EDITTEXT        IDC_NEW_ADDRESS,77,19,332,12,ES_AUTOHSCROLL
 END
 
+IDD_PROPPAGE_GENERAL DIALOG DISCARDABLE  0, 0, 372, 206
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Folders",IDC_STATIC,7,7,358,101
+    LTEXT           "Default output directory",IDC_STATIC,13,17,346,13
+    EDITTEXT        IDC_EDIT_OUTPUT_DIR,13,32,294,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_OUTPUT_DIR,316,32,43,14
+    EDITTEXT        IDC_EDIT_TEMP_DIR,13,86,294,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_TEMP_DIR,316,86,43,14
+    LTEXT           "Default temporary directory",IDC_STATIC,13,70,346,13
+END
+
+IDD_PROPPAGE_CONNECTION DIALOG DISCARDABLE  0, 0, 372, 206
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Connection"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Connection",IDC_STATIC,7,7,358,92
+    LTEXT           "Maximum task count (1-10)",IDC_STATIC,15,20,258,8
+    EDITTEXT        IDC_EDIT_MAX_TASK_COUNT,313,18,23,14,ES_AUTOHSCROLL
+    LTEXT           "Maximum connections allowed per task (1-16)",IDC_STATIC,
+                    15,41,258,8
+    EDITTEXT        IDC_EDIT_MAX_CONNECTION_COUNT,313,35,23,14,
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_SEGMENT_SIZE,313,56,23,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAX_RETRY_TIMES,313,77,23,14,ES_AUTOHSCROLL
+    LTEXT           "Minimum file segment size (1M-10M)",IDC_STATIC,15,62,
+                    258,8
+    LTEXT           "Maximum retry times (1-100)",IDC_STATIC,15,83,258,8
+END
+
+IDD_PROPPAGE_PROXY DIALOG DISCARDABLE  0, 0, 372, 206
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Proxy"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Proxy Settings",IDC_STATIC,7,7,358,129
+    CONTROL         "No Proxy",IDC_RADIO_NO_PROXY,"Button",
+                    BS_AUTORADIOBUTTON,15,23,45,10
+    CONTROL         "Specify Proxy Manually",IDC_RADIO_PROXY_MANUALLY,"Button",
+                    BS_AUTORADIOBUTTON,15,38,89,10
+    CONTROL         "Get Proxy from Internet Explorer",
+                    IDC_RADIO_PROXY_FROM_IE,"Button",BS_AUTORADIOBUTTON,15,
+                    53,115,10
+    LTEXT           "Address",IDC_STATIC,15,77,167,8
+    LTEXT           "Port",IDC_STATIC,207,77,103,8
+    EDITTEXT        IDC_EDIT_PROXY_ADDRESS,15,90,167,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PROXY_PORT,207,90,40,14,ES_AUTOHSCROLL
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -189,6 +241,30 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 99
     END
+
+    IDD_PROPPAGE_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 365
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 199
+    END
+
+    IDD_PROPPAGE_CONNECTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 365
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 199
+    END
+
+    IDD_PROPPAGE_PROXY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 365
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 199
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -203,6 +279,10 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "&Options...",                 IDM_TOOLS_OPTIONS
     END
     POPUP "&Help"
     BEGIN

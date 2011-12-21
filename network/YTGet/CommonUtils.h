@@ -68,7 +68,7 @@ public:
 	static int  GetHTTPStatusCode(const char* buffer);
 
 	//Extract the file name from the raw URL address
-	static BOOL ExtractFileName(LPCTSTR lpszUrl, CString& szFileName);
+	static BOOL ExtractFileName(LPCTSTR lpszUrl, CString& szFileName, BOOL bSetDefault = FALSE);
 
 	static BOOL RemoveDirectory(LPCTSTR lpPathName);
 	
@@ -105,6 +105,8 @@ public:
 	static void DecodeSpecialChars(CString& str);
 
 	static void GetTempFolder(CString& szTempFolder, const CDownloadParam& dlParam);
+
+	static BOOL GetProxyServerPort(const CString& szProxy, CString& szProxyServer, UINT& nProxyPort);
 private:
 	typedef CMap<UINT, UINT, CString, LPCTSTR> CMapUInt2String;
 	CCommonUtils();

@@ -148,6 +148,10 @@ SOURCE=.\MainToolBarCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\OptionDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Options.cpp
 # End Source File
 # Begin Source File
@@ -156,7 +160,27 @@ SOURCE=.\ParserDownloader.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PPgConnection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PPgGeneral.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PPgProxy.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressMeter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.cpp
 # End Source File
 # Begin Source File
 
@@ -202,6 +226,10 @@ SOURCE=.\ThreadMonitor.cpp
 # Begin Source File
 
 SOURCE=.\ThirdParty\ToolBarCtrlEx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\TreePropSheet.cpp
 # End Source File
 # Begin Source File
 
@@ -285,6 +313,10 @@ SOURCE=.\MainToolBarCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\OptionDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Options.h
 # End Source File
 # Begin Source File
@@ -293,7 +325,27 @@ SOURCE=.\ParserDownloader.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\PPgConnection.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PPgGeneral.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PPgProxy.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressMeter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrame.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\PropPageFrameDefault.h
 # End Source File
 # Begin Source File
 
@@ -342,6 +394,10 @@ SOURCE=.\ThreadMonitor.h
 # Begin Source File
 
 SOURCE=.\ThirdParty\ToolBarCtrlEx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\TreePropSheet\TreePropSheet.h
 # End Source File
 # Begin Source File
 

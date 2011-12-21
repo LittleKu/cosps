@@ -27,11 +27,13 @@ public:
 	virtual ~CYTGetApp();
 	CThreadMonitor* GetThreadMonitor();
 private:
+	void InitLog4cplus();
 	void Init();
 	void DeInit();
 // Attributes
 public:
-	CBrush*  m_pSysBkBrush;
+	CString	m_szWorkDir;
+	CBrush* m_pSysBkBrush;
 private:
 	CThreadMonitor m_threadMonitor;
 // Overrides

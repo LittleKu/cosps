@@ -296,11 +296,7 @@ void CYTGetDlg::AddTask(LPCTSTR lpszAddress)
 	pTaskInfo->m_nTaskID = CCommonUtils::GetUniqueID();
 
 	//File name
-	BOOL bResult = CCommonUtils::ExtractFileName(lpszAddress, pTaskInfo->m_szFileName);
-	if(!bResult || pTaskInfo->m_szFileName.GetLength() >= 64 || pTaskInfo->m_szFileName.IsEmpty())
-	{
-		pTaskInfo->m_szFileName = "index.html";
-	}
+	CCommonUtils::ExtractFileName(lpszAddress, pTaskInfo->m_szFileName, TRUE);
 
 	m_taskListCtrl.AddRow(pTaskInfo);
 }
