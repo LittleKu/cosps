@@ -61,6 +61,7 @@ Type: dirifempty; Name: "{app}\log"
 ; Don't explicitly delete the dir {app}, in case the user install the app in the root drive
 ;Type: dirifempty; Name: "{app}"
 Type: files; Name: "{win}\{#AppExeName}.INI"
-
+Type: filesandordirs; Name: "{userappdata}\{#AppName}\DlData"
+Type: dirifempty; Name: "{userdocs}\{#AppName}"
 
 [UninstallRun]

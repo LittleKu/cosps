@@ -2,7 +2,7 @@
 
 [General Info]
 Version=1
-LastClass=CPPgConnection
+LastClass=CAddTaskDlg
 LastTemplate=CPropertyPage
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "YTGet.h"
@@ -13,20 +13,20 @@ Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=9
-Resource1=IDD_PROPPAGE_PROXY
+Resource1=IDD_PROPPAGE_CONNECTION
 Resource2=IDR_MAINFRAME
-Resource3=IDD_ABOUTBOX
-Resource4=IDD_ADD_TASK_DIALOG
-Resource5=IDD_MAIN_DIALOG
+Resource3=IDD_PROPPAGE_PROXY
+Resource4=IDD_PROPPAGE_GENERAL
+Resource5=IDD_ADD_TASK_DIALOG
 Class4=CMainToolBarCtrl
 Class5=CYTGetDlg
 Class6=CTaskListCtrl
 Class7=CAddTaskDlg
-Resource6=IDD_PROPPAGE_CONNECTION
-Resource7=IDD_YTGET_DIALOG
+Resource6=IDD_YTGET_DIALOG
+Resource7=IDD_MAIN_DIALOG
 Class8=CPPgGeneral
 Class9=CPPgConnection
-Resource8=IDD_PROPPAGE_GENERAL
+Resource8=IDD_ABOUTBOX
 Class10=CPPgProxy
 Resource9=IDR_MAIN_MENU
 
@@ -108,11 +108,16 @@ VirtualFilter=FWC
 [DLG:IDD_ADD_TASK_DIALOG]
 Type=1
 Class=CAddTaskDlg
-ControlCount=4
+ControlCount=9
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
 Control3=IDC_TXT_NEW_ADDRESS,static,1342308352
 Control4=IDC_NEW_ADDRESS,edit,1350631552
+Control5=IDC_STATIC,static,1342308352
+Control6=IDC_EDIT_SAVE_TO_FILE_NAME,edit,1350631552
+Control7=IDC_STATIC,button,1342177287
+Control8=IDC_RADIO_START_AUTO,button,1342177289
+Control9=IDC_RADIO_START_MANUALLY,button,1342177289
 
 [CLS:CAddTaskDlg]
 Type=0
@@ -120,7 +125,7 @@ HeaderFile=AddTaskDlg.h
 ImplementationFile=AddTaskDlg.cpp
 BaseClass=CDialog
 Filter=D
-LastObject=IDC_NEW_ADDRESS
+LastObject=CAddTaskDlg
 VirtualFilter=dWC
 
 [DLG:IDD_PROPPAGE_GENERAL]

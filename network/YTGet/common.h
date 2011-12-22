@@ -39,6 +39,12 @@ typedef enum
 	DLTE_YAHOO
 } DlTypeEnum;
 
+typedef enum
+{
+	SME_AUTO,
+	SME_MANUAL
+} StartModeEnum;
+
 typedef CSize CRange;
 
 class CDownloadState

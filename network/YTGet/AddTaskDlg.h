@@ -19,7 +19,6 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CAddTaskDlg)
 	enum { IDD = IDD_ADD_TASK_DIALOG };
-		// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
 
 
@@ -37,6 +36,8 @@ protected:
 	//{{AFX_MSG(CAddTaskDlg)
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual BOOL OnInitDialog();
+	afx_msg void OnChangeNewAddress();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

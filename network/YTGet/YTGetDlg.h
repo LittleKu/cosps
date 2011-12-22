@@ -15,7 +15,7 @@ class CYTGetDlg : public CResizableDialog
 // Construction
 public:
 	void ListCtrlSelectionChanged();
-	void AddTask(LPCTSTR lpszAddress);
+	void AddTask(LPCTSTR lpszAddress, LPCTSTR lpszFileName = NULL, StartModeEnum nStartMode = SME_MANUAL);
 	void Restart();
 	void Remove();
 	void Pause();
@@ -53,6 +53,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
+	void StartTask(CTaskInfo* pTaskInfo);
 	void EnableButtons(DWORD dwStatus);
 	void InitResizableDlgAnchor();
 	void InitTaskListCtrl();

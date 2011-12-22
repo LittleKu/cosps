@@ -201,21 +201,7 @@ void CYTGetDlg::Start()
 			continue;
 		}
 		
-		CDownloadParam param;
-		param.m_hWnd = GetSafeHwnd();
-		param.m_nTaskID = pTaskInfo->m_nTaskID;
-		param.m_szUrl = pTaskInfo->m_szUrl;
-		param.m_szFileName = pTaskInfo->m_szFileName;
-		param.m_nFileSize = 0;
-		param.m_nDlType = CCommonUtils::GetDownloadType(param.m_szUrl);
-		
-		if(pTaskInfo->m_lpDownloaderMgr == NULL)
-		{
-			pTaskInfo->m_lpDownloaderMgr = new CDownloaderMgr();
-		}
-		pTaskInfo->m_lpDownloaderMgr->Init(param);
-		
-		pTaskInfo->m_lpDownloaderMgr->Start();
+		StartTask(pTaskInfo);
 	}
 }
 
@@ -289,16 +275,27 @@ void CYTGetDlg::Restart()
 	}
 }
 
-void CYTGetDlg::AddTask(LPCTSTR lpszAddress)
+void CYTGetDlg::AddTask(LPCTSTR lpszAddress, LPCTSTR lpszFileName, StartModeEnum nStartMode)
 {
 	CTaskInfo* pTaskInfo = new CTaskInfo();
 	pTaskInfo->m_szUrl = lpszAddress;
 	pTaskInfo->m_nTaskID = CCommonUtils::GetUniqueID();
-
 	//File name
-	CCommonUtils::ExtractFileName(lpszAddress, pTaskInfo->m_szFileName, TRUE);
+	if(lpszFileName == NULL)
+	{
+		CCommonUtils::ExtractFileName(lpszAddress, pTaskInfo->m_szFileName, TRUE);
+	}
+	else
+	{
+		pTaskInfo->m_szFileName = lpszFileName;
+	}
 
 	m_taskListCtrl.AddRow(pTaskInfo);
+
+	if(nStartMode == SME_AUTO)
+	{
+		StartTask(pTaskInfo);
+	}
 }
 
 BOOL CYTGetDlg::GetTaskInfo(int nTaskID, int* pIndex, CTaskInfo** ppTaskInfo)
@@ -378,4 +375,25 @@ void CYTGetDlg::EnableButtons(DWORD dwStatus)
 	pMainWnd->m_pMainToolBarCtrl->EnableButton(ID_TBBTN_PAUSE, dwStatus & DL_OPER_FLAG_PAUSE);
 	pMainWnd->m_pMainToolBarCtrl->EnableButton(ID_TBBTN_REMOVE, dwStatus & DL_OPER_FLAG_REMOVE);
 	pMainWnd->m_pMainToolBarCtrl->EnableButton(ID_TBBTN_RESTART, dwStatus & DL_OPER_FLAG_REDOWNLOAD);
+}
+
+void CYTGetDlg::StartTask(CTaskInfo *pTaskInfo)
+{
+	ASSERT(pTaskInfo != NULL);
+
+	CDownloadParam param;
+	param.m_hWnd = GetSafeHwnd();
+	param.m_nTaskID = pTaskInfo->m_nTaskID;
+	param.m_szUrl = pTaskInfo->m_szUrl;
+	param.m_szFileName = pTaskInfo->m_szFileName;
+	param.m_nFileSize = 0;
+	param.m_nDlType = CCommonUtils::GetDownloadType(param.m_szUrl);
+	
+	if(pTaskInfo->m_lpDownloaderMgr == NULL)
+	{
+		pTaskInfo->m_lpDownloaderMgr = new CDownloaderMgr();
+	}
+	pTaskInfo->m_lpDownloaderMgr->Init(param);
+	
+	pTaskInfo->m_lpDownloaderMgr->Start();
 }

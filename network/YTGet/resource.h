@@ -33,6 +33,10 @@
 #define IDC_RADIO_PROXY_FROM_IE         1020
 #define IDC_EDIT_PROXY_ADDRESS          1021
 #define IDC_EDIT_PROXY_PORT             1022
+#define IDC_COMBO_SAVE_TO_FOLDER        1023
+#define IDC_EDIT_SAVE_TO_FILE_NAME      1024
+#define IDC_RADIO_START_AUTO            1025
+#define IDC_RADIO_START_MANUALLY        1026
 #define IDM_FILE_EXIT                   32771
 #define IDM_HELP_ABOUT                  32772
 #define IDM_TOOLS_OPTIONS               32773
@@ -43,7 +47,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32774
-#define _APS_NEXT_CONTROL_VALUE         1023
+#define _APS_NEXT_CONTROL_VALUE         1028
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
