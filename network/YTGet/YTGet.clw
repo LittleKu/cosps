@@ -13,20 +13,20 @@ Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=9
-Resource1=IDD_PROPPAGE_CONNECTION
+Resource1=IDD_PROPPAGE_GENERAL
 Resource2=IDR_MAINFRAME
-Resource3=IDD_PROPPAGE_PROXY
-Resource4=IDD_PROPPAGE_GENERAL
-Resource5=IDD_ADD_TASK_DIALOG
+Resource3=IDD_PROPPAGE_CONNECTION
+Resource4=IDD_ADD_TASK_DIALOG
+Resource5=IDD_PROPPAGE_PROXY
 Class4=CMainToolBarCtrl
 Class5=CYTGetDlg
 Class6=CTaskListCtrl
 Class7=CAddTaskDlg
-Resource6=IDD_YTGET_DIALOG
-Resource7=IDD_MAIN_DIALOG
+Resource6=IDD_MAIN_DIALOG
+Resource7=IDD_ABOUTBOX
 Class8=CPPgGeneral
 Class9=CPPgConnection
-Resource8=IDD_ABOUTBOX
+Resource8=IDD_YTGET_DIALOG
 Class10=CPPgProxy
 Resource9=IDR_MAIN_MENU
 

@@ -228,6 +228,21 @@ BOOL CYTDownloaderCreator::GetFileExt(const CString& szType, CString& szFileExt)
 
 void CYTDownloaderCreator::TrimTitle(CString& szTitle)
 {
+	//Convert UTF-8 to ANSI
+	LPSTR lpDst = NULL;
+	int cbByteDst = 0;
+	BOOL bResult = CStringUtils::MultiByteToMultiByte((LPCTSTR)szTitle, szTitle.GetLength(), CP_UTF8, 
+		&lpDst, &cbByteDst, CP_ACP, 0);	
+	if(bResult)
+	{
+		ASSERT(strlen(lpDst) == cbByteDst);
+		
+		szTitle = lpDst;
+		
+		delete lpDst;
+		lpDst = NULL;
+	}
+
 	szTitle.TrimLeft(" \t\r\n");
 	szTitle.TrimRight(" \t\r\n");
 	

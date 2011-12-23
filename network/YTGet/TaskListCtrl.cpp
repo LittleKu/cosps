@@ -588,7 +588,14 @@ void CTaskListCtrl::OpenFolder()
 	CString szFullPath;
 	GetFileFullPath(nItem, szFullPath);
 
-	ShellExecute(NULL, _T("open"), _T("explorer"), _T("/select,\"") + szFullPath + _T("\""), NULL, SW_SHOW);
+	if(::PathFileExists(szFullPath))
+	{
+		ShellExecute(NULL, _T("open"), _T("explorer"), _T("/select,\"") + szFullPath + _T("\""), NULL, SW_SHOW);
+	}
+	else
+	{
+		ShellExecute(NULL, _T("open"), _T("explorer"), _T("/root,\"") + SYS_OPTIONS()->m_szSaveToFolder + _T("\""), NULL, SW_SHOW);
+	}
 }
 
 void CTaskListCtrl::GetFileFullPath(int nItem, CString &szFullPath)

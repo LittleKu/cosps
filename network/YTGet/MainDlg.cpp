@@ -299,6 +299,18 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			optionDlg.DoModal();
 		}
 		break;
+	case IDM_FILE_EXIT:
+		{
+			ASSERT(AfxGetMainWnd());
+			AfxGetMainWnd()->SendMessage(WM_CLOSE);
+		}
+		break;
+	case IDM_HELP_ABOUT:
+		{
+			CAboutDlg dlgAbout;
+			dlgAbout.DoModal();
+		}
+		break;
 	default:
 		{
 			bProcessed = FALSE;
