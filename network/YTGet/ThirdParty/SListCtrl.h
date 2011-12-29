@@ -72,6 +72,10 @@ public:
 
 	void SetRowHeight(int nRowHeight);
 	int  GetRowHeight();
+
+protected:
+	virtual void DrawEmptyBk(CDC* pDC, CRect rcClient);
+
 private:
 	CSListCtrl::CListSubItemData* GetSubItemData(int nItem, int nSubItem);
 
@@ -107,6 +111,7 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CSListCtrl)
+	afx_msg void OnPaint();
 	afx_msg void OnDestroy();
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);	
 	afx_msg BOOL OnClick(NMHDR* pNMHDR, LRESULT* pResult);

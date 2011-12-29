@@ -32,15 +32,15 @@ CSListCtrl::CSListCtrl()
 {
 	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
 	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
-
+	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
 	//background color for lost focus selection items
-	m_crBtnFace				= RGB(179, 200, 232);
+	m_crBtnFace				= RGB(198, 215, 192);
 	
 	//background color for focus selection items
-	m_crHighLight			= ::GetSysColor(COLOR_HIGHLIGHT);
+	m_crHighLight			= RGB(179, 200, 232);
 
 	//text color for focus selection items
-	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+	m_crHighLightText       = ::GetSysColor(COLOR_WINDOWTEXT);
 
 	//background color for non-selection items
 	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
@@ -63,6 +63,7 @@ CSListCtrl::~CSListCtrl()
 
 BEGIN_MESSAGE_MAP(CSListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CSListCtrl)
+	ON_WM_PAINT()
 	ON_WM_DESTROY()
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_NOTIFY_REFLECT_EX(NM_CLICK, OnClick)
@@ -85,6 +86,70 @@ void CSListCtrl::PreSubclassWindow()
 	}
 	
 	CListCtrl::PreSubclassWindow();
+}
+
+void CSListCtrl::OnPaint()
+{
+//	CListCtrl::OnPaint();
+    Default();
+	if (GetItemCount() <= 0)
+	{
+		CDC* pDC = GetDC();
+		int nSavedDC = pDC->SaveDC();
+
+		//Get Content client area
+		CRect rcClient;
+		GetClientRect(&rcClient);
+
+		CRect rcHeaderWindow;
+		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
+		rcClient.top += rcHeaderWindow.Height();
+
+		//Draw
+		DrawEmptyBk(pDC, rcClient);
+
+		//Restore
+		pDC->RestoreDC(nSavedDC);
+		ReleaseDC(pDC);
+	}
+}
+
+void CSListCtrl::DrawEmptyBk(CDC* pDC, CRect rcClient)
+{
+	//1. Draw background
+	pDC->FillSolidRect(&rcClient, m_crWindow);
+
+	//No valid row height, don't draw anything
+	if(m_nRowHeight <= 0 || rcClient.Height() < (2 * m_nRowHeight))
+	{
+		return;
+	}
+
+	COLORREF crGridLine = RGB(236, 233, 216);
+
+	//Draw horizontal lines
+	for(int nRowY = rcClient.top + m_nRowHeight; nRowY < rcClient.bottom; nRowY += (m_nRowHeight + 1))
+	{
+		pDC->FillSolidRect(rcClient.left, nRowY, rcClient.Width(), 1, crGridLine);
+	}
+
+	//Get horizontal scroll bar distance
+	int nMinPos, nMaxPos, nCurPos;
+	GetScrollRange(SB_HORZ, &nMinPos, &nMaxPos);
+	nCurPos = GetScrollPos(SB_HORZ);
+
+	int nHorzDistance = nCurPos - nMinPos;
+
+	//Draw vertical lines
+	CRect rcHeaderCol;
+	for(int nCol = 0; nCol < m_HeaderCtrl.GetItemCount(); nCol++)
+	{
+		m_HeaderCtrl.GetItemRect(nCol, &rcHeaderCol);
+		if(rcHeaderCol.right >= nHorzDistance)
+		{
+			pDC->FillSolidRect(rcHeaderCol.right - nHorzDistance, rcClient.top, 1, rcClient.Height(), crGridLine);
+		}
+	}
 }
 
 void CSListCtrl::OnDestroy() 
