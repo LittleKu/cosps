@@ -31,17 +31,17 @@
 #define VERSION_MJR		1
 #define VERSION_MIN		0
 #define VERSION_UPDATE	1
-#define VERSION_BUILD	2
+#define VERSION_BUILD	184
 
 // NOTE: This version string is also used by the language DLLs!
 #define	SZ_VERSION_NAME				chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(".") chSTR(VERSION_BUILD)
 #define SZ_SHORT_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)
 
-#define SZ_PRODUCT_NAME				_T("Demo")
+#define SZ_PRODUCT_NAME				_T("Any Code Counter")
 #define SZ_EXE_NAME					_T("acc.exe")
-#define SZ_ORGNIZATION_NAME			_T("www.easydemo77.com")
-#define SZ_PRODUCT_WEBSITE			_T("http://www.easydemo77.com")
-#define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@easydemo77.com")
+#define SZ_ORGNIZATION_NAME			_T("www.any-code-counter.com")
+#define SZ_PRODUCT_WEBSITE			_T("http://www.any-code-counter.com")
+#define SZ_PRODUCT_SUPPORT_EMAIL	_T("support@any-code-counter.com")
 
 #define SZ_PRODUCT_WEBSITE_ORDER	SZ_PRODUCT_WEBSITE _T("/purchase.html")
 #define SZ_PRODUCT_UPGRADE			SZ_PRODUCT_WEBSITE _T("/download.html")

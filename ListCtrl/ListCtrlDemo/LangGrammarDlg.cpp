@@ -443,8 +443,9 @@ CLangGrammarDlg::~CLangGrammarDlg()
 BOOL CLangGrammarDlg::OnEraseBkgnd(CDC* pDC)
 {
 	CRect rect;
-	GetClientRect(&rect);	
-	CBkDraw::GetInstance()->Draw(pDC, &rect);	
+	GetClientRect(&rect);
+	CFrameBkDraw bkDraw;
+	bkDraw.Draw(pDC, &rect);	
 	return TRUE;
 }
 
