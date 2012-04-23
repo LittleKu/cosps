@@ -31,68 +31,77 @@ import com.sun.jna.Structure;
 import com.sun.jna.Union;
 import com.sun.jna.ptr.LongByReference;
 
-public class WindowsProxy {
+public class WindowsProxy
+{
 
-	public static class ProxySettings {
+	public static class ProxySettings
+	{
 		public int flags = 0;
 		public String proxyServer = null;
 		public String proxyBypass = null;
 		public String autoConfigUrl = null;
 		public int autoDiscoveryFlags = 0;
 
-		private int set(int flags, int mask, boolean value) {
-			if (value)
+		private int set(int flags, int mask, boolean value)
+		{
+			if(value)
 				return flags | mask;
 			return flags & ~mask;
 		}
 
-		public boolean isAutoProxy() {
+		public boolean isAutoProxy()
+		{
 			return (flags & WinInet.PROXY_TYPE_AUTO_PROXY_URL) > 0;
 		}
 
-		public void setAutoProxy(boolean value) {
+		public void setAutoProxy(boolean value)
+		{
 			flags = set(flags, WinInet.PROXY_TYPE_AUTO_PROXY_URL, value);
 		}
 
-		public boolean isAutoDetect() {
+		public boolean isAutoDetect()
+		{
 			return (flags & WinInet.PROXY_TYPE_AUTO_DETECT) > 0;
 		}
 
-		public void setAutoDetect(boolean value) {
+		public void setAutoDetect(boolean value)
+		{
 			flags = set(flags, WinInet.PROXY_TYPE_AUTO_DETECT, value);
 		}
 
-		public boolean isDirect() {
+		public boolean isDirect()
+		{
 			return (flags & WinInet.PROXY_TYPE_DIRECT) > 0;
 		}
 
-		public void setDirect(boolean value) {
+		public void setDirect(boolean value)
+		{
 			flags = set(flags, WinInet.PROXY_TYPE_DIRECT, value);
 		}
 
-		public boolean isProxy() {
+		public boolean isProxy()
+		{
 			return (flags & WinInet.PROXY_TYPE_PROXY) > 0;
 		}
 
-		public void setProxy(boolean value) {
+		public void setProxy(boolean value)
+		{
 			flags = set(flags, WinInet.PROXY_TYPE_PROXY, value);
 		}
 
-		public String toString() {
-			return getClass().getSimpleName() + " (flags=" + flags
-					+ " (autoProxy=" + isAutoProxy() + ", autoDetect="
-					+ isAutoDetect() + ", direct=" + isDirect() + ", proxy="
-					+ isProxy() + "), proxyServer=" + proxyServer
-					+ ", proxyBypass=" + proxyBypass + ", autoConfigUrl="
-					+ autoConfigUrl + ", autoDiscoveryFlags="
-					+ autoDiscoveryFlags + ")";
+		public String toString()
+		{
+			return getClass().getSimpleName() + " (flags=" + flags + " (autoProxy=" + isAutoProxy()
+				+ ", autoDetect=" + isAutoDetect() + ", direct=" + isDirect() + ", proxy="
+				+ isProxy() + "), proxyServer=" + proxyServer + ", proxyBypass=" + proxyBypass
+				+ ", autoConfigUrl=" + autoConfigUrl + ", autoDiscoveryFlags=" + autoDiscoveryFlags
+				+ ")";
 		}
 	}
 
 	private static Error available = null;
 
 	private static WinInet wininet = null;
-
 
 	// private static CLibrary clibrary = null;
 	//
@@ -102,17 +111,22 @@ public class WindowsProxy {
 	//
 	// }
 
-	static {
-		try {
+	static
+	{
+		try
+		{
 			wininet = (WinInet) Native.loadLibrary("wininet", WinInet.class);
 			// clibrary = (CLibrary) Native.loadLibrary("msvcrt",
 			// CLibrary.class);
-		} catch (Error e) {
+		}
+		catch(Error e)
+		{
 			available = e;
 		}
 	}
 
-	public static boolean isAvailable() {
+	public static boolean isAvailable()
+	{
 		return available == null;
 	}
 
@@ -123,21 +137,20 @@ public class WindowsProxy {
 	 * @throws LastErrorException
 	 *             if there is an error retrieving the settings
 	 */
-	public static ProxySettings getProxySettings() throws LastErrorException {
-		if (available != null)
-			throw new RuntimeException("Unable to initialise JNA libraries",
-					available);
+	public static ProxySettings getProxySettings() throws LastErrorException
+	{
+		if(available != null)
+			throw new RuntimeException("Unable to initialise JNA libraries", available);
 
 		INTERNET_PER_CONN_OPTION.ByReference optRef = new INTERNET_PER_CONN_OPTION.ByReference();
-		INTERNET_PER_CONN_OPTION[] options = (INTERNET_PER_CONN_OPTION[]) optRef
-				.toArray(5);
+		INTERNET_PER_CONN_OPTION[] options = (INTERNET_PER_CONN_OPTION[]) optRef.toArray(5);
 
 		options[0].dwOption = WinInet.INTERNET_PER_CONN_FLAGS;
 		options[1].dwOption = WinInet.INTERNET_PER_CONN_PROXY_SERVER;
 		options[2].dwOption = WinInet.INTERNET_PER_CONN_PROXY_BYPASS;
 		options[3].dwOption = WinInet.INTERNET_PER_CONN_AUTOCONFIG_URL;
 		options[4].dwOption = WinInet.INTERNET_PER_CONN_AUTODISCOVERY_FLAGS;
-		for (int i = 0; i < options.length; i++)
+		for(int i = 0; i < options.length; i++)
 			options[i].write();
 
 		INTERNET_PER_CONN_OPTION_LIST list = new INTERNET_PER_CONN_OPTION_LIST();
@@ -149,18 +162,22 @@ public class WindowsProxy {
 		LongByReference size = new LongByReference(list.size());
 
 		boolean result = wininet.InternetQueryOptionA(null,
-				WinInet.INTERNET_OPTION_PER_CONNECTION_OPTION, list
-						.getPointer(), size);
+			WinInet.INTERNET_OPTION_PER_CONNECTION_OPTION, list.getPointer(), size);
 
-		if (!result) {
+		if(!result)
+		{
 			System.out.println("Error: " + Native.getLastError());
 			System.out.println("Option error: " + list.dwOptionError);
 			return null;
-		} else {
+		}
+		else
+		{
 			ProxySettings settings = new ProxySettings();
 			list.read();
-			for (int i = 0; i < options.length; i++) {
-				switch (options[i].dwOption) {
+			for(int i = 0; i < options.length; i++)
+			{
+				switch(options[i].dwOption)
+				{
 				case WinInet.INTERNET_PER_CONN_FLAGS:
 					settings.flags = getInt(options[i]);
 					break;
@@ -182,10 +199,11 @@ public class WindowsProxy {
 		}
 	}
 
-	private static String getString(INTERNET_PER_CONN_OPTION option) {
+	private static String getString(INTERNET_PER_CONN_OPTION option)
+	{
 		option.value.setType(Pointer.class);
 		option.value.read();
-		if (option.value.pszValue == null)
+		if(option.value.pszValue == null)
 			return null;
 		String str = option.value.pszValue.getString(0);
 		// FIXME : We still need to free this memory somehow!?
@@ -193,20 +211,20 @@ public class WindowsProxy {
 		return str;
 	}
 
-	private static int getInt(INTERNET_PER_CONN_OPTION option) {
+	private static int getInt(INTERNET_PER_CONN_OPTION option)
+	{
 		option.value.setType(int.class);
 		option.value.read();
 		return option.value.dwValue;
 	}
 
-	public static void setProxySettings(ProxySettings settings) {
-		if (available != null)
-			throw new RuntimeException("Unable to initialise JNA libraries",
-					available);
+	public static void setProxySettings(ProxySettings settings)
+	{
+		if(available != null)
+			throw new RuntimeException("Unable to initialise JNA libraries", available);
 
 		INTERNET_PER_CONN_OPTION.ByReference optRef = new INTERNET_PER_CONN_OPTION.ByReference();
-		INTERNET_PER_CONN_OPTION[] options = (INTERNET_PER_CONN_OPTION[]) optRef
-				.toArray(5);
+		INTERNET_PER_CONN_OPTION[] options = (INTERNET_PER_CONN_OPTION[]) optRef.toArray(5);
 
 		options[0].dwOption = WinInet.INTERNET_PER_CONN_FLAGS;
 		options[0].value.setType(int.class);
@@ -228,7 +246,7 @@ public class WindowsProxy {
 		options[4].value.setType(int.class);
 		options[4].value.dwValue = settings.autoDiscoveryFlags;
 
-		for (int i = 0; i < options.length; i++)
+		for(int i = 0; i < options.length; i++)
 			options[i].write();
 
 		INTERNET_PER_CONN_OPTION_LIST list = new INTERNET_PER_CONN_OPTION_LIST();
@@ -238,15 +256,14 @@ public class WindowsProxy {
 		list.dwSize = list.size();
 		list.write();
 
-		if (!wininet.InternetSetOptionA(null,
-				WinInet.INTERNET_OPTION_PER_CONNECTION_OPTION, list
-						.getPointer(), list.size()))
-			throw new RuntimeException(
-					"Error invoking InternetSetOptionA, code "
-							+ Native.getLastError());
+		if(!wininet.InternetSetOptionA(null, WinInet.INTERNET_OPTION_PER_CONNECTION_OPTION,
+			list.getPointer(), list.size()))
+			throw new RuntimeException("Error invoking InternetSetOptionA, code "
+				+ Native.getLastError());
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		ProxySettings current = getProxySettings();
 		System.out.println(current + "\n\n");
 		ProxySettings replacements = new ProxySettings();
@@ -258,8 +275,10 @@ public class WindowsProxy {
 		System.out.println(getProxySettings());
 	}
 
-	// bizarrely, use of an import for this Library symbol fails the build in Maven
-	interface WinInet extends com.sun.jna.Library { 
+	// bizarrely, use of an import for this Library symbol fails the build in
+	// Maven
+	interface WinInet extends com.sun.jna.Library
+	{
 
 		/**
 		 * PER_CONN_FLAGS
@@ -316,48 +335,51 @@ public class WindowsProxy {
 
 		static int INTERNET_OPTION_PER_CONNECTION_OPTION = 75;
 
-		boolean InternetQueryOptionA(Pointer unused, int dwOption,
-				Pointer lpBuffer, LongByReference size);
+		boolean InternetQueryOptionA(Pointer unused, int dwOption, Pointer lpBuffer,
+			LongByReference size);
 
-		boolean InternetSetOptionA(Pointer unused, int dwOption,
-				Pointer buffer, int bufferLength);
+		boolean InternetSetOptionA(Pointer unused, int dwOption, Pointer buffer, int bufferLength);
 
-		boolean InternetQueryOptionW(Pointer unused, int dwOption,
-				Pointer lpBuffer, LongByReference size);
+		boolean InternetQueryOptionW(Pointer unused, int dwOption, Pointer lpBuffer,
+			LongByReference size);
 
-		boolean InternetSetOptionW(Pointer unused, int dwOption,
-				Pointer buffer, int bufferLength);
+		boolean InternetSetOptionW(Pointer unused, int dwOption, Pointer buffer, int bufferLength);
 
-		static class INTERNET_PER_CONN_OPTION extends Structure {
+		public static class INTERNET_PER_CONN_OPTION extends Structure
+		{
 
-			int dwOption;
+			public int dwOption;
 
-			static class FILETIME extends Structure {
+			public static class FILETIME extends Structure
+			{
 				public int dwLowDateTime;
 				public int dwHighDateTime;
 			}
 
-			static class Value extends Union {
+			public static class Value extends Union
+			{
 				public int dwValue;
 				public Pointer pszValue;
 				public FILETIME ftValue;
 				public String strValue;
 			}
 
-			Value value;
+			public Value value;
 
-			static class ByReference extends INTERNET_PER_CONN_OPTION implements
-					Structure.ByReference {
+			public static class ByReference extends INTERNET_PER_CONN_OPTION implements
+					Structure.ByReference
+			{
 			};
 
 		}
 
-		static class INTERNET_PER_CONN_OPTION_LIST extends Structure {
-			int dwSize;
-			Pointer pszConnection;
-			int dwOptionCount;
-			int dwOptionError;
-			INTERNET_PER_CONN_OPTION.ByReference pOptions;
+		public static class INTERNET_PER_CONN_OPTION_LIST extends Structure
+		{
+			public int dwSize;
+			public Pointer pszConnection;
+			public int dwOptionCount;
+			public int dwOptionError;
+			public INTERNET_PER_CONN_OPTION.ByReference pOptions;
 		}
 	}
 
