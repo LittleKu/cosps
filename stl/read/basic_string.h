@@ -29,41 +29,41 @@ public:
 	typedef std::reverse_iterator<iterator, value_type, reference, pointer, difference_type> 
 		reverse_iterator;
 
-	explicit basic_string(const Alloc& _Al = Alloc()) : allocator(_Al) 
+	explicit basic_string(const Alloc& alloc = Alloc()) : allocator(alloc) 
 	{
-		tidy(); 
+		Tidy(); 
 	}
 	basic_string(const BasicStringType& str) : allocator(str.allocator)
 	{
-		tidy(), assign(str, 0, npos); 
+		Tidy(), assign(str, 0, npos); 
 	}
-	basic_string(const BasicStringType& str, size_type _P, size_type _M, 
-		const Alloc& _Al = Alloc()) : allocator(_Al) 
+	basic_string(const BasicStringType& str, size_type pos, size_type n, 
+		const Alloc& alloc = Alloc()) : allocator(alloc) 
 	{
-		tidy(), assign(str, _P, _M); 
+		Tidy(), assign(str, pos, n); 
 	}
-	basic_string(const E *_S, size_type _N, const Alloc& _Al = Alloc()) : allocator(_Al) 
+	basic_string(const E *str, size_type n, const Alloc& alloc = Alloc()) : allocator(alloc) 
 	{
-		tidy(), assign(_S, _N); 
+		Tidy(), assign(str, n); 
 	}
-	basic_string(const E *_S, const Alloc& _Al = Alloc()) : allocator(_Al) 
+	basic_string(const E *str, const Alloc& alloc = Alloc()) : allocator(alloc) 
 	{
-		tidy(), assign(_S); 
+		Tidy(), assign(str); 
 	}
-	basic_string(size_type _N, E _C, const Alloc& _Al = Alloc())
-		: allocator(_Al) 
+	basic_string(size_type n, E c, const Alloc& alloc = Alloc())
+		: allocator(alloc) 
 	{
-		tidy(), assign(_N, _C); 
+		Tidy(), assign(n, c); 
 	}
-	typedef const_iterator _It;
-	basic_string(_It _F, _It _L, const Alloc& _Al = Alloc())
-		: allocator(_Al) 
+	typedef const_iterator constIter;
+	basic_string(constIter first, constIter last, const Alloc& alloc = Alloc())
+		: allocator(alloc) 
 	{
-		tidy(); assign(_F, _L); 
+		Tidy(); assign(first, last); 
 	}
 	~basic_string()
 	{
-		tidy(true); 
+		Tidy(true); 
 	}
 	typedef Traits traits_type;
 	typedef Alloc allocator_type;
@@ -73,337 +73,342 @@ public:
 	{
 		return (assign(str)); 
 	}
-	BasicStringType& operator=(const E *_S)
+	BasicStringType& operator=(const E *str)
 	{
-		return (assign(_S)); 
+		return (assign(str)); 
 	}
-	BasicStringType& operator=(E _C)
+	BasicStringType& operator=(E c)
 	{
-		return (assign(1, _C)); 
+		return (assign(1, c)); 
 	}
 	BasicStringType& operator+=(const BasicStringType& str)
 	{
 		return (append(str)); 
 	}
-	BasicStringType& operator+=(const E *_S)
+	BasicStringType& operator+=(const E *str)
 	{
-		return (append(_S)); 
+		return (append(str)); 
 	}
-	BasicStringType& operator+=(E _C)
+	BasicStringType& operator+=(E c)
 	{
-		return (append(1, _C)); 
+		return (append(1, c)); 
 	}
 	BasicStringType& append(const BasicStringType& str)
 	{
 		return (append(str, 0, npos)); 
 	}
-	BasicStringType& append(const BasicStringType& str, size_type _P, size_type _M)
+	BasicStringType& append(const BasicStringType& str, size_type pos, size_type n)
 	{
-		if (str.size() < _P)
+		if (str.size() < pos)
 			throw_range_exception();
-		size_type _N = str.size() - _P;
-		if (_N < _M)
-			_M = _N;
-		if (npos - nLength <= _M)
+		size_type n = str.size() - pos;
+		if (n < n)
+			n = n;
+		if (npos - nLength <= n)
 			throw_length_exception();
-		if (0 < _M && _Grow(_N = nLength + _M))
+		if (0 < n && Grow(n = nLength + n))
 		{
-			Traits::copy(ptr + nLength, &str.c_str()[_P], _M);
-			_Eos(_N); 
+			Traits::copy(ptr + nLength, &str.c_str()[pos], n);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& append(const E *_S, size_type _M)
+	BasicStringType& append(const E *s, size_type n)
 	{
-		if (npos - nLength <= _M)
+		if (npos - nLength <= n)
 			throw_length_exception();
-		size_type _N;
-		if (0 < _M && _Grow(_N = nLength + _M))
+		size_type n;
+		if (0 < n && Grow(n = nLength + n))
 		{
-			Traits::copy(ptr + nLength, _S, _M);
-			_Eos(_N); 
+			Traits::copy(ptr + nLength, s, n);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& append(const E *_S)
+	BasicStringType& append(const E *s)
 	{
-		return (append(_S, Traits::length(_S))); 
+		return (append(s, Traits::length(s))); 
 	}
-	BasicStringType& append(size_type _M, E _C)
+	BasicStringType& append(size_type n, E c)
 	{
-		if (npos - nLength <= _M)
+		if (npos - nLength <= n)
 			throw_length_exception();
-		size_type _N;
-		if (0 < _M && _Grow(_N = nLength + _M))
+		size_type n;
+		if (0 < n && Grow(n = nLength + n))
 		{
-			Traits::assign(ptr + nLength, _M, _C);
-			_Eos(_N); 
+			Traits::assign(ptr + nLength, n, c);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& append(_It _F, _It _L)
+	BasicStringType& append(constIter first, constIter last)
 	{
-		return (replace(end(), end(), _F, _L)); 
+		return (replace(end(), end(), first, last)); 
 	}
 	BasicStringType& assign(const BasicStringType& str)
-	{return (assign(str, 0, npos)); }
-	BasicStringType& assign(const BasicStringType& str, size_type _P, size_type _M)
 	{
-		if (str.size() < _P)
+		return (assign(str, 0, npos)); 
+	}
+	BasicStringType& assign(const BasicStringType& str, size_type pos, size_type count)
+	{
+		if (str.size() < pos)
 			throw_range_exception();
-		size_type _N = str.size() - _P;
-		if (_M < _N)
-			_N = _M;
+		size_type n = str.size() - pos;
+		if (count < n)
+			n = count;
 		if (this == &str)
-			erase((size_type)(_P + _N)), erase(0, _P);
-		else if (0 < _N && _N == str.size() && _Refcnt(str.c_str()) < _FROZEN - 1 
+			erase((size_type)(pos + n)), erase(0, pos);
+		else if (0 < n && n == str.size() && RefCount(str.c_str()) < _FROZEN - 1 
 			&& allocator == str.allocator)
 		{
-			tidy(true);
+			Tidy(true);
 			ptr = (E *)str.c_str();
 			nLength = str.size();
 			nCapacity = str.capacity();
-			++_Refcnt(ptr); 
+			++RefCount(ptr); 
 		}
-		else if (_Grow(_N, true))
+		else if (Grow(n, true))
 		{
-			Traits::copy(ptr, &str.c_str()[_P], _N);
-			_Eos(_N); 
+			Traits::copy(ptr, &str.c_str()[pos], n);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& assign(const E *_S, size_type _N)
+	BasicStringType& assign(const E *s, size_type n)
 	{
-		if (_Grow(_N, true))
+		if (Grow(n, true))
 		{
-			Traits::copy(ptr, _S, _N);
-			_Eos(_N); 
+			Traits::copy(ptr, s, n);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& assign(const E *_S)
+	BasicStringType& assign(const E *s)
 	{
-		return (assign(_S, Traits::length(_S))); 
+		return (assign(s, Traits::length(s))); 
 	}
-	BasicStringType& assign(size_type _N, E _C)
+	BasicStringType& assign(size_type n, E c)
 	{
-		if (_N == npos)
+		if (n == npos)
 			throw_length_exception();
-		if (_Grow(_N, true))
+		if (Grow(n, true))
 		{
-			Traits::assign(ptr, _N, _C);
-			_Eos(_N); 
+			Traits::assign(ptr, n, c);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& assign(_It _F, _It _L)
-	{return (replace(begin(), end(), _F, _L)); }
-	BasicStringType& insert(size_type _P0, const BasicStringType& str)
-	{return (insert(_P0, str, 0, npos)); }
-	BasicStringType& insert(size_type _P0, const BasicStringType& str, size_type _P,
-		size_type _M)
+	BasicStringType& assign(constIter first, constIter last)
 	{
-		if (nLength < _P0 || str.size() < _P)
+		return (replace(begin(), end(), first, last)); 
+	}
+	BasicStringType& insert(size_type pos1, const BasicStringType& str)
+	{
+		return (insert(pos1, str, 0, npos)); 
+	}
+	BasicStringType& insert(size_type pos1, const BasicStringType& str, size_type pos2,
+		size_type count)
+	{
+		if (nLength < pos1 || str.size() < pos2)
 			throw_range_exception();
-		size_type _N = str.size() - _P;
-		if (_N < _M)
-			_M = _N;
-		if (npos - nLength <= _M)
+		size_type n = str.size() - pos2;
+		if (n < count)
+			count = n;
+		if (npos - nLength <= count)
 			throw_length_exception();
-		if (0 < _M && _Grow(_N = nLength + _M))
+		if (0 < count && Grow(n = nLength + count))
 		{
-			Traits::move(ptr + _P0 + _M, ptr + _P0, nLength - _P0);
-			Traits::copy(ptr + _P0, &str.c_str()[_P], _M);
-			_Eos(_N); 
+			Traits::move(ptr + pos1 + count, ptr + pos1, nLength - pos1);
+			Traits::copy(ptr + pos1, &str.c_str()[pos2], count);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& insert(size_type _P0, const E *_S, size_type _M)
+	BasicStringType& insert(size_type pos1, const E *str, size_type count)
 	{
-		if (nLength < _P0)
+		if (nLength < pos1)
 			throw_range_exception();
-		if (npos - nLength <= _M)
+		if (npos - nLength <= count)
 			throw_length_exception();
-		size_type _N;
-		if (0 < _M && _Grow(_N = nLength + _M))
+		size_type n;
+		if (0 < count && Grow(n = nLength + count))
 		{
-			Traits::move(ptr + _P0 + _M, ptr + _P0, nLength - _P0);
-			Traits::copy(ptr + _P0, _S, _M);
-			_Eos(_N); 
+			Traits::move(ptr + pos1 + count, ptr + pos1, nLength - pos1);
+			Traits::copy(ptr + pos1, str, count);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& insert(size_type _P0, const E *_S)
-	{return (insert(_P0, _S, Traits::length(_S))); }
-	BasicStringType& insert(size_type _P0, size_type _M, E _C)
+	BasicStringType& insert(size_type pos1, const E *s)
 	{
-		if (nLength < _P0)
+		return (insert(pos1, s, Traits::length(s))); 
+	}
+	BasicStringType& insert(size_type pos1, size_type count, E c)
+	{
+		if (nLength < pos1)
 			throw_range_exception();
-		if (npos - nLength <= _M)
+		if (npos - nLength <= count)
 			throw_length_exception();
-		size_type _N;
-		if (0 < _M && _Grow(_N = nLength + _M))
+		size_type n;
+		if (0 < count && Grow(n = nLength + count))
 		{
-			Traits::move(ptr + _P0 + _M, ptr + _P0, nLength - _P0);
-			Traits::assign(ptr + _P0, _M, _C);
-			_Eos(_N); 
+			Traits::move(ptr + pos1 + count, ptr + pos1, nLength - pos1);
+			Traits::assign(ptr + pos1, count, c);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	iterator insert(iterator _P, E _C)
+	iterator insert(iterator pos, E c)
 	{
-		size_type _P0 = _Pdif(_P, begin());
-		insert(_P0, 1, _C);
-		return (begin() + _P0); 
+		size_type pos0 = Pdif(pos, begin());
+		insert(pos0, 1, c);
+		return (begin() + pos0); 
 	}
-	void insert(iterator _P, size_type _M, E _C)
+	void insert(iterator pos, size_type _M, E c)
 	{
-		size_type _P0 = _Pdif(_P, begin());
-		insert(_P0, _M, _C); 
+		size_type pos0 = Pdif(pos, begin());
+		insert(pos0, _M, c); 
 	}
-	void insert(iterator _P, _It _F, _It _L)
+	void insert(iterator pos, constIter first, constIter last)
 	{
-		replace(_P, _P, _F, _L); 
+		replace(pos, pos, first, last); 
 	}
 	BasicStringType& erase(size_type _P0 = 0, size_type _M = npos)
 	{
 		if (nLength < _P0)
 			throw_range_exception();
-		_Split();
+		Split();
 		if (nLength - _P0 < _M)
 			_M = nLength - _P0;
 		if (0 < _M)
 		{
 			Traits::move(ptr + _P0, ptr + _P0 + _M, nLength - _P0 - _M);
-			size_type _N = nLength - _M;
-			if (_Grow(_N))
-				_Eos(_N); 
+			size_type n = nLength - _M;
+			if (Grow(n))
+				SetEOS(n); 
 		}
 		return (*this); 
 	}
 	iterator erase(iterator _P)
 	{
-		size_t _M = _Pdif(_P, begin());
+		size_t _M = Pdif(_P, begin());
 		erase(_M, 1);
-		return (_Psum(ptr, _M)); 
+		return (Psum(ptr, _M)); 
 	}
 	iterator erase(iterator _F, iterator _L)
 	{
-		size_t _M = _Pdif(_F, begin());
-		erase(_M, _Pdif(_L, _F));
-		return (_Psum(ptr, _M)); 
+		size_t _M = Pdif(_F, begin());
+		erase(_M, Pdif(_L, _F));
+		return (Psum(ptr, _M)); 
 	}
-	BasicStringType& replace(size_type _P0, size_type _N0, const BasicStringType& str)
+	BasicStringType& replace(size_type pos1, size_type count1, const BasicStringType& str)
 	{
-		return (replace(_P0, _N0, str, 0, npos)); 
+		return (replace(pos1, count1, str, 0, npos)); 
 	}
-	BasicStringType& replace(size_type _P0, size_type _N0, const BasicStringType& str,
-		size_type _P, size_type _M)
-	{	if (nLength < _P0 || str.size() < _P)
+	BasicStringType& replace(size_type pos1, size_type count1, const BasicStringType& str,
+		size_type pos2, size_type count2)
+	{	if (nLength < pos1 || str.size() < pos2)
 			throw_range_exception();
-		if (nLength - _P0 < _N0)
-			_N0 = nLength - _P0;
-		size_type _N = str.size() - _P;
-		if (_N < _M)
-			_M = _N;
-		if (npos - _M <= nLength - _N0)
+		if (nLength - pos1 < count1)
+			count1 = nLength - pos1;
+		size_type n = str.size() - pos2;
+		if (n < count2)
+			count2 = n;
+		if (npos - count2 <= nLength - count1)
 			throw_length_exception();
-		_Split();
-		size_type _Nm = nLength - _N0 - _P0;
-		if (_M < _N0)
-			Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-		if ((0 < _M || 0 < _N0) && _Grow(_N = nLength + _M - _N0))
+		Split();
+		size_type _Nm = nLength - count1 - pos1;
+		if (count2 < count1)
+			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+		if ((0 < count2 || 0 < count1) && Grow(n = nLength + count2 - count1))
 		{
-			if (_N0 < _M)
-			Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-			Traits::copy(ptr + _P0, &str.c_str()[_P], _M);
-			_Eos(_N); 
+			if (count1 < count2)
+			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+			Traits::copy(ptr + pos1, &str.c_str()[pos2], count2);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& replace(size_type _P0, size_type _N0, const E *_S,
-		size_type _M)
+	BasicStringType& replace(size_type pos1, size_type count1, const E *str,
+		size_type count2)
 	{
-		if (nLength < _P0)
+		if (nLength < pos1)
 		throw_range_exception();
-		if (nLength - _P0 < _N0)
-			_N0 = nLength - _P0;
-		if (npos - _M <= nLength - _N0)
+		if (nLength - pos1 < count1)
+			count1 = nLength - pos1;
+		if (npos - count2 <= nLength - count1)
 			throw_length_exception();
-		_Split();
-		size_type _Nm = nLength - _N0 - _P0;
-		if (_M < _N0)
-			Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-		size_type _N;
-		if ((0 < _M || 0 < _N0) && _Grow(_N = nLength + _M - _N0))
+		Split();
+		size_type _Nm = nLength - count1 - pos1;
+		if (count2 < count1)
+			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+		size_type n;
+		if ((0 < count2 || 0 < count1) && Grow(n = nLength + count2 - count1))
 		{
-			if (_N0 < _M)
-			Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-			Traits::copy(ptr + _P0, _S, _M);
-			_Eos(_N); 
+			if (count1 < count2)
+			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+			Traits::copy(ptr + pos1, str, count2);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& replace(size_type _P0, size_type _N0, const E *_S)
+	BasicStringType& replace(size_type pos1, size_type count1, const E *str)
 	{
-		return (replace(_P0, _N0, _S, Traits::length(_S))); 
+		return (replace(pos1, count1, str, Traits::length(str))); 
 	}
-	BasicStringType& replace(size_type _P0, size_type _N0,
-		size_type _M, E _C)
+	BasicStringType& replace(size_type pos1, size_type count1, size_type count2, E c)
 	{
-		if (nLength < _P0)
+		if (nLength < pos1)
 		throw_range_exception();
-		if (nLength - _P0 < _N0)
-			_N0 = nLength - _P0;
-		if (npos - _M <= nLength - _N0)
+		if (nLength - pos1 < count1)
+			count1 = nLength - pos1;
+		if (npos - count2 <= nLength - count1)
 			throw_length_exception();
-		_Split();
-		size_type _Nm = nLength - _N0 - _P0;
-		if (_M < _N0)
-			Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-		size_type _N;
-		if ((0 < _M || 0 < _N0) && _Grow(_N = nLength + _M - _N0))
+		Split();
+		size_type _Nm = nLength - count1 - pos1;
+		if (count2 < count1)
+			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+		size_type n;
+		if ((0 < count2 || 0 < count1) && Grow(n = nLength + count2 - count1))
 		{
-			if (_N0 < _M)
-				Traits::move(ptr + _P0 + _M, ptr + _P0 + _N0, _Nm);
-			Traits::assign(ptr + _P0, _M, _C);
-			_Eos(_N); 
+			if (count1 < count2)
+				Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+			Traits::assign(ptr + pos1, count2, c);
+			SetEOS(n); 
 		}
 		return (*this); 
 	}
-	BasicStringType& replace(iterator _F, iterator _L, const BasicStringType& str)
+	BasicStringType& replace(iterator first, iterator last, const BasicStringType& str)
 	{
-		return (replace(_Pdif(_F, begin()), _Pdif(_L, _F), str)); 
+		return (replace(Pdif(first, begin()), Pdif(last, first), str)); 
 	}
-	BasicStringType& replace(iterator _F, iterator _L, const E *_S,
-		size_type _M)
+	BasicStringType& replace(iterator first, iterator last, const E *str, size_type count)
 	{
-		return (replace(_Pdif(_F, begin()), _Pdif(_L, _F), _S, _M)); 
+		return (replace(Pdif(first, begin()), Pdif(last, first), str, count)); 
 	}
-	BasicStringType& replace(iterator _F, iterator _L, const E *_S)
+	BasicStringType& replace(iterator first, iterator last, const E *str)
 	{
-		return (replace(
-	_Pdif(_F, begin()), _Pdif(_L, _F), _S)); 
+		return (replace(Pdif(first, begin()), Pdif(last, first), str)); 
 	}
-	BasicStringType& replace(iterator _F, iterator _L,	size_type _M, E _C)
+	BasicStringType& replace(iterator first, iterator last,	size_type count, E c)
 	{
-		return (replace(
-	_Pdif(_F, begin()), _Pdif(_L, _F), _M, _C)); 
+		return (replace(Pdif(first, begin()), Pdif(last, first), count, c)); 
 	}
-	BasicStringType& replace(iterator _F1, iterator _L1,
-		_It _F2, _It _L2)
+	BasicStringType& replace(iterator first1, iterator last1, constIter first2, constIter last2)
 	{
-		size_type _P0 = _Pdif(_F1, begin());
-		size_type _M = 0;
-		_Distance(_F2, _L2, _M);
-		replace(_P0, _Pdif(_L1, _F1), _M, E(0));
-		for (_F1 = begin() + _P0; 0 < _M; ++_F1, ++_F2, --_M)
-			*_F1 = *_F2;
+		size_type pos = Pdif(first1, begin());
+		size_type count = 0;
+		_Distance(first2, last2, count);
+
+		replace(pos, Pdif(last1, first1), count, E(0));
+
+		for (first1 = begin() + pos; 0 < count; ++first1, ++first2, --count)
+			*first1 = *first2;
 		return (*this); 
 	}
 	iterator begin()
 	{
-		_Freeze();
+		Freeze();
 		return (ptr); 
 	}
 	const_iterator begin() const
@@ -412,49 +417,59 @@ public:
 	}
 	iterator end()
 	{
-		_Freeze();
-		return ((iterator)_Psum(ptr, nLength)); 
+		Freeze();
+		return ((iterator)Psum(ptr, nLength)); 
 	}
 	const_iterator end() const
-	{return ((const_iterator)_Psum(ptr, nLength)); }
+	{
+		return ((const_iterator)Psum(ptr, nLength)); 
+	}
 	reverse_iterator rbegin()
-	{return (reverse_iterator(end())); }
+	{
+		return (reverse_iterator(end())); 
+	}
 	const_reverse_iterator rbegin() const
-	{return (const_reverse_iterator(end())); }
+	{
+		return (const_reverse_iterator(end())); 
+	}
 	reverse_iterator rend()
-	{return (reverse_iterator(begin())); }
+	{
+		return (reverse_iterator(begin())); 
+	}
 	const_reverse_iterator rend() const
-	{return (const_reverse_iterator(begin())); }
-	reference at(size_type _P0)
 	{
-		if (nLength <= _P0)
-			throw_range_exception();
-		_Freeze();
-		return (ptr[_P0]); 
+		return (const_reverse_iterator(begin())); 
 	}
-	const_reference at(size_type _P0) const
+	reference at(size_type pos)
 	{
-		if (nLength <= _P0)
+		if (nLength <= pos)
 			throw_range_exception();
-		return (ptr[_P0]); 
+		Freeze();
+		return (ptr[pos]); 
 	}
-	reference operator[](size_type _P0)
+	const_reference at(size_type pos) const
 	{
-		if (nLength < _P0 || ptr == 0)
-			return ((reference)*_Nullstr());
-		_Freeze();
-		return (ptr[_P0]); 
+		if (nLength <= pos)
+			throw_range_exception();
+		return (ptr[pos]); 
+	}
+	reference operator[](size_type pos)
+	{
+		if (nLength < pos || ptr == 0)
+			return ((reference)*Nullstr());
+		Freeze();
+		return (ptr[pos]); 
 	}
 	const_reference operator[](size_type _P0) const
 	{
 		if (ptr == 0)
-			return (*_Nullstr());
+			return (*Nullstr());
 		else
 			return (ptr[_P0]); 
 	}
 	const E *c_str() const
 	{
-		return (ptr == 0 ? _Nullstr() : ptr); 
+		return (ptr == 0 ? Nullstr() : ptr); 
 	}
 	const E *data() const
 	{
@@ -465,42 +480,53 @@ public:
 		return (nLength); 
 	}
 	size_type size() const
-	{return (nLength); }
+	{
+		return (nLength); 
+	}
 	size_type max_size() const
-	{size_type _N = allocator.max_size();
-	return (_N <= 2 ? 1 : _N - 2); }
-	void resize(size_type _N, E _C)
 	{
-		_N <= nLength ? erase(_N) : append(_N - nLength, _C); }
+		size_type n = allocator.max_size();
+		return (n <= 2 ? 1 : n - 2); 
+	}
+	void resize(size_type n, E c)
+	{
+		n <= nLength ? erase(n) : append(n - nLength, c); 
+	}
 
-	void resize(size_type _N)
-	{_N <= nLength ? erase(_N) : append(_N - nLength, E(0)); }
-	size_type capacity() const
-	{return (nCapacity); }
-	void reserve(size_type _N = 0)
+	void resize(size_type n)
 	{
-		if (nCapacity < _N)
-			_Grow(_N); 
+		n <= nLength ? erase(n) : append(n - nLength, E(0)); 
+	}
+	size_type capacity() const
+	{
+		return (nCapacity); 
+	}
+	void reserve(size_type n = 0)
+	{
+		if (nCapacity < n)
+			Grow(n); 
 	}
 	bool empty() const
-	{return (nLength == 0); }
-	size_type copy(E *_S, size_type _N, size_type _P0 = 0) const
 	{
-		if (nLength < _P0)
+		return (nLength == 0); 
+	}
+	size_type copy(E *str, size_type count, size_type pos = 0) const
+	{
+		if (nLength < pos)
 			throw_range_exception();
-		if (nLength - _P0 < _N)
-			_N = nLength - _P0;
-		if (0 < _N)
-			Traits::copy(_S, ptr + _P0, _N);
-		return (_N); 
+		if (nLength - pos < count)
+			count = nLength - pos;
+		if (0 < count)
+			Traits::copy(str, ptr + pos, count);
+		return (count); 
 	}
 	void swap(BasicStringType& str)
 	{
 		if (allocator == str.allocator)
 		{
-			std::swap(ptr, str._Ptr);
-			std::swap(nLength, str._Len);
-			std::swap(nCapacity, str._Res); 
+			std::swap(ptr, str.ptr);
+			std::swap(nLength, str.nLength);
+			std::swap(nCapacity, str.nCapacity); 
 		}
 		else
 		{
@@ -508,273 +534,304 @@ public:
 			*this = str, str = _Ts; 
 		}
 	}
-	friend void swap(BasicStringType& str, BasicStringType& _Y)
+	friend void swap(BasicStringType& str1, BasicStringType& str2)
 	{
-		str.swap(_Y); 
+		str1.swap(str2); 
 	}
-	size_type find(const BasicStringType& str, size_type _P = 0) const
-	{return (find(str.c_str(), _P, str.size())); }
-	size_type find(const E *_S, size_type _P,
-		size_type _N) const
+	size_type find(const BasicStringType& str, size_type pos = 0) const
 	{
-		if (_N == 0 && _P <= nLength)
-			return (_P);
-		size_type _Nm;
-		if (_P < nLength && _N <= (_Nm = nLength - _P))
+		return (find(str.c_str(), pos, str.size())); 
+	}
+	size_type find(const E *str, size_type pos, size_type n) const
+	{
+		if (n == 0 && pos <= nLength)
+			return (pos);
+		size_type nNumber;
+		if (pos < nLength && n <= (nNumber = nLength - pos))
 		{
 			const E *_U, *_V;
-			for (_Nm -= _N - 1, _V = ptr + _P; (_U = Traits::find(_V, _Nm, *_S)) != 0; 
-				_Nm -= _U - _V + 1, _V = _U + 1)
+			for (nNumber -= n - 1, _V = ptr + pos; (_U = Traits::find(_V, nNumber, *str)) != 0; 
+				nNumber -= _U - _V + 1, _V = _U + 1)
 
-				if (Traits::compare(_U, _S, _N) == 0)
+				if (Traits::compare(_U, str, n) == 0)
 					return (_U - ptr); 
 		}
 		return (npos); 
 	}
-	size_type find(const E *_S, size_type _P = 0) const
-	{return (find(_S, _P, Traits::length(_S))); }
-	size_type find(E _C, size_type _P = 0) const
-	{return (find((const E *)&_C, _P, 1)); }
-	size_type rfind(const BasicStringType& str, size_type _P = npos) const
-	{return (rfind(str.c_str(), _P, str.size())); }
-	size_type rfind(const E *_S, size_type _P,
-		size_type _N) const
+	size_type find(const E *str, size_type pos = 0) const
 	{
-		if (_N == 0)
-			return (_P < nLength ? _P : nLength);
-		if (_N <= nLength)
-		for (const E *_U = ptr + + (_P < nLength - _N ? _P : nLength - _N); ; --_U)
-			if (Traits::eq(*_U, *_S) && Traits::compare(_U, _S, _N) == 0)
+		return (find(str, pos, Traits::length(str))); 
+	}
+	size_type find(E c, size_type pos = 0) const
+	{
+		return (find((const E *)&c, pos, 1)); 
+	}
+	size_type rfind(const BasicStringType& str, size_type pos = npos) const
+	{
+		return (rfind(str.c_str(), pos, str.size())); 
+	}
+	size_type rfind(const E *str, size_type pos, size_type n) const
+	{
+		if (n == 0)
+			return (pos < nLength ? pos : nLength);
+		if (n <= nLength)
+		for (const E *_U = ptr + + (pos < nLength - n ? pos : nLength - n); ; --_U)
+			if (Traits::eq(*_U, *str) && Traits::compare(_U, str, n) == 0)
 				return (_U - ptr);
 			else if (_U == ptr)
 				break;
 		return (npos); 
 	}
-	size_type rfind(const E *_S, size_type _P = npos) const
+	size_type rfind(const E *str, size_type pos = npos) const
 	{
-		return (rfind(_S, _P, Traits::length(_S))); 
+		return (rfind(str, pos, Traits::length(str))); 
 	}
-	size_type rfind(E _C, size_type _P = npos) const
-	{return (rfind((const E *)&_C, _P, 1)); }
-	size_type find_first_of(const BasicStringType& str,
-		size_type _P = 0) const
-	{return (find_first_of(str.c_str(), _P, str.size())); }
-	size_type find_first_of(const E *_S, size_type _P,
-		size_type _N) const
+	size_type rfind(E c, size_type pos = npos) const
 	{
-		if (0 < _N && _P < nLength)
+		return (rfind((const E *)&c, pos, 1)); 
+	}
+	size_type find_first_of(const BasicStringType& str, size_type pos = 0) const
+	{
+		return (find_first_of(str.c_str(), pos, str.size())); 
+	}
+	size_type find_first_of(const E *str, size_type pos, size_type n) const
+	{
+		if (0 < n && pos < nLength)
 		{
 			const E *const _V = ptr + nLength;
-			for (const E *_U = ptr + _P; _U < _V; ++_U)
-				if (Traits::find(_S, _N, *_U) != 0)
+			for (const E *_U = ptr + pos; _U < _V; ++_U)
+				if (Traits::find(str, n, *_U) != 0)
 					return (_U - ptr); 
 		}
 		return (npos); 
 	}
 
-	size_type find_first_of(const E *_S, size_type _P = 0) const
-	{return (find_first_of(_S, _P, Traits::length(_S))); }
-	size_type find_first_of(E _C, size_type _P = 0) const
-	{return (find((const E *)&_C, _P, 1)); }
-	size_type find_last_of(const BasicStringType& str,
-		size_type _P = npos) const
-	{return (find_last_of(str.c_str(), _P, str.size())); }
-	size_type find_last_of(const E *_S, size_type _P,
-		size_type _N) const
+	size_type find_first_of(const E *str, size_type pos = 0) const
 	{
-		if (0 < _N && 0 < nLength)
-			for (const E *_U = ptr + (_P < nLength ? _P : nLength - 1); ; --_U)
-				if (Traits::find(_S, _N, *_U) != 0)
+		return (find_first_of(str, pos, Traits::length(str))); 
+	}
+	size_type find_first_of(E c, size_type pos = 0) const
+	{
+		return (find((const E *)&c, pos, 1)); 
+	}
+	size_type find_last_of(const BasicStringType& str, size_type pos = npos) const
+	{
+		return (find_last_of(str.c_str(), pos, str.size())); 
+	}
+	size_type find_last_of(const E *str, size_type pos, size_type n) const
+	{
+		if (0 < n && 0 < nLength)
+			for (const E *_U = ptr + (pos < nLength ? pos : nLength - 1); ; --_U)
+				if (Traits::find(str, n, *_U) != 0)
 					return (_U - ptr);
 				else if (_U == ptr)
 					break;
 			return (npos); 
 	}
-	size_type find_last_of(const E *_S,
-		size_type _P = npos) const
-	{return (find_last_of(_S, _P, Traits::length(_S))); }
-	size_type find_last_of(E _C, size_type _P = npos) const
-	{return (rfind((const E *)&_C, _P, 1)); }
-	size_type find_first_not_of(const BasicStringType& str,
-		size_type _P = 0) const
-	{return (find_first_not_of(str.c_str(), _P,
-	str.size())); }
-	size_type find_first_not_of(const E *_S, size_type _P,
-		size_type _N) const
+	size_type find_last_of(const E *str, size_type pos = npos) const
 	{
-		if (_P < nLength)
+		return (find_last_of(str, pos, Traits::length(str))); 
+	}
+	size_type find_last_of(E c, size_type pos = npos) const
+	{
+		return (rfind((const E *)&c, pos, 1)); 
+	}
+	size_type find_first_not_of(const BasicStringType& str, size_type pos = 0) const
+	{
+		return (find_first_not_of(str.c_str(), pos, str.size())); 
+	}
+	size_type find_first_not_of(const E *str, size_type pos, size_type n) const
+	{
+		if (pos < nLength)
 		{
 			const E *const _V = ptr + nLength;
-			for (const E *_U = ptr + _P; _U < _V; ++_U)
-				if (Traits::find(_S, _N, *_U) == 0)
+			for (const E *_U = ptr + pos; _U < _V; ++_U)
+				if (Traits::find(str, n, *_U) == 0)
 					return (_U - ptr); 
 		}
 		return (npos); 
 	}
-	size_type find_first_not_of(const E *_S,
-		size_type _P = 0) const
-	{return (find_first_not_of(_S, _P, Traits::length(_S))); }
-	size_type find_first_not_of(E _C, size_type _P = 0) const
-	{return (find_first_not_of((const E *)&_C, _P, 1)); }
-	size_type find_last_not_of(const BasicStringType& str,
-		size_type _P = npos) const
-	{return (find_last_not_of(str.c_str(), _P, str.size())); }
-	size_type find_last_not_of(const E *_S, size_type _P,
-		size_type _N) const
+	size_type find_first_not_of(const E *str, size_type pos = 0) const
+	{
+		return (find_first_not_of(str, pos, Traits::length(str))); 
+	}
+	size_type find_first_not_of(E c, size_type pos = 0) const
+	{
+		return (find_first_not_of((const E *)&c, pos, 1)); 
+	}
+	size_type find_last_not_of(const BasicStringType& str, size_type pos = npos) const
+	{
+		return (find_last_not_of(str.c_str(), pos, str.size())); 
+	}
+	size_type find_last_not_of(const E *str, size_type pos, size_type n) const
 	{
 		if (0 < nLength)
-		for (const E *_U = ptr + (_P < nLength ? _P : nLength - 1); ; --_U)
-		if (Traits::find(_S, _N, *_U) == 0)
+		for (const E *_U = ptr + (pos < nLength ? pos : nLength - 1); ; --_U)
+		if (Traits::find(str, n, *_U) == 0)
 			return (_U - ptr);
 		else if (_U == ptr)
 			break;
 		return (npos); 
 	}
-	size_type find_last_not_of(const E *_S,
-		size_type _P = npos) const
-	{return (find_last_not_of(_S, _P, Traits::length(_S))); }
-	size_type find_last_not_of(E _C, size_type _P = npos) const
-	{return (find_last_not_of((const E *)&_C, _P, 1)); }
-	BasicStringType substr(size_type _P = 0, size_type _M = npos) const
-	{return (BasicStringType(*this, _P, _M)); }
+	size_type find_last_not_of(const E *str, size_type pos = npos) const
+	{
+		return (find_last_not_of(str, pos, Traits::length(str))); 
+	}
+	size_type find_last_not_of(E c, size_type pos = npos) const
+	{
+		return (find_last_not_of((const E *)&c, pos, 1)); 
+	}
+	BasicStringType substr(size_type pos = 0, size_type count = npos) const
+	{
+		return (BasicStringType(*this, pos, count)); 
+	}
 	int compare(const BasicStringType& str) const
-	{return (compare(0, nLength, str.c_str(), str.size())); }
-	int compare(size_type _P0, size_type _N0,
-		const BasicStringType& str) const
-	{return (compare(_P0, _N0, str, 0, npos)); }
-	int compare(size_type _P0, size_type _N0, const BasicStringType& str,
-		size_type _P, size_type _M) const
 	{
-		if (str.size() < _P)
-			throw_range_exception();
-		if (str._Len - _P < _M)
-			_M = str._Len - _P;
-	return (compare(_P0, _N0, str.c_str() + _P, _M)); }
-	int compare(const E *_S) const
-	{return (compare(0, nLength, _S, Traits::length(_S))); }
-	int compare(size_type _P0, size_type _N0, const E *_S) const
-	{return (compare(_P0, _N0, _S, Traits::length(_S))); }
-	int compare(size_type _P0, size_type _N0, const E *_S,
-		size_type _M) const
+		return (compare(0, nLength, str.c_str(), str.size())); 
+	}
+	int compare(size_type pos, size_type count, const BasicStringType& str) const
 	{
-		if (nLength < _P0)
+		return (compare(pos, count, str, 0, npos)); 
+	}
+	int compare(size_type pos1, size_type count1, const BasicStringType& str, size_type pos2, size_type count2) const
+	{
+		if (str.size() < pos2)
 			throw_range_exception();
-		if (nLength - _P0 < _N0)
-			_N0 = nLength - _P0;
-		size_type _Ans = Traits::compare(_Psum(ptr, _P0), _S, _N0 < _M ? _N0 : _M);
-		return (_Ans != 0 ? _Ans : _N0 < _M ? -1 : _N0 == _M ? 0 : +1); 
+		if (str.nLength - pos2 < count2)
+			count2 = str.nLength - pos2;
+		return (compare(pos1, count1, str.c_str() + pos2, count2)); 
+	}
+	int compare(const E *str) const
+	{
+		return (compare(0, nLength, str, Traits::length(str))); 
+	}
+	int compare(size_type pos, size_type count, const E *str) const
+	{
+		return (compare(pos, count, str, Traits::length(str))); 
+	}
+	int compare(size_type pos1, size_type count1, const E *str, size_type count2) const
+	{
+		if (nLength < pos1)
+			throw_range_exception();
+		if (nLength - pos1 < count1)
+			count1 = nLength - pos1;
+		size_type _Ans = Traits::compare(Psum(ptr, pos1), str, count1 < count2 ? count1 : count2);
+		return (_Ans != 0 ? _Ans : count1 < count2 ? -1 : count1 == count2 ? 0 : +1); 
 	}
 	Alloc get_allocator() const
-	{return (allocator); }
+	{
+		return (allocator); 
+	}
+
 protected:
 	Alloc allocator;
 private:
 	enum {_MIN_SIZE = sizeof (E) <= 32 ? 31 : 7};
-	void _Copy(size_type _N)
+	void Copy(size_type n)
 	{
-		size_type _Ns = _N | _MIN_SIZE;
+		size_type _Ns = n | _MIN_SIZE;
 		if (max_size() < _Ns)
-			_Ns = _N;
-		E *_S;
+			_Ns = n;
+		E *str;
 		_TRY_BEGIN
-			_S = allocator.allocate(_Ns + 2, (void *)0);
+			str = allocator.allocate(_Ns + 2, (void *)0);
 		_CATCH_ALL
-			_Ns = _N;
-		_S = allocator.allocate(_Ns + 2, (void *)0);
+			_Ns = n;
+		str = allocator.allocate(_Ns + 2, (void *)0);
 		_CATCH_END
 		if (0 < nLength)
-			Traits::copy(_S + 1, ptr,nLength>_Ns?_Ns:nLength);
+			Traits::copy(str + 1, ptr,nLength>_Ns?_Ns:nLength);
 		size_type _Olen = nLength;
-		tidy(true);
-		ptr = _S + 1;
-		_Refcnt(ptr) = 0;
+		Tidy(true);
+		ptr = str + 1;
+		RefCount(ptr) = 0;
 		nCapacity = _Ns;
-		_Eos(_Olen>_Ns?_Ns:_Olen); 
+		SetEOS(_Olen>_Ns?_Ns:_Olen); 
 	}
-	void _Eos(size_type _N)
+	void SetEOS(size_type n)
 	{
-		Traits::assign(ptr[nLength = _N], E(0)); 
+		Traits::assign(ptr[nLength = n], E(0)); 
 	}
-	void _Freeze()
+	void Freeze()
 	{
-		if (ptr != 0 && _Refcnt(ptr) != 0 && _Refcnt(ptr) != _FROZEN)
-			_Grow(nLength);
+		if (ptr != 0 && RefCount(ptr) != 0 && RefCount(ptr) != _FROZEN)
+			Grow(nLength);
 		if (ptr != 0)
-			_Refcnt(ptr) = _FROZEN; 
+			RefCount(ptr) = _FROZEN; 
 	}
-	bool _Grow(size_type _N, bool _Trim = false)
+	bool Grow(size_type n, bool _Trim = false)
 	{
-		if (max_size() < _N)
+		if (max_size() < n)
 			throw_length_exception();
-		if (ptr != 0 && _Refcnt(ptr) != 0 && _Refcnt(ptr) != _FROZEN)
-			if (_N == 0)
+		if (ptr != 0 && RefCount(ptr) != 0 && RefCount(ptr) != _FROZEN)
+			if (n == 0)
 			{
-				--_Refcnt(ptr), tidy();
+				--RefCount(ptr), Tidy();
 				return (false); 
 			}
 			else
 			{
-				_Copy(_N);
+				Copy(n);
 				return (true); 
 			}
-		if (_N == 0)
+		if (n == 0)
 		{
 			if (_Trim)
-				tidy(true);
+				Tidy(true);
 			else if (ptr != 0)
-				_Eos(0);
+				SetEOS(0);
 			return (false); 
 		}
 		else
 		{
-			if (_Trim && (_MIN_SIZE < nCapacity || nCapacity < _N))
+			if (_Trim && (_MIN_SIZE < nCapacity || nCapacity < n))
 			{
-				tidy(true);
-				_Copy(_N); 
+				Tidy(true);
+				Copy(n); 
 			}
-			else if (!_Trim && nCapacity < _N)
-				_Copy(_N);
+			else if (!_Trim && nCapacity < n)
+				Copy(n);
 			return (true); 
 		}
 	}
-	static const E * __cdecl _Nullstr()
+	static const E * __cdecl Nullstr()
 	{
-		static const E _C = E(0);
-		return (&_C); 
+		static const E c = E(0);
+		return (&c); 
 	}
-	static size_type _Pdif(const_pointer _P2, const_pointer _P1)
+	static size_type Pdif(const_pointer _P2, const_pointer _P1)
 	{
 		return (_P2 == 0 ? 0 : _P2 - _P1); 
 	}
-	static const_pointer _Psum(const_pointer _P, size_type _N)
+	static const_pointer Psum(const_pointer _P, size_type n)
 	{
-		return (_P == 0 ? 0 : _P + _N); 
+		return (_P == 0 ? 0 : _P + n); 
 	}
-	static pointer _Psum(pointer _P, size_type _N)
+	static pointer Psum(pointer _P, size_type n)
 	{
-		return (_P == 0 ? 0 : _P + _N); 
+		return (_P == 0 ? 0 : _P + n); 
 	}
-	unsigned char& _Refcnt(const E *_U)
+	unsigned char& RefCount(const E *_U)
 	{
 		return (((unsigned char *)_U)[-1]); 
 	}
-	void _Split()
+	void Split()
 	{
-		if (ptr != 0 && _Refcnt(ptr) != 0 && _Refcnt(ptr) != _FROZEN)
+		if (ptr != 0 && RefCount(ptr) != 0 && RefCount(ptr) != _FROZEN)
 		{
 			E *_Temp = ptr;
-			tidy(true);
+			Tidy(true);
 			assign(_Temp); 
 		}
 	}
-	void tidy(bool _Built = false)
+	void Tidy(bool _Built = false)
 	{
 		if (!_Built || ptr == 0)
 			;
-		else if (_Refcnt(ptr) == 0 || _Refcnt(ptr) == _FROZEN)
+		else if (RefCount(ptr) == 0 || RefCount(ptr) == _FROZEN)
 			allocator.deallocate(ptr - 1, nCapacity + 2);
 		else
-			--_Refcnt(ptr);
+			--RefCount(ptr);
 
 		ptr = 0, nLength = 0, nCapacity = 0; 
 	}
@@ -789,7 +846,6 @@ const basic_string<E, Traits, Alloc>::size_type
 basic_string<E, Traits, Alloc>::npos = -1;
 
 typedef basic_string<char, char_traits<char>, allocator<char> > string;
-
 typedef basic_string<wchar_t, char_traits<wchar_t>, allocator<wchar_t> > wstring;
 
 
