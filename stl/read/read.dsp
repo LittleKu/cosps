@@ -97,11 +97,27 @@ SOURCE=.\allocator.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\basic_ios.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\basic_streambuf.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\basic_string.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\basic_stringbuf.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\char_traits.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ios_base.cpp
 # End Source File
 # Begin Source File
 
@@ -121,11 +137,35 @@ SOURCE=.\allocator.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\basic_ios.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\basic_istream.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\basic_ostream.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\basic_streambuf.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\basic_string.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\basic_stringbuf.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\char_traits.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ios_base.h
 # End Source File
 # Begin Source File
 
