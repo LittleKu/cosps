@@ -25,10 +25,10 @@ public:
 	typedef Alloc::const_pointer const_iterator;
 	typedef std::reverse_iterator<const_iterator, value_type, const_reference, const_pointer, difference_type> 
 		const_reverse_iterator;
-
+	
 	typedef std::reverse_iterator<iterator, value_type, reference, pointer, difference_type> 
 		reverse_iterator;
-
+	
 	explicit basic_string(const Alloc& alloc = Alloc()) : allocator(alloc) 
 	{
 		Tidy(); 
@@ -65,10 +65,12 @@ public:
 	{
 		Tidy(true); 
 	}
+	
 	typedef Traits traits_type;
 	typedef Alloc allocator_type;
 	enum _Mref {_FROZEN = 255};
 	static const size_type npos;
+	
 	BasicStringType& operator=(const BasicStringType& str)
 	{
 		return (assign(str)); 
@@ -305,9 +307,10 @@ public:
 	{
 		return (replace(pos1, count1, str, 0, npos)); 
 	}
-	BasicStringType& replace(size_type pos1, size_type count1, const BasicStringType& str,
+	BasicStringType& replace(size_type pos1, size_type count1, const BasicStringType& str, 
 		size_type pos2, size_type count2)
-	{	if (nLength < pos1 || str.size() < pos2)
+	{	
+		if (nLength < pos1 || str.size() < pos2)
 			throw_range_exception();
 		if (nLength - pos1 < count1)
 			count1 = nLength - pos1;
@@ -323,7 +326,7 @@ public:
 		if ((0 < count2 || 0 < count1) && Grow(n = nLength + count2 - count1))
 		{
 			if (count1 < count2)
-			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+				Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
 			Traits::copy(ptr + pos1, &str.c_str()[pos2], count2);
 			SetEOS(n); 
 		}
@@ -333,7 +336,7 @@ public:
 		size_type count2)
 	{
 		if (nLength < pos1)
-		throw_range_exception();
+			throw_range_exception();
 		if (nLength - pos1 < count1)
 			count1 = nLength - pos1;
 		if (npos - count2 <= nLength - count1)
@@ -346,7 +349,7 @@ public:
 		if ((0 < count2 || 0 < count1) && Grow(n = nLength + count2 - count1))
 		{
 			if (count1 < count2)
-			Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
+				Traits::move(ptr + pos1 + count2, ptr + pos1 + count1, _Nm);
 			Traits::copy(ptr + pos1, str, count2);
 			SetEOS(n); 
 		}
@@ -359,7 +362,7 @@ public:
 	BasicStringType& replace(size_type pos1, size_type count1, size_type count2, E c)
 	{
 		if (nLength < pos1)
-		throw_range_exception();
+			throw_range_exception();
 		if (nLength - pos1 < count1)
 			count1 = nLength - pos1;
 		if (npos - count2 <= nLength - count1)
@@ -399,9 +402,9 @@ public:
 		size_type pos = Pdif(first1, begin());
 		size_type count = 0;
 		_Distance(first2, last2, count);
-
+		
 		replace(pos, Pdif(last1, first1), count, E(0));
-
+		
 		for (first1 = begin() + pos; 0 < count; ++first1, ++first2, --count)
 			*first1 = *first2;
 		return (*this); 
@@ -492,7 +495,7 @@ public:
 	{
 		n <= nLength ? erase(n) : append(n - nLength, c); 
 	}
-
+	
 	void resize(size_type n)
 	{
 		n <= nLength ? erase(n) : append(n - nLength, E(0)); 
@@ -551,8 +554,8 @@ public:
 		{
 			const E *_U, *_V;
 			for (nNumber -= n - 1, _V = ptr + pos; (_U = Traits::find(_V, nNumber, *str)) != 0; 
-				nNumber -= _U - _V + 1, _V = _U + 1)
-
+			nNumber -= _U - _V + 1, _V = _U + 1)
+				
 				if (Traits::compare(_U, str, n) == 0)
 					return (_U - ptr); 
 		}
@@ -575,12 +578,12 @@ public:
 		if (n == 0)
 			return (pos < nLength ? pos : nLength);
 		if (n <= nLength)
-		for (const E *_U = ptr + + (pos < nLength - n ? pos : nLength - n); ; --_U)
-			if (Traits::eq(*_U, *str) && Traits::compare(_U, str, n) == 0)
-				return (_U - ptr);
-			else if (_U == ptr)
-				break;
-		return (npos); 
+			for (const E *_U = ptr + + (pos < nLength - n ? pos : nLength - n); ; --_U)
+				if (Traits::eq(*_U, *str) && Traits::compare(_U, str, n) == 0)
+					return (_U - ptr);
+				else if (_U == ptr)
+					break;
+				return (npos); 
 	}
 	size_type rfind(const E *str, size_type pos = npos) const
 	{
@@ -605,7 +608,7 @@ public:
 		}
 		return (npos); 
 	}
-
+	
 	size_type find_first_of(const E *str, size_type pos = 0) const
 	{
 		return (find_first_of(str, pos, Traits::length(str))); 
@@ -626,7 +629,7 @@ public:
 					return (_U - ptr);
 				else if (_U == ptr)
 					break;
-			return (npos); 
+				return (npos); 
 	}
 	size_type find_last_of(const E *str, size_type pos = npos) const
 	{
@@ -666,12 +669,12 @@ public:
 	size_type find_last_not_of(const E *str, size_type pos, size_type n) const
 	{
 		if (0 < nLength)
-		for (const E *_U = ptr + (pos < nLength ? pos : nLength - 1); ; --_U)
-		if (Traits::find(str, n, *_U) == 0)
-			return (_U - ptr);
-		else if (_U == ptr)
-			break;
-		return (npos); 
+			for (const E *_U = ptr + (pos < nLength ? pos : nLength - 1); ; --_U)
+				if (Traits::find(str, n, *_U) == 0)
+					return (_U - ptr);
+				else if (_U == ptr)
+					break;
+				return (npos); 
 	}
 	size_type find_last_not_of(const E *str, size_type pos = npos) const
 	{
@@ -722,31 +725,46 @@ public:
 	{
 		return (allocator); 
 	}
-
+	
 protected:
 	Alloc allocator;
 private:
 	enum {_MIN_SIZE = sizeof (E) <= 32 ? 31 : 7};
 	void Copy(size_type n)
 	{
-		size_type _Ns = n | _MIN_SIZE;
-		if (max_size() < _Ns)
-			_Ns = n;
+		//0. Determine the size to copy
+		size_type count = n | _MIN_SIZE;
+		if (max_size() < count)
+			count = n;
+
+		//1. allocate space
 		E *str;
-		_TRY_BEGIN
-			str = allocator.allocate(_Ns + 2, (void *)0);
-		_CATCH_ALL
-			_Ns = n;
-		str = allocator.allocate(_Ns + 2, (void *)0);
-		_CATCH_END
+		/*		_TRY_BEGIN*/
+		try
+		{
+			
+			str = allocator.allocate(count + 2, (void *)0);
+			/*		_CATCH_ALL*/
+		} 
+		catch (...) 
+		{
+			count = n;
+			str = allocator.allocate(count + 2, (void *)0);
+			/*		_CATCH_END*/
+		}
+
+		//2. Copy the original data to the new allocated space
 		if (0 < nLength)
-			Traits::copy(str + 1, ptr,nLength>_Ns?_Ns:nLength);
-		size_type _Olen = nLength;
+			Traits::copy(str + 1, ptr, (nLength > count) ? count : nLength);
+
+
+		//3. Update the new fields of the object
+		size_type oldLength = nLength;
 		Tidy(true);
 		ptr = str + 1;
 		RefCount(ptr) = 0;
-		nCapacity = _Ns;
-		SetEOS(_Olen>_Ns?_Ns:_Olen); 
+		nCapacity = count;
+		SetEOS(oldLength > count ? count : oldLength); 
 	}
 	void SetEOS(size_type n)
 	{
@@ -759,7 +777,7 @@ private:
 		if (ptr != 0)
 			RefCount(ptr) = _FROZEN; 
 	}
-	bool Grow(size_type n, bool _Trim = false)
+	bool Grow(size_type n, bool bTrim = false)
 	{
 		if (max_size() < n)
 			throw_length_exception();
@@ -776,7 +794,7 @@ private:
 			}
 		if (n == 0)
 		{
-			if (_Trim)
+			if (bTrim)
 				Tidy(true);
 			else if (ptr != 0)
 				SetEOS(0);
@@ -784,12 +802,12 @@ private:
 		}
 		else
 		{
-			if (_Trim && (_MIN_SIZE < nCapacity || nCapacity < n))
+			if (bTrim && (_MIN_SIZE < nCapacity || nCapacity < n))
 			{
 				Tidy(true);
 				Copy(n); 
 			}
-			else if (!_Trim && nCapacity < n)
+			else if (!bTrim && nCapacity < n)
 				Copy(n);
 			return (true); 
 		}
@@ -832,10 +850,10 @@ private:
 			allocator.deallocate(ptr - 1, nCapacity + 2);
 		else
 			--RefCount(ptr);
-
+		
 		ptr = 0, nLength = 0, nCapacity = 0; 
 	}
-
+	
 	E *ptr;
 	size_type nLength, nCapacity;
 };
