@@ -1,14 +1,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <iconv.h>
+#include <string>
+
+#pragma setlocale(".936")
 
 bool bDebug = true;
 
 int convert(const char* in_file, const char* in_encoding, const char* out_file, const char* out_encoding);
+void test();
 
 int main(int argc, char* argv[])
 {
-	int rc = convert("input.txt", "UTF-8", "output.txt", "UCS-2BE");
+	int rc = 0;
+//	rc = convert("input.txt", "UTF-8", "output.txt", "UCS-2BE");
+
+	test();
+
 	return rc;
 }
 
@@ -105,6 +113,108 @@ int convert(const char* in_file, const char* in_encoding, const char* out_file, 
 	}
 
 	return rc;
+}
+
+char getByte(wchar_t ch, bool hi)
+{
+	if(hi)
+	{
+		return (char)((ch & 0xFF00) >> 8);
+	}
+	else
+	{
+		return (char)(ch & 0x00FF);
+	}
+}
+
+size_t getBytes(const std::wstring& s, char* buffer)
+{
+	for(int i = 0, length = s.length(); i < length; i++)
+	{
+		wchar_t ch = s.at(i);
+		buffer[i * 2] = getByte(ch, false);
+		buffer[i * 2 + 1] = getByte(ch, true);
+	}
+	return length * 2;
+}
+
+size_t getBytes(const std::wstring& s, char* buffer, size_t buffer_size, const char* charset)
+{
+	const int BUF_SIZE = 128;
+
+	char input[BUF_SIZE];
+	size_t input_len = getBytes(s, input);
+	
+	char* inbuf = input;
+	size_t inbytesleft = input_len;
+	
+	char* outbuf = buffer;
+	size_t outbytesleft = buffer_size;
+
+	iconv_t cd = iconv_open (charset, "UCS-2LE");
+	size_t niconv = iconv(cd, (const char**)&inbuf, &inbytesleft, (char**)(&outbuf), &outbytesleft);
+	//OK
+// 	if(inbytesleft == 0)
+// 	{
+// 		return buffer_size - outbytesleft;
+// 	}
+// 	//Fail
+// 	else
+// 	{
+// 		return niconv;
+// 	}
+
+	return buffer_size - outbytesleft;
+}
+
+static char _hexcodes[] =
+{
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+};
+void hexDump(char* buffer, size_t size, std::string& s)
+{
+	s.erase();
+	s.reserve(size * 2);
+	size_t i;
+	for(i = 0; i < size; i++)
+	{
+		if(i > 0)
+		{
+			s += ' ';
+		}
+		char ch = buffer[i];
+
+		char lo = _hexcodes[ch & 0x0F];
+		char hi = _hexcodes[(ch >> 4) & 0x0F];
+
+		s += hi;
+		s += lo;
+	}
+}
+
+void test()
+{
+	const wchar_t* TEST_STRING = L"ÖÐÎÄ123";
+	TEST_STRING = L"\x4E2D\x6587\x0031\x0032\x0033";
+	std::wstring s(TEST_STRING);
+
+	const int BUF_SIZE = 128;
+	char buffer[BUF_SIZE];
+
+	const char* CHARSETS[] = { "GB2312", "GBK", "ISO-8859-1", "US-ASCII", "UTF-16",
+		"UTF-16BE", "UTF-16LE", "UTF-32", "UTF-32BE", "UTF-32LE", "UTF-8", "UTF-7" };
+	size_t len = 0;
+	int i;
+	std::string output;
+
+	for(i = 0; i < sizeof(CHARSETS)/sizeof(CHARSETS[0]); i++)
+	{
+		len = getBytes(s, buffer, BUF_SIZE, CHARSETS[i]);
+
+		hexDump(buffer, len, output);
+
+		printf("[%12s]:%s\n", CHARSETS[i], output.c_str());
+	}
 }
 
 
