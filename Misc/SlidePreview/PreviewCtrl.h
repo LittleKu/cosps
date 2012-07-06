@@ -41,6 +41,7 @@ protected:
 	//{{AFX_MSG(CPreviewCtrl)
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

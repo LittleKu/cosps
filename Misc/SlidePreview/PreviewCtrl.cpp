@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CPreviewCtrl, CStatic)
 	//{{AFX_MSG_MAP(CPreviewCtrl)
 	ON_WM_PAINT()
 	ON_WM_TIMER()
+	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -389,4 +390,11 @@ void CPreviewCtrl::SaveFrames(int nTotalFrames)
 	
 
 	::ReleaseDC(GetSafeHwnd(), hdc);
+}
+
+BOOL CPreviewCtrl::OnEraseBkgnd(CDC* pDC) 
+{
+	return TRUE;
+	
+//	return CStatic::OnEraseBkgnd(pDC);
 }
