@@ -83,11 +83,34 @@ HRESULT CAviBitmap::Init()
 			break;
 		}
 
+		hr = AVIStreamInfo(m_pAviStream, &m_aviInfo, sizeof(AVISTREAMINFO));
+		if(hr != S_OK)
+		{
+			m_szLastErrorMsg.Format(_T("Unable to Get the video stream info"));
+			break;
+		}
+		CString szFourCC;
+		FourCC2Str(m_aviInfo.fccHandler, szFourCC);
+		AfxTrace(_T("fccHandler=%s, 0x%08X\n"), szFourCC, m_aviInfo.fccHandler);
+
+		ZeroMemory(&m_biWanted, sizeof(m_biWanted));
+		LONG lFormat = sizeof(m_biWanted);
+
+		hr = AVIStreamReadFormat(m_pAviStream, 0, &m_biWanted, &lFormat);
+		if(hr != S_OK)
+		{
+			m_szLastErrorMsg.Format(_T("Unable to Get the foramt of the 1st frame"));
+			break;
+		}
+		m_biWanted.biCompression = BI_RGB;
+		m_biWanted.biBitCount = 32;
+		m_biWanted.biSizeImage = m_biWanted.biWidth * 4 * m_biWanted.biHeight;
+
 		//Set the result to Fail
 		hr = E_FAIL;
 
 		//Get the GETFRAME handle
-		m_pGetFrame = AVIStreamGetFrameOpen(m_pAviStream, NULL);
+		m_pGetFrame = AVIStreamGetFrameOpen(m_pAviStream, &m_biWanted);
 		if(m_pGetFrame == NULL)
 		{
 			m_szLastErrorMsg.Format(_T("Unable to Get the GETFRAME handle"));
@@ -123,7 +146,7 @@ HRESULT CAviBitmap::Init()
 	return hr;
 }
 
-HRESULT CAviBitmap::GetAllFrames()
+HRESULT CAviBitmap::GetAllFrames(LPCTSTR lpszFolderName)
 {
 	if(m_pGetFrame == NULL)
 	{
@@ -132,31 +155,48 @@ HRESULT CAviBitmap::GetAllFrames()
 	}
 	HRESULT hr = S_OK;
 
-	BITMAPINFOHEADER bmpInfoHdr;
-	LONG lpcbFormat = sizeof(bmpInfoHdr);
+	int nBmpInfoHdrSize = sizeof(BITMAPINFO) + sizeof(RGBQUAD) * 256;
+	BITMAPINFOHEADER* lpBmpInfoHdr = (BITMAPINFOHEADER*)(new BYTE[nBmpInfoHdrSize]);
+	LONG lpcbFormat = nBmpInfoHdrSize;
 
 	BYTE* lpDib = NULL;
 	BYTE* lpBuffer = NULL;
 
+	LONG lBytes = 0, lSamples = 0;
+	BOOL bReadRaw = FALSE;
+
 	int nPos = 0;
-	for(nPos = 0; nPos < m_lSampleCount; nPos++)
+	int nSampleCount = min(m_lSampleCount, 101);
+	for(nPos = 0; nPos < nSampleCount; nPos++)
 	{
 		//Get the frame format
-		hr = AVIStreamReadFormat(m_pAviStream, nPos, &bmpInfoHdr,&lpcbFormat);
+		hr = AVIStreamReadFormat(m_pAviStream, nPos, lpBmpInfoHdr, &lpcbFormat);
 		if(hr != S_OK)
 		{
 			m_szLastErrorMsg.Format(_T("Unable to Get the sample format: %d"), nPos);
 			break;
 		}
 
-		//Get the frame data
-		lpBuffer = new BYTE[bmpInfoHdr.biSizeImage];
-		hr = AVIStreamRead(m_pAviStream, nPos, 1, lpBuffer, bmpInfoHdr.biSizeImage, NULL, NULL);
-		if(hr != S_OK)
+		lpBuffer = NULL;
+		//Try to read raw data when the bitmap is BI_RGB
+		if(lpBmpInfoHdr->biCompression == BI_RGB && (lpBmpInfoHdr->biBitCount == 24 || lpBmpInfoHdr->biBitCount == 32))
 		{
-			m_szLastErrorMsg.Format(_T("Unable to Get the sample data: %d"), nPos);
-			break;
+			//Get the frame data
+			lpBuffer = new BYTE[m_biWanted.biSizeImage];
+			hr = AVIStreamRead(m_pAviStream, nPos, 1, lpBuffer, m_biWanted.biSizeImage, &lBytes, &lSamples);
+			if(hr != S_OK)
+			{
+				m_szLastErrorMsg.Format(_T("Unable to Get the sample data: %d"), nPos);
+				break;
+			}
 		}
+		else
+		{
+			CString szFourCC;
+			FourCC2Str(m_aviInfo.fccHandler, szFourCC);
+			AfxTrace(_T("Non-RGB format at frame(%03d)=%s, 0x%08X\n"), nPos, szFourCC, lpBmpInfoHdr->biCompression);
+		}
+
 
 		//Get the frame at nPos
 		lpDib = (BYTE*)AVIStreamGetFrame(m_pGetFrame, nPos);
@@ -167,17 +207,36 @@ HRESULT CAviBitmap::GetAllFrames()
 			break;
 		}
 
-		//compare the data retrieved in 2 ways
-		if(memcmp(lpBuffer, lpDib + sizeof(BITMAPINFOHEADER), bmpInfoHdr.biSizeImage) != 0)
+		//compare the data retrieved in 2 ways if needed
+		if(lpBuffer != NULL)
 		{
-			m_szLastErrorMsg.Format(_T("not equals: %d"), nPos);
-			hr = E_FAIL;
-			break;
+			if(memcmp(lpBuffer, lpDib + sizeof(BITMAPINFOHEADER), lpBmpInfoHdr->biSizeImage) != 0)
+			{
+				m_szLastErrorMsg.Format(_T("not equals: %d"), nPos);
+				hr = E_FAIL;
+				break;
+			}
 		}
 
-		delete [] lpBuffer;
-		lpBuffer = NULL;
+		CString szFileName;
+		if(lpszFolderName == NULL)
+		{
+			szFileName.Format(_T(".\\Frame%03d.bmp"), nPos);
+		}
+		else
+		{
+			szFileName.Format(_T("%s\\Frame%03d.bmp"), lpszFolderName, nPos);
+		}
+		BITMAPINFOHEADER* pTemp = (BITMAPINFOHEADER*)lpDib;
 
+//		hr = SaveBitmap(lpBmpInfoHdr, lpBuffer, lpBmpInfoHdr->biSizeImage, szFileName);
+		hr = SaveBitmap(&m_biWanted, lpDib + sizeof(BITMAPINFOHEADER), m_biWanted.biSizeImage, szFileName);
+
+		if(lpBuffer != NULL)
+		{
+			delete [] lpBuffer;
+			lpBuffer = NULL;
+		}
 		//Done
 	}
 
@@ -187,7 +246,59 @@ HRESULT CAviBitmap::GetAllFrames()
 		lpBuffer = NULL;
 	}
 
+	if(lpBmpInfoHdr != NULL)
+	{
+		delete [] lpBmpInfoHdr;
+		lpBmpInfoHdr = NULL;
+	}
+
 	ReleaseMemory();
+
+	return hr;
+}
+
+HRESULT CAviBitmap::SaveBitmap(BITMAPINFOHEADER *lpBMIH, BYTE *lpBuffer, DWORD cbBuffer, LPCTSTR lpszFileName)
+{
+	BITMAPFILEHEADER bmpFileHdr;
+	bmpFileHdr.bfType = 0x4D42;
+	bmpFileHdr.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	bmpFileHdr.bfReserved1 = bmpFileHdr.bfReserved2 = 0;
+	bmpFileHdr.bfSize = bmpFileHdr.bfOffBits + cbBuffer;
+
+
+	HANDLE hFile = CreateFile(lpszFileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hFile == INVALID_HANDLE_VALUE)
+    {
+		m_szLastErrorMsg.Format(_T("Unable to create file"));
+		return E_FAIL;
+    }
+	
+	HRESULT hr = E_FAIL;
+	DWORD dwWrite = 0;
+	do 
+	{
+		if(!WriteFile(hFile, &bmpFileHdr, sizeof(BITMAPFILEHEADER), &dwWrite, NULL))
+		{
+			m_szLastErrorMsg.Format(_T("Unable to write file header"));
+			break;
+		}
+		
+		if(!WriteFile(hFile, lpBMIH, sizeof(BITMAPINFOHEADER), &dwWrite, NULL))
+		{
+			m_szLastErrorMsg.Format(_T("Unable to write info header"));
+			break;
+		}
+		if(!WriteFile(hFile, lpBuffer, cbBuffer, &dwWrite, NULL))
+		{
+			m_szLastErrorMsg.Format(_T("Unable to write image data"));
+			break;
+		}
+
+		hr = S_OK;
+
+	} while (FALSE);
+	
+	CloseHandle(hFile);
 
 	return hr;
 }
@@ -197,4 +308,10 @@ HRESULT CAviBitmap::GetFrame(int nFrame, LPVOID lpBuffer, DWORD cbBuffer)
 	HRESULT hr = E_FAIL;
 
 	return hr;
+}
+
+
+void CAviBitmap::FourCC2Str(DWORD dwFourCC, CString &szStr)
+{
+	szStr.Format(_T("%c%c%c%c"), dwFourCC%256, (dwFourCC>>8)%256, (dwFourCC>>16)%256, (dwFourCC>>24)%256);
 }

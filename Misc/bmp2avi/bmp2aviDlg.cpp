@@ -186,7 +186,7 @@ void CBmp2aviDlg::OnAviToBmp()
 			break;
 		}
 
-		hr = aviBitmap.GetAllFrames();
+		hr = aviBitmap.GetAllFrames(_T(".\\bmp2"));
 		if(hr != S_OK)
 		{
 			break;
@@ -196,7 +196,7 @@ void CBmp2aviDlg::OnAviToBmp()
 	CString szMsg = _T("OK");
 	if(hr != S_OK)
 	{
-		szMsg = aviBitmap.GetLastErrorMessage();
+		szMsg.Format(_T("0x%08X: %s"), hr, aviBitmap.GetLastErrorMessage());
 	}
 	AfxMessageBox(szMsg);
 }

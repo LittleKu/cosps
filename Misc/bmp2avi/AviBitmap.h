@@ -19,7 +19,7 @@ public:
 
 	HRESULT Init();
 	HRESULT GetFrame(int nFrame, LPVOID lpBuffer, DWORD cbBuffer);
-	HRESULT GetAllFrames();
+	HRESULT GetAllFrames(LPCTSTR lpszFolderName = NULL);
 
 	LPCTSTR GetLastErrorMessage() const {	return m_szLastErrorMsg;	}
 
@@ -27,8 +27,12 @@ private:
 	void ReleaseMemory();
 
 private:
+	void FourCC2Str(DWORD dwFourCC, CString& szStr);
+	HRESULT SaveBitmap(BITMAPINFOHEADER* lpBMIH, BYTE* lpBuffer, DWORD cbBuffer, LPCTSTR lpszFileName);
 	PAVIFILE			m_pAviFile;
 	PAVISTREAM			m_pAviStream;
+	AVISTREAMINFO		m_aviInfo;
+	BITMAPINFOHEADER	m_biWanted;
 	PGETFRAME			m_pGetFrame;
 
 	LONG				m_lFirstSample;
