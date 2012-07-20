@@ -101,6 +101,10 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\YUVLib.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\YUVviewer.cpp
 # End Source File
 # Begin Source File
@@ -130,6 +134,10 @@ SOURCE=.\Resource.h
 # Begin Source File
 
 SOURCE=.\StdAfx.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\YUVLib.h
 # End Source File
 # Begin Source File
 

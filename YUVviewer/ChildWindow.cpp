@@ -35,6 +35,7 @@
 #include "YUVviewer.h"
 #include "ChildWindow.h"
 #include "YUVviewerDlg.h"
+#include "YUVLib.h"
 
 
 #ifdef _DEBUG
@@ -232,7 +233,9 @@ void CChildWindow::OnPaint()
 	SetWindowText(msg);
 	
 	if(bColorImage){    //²ÊÉ«	//Colorful
-		conv.YV12_to_RGB24(Y,Cb,Cr,RGBbuf,iWidth,iHeight);
+//		conv.YV12_to_RGB24(Y,Cb,Cr,RGBbuf,iWidth,iHeight);
+		CYUVLib::YV12_to_RGB24(Y, Cb, Cr, RGBbuf, iWidth, iHeight);
+//		flip(RGBbuf, iWidth, iHeight);
 		ShowImage(&dc,RGBbuf);
 	}
 	else {                    //ºÚ°×	//Monochrome
@@ -276,4 +279,19 @@ int CChildWindow::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	LocalFree(hloc1);
 
 	return 0;
+}
+
+void CChildWindow::flip(BYTE *lpImage, int nWdith, int nHeight)
+{
+	BYTE* lpRowData = new BYTE[nWdith * 3];
+	int nRowUp = 0, nRowDown = nHeight - 1;
+	while(nRowUp < nRowDown)
+	{
+		memcpy(lpRowData, lpImage + nRowUp * 3 * nWdith, nWdith * 3);
+		memcpy(lpImage + nRowUp * 3 * nWdith, lpImage + nRowDown * 3 * nWdith, nWdith * 3);
+		memcpy(lpImage + nRowDown * 3 * nWdith, lpRowData, nWdith * 3);
+		nRowUp++;
+		nRowDown--;
+	}
+	delete lpRowData;
 }

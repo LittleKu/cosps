@@ -51,6 +51,7 @@ protected:
 	CChildWindow();           // protected constructor used by dynamic creation
 
 private:
+	void flip(BYTE* lpImage, int nWdith, int nHeight);
 	BOOL bColorImage;
 	int iWidth,iHeight;
 	int m_nzoom;
