@@ -4,3 +4,7 @@ http://www.codeproject.com/Articles/29366/Play-Wave-file-with-DirectSound-and-di
 
 tutorial
 http://www.planet-source-code.com/vb/scripts/ShowCode.asp?txtCodeId=4422&lngWId=3
+
+waveOutOpen for Thread Callback
+http://stackoverflow.com/questions/1877210/waveout-win32api-and-multithreading
+http://www.koders.com/cpp/fidBC5A91280464C0CB59491A5CEBAEF14679091A62.aspx
