@@ -1,0 +1,1 @@
+http://www.codeproject.com/Articles/6129/Using-WIN32-Message-Queue-in-C-WIN32-Multithreaded
