@@ -1,0 +1,6 @@
+http://cboard.cprogramming.com/projects-job-recruitment/78282-compression-decompression-wave-file-mp3.html
+http://devmaster.net/forums/topic/4510-can-we-use-function-acmstreamconvert-to-decode-an-mp3-file/
+http://blogs.msdn.com/b/matthew_van_eerde/archive/2010/06/01/how-to-enumerate-audio-compression-manager-acm-drivers-on-your-system-spot-the-bug.aspx
+http://www.wavpack.com/index.html
+http://sox.git.sourceforge.net/git/gitweb.cgi?p=sox/sox;a=blob;f=README.win32;hb=HEAD
+http://www.voiceage.com/acmdriver.php
