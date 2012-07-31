@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 	* set up the WAVEFORMATEX structure.
 	*/
 	wfx.nSamplesPerSec = 44100; /* sample rate */
-	wfx.wBitsPerSample = 8; /* sample size */
+	wfx.wBitsPerSample = 16; /* sample size */
 	wfx.nChannels= 2; /* channels*/
 	wfx.cbSize = 0; /* size of _extra_ info */
 	wfx.wFormatTag = WAVE_FORMAT_PCM;

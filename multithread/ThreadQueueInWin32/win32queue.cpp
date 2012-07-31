@@ -36,7 +36,7 @@ DWORD WINAPI	ThrdFunc ( LPVOID n )
 	return 0;
 }
 
-int main()
+int main1()
 {
 	HANDLE	hThrd [ NUM_THREADS ];
 	DWORD	Id [ NUM_THREADS ];

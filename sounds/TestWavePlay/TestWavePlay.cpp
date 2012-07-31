@@ -6,6 +6,40 @@
 
 #pragma comment( lib, "Winmm.lib" )
 
+void printFlags(DWORD dwFlag, const char* prefix = 0)
+{
+	char buffer[256] = {0};
+	if(dwFlag & WHDR_BEGINLOOP)
+	{
+		strcat(buffer, " BEGINLOOP");
+	}
+	if(dwFlag & WHDR_DONE)
+	{
+		strcat(buffer, " DONE");
+	}
+	if(dwFlag & WHDR_ENDLOOP)
+	{
+		strcat(buffer, " ENDLOOP");
+	}
+	if(dwFlag & WHDR_INQUEUE)
+	{
+		strcat(buffer, " INQUEUE");
+	}
+	if(dwFlag & WHDR_PREPARED)
+	{
+		strcat(buffer, " PREPARED");
+	}
+
+	if(prefix)
+	{
+		printf("%s: dwFlag=%08X, flag=%s\n", prefix, dwFlag, buffer);
+	}
+	else
+	{
+		printf("dwFlag=%08X, flag=%s\n", dwFlag, buffer);
+	}
+}
+
 int main(int argc, char* argv[])
 {
 //    LPWSTR szFileName;//声音文件名
@@ -121,23 +155,41 @@ int main(int argc, char* argv[])
     pWaveOutHdr.lpData =(HPSTR)lpData;
     pWaveOutHdr.dwBufferLength =m_WaveLong;
     pWaveOutHdr.dwFlags =0;
+	pWaveOutHdr.dwLoops = 10;
     if(waveOutPrepareHeader(hWaveOut,&pWaveOutHdr,sizeof(WAVEHDR))!=0)
     {
         printf("Failed to prepare the wave data buffer");
         return 0;
     }
+	printFlags(pWaveOutHdr.dwFlags, "after [waveOutPrepareHeader]");
+
+	pWaveOutHdr.dwFlags |= (WHDR_BEGINLOOP | WHDR_ENDLOOP);
     //播放音频数据文件
     if(waveOutWrite(hWaveOut,&pWaveOutHdr,sizeof(WAVEHDR))!=0)
     {
         printf("Failed to write the wave data buffer");
         return 0;
     }
+	printFlags(pWaveOutHdr.dwFlags, "after [waveOutWrite]");
     //关闭音频输出设备,释放内存
 //     printf("\npress any key");
 //     getchar();
-	Sleep(50000);
+	Sleep(20000);
+	printFlags(pWaveOutHdr.dwFlags, "after [Sleep]");
+
+	if(waveOutUnprepareHeader(hWaveOut, &pWaveOutHdr, sizeof(pWaveOutHdr)) != 0)
+	{
+		printf("Failed to unPrepare the wave data buffer");
+        return 0;
+	}
+	printFlags(pWaveOutHdr.dwFlags, "after [waveOutUnprepareHeader]");
+
     waveOutReset(hWaveOut);
+	printFlags(pWaveOutHdr.dwFlags, "after [waveOutReset]");
+
     waveOutClose(hWaveOut);
+	printFlags(pWaveOutHdr.dwFlags, "after [waveOutClose]");
+
     LocalUnlock(m_hFormat);
     LocalFree(m_hFormat);
     delete [] lpData;

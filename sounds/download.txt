@@ -8,3 +8,10 @@ http://www.planet-source-code.com/vb/scripts/ShowCode.asp?txtCodeId=4422&lngWId=
 waveOutOpen for Thread Callback
 http://stackoverflow.com/questions/1877210/waveout-win32api-and-multithreading
 http://www.koders.com/cpp/fidBC5A91280464C0CB59491A5CEBAEF14679091A62.aspx
+
+Wave File Format Specifications
+http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+Wave sample files
+http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/Samples.html
+WAVE PCM soundfile format
+https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
