@@ -64,7 +64,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_AFXDLL" /D "ENABLE_PTHREAD" /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
 # ADD RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
 BSC32=bscmake.exe
@@ -90,6 +90,10 @@ SOURCE=.\AutoEventQueue.cpp
 # Begin Source File
 
 SOURCE=.\ManualEventQueue.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\PosixCVQueue.cpp
 # End Source File
 # Begin Source File
 
@@ -119,6 +123,10 @@ SOURCE=.\AutoEventQueue.h
 # Begin Source File
 
 SOURCE=.\ManualEventQueue.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PosixCVQueue.h
 # End Source File
 # Begin Source File
 

@@ -7,6 +7,10 @@
 #include "ManualEventQueue.h"
 #include "AutoEventQueue.h"
 
+#if defined ENABLE_PTHREAD
+#include "PosixCVQueue.h"
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -22,7 +26,7 @@ using namespace std;
 
 long nProductID = 0;
 
-const int nSleepTime = 1000;
+const int nSleepTime = 2000;
 const int nProducerCount = 2;
 const int nConsumerCount = 7;
 const int nQueueCapacity = 10;
@@ -37,8 +41,8 @@ DWORD WINAPI ThreadProcP(LPVOID lpParameter)
 	{
 //		Sleep(nSleepTime);
 		nID = ::InterlockedIncrement(&nProductID);
-		printf("Producer [%05d] produce [%02d]\n", GetCurrentThreadId(), nID);
 		pQueue->Put((void*)nID);
+		printf("Producer [%05d] produce [%02d]\n", GetCurrentThreadId(), nID);
 	}
 	
 	return 0;
@@ -102,11 +106,14 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		cout << (LPCTSTR)strHello << endl;
 	}
 
-	printf("===test 1===\n");
-	TestProducerConsumer(nProducerCount, nConsumerCount, nQueueCapacity, 0);
+// 	printf("===test 1===\n");
+// 	TestProducerConsumer(nProducerCount, nConsumerCount, nQueueCapacity, 0);
+// 
+// 	printf("\n\n===test 2===\n");
+// 	TestProducerConsumer(nProducerCount, nConsumerCount, nQueueCapacity, 1);
 
-	printf("\n\n===test 2===\n");
-	TestProducerConsumer(nProducerCount, nConsumerCount, nQueueCapacity, 1);
+	printf("\n\n===test 3===\n");
+	TestProducerConsumer(nProducerCount, nConsumerCount, nQueueCapacity, 2);
 
 	return nRetCode;
 }
@@ -116,13 +123,21 @@ void TestProducerConsumer(int nCountP, int nCountC, int nMax, int nType)
 	nProductID = 0;
 	CSyncQueue* pSyncQueue = NULL;
 	
-	if(nType % 2 == 0)
+	if(nType % 3 == 0)
 	{
 		pSyncQueue = new CManualEventQueue(nMax);
 	}
-	else
+	else if(nType % 3 == 1)
 	{
 		pSyncQueue = new CAutoEventQueue(nMax);
+	}
+	else
+	{
+#if defined ENABLE_PTHREAD
+		pSyncQueue = new CPosixCVQueue(nMax);
+#else
+		pSyncQueue = new CAutoEventQueue(nMax);
+#endif
 	}
 	
 	HANDLE* hThreads = new HANDLE[nCountP + nCountC];
