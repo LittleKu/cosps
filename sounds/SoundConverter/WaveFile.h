@@ -27,9 +27,13 @@ public:
 	{
 		return this->m_lpWaveFormat != NULL;
 	}
-	const WAVEFORMATEX* GetWaveFormat() const
+	WAVEFORMATEX* GetWaveFormat() const
 	{
 		return this->m_lpWaveFormat;
+	}
+	const DWORD GetWaveFormatSize() const
+	{
+		return this->m_dwWaveFormatSize;
 	}
 	const MMCKINFO* GetChunkDataInfo() const
 	{
@@ -45,6 +49,7 @@ private:
 
 	HMMIO			m_hWaveFile;		/* wave file handle */
 	WAVEFORMATEX*	m_lpWaveFormat;		/* wave format pointer */
+	DWORD			m_dwWaveFormatSize;	/* total struct size of m_lpWaveFormat */
 	MMCKINFO		m_ckInfoData;		/* chunk data info */
 	DWORD			m_dwDataReadCount;	/* data count already read */
 };

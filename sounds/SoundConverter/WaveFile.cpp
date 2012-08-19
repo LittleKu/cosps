@@ -91,6 +91,7 @@ BOOL CWaveFile::PrepareWaveFile(LPCTSTR lpszFileName)
 		}
 		//remember the fmt
 		m_lpWaveFormat = (WAVEFORMATEX*)fmtBuffer;
+		m_dwWaveFormatSize = ckInfo.cksize;
 		
 		//leave chunk 'fmt '
 		mmResult = mmioAscend(m_hWaveFile, &ckInfo, 0);
