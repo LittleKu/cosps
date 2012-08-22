@@ -9,10 +9,19 @@ void testWaveFile(LPCTSTR lpszFileName);
 
 int main(int argc, char* argv[])
 {
-//	testWaveFile("C:\\lgao1\\72audio\\wav\\msadpcm.wav");
-	testWaveFile("F:\\data\\sound\\wav\\output\\MS_ADPCM.wav");
+	if(argc < 2)
+	{
+		printf("usage: %s <file name>\n", argv[0]);
+		return -1;
+	}
 
-	printf("Hello World!\n");
+	for(int k = 1; k < argc; k++)
+	{
+		printf("WaveFile[%d]: %s\n", k, argv[k]);
+		testWaveFile(argv[k]);
+	}
+
+	printf("\n");
 	return 0;
 }
 
