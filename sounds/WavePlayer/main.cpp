@@ -1,10 +1,15 @@
 #include "WavePlayer.h"
+#include "WaveFilePlayer.h"
 #include <stdio.h>
 
 static const int BUFFER_LEN = 17003;
 static char buffer[BUFFER_LEN];
 
+int testPlayRaw(int argc, char* argv[]);
 void PlayRaw(CWavePlayer* player, const char* pFileName);
+
+int testPlayFile(int argc, char* argv[]);
+void PlayFile(CWaveFilePlayer* player, const char* pFileName);
 
 int main(int argc, char* argv[])
 {
@@ -14,13 +19,20 @@ int main(int argc, char* argv[])
 		return 1 ;
 	}
 
+	testPlayFile(argc, argv);
+
+	return 0;
+}
+
+int testPlayRaw(int argc, char* argv[])
+{
 	CWavePlayer player;
 	if(!player.Init())
 	{
 		printf("%s\n", player.GetErrorMsg());
 		return 2;
 	}
-
+	
 	BOOL bRet;
 	for(int k = 1 ; k < argc ; k++)
 	{
@@ -32,7 +44,6 @@ int main(int argc, char* argv[])
 		{
 			bRet = player.Open(44100, 8, 2);
 		}
-//		bRet = player.SetFormat(44100, 16, 2);
 		
 		if(!bRet)
 		{
@@ -44,7 +55,7 @@ int main(int argc, char* argv[])
 		PlayRaw(&player, argv[k]);
 		printf("end play %s\n", argv[k]);
 	}
-
+	
 	return 0;
 }
 
@@ -74,4 +85,21 @@ void PlayRaw(CWavePlayer* player, const char* pFileName)
 	player->Close();
 
 	fclose(fp);
+}
+
+int testPlayFile(int argc, char* argv[])
+{
+	CWaveFilePlayer player;
+	for(int k = 1; k < argc; k++)
+	{
+		printf("Play[%d]: %s\n", k, argv[k]);
+		player.Play(argv[k]);
+	}
+
+	return 0;
+}
+
+void PlayFile(CWaveFilePlayer* player, const char* pFileName)
+{
+	player->Play(pFileName);
 }
