@@ -13,12 +13,7 @@ void PlayFile(CWaveFilePlayer* player, const char* pFileName);
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
-	{
-		printf ("\nUsage : %s <input sound file>\n\n", argv [0]) ;
-		return 1 ;
-	}
-
+//	testPlayRaw(argc, argv);
 	testPlayFile(argc, argv);
 
 	return 0;
@@ -26,35 +21,44 @@ int main(int argc, char* argv[])
 
 int testPlayRaw(int argc, char* argv[])
 {
+	if(argc < 2)
+	{
+		printf("Usage: %s <input file> <sample rate> <bits> <channels>\n", "RawPlayer");
+		return -1;
+	}
 	CWavePlayer player;
 	if(!player.Init())
 	{
 		printf("%s\n", player.GetErrorMsg());
 		return 2;
 	}
-	
-	BOOL bRet;
-	for(int k = 1 ; k < argc ; k++)
+
+	DWORD nSampleRate = 44100;
+	WORD wBitsPerSample = 16;
+	WORD wChannel = 2;
+
+	if(argc >= 3)
 	{
-		if(k % 2 == 1)
-		{
-			bRet = player.Open(44100, 16, 2);
-		}
-		else if(k % 2 == 0)
-		{
-			bRet = player.Open(44100, 8, 2);
-		}
-		
-		if(!bRet)
-		{
-			printf("%s\n", player.GetErrorMsg());
-			continue;
-		}
-		
-		printf("start play %s\n", argv[k]);
-		PlayRaw(&player, argv[k]);
-		printf("end play %s\n", argv[k]);
+		nSampleRate = atoi(argv[2]);
 	}
+	if(argc >= 4)
+	{
+		wBitsPerSample = atoi(argv[3]);
+	}
+	if(argc >= 5)
+	{
+		wChannel = atoi(argv[4]);
+	}
+	
+	BOOL bRet = player.Open(nSampleRate, wBitsPerSample, wChannel);
+	if(!bRet)
+	{
+		printf("%s\n", player.GetErrorMsg());
+		return -1;
+	}
+	printf("start play %s\n", argv[1]);
+	PlayRaw(&player, argv[1]);
+	printf("end play %s\n", argv[1]);
 	
 	return 0;
 }
@@ -75,11 +79,11 @@ void PlayRaw(CWavePlayer* player, const char* pFileName)
 		nCount += nRead;
 		player->PlayData(buffer, nRead);
 //		player->Flush();
-		if(nCount >= 11 * 44100 * 4)
-		{
-			printf("played 10 seconds data, stop now\n");
-			break;
-		}
+// 		if(nCount >= 11 * 44100 * 4)
+// 		{
+// 			printf("played 10 seconds data, stop now\n");
+// 			break;
+// 		}
 	}
 	player->Flush();
 	player->Close();
@@ -89,6 +93,12 @@ void PlayRaw(CWavePlayer* player, const char* pFileName)
 
 int testPlayFile(int argc, char* argv[])
 {
+	if (argc < 2)
+	{
+		printf ("\nUsage : %s <input sound file>\n\n", argv [0]) ;
+		return 1 ;
+	}
+
 	CWaveFilePlayer player;
 	for(int k = 1; k < argc; k++)
 	{
