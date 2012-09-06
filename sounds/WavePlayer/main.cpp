@@ -1,5 +1,6 @@
 #include "WavePlayer.h"
 #include "WaveFilePlayer.h"
+#include "MP3Player.h"
 #include <stdio.h>
 
 static const int BUFFER_LEN = 17003;
@@ -11,10 +12,13 @@ void PlayRaw(CWavePlayer* player, const char* pFileName);
 int testPlayFile(int argc, char* argv[]);
 void PlayFile(CWaveFilePlayer* player, const char* pFileName);
 
+int testPlayMP3(int argc, char* argv[]);
+
 int main(int argc, char* argv[])
 {
 //	testPlayRaw(argc, argv);
-	testPlayFile(argc, argv);
+//	testPlayFile(argc, argv);
+	testPlayMP3(argc, argv);
 
 	return 0;
 }
@@ -112,4 +116,21 @@ int testPlayFile(int argc, char* argv[])
 void PlayFile(CWaveFilePlayer* player, const char* pFileName)
 {
 	player->Play(pFileName);
+}
+
+int testPlayMP3(int argc, char* argv[])
+{
+	if(argc < 2)
+	{
+		printf("Usage: %s <input file> ...\n", "mp3Player");
+		return -1;
+	}
+	CMP3Player player;
+	for(int i = 1; i < argc; i++)
+	{
+		printf("\n\n===========Play %s =============\n\n", argv[i]);
+		player.Play(argv[i]);
+	}
+
+	return 0;
 }
