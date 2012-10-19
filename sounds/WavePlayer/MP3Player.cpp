@@ -118,7 +118,7 @@ BOOL CMP3Player::Play(LPCSTR lpszFileName)
 		do 
 		{
 			//try to decode at most 1 frame
-			nSamples = m_pDecoder->Decode1Header(mp3_buffer, nBufferLen, pcm_l, pcm_r, &mp3data);
+			nSamples = m_pDecoder->Decode1Frame(mp3_buffer, nBufferLen, pcm_l, pcm_r, &mp3data);
 			
 			//header parsed
 			if(mp3data.header_parsed == 1)

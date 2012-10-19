@@ -105,6 +105,10 @@ SOURCE=.\WaveFilePlayer.cpp
 
 SOURCE=.\WavePlayer.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\CircleBuffer.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -124,6 +128,10 @@ SOURCE=.\WaveFilePlayer.h
 # Begin Source File
 
 SOURCE=.\WavePlayer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CircleBuffer.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

@@ -17,8 +17,8 @@ int testPlayMP3(int argc, char* argv[]);
 int main(int argc, char* argv[])
 {
 //	testPlayRaw(argc, argv);
-//	testPlayFile(argc, argv);
-	testPlayMP3(argc, argv);
+	testPlayFile(argc, argv);
+//	testPlayMP3(argc, argv);
 
 	return 0;
 }

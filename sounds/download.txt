@@ -1,3 +1,6 @@
+Sound Generator
+http://www.codeproject.com/Articles/7474/Sound-Generator-How-to-create-alien-sounds-using-m
+
 http://www.codeproject.com/Articles/8396/Using-DirectSound-to-Play-Audio-Stream-Data
 http://www.codeproject.com/Articles/29366/Play-Wave-file-with-DirectSound-and-display-its-sp
 

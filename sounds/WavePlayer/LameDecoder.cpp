@@ -3,8 +3,12 @@
 
 #pragma warning( disable : 4786 )
 #include "BlockBufferInputStream.h"
-
+#include "CircleBuffer.h"
 #include <assert.h>
+
+#ifndef max
+#define max(a, b) ((a) >= (b) ? (a) : (b))
+#endif
 
 #define TRACE_PADDING(x, y) \
 	{	\
@@ -17,7 +21,30 @@
 		} \
 	}
 
-CLameDecoder::CLameDecoder()
+CLameDecoder::DelayInfo::DelayInfo(int nSkipEnd) : pBufferL(NULL), pBufferR(NULL), nStartSkipped(0)
+{
+	if(nSkipEnd > 0)
+	{
+		pBufferL = new CCircleBuffer(nSkipEnd, MAX_SAMPLES_PER_FRAME, 2);
+		pBufferR = new CCircleBuffer(nSkipEnd, MAX_SAMPLES_PER_FRAME, 2);
+	}
+}
+
+CLameDecoder::DelayInfo::~DelayInfo()
+{
+	if(pBufferL != NULL)
+	{
+		delete pBufferL;
+		pBufferL = NULL;
+	}
+	if(pBufferR != NULL)
+	{
+		delete pBufferR;
+		pBufferR = NULL;
+	}
+}
+
+CLameDecoder::CLameDecoder() : m_pDelayInfo(NULL), m_bSkipPadding(false)
 {
 	m_pDebug = new CDebugSupportA();
 }
@@ -31,6 +58,11 @@ CLameDecoder::~CLameDecoder()
 	}
 
 	DeInit();
+}
+
+void CLameDecoder::SetSkipPadding(bool bSkipPadding)
+{
+	m_bSkipPadding = bSkipPadding;
 }
 
 int CLameDecoder::Init()
@@ -84,10 +116,131 @@ int CLameDecoder::DeInit()
 	lame_close(m_lame);
 	m_lame = NULL;
 
+	if(m_pDelayInfo != NULL)
+	{
+		delete m_pDelayInfo;
+		m_pDelayInfo = NULL;
+	}
+
 	return 0;
 }
 
-int CLameDecoder::Decode1Header(unsigned char* mp3buf, size_t len, 
+int CLameDecoder::GetSkipStart()
+{
+	if(m_nDelay > -1)
+	{
+		return m_nDelay + 528 + 1;
+	}
+	return 0;
+}
+int CLameDecoder::GetSkipEnd()
+{
+	if(m_nPadding > -1)
+	{
+		int ret = m_nPadding - (528 + 1);
+		if(ret < 0)
+		{
+			TRACEA("GetSkipEnd found an abnormal padding value: %d\n", m_nPadding);
+			ret = 0;
+		}
+		return ret;
+	}
+	return 0;
+}
+
+int CLameDecoder::Decode1Frame(unsigned char* mp3buf, size_t len, short pcm_l[], short pcm_r[], mp3data_struct* mp3data)
+{
+	if(!m_bSkipPadding)
+	{
+		return Decode1FrameRaw(mp3buf, len, pcm_l, pcm_r, mp3data);
+	}
+	else
+	{
+		int ret = -1;
+		if(m_pDelayInfo == NULL)
+		{
+			ret = Decode1FrameRaw(mp3buf, len, pcm_l, pcm_r, mp3data);
+
+			//found nc_delay and enc_padding, and have some decoded data
+			//this case should not happen in normal case
+			if(ret > 0 && m_pDelayInfo != NULL)
+			{
+				assert(m_pDelayInfo->pBufferL != NULL);
+				TRACEA("[abnormal]: m_pDelayInfo != NULL. ret=%d\n", ret);
+				m_pDelayInfo->pBufferL->AddData((char*)pcm_l, 2, ret);
+				m_pDelayInfo->pBufferR->AddData((char*)pcm_r, 2, ret);
+			}
+			else
+			{
+				return ret;
+			}
+		}
+		else
+		{
+			short *bufferL = (short*)m_pDelayInfo->pBufferL->GetBuffer(MAX_SAMPLES_PER_FRAME);
+			short *bufferR = (short*)m_pDelayInfo->pBufferR->GetBuffer(MAX_SAMPLES_PER_FRAME);
+			assert(bufferL != NULL && bufferR != NULL);
+
+			ret = Decode1FrameRaw(mp3buf, len, bufferL, bufferR, mp3data);
+
+			int nNewData = (ret < 0 ? 0 : ret);
+			m_pDelayInfo->pBufferL->ReleaseBuffer(MAX_SAMPLES_PER_FRAME, nNewData);
+			m_pDelayInfo->pBufferR->ReleaseBuffer(MAX_SAMPLES_PER_FRAME, nNewData);
+
+			if(ret <= 0)
+			{
+				return ret;
+			}
+		}
+
+		assert(ret > 0 && m_pDelayInfo != NULL);
+		
+		int nLeft;
+		//start skip
+		nLeft = GetSkipStart() - m_pDelayInfo->nStartSkipped;
+		if(nLeft > 0)
+		{
+			if(nLeft >= ret)
+			{
+				TRACEA("Skipped the current whole block: %d\n", ret);
+				m_pDelayInfo->nStartSkipped += ret;
+
+				m_pDelayInfo->pBufferL->Skip(2, ret);
+				m_pDelayInfo->pBufferR->Skip(2, ret);
+
+				//try to flush the buffer
+				TRACEA("try to flush the buffer again. ret=%d\n", ret);
+				return Decode1Frame(mp3buf, 0, pcm_l, pcm_r, mp3data);
+				//return 0;
+			}
+
+			//only skip the left bytes
+			TRACEA("Skipped %d bytes at beginning\n", nLeft);
+			m_pDelayInfo->nStartSkipped += nLeft;
+			ret -= nLeft;
+			
+			//move the output data backward
+			m_pDelayInfo->pBufferL->Skip(2, nLeft);
+			m_pDelayInfo->pBufferR->Skip(2, nLeft);
+		}
+
+		int dataLenL = m_pDelayInfo->pBufferL->GetData((char*)pcm_l, 2);
+		int dataLenR = m_pDelayInfo->pBufferR->GetData((char*)pcm_r, 2);
+
+		assert(dataLenL == dataLenR);
+		
+		if(dataLenL <= 0)
+		{
+			//try to flush the buffer
+			TRACEA("Skipped over, try to flush the buffer again. ret=%d\n", ret);
+			return Decode1Frame(mp3buf, 0, pcm_l, pcm_r, mp3data);
+		}
+		ret = dataLenL;
+		return ret;
+	}
+}
+
+int CLameDecoder::Decode1FrameRaw(unsigned char* mp3buf, size_t len, 
 								 short pcm_l[], short pcm_r[], mp3data_struct* mp3data)
 {
 	assert(m_nState >= STATE_IN_FILE_HEADER && m_nState <= STATE_IN_MPEG_DATA_N);
@@ -159,14 +312,6 @@ int CLameDecoder::Decode1Header(unsigned char* mp3buf, size_t len,
 			ret = DecodeMpegData(pcm_l, pcm_r, mp3data);
 		}
 	}
-	
-	if(ret <= 0)
-	{
-		return ret;
-	}
-
-	//TODO: add delay and padding support
-	//modify pcm_l and pcm_r content due to m_nDelay and m_nPadding
 
 	return ret;
 }
@@ -235,8 +380,16 @@ int CLameDecoder::DecodeMpegHeader(short pcm_l[], short pcm_r[], mp3data_struct*
 
 	m_nDelay = enc_delay;
 	m_nPadding = enc_padding;
+	TRACEA("parsed=%d, enc_delay=%d, enc_padding=%d\n", mp3data->header_parsed, enc_delay, enc_padding);
 
-	TRACE("enc_delay=%d, enc_padding=%d\n", enc_delay, enc_padding);
+	//need automatically skip padding bytes
+	if(m_bSkipPadding && (m_nDelay > -1 || m_nPadding > -1))
+	{
+		if(GetSkipEnd() > 0)
+		{
+			m_pDelayInfo = new DelayInfo(GetSkipEnd());
+		}
+	}
 
 	TRACE("stereo=%d\n", mp3data->stereo);
 	TRACE("samplerate=%d\n", mp3data->samplerate);
@@ -255,7 +408,7 @@ int CLameDecoder::DecodeMpegHeader(short pcm_l[], short pcm_r[], mp3data_struct*
 	{
         /* set as unknown.  Later, we will take a guess based on file size
          * ant bitrate */
-        mp3data->nsamp = 0xFFFFFFFF;
+        mp3data->nsamp = MAX_U_32_NUM;
     }
 
     return ret;
@@ -276,11 +429,10 @@ int CLameDecoder::DecodeFileHeader()
 	//try to skip ID3v2 tag header
     if (buf[0] == 'I' && buf[1] == 'D' && buf[2] == '3') 
 	{
-		TRACEA("ID3v2 found. " "Be aware that the ID3 tag is currently lost when transcoding.\n");
-		
         len = 6;
         if (m_is->Read(buf, len) != len)
 		{
+			TRACEA("ID3v2 found. " "Be aware that the ID3 tag is currently lost when transcoding.\n");
 			return RET_NEED_MORE_DATA;
 		}
 		
@@ -290,6 +442,7 @@ int CLameDecoder::DecodeFileHeader()
         buf[5] &= 127;
         len = (((((buf[2] << 7) + buf[3]) << 7) + buf[4]) << 7) + buf[5];
 		
+		TRACEA("ID3v2 tag found, length: %d\n", len);
         if(m_is->Skip(len) != (int)len)
 		{
 			return RET_NEED_MORE_DATA;
@@ -348,6 +501,10 @@ int CLameDecoder::DecodeFileHeader()
 			return RET_NEED_MORE_DATA;
 		}
     }
+	if(nSkip > 0)
+	{
+		TRACEA("Skipped %d bytes to find sync word\n", nSkip);
+	}
 
 	int nCurPos = m_is->GetPos();
 	assert(nCurPos >= 4);
@@ -383,4 +540,12 @@ int CLameDecoder::is_syncword_mp123(const void * headerptr)
     if ((p[3] & 3) == 2)
         return 0;       /* reserved emphasis mode */
     return 1;
+}
+
+void CLameDecoder::ArrayCopy(short* src, int srcOff, short* dst, int dstOff, int length)
+{
+	for(int i = 0; i < length; i++)
+	{
+		dst[dstOff + i] = src[srcOff + i];
+	}
 }

@@ -51,6 +51,12 @@ BOOL CWaveFilePlayer::Play(LPCSTR lpszFileName)
 		return FALSE;
 	}
 
+	if((sfinfo.format & SF_FORMAT_SUBMASK) == SF_FORMAT_FLOAT || (sfinfo.format & SF_FORMAT_SUBMASK) == SF_FORMAT_DOUBLE)
+	{
+		printf("float data type files\n");
+		sf_command (sndfile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE) ;
+	}
+
 	sf_count_t nRead = 0, nBufferSize = BUFFER_SIZE / sizeof(short);
 	while( (nRead = sf_read_short(sndfile, (short*)m_buffer, nBufferSize)) > 0 )
 	{
