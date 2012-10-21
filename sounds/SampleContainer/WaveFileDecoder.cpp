@@ -16,47 +16,7 @@ WaveFileDecoder::~WaveFileDecoder()
 	}
 }
 
-int WaveFileDecoder::Init(const TCHAR* pFileName, SampleContainer& sampleContainer)
-{
-	m_pFile = _tfopen(pFileName, _T("rb"));
-	if(m_pFile == NULL)
-	{
-		SetErrorMsg(_T("[Init]: failed open file %s"), pFileName);
-		return -1;
-	}
-
-	int ret = ParseWaveHeader();
-	if(ret != 0)
-	{
-		return ret;
-	}
-
-	m_nBufLen = SAMPLE_COUNT * m_wfx.nChannels * (m_wfx.wBitsPerSample >> 3);
-	if(m_nBufLen <= 0)
-	{
-		SetErrorMsg(_T("Parsed buffer length is invalid. m_nBufLen=%d"), m_nBufLen);
-		return -1;
-	}
-
-	m_pBuffer = new byte[m_nBufLen];
-	if(m_pBuffer == NULL)
-	{
-		SetErrorMsg(_T("Allocate buffer failed. m_nBufLen=%d"), m_nBufLen);
-		return -1;
-	}
-
-	SampleContainer::SampleTraits st;
-	st.nBitsPerSample = m_wfx.wBitsPerSample;
-	st.nChannels = m_wfx.nChannels;
-	st.nSampleRate = m_wfx.nSamplesPerSec;
-	st.nFlags = SampleContainer::FLAG_INTERLEAVED;
-
-	sampleContainer.SetSourceTraits(&st);
-
-	return 0;
-}
-
-int WaveFileDecoder::ParseWaveHeader()
+int WaveFileDecoder::ParseWaveHeader(SampleContext& context)
 {
 	FILE* pFileSrc = m_pFile;
 
@@ -69,14 +29,14 @@ int WaveFileDecoder::ParseWaveHeader()
 	nRead = fread(buf, 1, 12, pFileSrc);
 	if(nRead != 12)
 	{
-		SetErrorMsg(_T("Read RIFF header length failed. length=%d"), nRead);
+		SetErrorMsg(context, _T("Read RIFF header length failed. length=%d"), nRead);
 		return -1;
 	}
 	
 	/* starts with RIFF? */
 	if(memcmp(buf, "RIFF", 4) != 0)
 	{
-		SetErrorMsg(_T("Can't find 'RIFF' tag"));
+		SetErrorMsg(context, _T("Can't find 'RIFF' tag"));
 		return -1;
 	}
 	
@@ -84,7 +44,7 @@ int WaveFileDecoder::ParseWaveHeader()
 	
 	if(memcmp(buf + 8, "WAVE", 4) != 0)
 	{
-		SetErrorMsg(_T("Can't find 'WAVE' tag"));
+		SetErrorMsg(context, _T("Can't find 'WAVE' tag"));
 		return -1;
 	}
 	
@@ -94,7 +54,7 @@ int WaveFileDecoder::ParseWaveHeader()
 		nRead = fread(buf, 1, 8, pFileSrc);
 		if(nRead != 8)
 		{
-			SetErrorMsg(_T("Read chunk ID failed: %d"), nRead);
+			SetErrorMsg(context, _T("Read chunk ID failed: %d"), nRead);
 			return -1;
 		}
 		
@@ -105,7 +65,7 @@ int WaveFileDecoder::ParseWaveHeader()
 		{
 			if(nChunkSize < 16)
 			{
-				SetErrorMsg(_T("Wave Format length is too small: %d"), nChunkSize);
+				SetErrorMsg(context, _T("Wave Format length is too small: %d"), nChunkSize);
 				return -1;
 			}
 			
@@ -113,13 +73,13 @@ int WaveFileDecoder::ParseWaveHeader()
 			nRead = fread(&m_wfx, 1, 16, pFileSrc);
 			if(nRead != 16)
 			{
-				SetErrorMsg(_T("Read Wave Format failed. nRead=%d"), nRead);
+				SetErrorMsg(context, _T("Read Wave Format failed. nRead=%d"), nRead);
 				return -1;
 			}
 			
 			if(m_wfx.wFormatTag != WAVE_FORMAT_PCM)
 			{
-				SetErrorMsg(_T("Unsupported data format: 0x%04X"), m_wfx.wFormatTag);
+				SetErrorMsg(context, _T("Unsupported data format: 0x%04X"), m_wfx.wFormatTag);
 				return -1;
 			}
 			
@@ -127,7 +87,7 @@ int WaveFileDecoder::ParseWaveHeader()
 			{
 				if(fseek(pFileSrc, nChunkSize - 16, SEEK_CUR) != 0)
 				{
-					SetErrorMsg(_T("fseek failed"));
+					SetErrorMsg(context, _T("fseek failed"));
 					return -1;
 				}
 			}
@@ -150,7 +110,7 @@ int WaveFileDecoder::ParseWaveHeader()
 			
 			if(fseek(pFileSrc, nChunkSize, SEEK_CUR) != 0)
 			{
-				CFL_TRACE(_T("fseek failed\n"));
+				SetErrorMsg(context, _T("fseek failed\n"));
 				return -1;
 			}
 		}
@@ -159,37 +119,89 @@ int WaveFileDecoder::ParseWaveHeader()
 	return (m_nDataLen > 0) ? 0 : -1;
 }
 
-int WaveFileDecoder::Decode(SampleContainer& sampleContainer)
+//! initializes the input module
+int WaveFileDecoder::Open(SampleContainer& samples, SampleContext& context)
 {
-	int nSampleRemain = m_nDataLen / (m_wfx.nChannels * (m_wfx.wBitsPerSample >> 3));
+	m_pFile = _tfopen(SampleParams::GetInputFile(context), _T("rb"));
+	if(m_pFile == NULL)
+	{
+		SetErrorMsg(context, _T("[Open]: failed open file %s"), SampleParams::GetInputFile(context));
+		return -1;
+	}
+	
+	int ret = ParseWaveHeader(context);
+	if(ret != 0)
+	{
+		return ret;
+	}
+	
+	m_nBufLen = SAMPLE_COUNT * m_wfx.nChannels * (m_wfx.wBitsPerSample >> 3);
+	if(m_nBufLen <= 0)
+	{
+		SetErrorMsg(context, _T("Parsed buffer length is invalid. m_nBufLen=%d"), m_nBufLen);
+		return -1;
+	}
+	
+	m_pBuffer = new byte[m_nBufLen];
+	if(m_pBuffer == NULL)
+	{
+		SetErrorMsg(context, _T("Allocate buffer failed. m_nBufLen=%d"), m_nBufLen);
+		return -1;
+	}
+	
+	SampleContainer::SampleTraits st;
+	st.nBitsPerSample = m_wfx.wBitsPerSample;
+	st.nChannels = m_wfx.nChannels;
+	st.nSampleRate = m_wfx.nSamplesPerSec;
+	st.nFlags = SampleContainer::FLAG_DEFAULT;
+	
+	samples.SetSourceTraits(&st);
+	
+	CFL_TRACEA("Input Wave Format: bps=%d, channels=%d, samplerate=%d\n", 
+		st.nBitsPerSample, st.nChannels, st.nSampleRate);
+	
+	return 0;
+}
+/*! decodes samples and stores them in the sample container
+returns number of samples decoded, or 0 if finished;
+a negative value indicates an error */
+int WaveFileDecoder::Decode(SampleContainer& samples, SampleContext& context)
+{
+	int nSampleRemain = m_nDataLen / (m_wfx.nChannels * (m_wfx.wBitsPerSample >> 3)) - m_nSamplesRead;
 	int n = min(nSampleRemain, SAMPLE_COUNT);
 
 	int nRead = fread(m_pBuffer, (m_wfx.nChannels * (m_wfx.wBitsPerSample >> 3)), n, m_pFile);
 	if(nRead != n)
 	{
-		SetErrorMsg(_T("[Decode] fread error. n=%d, nRead=%d"), n, nRead);
+		SetErrorMsg(context, _T("[Decode] fread error. n=%d, nRead=%d"), n, nRead);
 		return -1;
 	}
-
-	sampleContainer.PutSamples(m_pBuffer, nRead);
-
+	
+	samples.PutSamples(m_pBuffer, nRead);
+	
+	m_nSamplesRead += nRead;
+	
 	return nRead;
 }
-
-int WaveFileDecoder::Done()
+//! called when done with decoding
+int WaveFileDecoder::Close(SampleContainer& samples, SampleContext& context)
 {
-	if(m_pFile == NULL)
-	{
-		return 0;
-	}
-	fclose(m_pFile);
-	m_pFile = NULL;
-
 	if(m_pBuffer != NULL)
 	{
 		delete [] m_pBuffer;
 		m_pBuffer = NULL;
 	}
 
-	return 0;
+	if(m_pFile == NULL)
+	{
+		return 0;
+	}
+
+	int ret = fclose(m_pFile);
+	if(ret != 0)
+	{
+		SetErrorMsg(context, _T("[Close] fclose error. ret=%d"), ret);
+	}
+	
+	return ret;
 }

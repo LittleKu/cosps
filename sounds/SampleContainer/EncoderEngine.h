@@ -4,30 +4,22 @@
 #pragma once
 
 #include "SampleInterface.h"
-#include "cflbase/tstring.h"
-#include "cflbase/ErrorMsg.h"
 
-class EncoderEngine : public NS_CFL::ErrorMsg
+class EncoderEngine
 {
 public:
 	EncoderEngine();
 	virtual ~EncoderEngine();
-	
 	void SetDecoder(SampleDecoder* pDecoder);
 	void SetEncoder(SampleEncoder* pEncoder);
-	
-	void SetSrcFile(const TCHAR* pFileName);
-	void SetDstFile(const TCHAR* pFileName);
 
-	virtual int execute();
-	int doExecute();
+	virtual int execute(SampleContext& context);
+	int doExecute(SampleContext& context);
 
 protected:
+	SampleContainer m_samples;
 	SampleDecoder*	m_pDecoder;
 	SampleEncoder*	m_pEncoder;
-	NS_CFL::tstring	m_srcFile;
-	NS_CFL::tstring	m_dstFile;
-	SampleContainer m_samples;
 };
 
 

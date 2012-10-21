@@ -8,25 +8,25 @@ EncoderEngine::~EncoderEngine()
 {
 }
 
-int EncoderEngine::execute()
+int EncoderEngine::execute(SampleContext& context)
 {
 	int ret = 0;
 	
 	do 
 	{
-		ret = m_pDecoder->Init(m_srcFile.c_str(), m_samples);
+		ret = m_pDecoder->Open(m_samples, context);
 		if(ret != 0)
 		{
 			break;
 		}
 		
-		ret = m_pEncoder->Init(m_dstFile.c_str(), m_samples);
+		ret = m_pEncoder->Open(m_samples, context);
 		if(ret != 0)
 		{
 			break;
 		}
 
-		ret = doExecute();
+		ret = doExecute(context);
 		if(ret != 0)
 		{
 			break;
@@ -35,25 +35,25 @@ int EncoderEngine::execute()
 
 	} while (false);
 
-	m_pDecoder->Done();
-	m_pEncoder->Done();
+	m_pDecoder->Close(m_samples, context);
+	m_pEncoder->Close(m_samples, context);
 	
 
 	return ret;
 }
 
-int EncoderEngine::doExecute()
+int EncoderEngine::doExecute(SampleContext& context)
 {
 	int ret = 0;
 	do 
 	{
-		ret = m_pDecoder->Decode(m_samples);
+		ret = m_pDecoder->Decode(m_samples, context);
 		if(ret <= 0)
 		{
 			return ret;
 		}
 		
-		ret = m_pEncoder->Encode(m_samples);
+		ret = m_pEncoder->Encode(m_samples, context);
 		if(ret < 0)
 		{
 			return ret;
@@ -71,14 +71,4 @@ void EncoderEngine::SetDecoder(SampleDecoder* pDecoder)
 void EncoderEngine::SetEncoder(SampleEncoder* pEncoder)
 {
 	this->m_pEncoder = pEncoder;
-}
-
-void EncoderEngine::SetSrcFile(const TCHAR* pFileName)
-{
-	m_srcFile = pFileName;
-}
-
-void EncoderEngine::SetDstFile(const TCHAR* pFileName)
-{
-	m_dstFile = pFileName;
 }

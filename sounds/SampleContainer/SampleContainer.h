@@ -9,7 +9,7 @@ public:
 	enum SampleFlag
 	{
 		FLAG_DEFAULT		= 0,	/* default SampleTraits flag */
-		FLAG_INTERLEAVED	= 0x01,	/* sample data is in interleaved format */
+		FLAG_CHANNELIZED	= 0x01,	/* sample data is in channelized format */
 		FLAG_ENDIAN_BIG		= 0x02,	/* sample data is in endian-big format */	
 		FLAG_PCM_S8			= 0x04	/* sample is signed 8 bits (when nBitsPerSample = 8) */
 	};

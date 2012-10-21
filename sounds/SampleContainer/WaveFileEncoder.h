@@ -4,26 +4,30 @@
 #pragma once
 
 #include "SampleInterface.h"
-#include "cflbase/ErrorMsg.h"
 
-class WaveFileEncoder : public SampleEncoder, public NS_CFL::ErrorMsg
+class WaveFileEncoder : public SampleEncoder
 {
 public:
 	WaveFileEncoder();
 	virtual ~WaveFileEncoder();
-	//! initializes the input module
-	virtual int Init(const TCHAR* pFileName, SampleContainer& sampleContainer);
-	
-	//! decodes samples and stores them in the sample container
-	/*! returns number of samples decoded, or 0 if finished;
-	a negative value indicates an error */
-	virtual int Encode(SampleContainer& sampleContainer);
-	
-	//! called when done with encoding
-	virtual int Done();
 
+	//! initializes the output module
+	virtual int Open(SampleContainer& samples, SampleContext& context);
+
+	/* encodes samples from the sample container
+	it is required that all samples from the container will be used up;
+	returns 0 if all was ok, or a negative value on error */
+	virtual int Encode(SampleContainer& samples, SampleContext& context);
+
+	//! cleans up the output module
+	virtual int Close(SampleContainer& samples, SampleContext& context);
+
+	static const char* OUT_BITS_PER_SAMPLE;
+private:
+	int WriteWaveHeader(FILE* fp, int nDataLength, int nSampleRate, int nChannels, int nBitsPerSample);
 private:
 	FILE*	m_pFile;
+	int		m_nSamplesEncoded;
 };
 
 #endif

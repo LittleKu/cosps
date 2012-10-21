@@ -53,25 +53,25 @@ void SampleContainer::GetTargetTraits(SampleTraits* st)
 
 void SampleContainer::PutSamplesInterleaved(void* pSamples, int nSampleCount)
 {
-	assert(source.nFlags & FLAG_INTERLEAVED);
+	assert((source.nFlags & FLAG_CHANNELIZED) != FLAG_CHANNELIZED);
 	PutSamples(pSamples, nSampleCount);
 }
 void SampleContainer::GetSamplesInterleaved(void*& pSamples, int& nSampleCount)
 {
-	assert(target.nFlags & FLAG_INTERLEAVED);
+	assert((target.nFlags & FLAG_CHANNELIZED) != FLAG_CHANNELIZED);
 	pSamples = m_pSamples;
 	nSampleCount = m_nSampleCount;
 }
 
 void SampleContainer::PutSamplesChannelized(void** pSamples, int nSampleCount)
 {
-	assert((source.nFlags & FLAG_INTERLEAVED) != FLAG_INTERLEAVED);
+	assert(source.nFlags & FLAG_CHANNELIZED);
 	PutSamples((void*)pSamples, nSampleCount);
 }
 
 void SampleContainer::GetSamplesChannelized(void**& pSamples, int& nSampleCount)
 {
-	assert((target.nFlags & FLAG_INTERLEAVED) != FLAG_INTERLEAVED);
+	assert(target.nFlags & FLAG_CHANNELIZED);
 	pSamples = (void**)m_pSamples;
 	nSampleCount = m_nSampleCount;
 }
@@ -112,13 +112,8 @@ void SampleContainer::FreeSampleBuffer()
 		return;
 	}
 	
-	//interleaved
-	if(target.nFlags & FLAG_INTERLEAVED)
-	{
-		delete [] m_pSamples;
-	}
 	//channelized
-	else
+	if(target.nFlags & FLAG_CHANNELIZED)
 	{
 		byte** buf = (byte**)m_pSamples;
 		
@@ -127,6 +122,11 @@ void SampleContainer::FreeSampleBuffer()
 			delete [] buf[i];
 		}
 		delete [] buf;
+	}
+	//interleaved
+	else
+	{
+		delete [] m_pSamples;
 	}
 	
 	m_pSamples = NULL;
@@ -142,13 +142,8 @@ void SampleContainer::EnsureCapacity(int capacity)
 	//capacity by channel in bytes
 	int nCapByChannel = capacity * (target.nBitsPerSample>>3);
 
-	//interleaved
-	if(target.nFlags & FLAG_INTERLEAVED)
-	{
-		m_pSamples = new byte[target.nChannels * nCapByChannel];
-	}
 	//channelized
-	else
+	if(target.nFlags & FLAG_CHANNELIZED)
 	{
 		byte** buf = new byte* [target.nChannels];
 		for(int i = 0; i < target.nChannels; i++)
@@ -156,6 +151,11 @@ void SampleContainer::EnsureCapacity(int capacity)
 			buf[i] = new byte[nCapByChannel];
 		}
 		m_pSamples = (byte*)buf;
+	}
+	//interleaved
+	else
+	{
+		m_pSamples = new byte[target.nChannels * nCapByChannel];
 	}
 
 	m_nCapacity = capacity;
@@ -165,7 +165,7 @@ int SampleContainer::GetStep(const SampleTraits& st)
 {
 	int step = st.nBitsPerSample >> 3;
 	//interleaved
-	if(target.nFlags & FLAG_INTERLEAVED)
+	if((target.nFlags & FLAG_CHANNELIZED) != FLAG_CHANNELIZED)
 	{
 		step *= st.nChannels;
 	}
@@ -176,15 +176,15 @@ void* SampleContainer::GetSampleBuffer(const SampleTraits& st, void* samples, in
 {
 	void* buf = NULL;
 	
-	//interleaved
-	if(st.nFlags & FLAG_INTERLEAVED)
-	{
-		buf =  (byte*)(samples) + channel * (st.nBitsPerSample >> 3);
-	}
 	//channelized
-	else
+	if(st.nFlags & FLAG_CHANNELIZED)
 	{
 		buf = ((byte**)samples)[channel];
+	}
+	//interleaved	
+	else
+	{
+		buf =  (byte*)(samples) + channel * (st.nBitsPerSample >> 3);
 	}
 	
 	return buf;
