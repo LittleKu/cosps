@@ -32,9 +32,20 @@ public:
 	void SetSourceTraits(const SampleTraits* st);
 	void GetSourceTraits(SampleTraits* st);
 
+	void SetSourceTraits(int nBitsPerSample, int nChannels, int nSampleRate, int nFlags);
+	int GetSourceChannels() {return source.nChannels;}
+	int GetSourceBitsPerSample() {return source.nBitsPerSample;}
+	int GetSourceSampleRate() {return source.nSampleRate;}
+	int GetSourceFlags() {return source.nFlags;}
+
 	void SetTargetTraits(const SampleTraits* st);
-	void SetTargetTraits(int nBitsPerSample, int nFlags);
 	void GetTargetTraits(SampleTraits* st);
+
+	void SetTargetTraits(int nBitsPerSample, int nFlags);
+	int GetTargetChannels() {return target.nChannels;}
+	int GetTargetBitsPerSample() {return target.nBitsPerSample;}
+	int GetTargetSampleRate() {return target.nSampleRate;}
+	int GetTargetFlags() {return target.nFlags;}
 
 	// functions to put samples in or get samples out
 

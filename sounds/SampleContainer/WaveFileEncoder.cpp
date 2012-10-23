@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <MMSystem.h>
 #include "cflbase/tstring.h"
+#include "SampleParams.h"
 
 const char* WaveFileEncoder::OUT_BITS_PER_SAMPLE = "WaveFileEncoder::OUT_BITS_PER_SAMPLE";
 

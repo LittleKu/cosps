@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "cflbase/tstring.h"
-#include <tchar.h>
+#pragma warning( disable : 4786 )
+
 #include <map>
 #include <string>
 #include "SampleContainer.h"
@@ -30,21 +30,17 @@ protected:
 	std::map<std::string, void*>	m_map;
 };
 
-class SampleParams
+class SampleModule
 {
 public:
-	static const TCHAR* GetInputFile(SampleContext& context);
-	static const TCHAR* GetOutputFile(SampleContext& context);
-	static NS_CFL::tstring* GetErrorMsg(SampleContext& context);
+	SampleModule() {}
+	virtual ~SampleModule() {}
 
-	static const char* INPUT_FILE_NAME;
-	static const char* OUTPUT_FILE_NAME;
-	static const char* ERROR_STR;
+	virtual int Open(SampleContainer& samples, SampleContext& context) = 0;
+	virtual int Close(SampleContainer& samples, SampleContext& context) = 0;
 };
 
-void SetErrorMsg(SampleContext& context, const TCHAR* fmt, ...);
-
-class SampleDecoder
+class SampleDecoder : public SampleModule
 {
 public:
 	SampleDecoder() {}
@@ -62,7 +58,7 @@ public:
 	virtual int Close(SampleContainer& samples, SampleContext& context) = 0;
 };
 
-class SampleEncoder
+class SampleEncoder : public SampleModule
 {
 public:
 	SampleEncoder() {}

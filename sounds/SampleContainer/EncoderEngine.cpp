@@ -37,7 +37,6 @@ int EncoderEngine::execute(SampleContext& context)
 
 	m_pDecoder->Close(m_samples, context);
 	m_pEncoder->Close(m_samples, context);
-	
 
 	return ret;
 }

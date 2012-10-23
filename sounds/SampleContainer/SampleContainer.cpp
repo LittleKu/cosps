@@ -21,6 +21,16 @@ void SampleContainer::SetSourceTraits(const SampleTraits* st)
 	source = *st;
 	target = *st;
 }
+void SampleContainer::SetSourceTraits(int nBitsPerSample, int nChannels, int nSampleRate, int nFlags)
+{
+	SampleTraits st;
+	st.nBitsPerSample = nBitsPerSample;
+	st.nChannels = nChannels;
+	st.nSampleRate = nSampleRate;
+	st.nFlags = nFlags;
+
+	SetSourceTraits(&st);
+}
 void SampleContainer::GetSourceTraits(SampleTraits* st)
 {
 	assert(st != NULL);
@@ -165,7 +175,7 @@ int SampleContainer::GetStep(const SampleTraits& st)
 {
 	int step = st.nBitsPerSample >> 3;
 	//interleaved
-	if((target.nFlags & FLAG_CHANNELIZED) != FLAG_CHANNELIZED)
+	if((st.nFlags & FLAG_CHANNELIZED) != FLAG_CHANNELIZED)
 	{
 		step *= st.nChannels;
 	}

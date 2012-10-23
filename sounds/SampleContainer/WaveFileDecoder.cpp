@@ -1,6 +1,7 @@
 #include "WaveFileDecoder.h"
 #include "cflbase/byte_utils.h"
 #include "cflbase/tstring.h"
+#include "SampleParams.h"
 
 WaveFileDecoder::WaveFileDecoder() : m_pFile(NULL), m_nDataLen(0), m_nSamplesRead(0), m_pBuffer(NULL)
 {

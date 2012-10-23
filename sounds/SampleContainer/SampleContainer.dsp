@@ -39,6 +39,7 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "CFLBASE_STATIC" /YX /FD /c
@@ -49,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 cflbaseS.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 cflbaseS.lib libmp3lame-static.lib /nologo /subsystem:console /machine:I386
 
 !ELSEIF  "$(CFG)" == "SampleContainer - Win32 Debug"
 
@@ -73,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 cflbaseSD.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 cflbaseSD.lib libmp3lame-static-d.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
 
 !ENDIF 
 
@@ -90,6 +91,18 @@ SOURCE=.\EncoderEngine.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\LameDecoder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\LameFileDecoder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\LameFileEncoder.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.cpp
 # End Source File
 # Begin Source File
@@ -99,6 +112,10 @@ SOURCE=.\SampleContainer.cpp
 # Begin Source File
 
 SOURCE=.\SampleInterface.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SampleParams.cpp
 # End Source File
 # Begin Source File
 
@@ -118,11 +135,27 @@ SOURCE=.\EncoderEngine.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\LameDecoder.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\LameFileDecoder.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\LameFileEncoder.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\SampleContainer.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\SampleInterface.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SampleParams.h
 # End Source File
 # Begin Source File
 

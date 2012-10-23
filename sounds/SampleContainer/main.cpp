@@ -1,6 +1,9 @@
 #include "SampleContainer.h"
+#include "SampleParams.h"
 #include "WaveFileDecoder.h"
 #include "WaveFileEncoder.h"
+#include "LameFileDecoder.h"
+#include "LameFileEncoder.h"
 #include "EncoderEngine.h"
 #include "cflbase/tstring.h"
 
@@ -13,6 +16,50 @@ int main(int argc, char* argv[])
 	ret = testCase1(argc, argv);
 
 	return ret;
+}
+
+SampleDecoder* GetDecoder(const TCHAR* lpFileName)
+{
+	SampleDecoder* pDecoder = NULL;
+	TCHAR* lpFileExt = _tcsrchr(lpFileName, _T('.'));
+	if(lpFileExt != NULL)
+	{
+		if(_tcsicmp(lpFileExt, _T(".mp3")) == 0)
+		{
+			pDecoder = new LameFileDecoder();
+		}
+		else if(_tcsicmp(lpFileExt, _T(".wav")) == 0)
+		{
+			pDecoder = new WaveFileDecoder();
+		}
+	}
+
+	if(pDecoder == NULL)
+		pDecoder = new WaveFileDecoder();
+
+	return pDecoder;
+}
+
+SampleEncoder* GetEncoder(const TCHAR* lpFileName)
+{
+	SampleEncoder* pEncoder = NULL;
+	TCHAR* lpFileExt = _tcsrchr(lpFileName, _T('.'));
+	if(lpFileExt != NULL)
+	{
+		if(_tcsicmp(lpFileExt, _T(".mp3")) == 0)
+		{
+			pEncoder = new LameFileEncoder();
+		}
+		else if(_tcsicmp(lpFileExt, _T(".wav")) == 0)
+		{
+			pEncoder = new WaveFileEncoder();
+		}
+	}
+	
+	if(pEncoder == NULL)
+		pEncoder = new WaveFileEncoder();
+	
+	return pEncoder;
 }
 
 int testCase1(int argc, char* argv[])
@@ -35,10 +82,10 @@ int testCase1(int argc, char* argv[])
 
 	EncoderEngine engine;
 
-	SampleDecoder* pDecoder = new WaveFileDecoder();
+	SampleDecoder* pDecoder = GetDecoder(srcFile.c_str());
 	engine.SetDecoder(pDecoder);
 
-	SampleEncoder* pEncoder = new WaveFileEncoder();
+	SampleEncoder* pEncoder = GetEncoder(dstFile.c_str());
 	engine.SetEncoder(pEncoder);
 	
 	if(argc >= 4)
