@@ -2,7 +2,7 @@
 #include "log4cplus_config.h"
 #include <stdio.h>
 
-DECLARE_THE_LOGGER_NAME("StreamGobbler.cpp")
+DECLARE_THE_LOGGER_NAME("StreamGobbler")
 
 DWORD WINAPI StreamGobbler::ThreadProc(LPVOID lpParameter)
 {
