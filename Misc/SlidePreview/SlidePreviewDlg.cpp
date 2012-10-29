@@ -198,6 +198,6 @@ void CSlidePreviewDlg::OnStopPrev()
 
 void CSlidePreviewDlg::OnSaveFrames() 
 {
-	m_prevCtrl.SaveFrames(100);
+	m_prevCtrl.SaveFrames(500);
 	AfxMessageBox("Save Done");
 }

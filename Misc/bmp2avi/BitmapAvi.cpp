@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "BitmapAvi.h"
 #include <Shlwapi.h>
+#include "cflbase/byte_utils.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -19,7 +20,7 @@ static char THIS_FILE[]=__FILE__;
 #define DWORD_ALIGNED_BITS(x) ((((x) + 31) & ~31) >> 3)
 #endif
 
-CBitmapAvi::CBitmapAvi(LPCTSTR lpszFileName, DWORD dwCodec, DWORD dwFrameRate)
+CBitmapAvi::CBitmapAvi(LPCTSTR lpszFileName, DWORD dwCodec, DWORD dwFrameRate, LPCTSTR lpszWaveFile)
 {
 	AVIFileInit();
 
@@ -36,6 +37,19 @@ CBitmapAvi::CBitmapAvi(LPCTSTR lpszFileName, DWORD dwCodec, DWORD dwFrameRate)
 	m_dwFrameRate = dwFrameRate;
 
 	ZeroMemory(&m_bmpInfoHdr, sizeof(m_bmpInfoHdr));
+
+	if(lpszWaveFile == NULL)
+	{
+		ZeroMemory(m_szWaveFile, sizeof(m_szWaveFile));
+	}
+	else
+	{
+		_tcscpy(m_szWaveFile, lpszWaveFile);
+	}
+	m_pAudioStream = NULL;
+	m_nDataLen = 0;
+	ZeroMemory(&m_wfx, sizeof(m_wfx));
+	m_waveFile = NULL;
 }
 
 CBitmapAvi::~CBitmapAvi()
@@ -61,6 +75,18 @@ void CBitmapAvi::ReleaseMemory()
 	{
 		AVIFileRelease(m_pAviFile);
 		m_pAviFile = NULL;
+	}
+
+	if(m_pAudioStream)
+	{
+		AVIStreamRelease(m_pAudioStream);
+		m_pAudioStream = NULL;
+	}
+
+	if(m_waveFile)
+	{
+		fclose(m_waveFile);
+		m_waveFile = NULL;
 	}
 
 	m_szFileName.Empty();
@@ -172,6 +198,52 @@ HRESULT CBitmapAvi::Init(DWORD dwWidth, DWORD dwHeight, WORD wBitsPerPixel)
 			break;
 		}
 
+		//5. Open Audio Stream if needed
+		LPCTSTR lpszWaveFile = ((_tcslen(m_szWaveFile) > 0) ? m_szWaveFile : NULL);
+		if(lpszWaveFile == NULL)
+		{
+			break;
+		}
+		m_waveFile = _tfopen(lpszWaveFile, _T("rb"));
+		if(m_waveFile == NULL)
+		{
+			_stprintf(m_szErrMsg, _T("Failed to open wave file %s"), lpszWaveFile);
+			break;
+		}
+
+		if(ParseWaveHeader() != 0)
+		{
+			fclose(m_waveFile);
+			m_waveFile = NULL;
+
+			break;
+		}
+
+		//6. Create Audio Stream
+		ZeroMemory(&aviStreamInfo, sizeof(AVISTREAMINFO));
+		aviStreamInfo.fccType		= streamtypeAUDIO;
+		aviStreamInfo.fccHandler	= m_dwFCCHandler;
+		aviStreamInfo.dwScale		= m_wfx.nBlockAlign;
+		aviStreamInfo.dwRate		= m_wfx.nSamplesPerSec * m_wfx.nBlockAlign;
+		aviStreamInfo.dwQuality		= -1;				// Default Quality
+		aviStreamInfo.dwSampleSize  = m_wfx.nBlockAlign;
+		aviStreamInfo.dwSuggestedBufferSize = m_wfx.nAvgBytesPerSec;
+		
+		hr = AVIFileCreateStream(m_pAviFile, &m_pAudioStream, &aviStreamInfo);
+		if(hr != S_OK)
+		{
+			SetErrorMessage(_T("Unable to Create the Audio Stream"));
+			break;
+		}
+
+		//7. Set Audio Stream format
+		hr = AVIStreamSetFormat(m_pAudioStream, 0, &m_wfx, 16);
+		if(hr != S_OK)
+		{
+			SetErrorMessage(_T("Unable to Set Audio Stream format"));
+			break;
+		}
+
 		//Done
 
 	} while (FALSE);
@@ -182,6 +254,51 @@ HRESULT CBitmapAvi::Init(DWORD dwWidth, DWORD dwHeight, WORD wBitsPerPixel)
 		//TODO some cleaning
 		ReleaseMemory();
 	}
+	return hr;
+}
+
+HRESULT CBitmapAvi::Done()
+{
+	if(m_waveFile == NULL || m_nDataLen <= 0)
+	{
+		return S_OK;
+	}
+	int i, nRead, nSamples, nTotalSamples = 0, nTotalSeconds = m_lSample / m_dwFrameRate + 1;
+	char* pcmbuf = new char[m_wfx.nAvgBytesPerSec];
+	if(pcmbuf == NULL)
+	{
+		SetErrorMessage(_T("Done: Unable to allocate audio buffer"));
+		return S_FALSE;
+	}
+
+	HRESULT hr = S_OK;
+	for(i = 0; i < nTotalSeconds; i++)
+	{
+		//read audio data in one second
+		nRead = fread(pcmbuf, 1, m_wfx.nAvgBytesPerSec, m_waveFile);
+		//EOF
+		if(nRead <= 0)
+		{
+			break;
+		}
+
+		nSamples = nRead / m_wfx.nBlockAlign;
+
+		nRead = nSamples * m_wfx.nBlockAlign;
+
+		
+		hr = AVIStreamWrite(m_pAudioStream, nTotalSamples, nSamples, pcmbuf, nRead, 0, NULL, NULL);
+		if(hr != S_OK)
+		{
+			_stprintf(m_szErrMsg, _T("AVIStreamWrite: Unable to Write Audio Stream: %u"), hr);
+			break;
+		}
+
+		nTotalSamples += nSamples;
+	}
+
+	delete [] pcmbuf;
+
 	return hr;
 }
 
@@ -286,4 +403,107 @@ HRESULT CBitmapAvi::AddFrame(LPCTSTR lpszBitmapFile)
 	}
 
 	return hr;
+}
+
+int CBitmapAvi::ParseWaveHeader()
+{
+	FILE* pFileSrc = m_waveFile;
+
+	m_nDataLen = 0;
+	
+	char buf[32], msg[256];
+	int nRead;
+	
+	/*Read RIFF file header*/
+	nRead = fread(buf, 1, 12, pFileSrc);
+	if(nRead != 12)
+	{
+		_stprintf(m_szErrMsg, _T("Read RIFF header length failed. length=%d"), nRead);
+		return -1;
+	}
+	
+	/* starts with RIFF? */
+	if(memcmp(buf, "RIFF", 4) != 0)
+	{
+		_stprintf(m_szErrMsg, _T("Can't find 'RIFF' tag"));
+		return -1;
+	}
+	
+	int nRiffLen = cfl::bytes_to_int32((const byte*)(buf + 4));
+	
+	if(memcmp(buf + 8, "WAVE", 4) != 0)
+	{
+		_stprintf(m_szErrMsg, _T("Can't find 'WAVE' tag"));
+		return -1;
+	}
+	
+	int nChunkSize;
+	while(true)
+	{
+		nRead = fread(buf, 1, 8, pFileSrc);
+		if(nRead != 8)
+		{
+			_stprintf(m_szErrMsg, _T("Read chunk ID failed: %d"), nRead);
+			return -1;
+		}
+		
+		nChunkSize = cfl::bytes_to_int32((const byte*)(buf + 4));
+		
+		//format chunk
+		if(memcmp(buf, "fmt ", 4) == 0)
+		{
+			if(nChunkSize < 16)
+			{
+				_stprintf(m_szErrMsg, _T("Wave Format length is too small: %d"), nChunkSize);
+				return -1;
+			}
+			
+			memset(&m_wfx, 0, sizeof(m_wfx));
+			nRead = fread(&m_wfx, 1, 16, pFileSrc);
+			if(nRead != 16)
+			{
+				_stprintf(m_szErrMsg, _T("Read Wave Format failed. nRead=%d"), nRead);
+				return -1;
+			}
+			
+			if(m_wfx.wFormatTag != WAVE_FORMAT_PCM)
+			{
+				_stprintf(m_szErrMsg, _T("Unsupported data format: 0x%04X"), m_wfx.wFormatTag);
+				return -1;
+			}
+			
+			if(nChunkSize > 16)
+			{
+				if(fseek(pFileSrc, nChunkSize - 16, SEEK_CUR) != 0)
+				{
+					_stprintf(m_szErrMsg, _T("fseek failed"));
+					return -1;
+				}
+			}
+		}
+		//data chunk
+		else if(memcmp(buf, "data", 4) == 0)
+		{
+			m_nDataLen = nChunkSize;
+			
+			AfxTrace(_T("Found data chunk with length: %d(0x%08X)\n"), m_nDataLen, m_nDataLen);
+			/* We've found the audio data. Read no further! */
+            break;
+		}
+		//other chunks
+		else
+		{
+			memcpy(msg, buf, 4);
+			msg[4]= 0;
+			AfxTrace("Skipped chunk: %s\n", msg);
+			
+			if(fseek(pFileSrc, nChunkSize, SEEK_CUR) != 0)
+			{
+				_stprintf(m_szErrMsg, _T("fseek failed\n"));
+				return -1;
+			}
+		}
+	}
+	
+	return (m_nDataLen > 0) ? 0 : -1;
 }

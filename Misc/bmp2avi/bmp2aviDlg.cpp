@@ -321,7 +321,7 @@ void CBmp2aviDlg::AVItoBmp(CString strAVIFileName, CString strBmpDir)
 
 LONG CBmp2aviDlg::BMPtoAVI(CString szAVIName, CString strBmpDir)
 {
-	CBitmapAvi bitmapAvi(szAVIName, 0, 25);
+	CBitmapAvi bitmapAvi(szAVIName, 0, 25, "audio.wav");
 
 	CFileFind finder;
 	strBmpDir += _T("\\*.bmp");
@@ -339,10 +339,19 @@ LONG CBmp2aviDlg::BMPtoAVI(CString szAVIName, CString strBmpDir)
 			hr = bitmapAvi.AddFrame(str);
 			if(hr != S_OK)
 			{
-				szMsg = bitmapAvi.GetLastErrorMessage();
 				break;
 			}
 		}
+	}
+
+	if(hr == S_OK)
+	{
+		hr = bitmapAvi.Done();
+	}
+
+	if(hr != S_OK)
+	{
+		szMsg = bitmapAvi.GetLastErrorMessage();
 	}
 
 	AfxMessageBox(szMsg);
