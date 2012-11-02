@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "decode_encode", "decode_encode\decode_encode.vcxproj", "{B81BBC2B-DCFA-4825-96D7-45BE9B3E1242}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scaling_video", "scaling_video\scaling_video.vcxproj", "{7480B97E-2378-4B31-AC83-CCC75D1F8D83}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B81BBC2B-DCFA-4825-96D7-45BE9B3E1242}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B81BBC2B-DCFA-4825-96D7-45BE9B3E1242}.Debug|Win32.Build.0 = Debug|Win32
+		{B81BBC2B-DCFA-4825-96D7-45BE9B3E1242}.Release|Win32.ActiveCfg = Release|Win32
+		{B81BBC2B-DCFA-4825-96D7-45BE9B3E1242}.Release|Win32.Build.0 = Release|Win32
+		{7480B97E-2378-4B31-AC83-CCC75D1F8D83}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7480B97E-2378-4B31-AC83-CCC75D1F8D83}.Debug|Win32.Build.0 = Debug|Win32
+		{7480B97E-2378-4B31-AC83-CCC75D1F8D83}.Release|Win32.ActiveCfg = Release|Win32
+		{7480B97E-2378-4B31-AC83-CCC75D1F8D83}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
