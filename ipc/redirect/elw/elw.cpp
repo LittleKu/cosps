@@ -1,3 +1,4 @@
+#include "cflbase/Properties.h"
 #include "log4cplus_config.h"
 #include "StreamGobbler.h"
 #include "CmdLineParser.h"
@@ -7,33 +8,55 @@ DECLARE_THE_LOGGER_NAME("elw")
 
 using namespace log4cplus;
 
-void InitLog4cplus();
+void InitProperties(cfl::Properties& prop);
+void InitLog4cplus(cfl::Properties& prop);
 
 int main(int argc, char* argv[])
 {
-	InitLog4cplus();
+	cfl::Properties prop;
+	InitProperties(prop);
+	InitLog4cplus(prop);
 
 	CmdLineParser clp(argc, argv);
 	clp.Execute();
 	std::string childCmdLine;
 	clp.GetChildCommandLine(childCmdLine);
 
-	ProcessRedirect redirector(childCmdLine.c_str());
+	ProcessRedirect redirector(childCmdLine.c_str(), &prop);
 	int ret = redirector.Redirect();
 
 	return ret;
 }
 
+void InitProperties(cfl::Properties& prop)
+{
+	const char* log_dir = "C:\\Temp\\elw";
+	prop.SetProperty("log_dir", log_dir);
 
+	prop.SetProperty(_T("log_file_all"), "C:\\Temp\\elw" "\\all.log");
+	prop.SetProperty("log_file_cmd", "C:\\Temp\\elw" "\\cmd.log");
 
-void InitLog4cplus()
+	prop.SetProperty("log_file_stdin", "C:\\Temp\\elw" "\\stdin.log");
+	prop.SetProperty("log_file_stdout", "C:\\Temp\\elw" "\\stdout.log");
+	prop.SetProperty("log_file_stderr", "C:\\Temp\\elw" "\\stderr.log");
+
+	prop.SetProperty("log_file_stdall", "C:\\Temp\\elw" "\\stdall.log");
+
+	TCHAR* szPropFile = _tgetenv(_T("elw_prop"));
+	if(szPropFile != NULL)
+	{
+		prop.Load(szPropFile);
+	}
+}
+
+void InitLog4cplus(cfl::Properties& prop)
 {
 #ifdef ENABLE_LOG4CPLUS
-	char log_file[256];
+	cfl::tstring szVal;
 	
+	prop.GetProperty(_T("log_file_all"), szVal);
 	//setting root logger
-	sprintf(log_file, "%s\\%s.log", "C:\\Temp\\elw", "all");
-	SharedAppenderPtr fileAppender(new RollingFileAppender(log_file, 10*1024*1024, 500));
+	SharedAppenderPtr fileAppender(new RollingFileAppender(szVal.c_str(), 10*1024*1024, 500));
 	fileAppender->setName("file");
 	
 	std::auto_ptr<Layout> pPatternLayout(new PatternLayout("[%d{%Y-%m-%d %H:%M:%S:%q}][%p][%t][%c] - %m%n"));
@@ -43,8 +66,8 @@ void InitLog4cplus()
 	ROOT_LOGGER.setLogLevel(INFO_LOG_LEVEL);
 
 	//setting CMD logger
-	sprintf(log_file, "%s\\%s.log", "C:\\Temp\\elw", "cmd");
-	SharedAppenderPtr cmdAppender(new RollingFileAppender(log_file, 10*1024*1024, 500));
+	prop.GetProperty(_T("log_file_cmd"), szVal);
+	SharedAppenderPtr cmdAppender(new RollingFileAppender(szVal.c_str(), 10*1024*1024, 500));
 	cmdAppender->setName("CMD");
 	
 	std::auto_ptr<Layout> pCmdPatternLayout(new PatternLayout("%m%n"));
@@ -54,6 +77,8 @@ void InitLog4cplus()
 	GET_LOGGER("CMD").setLogLevel(INFO_LOG_LEVEL);
 	GET_LOGGER("CMD").setAdditivity(false);
 
-	LOG4CPLUS_INFO(THE_LOGGER, "The Log4cplus has been initialized.")
+	TCHAR* szPropFile = _tgetenv(_T("elw_prop"));
+	cfl::format(szVal, _T("${elw_prop}=%s"), (szPropFile == NULL ? _T("NULL") : szPropFile));
+	LOG4CPLUS_INFO(THE_LOGGER, "The Log4cplus has been initialized. " << szVal)
 #endif
 }

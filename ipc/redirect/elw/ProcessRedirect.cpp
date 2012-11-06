@@ -6,8 +6,9 @@
 
 DECLARE_THE_LOGGER_NAME("ProcessRedirect")
 
-ProcessRedirect::ProcessRedirect(const char* cmdline)
+ProcessRedirect::ProcessRedirect(const char* cmdline, cfl::Properties* pProp)
 {
+	m_prop = pProp;
 	strcpy(m_szCmdLine, cmdline);
 	memset(&m_pi, 0, sizeof(m_pi));
 	memset(m_szErrorMsg, 0, ERR_STR_SIZE);
@@ -136,6 +137,17 @@ BOOL ProcessRedirect::CreateChildProcess()
 		&m_pi);		   // receives PROCESS_INFORMATION 
 }
 
+FILE* ProcessRedirect::CreateFile(LPCTSTR lpszKey)
+{
+	cfl::tstring szVal;
+	if(m_prop->GetProperty(lpszKey, szVal))
+	{
+		return _tfopen(szVal.c_str(), _T("ab"));
+	}
+
+	return NULL;
+}
+
 int ProcessRedirect::Redirect()
 {
 	BOOL bOK = FALSE;
@@ -212,20 +224,31 @@ int ProcessRedirect::Redirect()
 		LOG4CPLUS_ERROR(THE_LOGGER, m_szErrorMsg)
 		return -1;
 	}
+
+	FILE *inFile, *outFile, *errFile, *allFile;
+	inFile = CreateFile(_T("log_file_stdin"));
+	outFile = CreateFile(_T("log_file_stdout"));
+	errFile = CreateFile(_T("log_file_stderr"));
+	allFile = CreateFile(_T("log_file_stdall"));
 	
-	StreamGobbler sgOutput(hStdOutRead, hStdOut, "OUT");
+	StreamGobbler sgOutput(hStdOutRead, hStdOut, "OUT", outFile, allFile);
 	sgOutput.Start();
 
-	StreamGobbler sgError(hStdErrRead, hStdErr, "ERR");
+	StreamGobbler sgError(hStdErrRead, hStdErr, "ERR", errFile, allFile);
 	sgError.Start();
 
-	StreamGobbler sgInput(hStdIn, hStdInWrite, "IN");
+	StreamGobbler sgInput(hStdIn, hStdInWrite, "IN", inFile, allFile);
 	sgInput.Start();
 	
 	DWORD dwWaitRet = ::WaitForSingleObject(m_pi.hProcess, INFINITE);
 	
 	sprintf(m_szErrorMsg, "WaitForSingleObject process returned: %u", dwWaitRet);
 	LOG4CPLUS_INFO(THE_LOGGER, m_szErrorMsg)
+
+	if(inFile) fclose(inFile);
+	if(outFile) fclose(outFile);
+	if(errFile) fclose(errFile);
+	if(allFile) fclose(allFile);
 		
 	return dwWaitRet;
 }

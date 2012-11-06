@@ -3,12 +3,13 @@
 
 #pragma once
 
+#include "cflbase/Properties.h"
 #include <windows.h>
 
 class ProcessRedirect
 {
 public:
-	ProcessRedirect(const char* cmdline);
+	ProcessRedirect(const char* cmdline, cfl::Properties* pProp);
 	virtual ~ProcessRedirect();
 
 	int Redirect();
@@ -16,6 +17,7 @@ public:
 private:
 	BOOL RedirectStdHandle(DWORD nStdHandle, BOOL bOut, PHANDLE phOrig, PHANDLE phRead, PHANDLE phWrite);
 	BOOL CreateChildProcess();
+	FILE* CreateFile(LPCTSTR lpszKey);
 private:
 	enum
 	{
@@ -26,6 +28,8 @@ private:
 	char m_szCmdLine[CMD_BUF_SIZE];
 	char m_szErrorMsg[ERR_STR_SIZE];
 	PROCESS_INFORMATION m_pi;
+
+	cfl::Properties* m_prop;
 };
 
 #endif
