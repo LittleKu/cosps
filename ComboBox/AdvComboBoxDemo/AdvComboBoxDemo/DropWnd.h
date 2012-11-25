@@ -118,16 +118,18 @@ private:
 	CRect m_rcSizeHandle;
 
 	CWnd* m_pComboParent;
-	CFont* m_pListFont;
+//	CFont* m_pListFont;
 
 	list<LIST_ITEM> m_list;
-	list<LIST_ITEM>::iterator m_iter;
+//	list<LIST_ITEM>::iterator m_iter;
 
 	bool m_bResizing;
-	CPoint m_ptLastResize;
 	int m_nMouseDiffX;
 	int m_nMouseDiffY;
 	DWORD m_dwACBStyle;
+
+	int m_nVScrollW;
+	int m_nVScrollH;
 };
 
 /////////////////////////////////////////////////////////////////////////////

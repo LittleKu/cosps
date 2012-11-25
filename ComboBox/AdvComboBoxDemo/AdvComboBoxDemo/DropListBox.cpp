@@ -24,7 +24,6 @@
 
 #include "DropListBox.h"
 #include "AdvComboBox.h"
-#include "Resource.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,23 +40,21 @@ CDropListBox::CDropListBox( CWnd* pComboParent, CDropScrollBar* pScroll )
 	m_pComboParent( pComboParent ),
 	m_pScroll( pScroll )
 {
-	m_pListFont = new CFont;
-	LOGFONT logFont;
-	memset( &logFont, 0, sizeof(LOGFONT) );
-	strcpy( logFont.lfFaceName, "MS Sans Serif" );
-	logFont.lfHeight = 20;
-	m_pListFont->CreateFontIndirect(&logFont);
+// 	m_pListFont = new CFont;
+// 	LOGFONT logFont;
+// 	memset( &logFont, 0, sizeof(LOGFONT) );
+// 	strcpy( logFont.lfFaceName, "MS Sans Serif" );
+// 	logFont.lfHeight = 20;
+// 	m_pListFont->CreateFontIndirect(&logFont);
 
 	m_nLastTopIdx = 0;
 
 	m_dwACBStyle = 0;
-
-	m_bSelectDisabled = FALSE;
 }
 
 CDropListBox::~CDropListBox()
 {
-	delete m_pListFont;
+//	delete m_pListFont;
 }
 
 
@@ -127,9 +124,9 @@ void CDropListBox::OnMouseMove(UINT nFlags, CPoint point)
 
 	//
 	// Set selection item under mouse
-	int nPos = point.y / GetItemHeight(0) + GetTopIndex();
+	int nPos = PointTest(point);
 	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
-	if( (DWORD)pItem != -1 )
+	if( nPos != LB_ERR && (DWORD)pItem != -1 && pItem != NULL)
 	{
 		if( GetCurSel() != nPos && !pItem->bDisabled )
 		{
@@ -182,9 +179,9 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 
 	//
 	// Set selection item under mouse
-	int nPos = point.y / GetItemHeight(0) + GetTopIndex();
+	int nPos = PointTest(point);
 	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
-	if( (DWORD)pItem != -1 )
+	if( nPos != LB_ERR && (DWORD)pItem != -1 && pItem != NULL)
 	{
 		if( pItem->bDisabled )
 		{
@@ -206,6 +203,15 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 
+// 	if(point.x < 5 && nPos % 5 == 0)
+// 	{
+// 		DeleteString(nPos+1);
+// 		DeleteString(nPos+2);
+// 		DeleteString(nPos+3);
+// 		DeleteString(nPos+4);
+// 		return;
+// 	}
+
 	//
 	// Send current selection to comboedit
 	if( nPos != -1 )
@@ -217,23 +223,9 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 	//
 	// Destroy dropdown
 	ReleaseCapture();
-	CAdvComboBox* pList = static_cast<CAdvComboBox*>(m_pComboParent);
+	//CAdvComboBox* pList = static_cast<CAdvComboBox*>(m_pComboParent);
 	m_pComboParent->PostMessage( WM_DESTROY_DROPLIST );
 
-	//
-	// Send input to parent
-/*	CRect rc;
-	GetClientRect( &rc );
-	CPoint pt = point;
-	ClientToScreen( &pt );
-	INPUT input;
-	input.type = INPUT_MOUSE;
-	input.mi.dx = pt.x;
-	input.mi.dy = pt.y;
-	input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-	input.mi.time = 0;
-	SendInput( 1, &input, sizeof(INPUT) );
-*/
 	//
 	// Return so that the listbox can be destroyed
 //	CListBox::OnLButtonDown(nFlags, point);
@@ -245,10 +237,44 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 int CDropListBox::GetBottomIndex()
 {
 	int nTop = GetTopIndex();
+	if(nTop == LB_ERR)
+	{
+		return LB_ERR;
+	}
 	CRect rc;
 	GetClientRect( &rc );
-	int nVisCount = rc.Height() / GetItemHeight(0);
-	return nTop + nVisCount;
+
+	int nBottomIndex = LB_ERR;
+	//variable height
+	if((GetStyle() & LBS_OWNERDRAWVARIABLE) == LBS_OWNERDRAWVARIABLE)
+	{
+		int i, nHeight, nCount = GetCount(), nTotalHeight = 0;
+		for(i = nTop; i < nCount; i++)
+		{
+			if((nHeight = GetItemHeight(i)) == LB_ERR)
+			{
+				ASSERT(FALSE);
+				break;
+			}
+			nTotalHeight += nHeight;
+			if(nTotalHeight > rc.Height())
+			{
+				break;
+			}
+		}
+		nBottomIndex = i;
+	}
+	else
+	{
+		int nVisCount = rc.Height() / GetItemHeight(0);
+		nBottomIndex = nTop + nVisCount;
+		if(nBottomIndex > GetCount())
+		{
+			nBottomIndex = GetCount();
+		}
+	}
+	AfxTrace(_T("GetBottomIndex=%d\n"), nBottomIndex);
+	return nBottomIndex;
 }
 
 void CDropListBox::SetTopIdx(int nPos, BOOL bUpdateScrollbar)
@@ -339,21 +365,7 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 	// Is item selected
 	if( bIsSelected )
 	{
-		if( m_bSelectDisabled )
-		{
-			pDC->SetBkColor( clrBackground );
-			pDC->SetTextColor( clrTextHilight );
-			pDC->FillSolidRect( rcItem, clrSelected);
-		}
-		else
-		if( m_bSelectDisabled && !bIsDisabled )
-		{
-			pDC->SetBkColor( clrBackground );
-			pDC->SetTextColor( clrTextHilight );
-			pDC->FillSolidRect( rcItem, clrSelected);
-		}
-		else
-		if( !m_bSelectDisabled && !bIsDisabled )
+		if( !bIsDisabled )
 		{
 			pDC->SetBkColor( clrBackground );
 			pDC->SetTextColor( clrTextHilight );
@@ -365,6 +377,10 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 		pDC->SetBkColor( clrNormal );
 		pDC->SetTextColor( clrText );
 		pDC->FillSolidRect( rcItem, clrNormal);
+		if(pDIStruct->itemID % 5 == 0)
+		{
+			pDC->FillSolidRect( rcItem, RGB(245, 245, 245));
+		}
 	}
 
 	if( bIsDisabled )
@@ -386,8 +402,18 @@ int CDropListBox::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
 
 void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
-	// TODO: Add your message handler code here
-	
+	//only setting for variable
+	if(GetStyle() & LBS_OWNERDRAWVARIABLE)
+	{
+		if(lpMeasureItemStruct->itemID % 5 == 0)
+		{
+			lpMeasureItemStruct->itemHeight = 40;
+		}
+		else
+		{
+			lpMeasureItemStruct->itemHeight = 20;
+		}
+	}
 }
 
 
@@ -416,25 +442,24 @@ int CDropListBox::SetCurSel(int nSelect)
 	int nCur = GetCurSel();
 	int nWay = nSelect - nCur;
 	int nTmp = nSelect;
-	if( !m_bSelectDisabled )
+
+	// Select the next in list the is NOT disabled
+	if( nWay < 0 )
 	{
-		// Select the next in list the is NOT disabled
-		if( nWay < 0 )
+		// Select previous in list
+		pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
+		while( (DWORD)pItem != -1 )
 		{
-			// Select previous in list
-			pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
-			while( (DWORD)pItem != -1 )
+			if( !pItem->bDisabled )
 			{
-				if( !pItem->bDisabled )
-				{
-					nSelect = nTmp;
-					break;
-				}
-				nTmp--;
-				pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
+				nSelect = nTmp;
+				break;
 			}
+			nTmp--;
+			pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
 		}
-		else
+	}
+	else
 		if( nWay > 0 )
 		{
 			// Select next in list
@@ -450,7 +475,6 @@ int CDropListBox::SetCurSel(int nSelect)
 				pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
 			}
 		}
-	}
 
 	pItem = (PLIST_ITEM)GetItemDataPtr( nSelect);
 	if( (DWORD)pItem != -1 )
@@ -477,6 +501,67 @@ int CDropListBox::SetCurSel(int nSelect)
 		}
 	}
 	return nr;
+}
+
+int CDropListBox::GetTotalItemHeight(int nStartIndex, int nCount)
+{
+	ASSERT(nStartIndex >= 0);
+	if(nCount < 0)
+	{
+		nCount = GetCount();
+	}
+	if(nCount - nStartIndex > GetCount())
+	{
+		nCount = GetCount() - nStartIndex;
+	}
+
+	int nHeight, nTotal = 0;
+	//variable height
+	if((GetStyle() & LBS_OWNERDRAWVARIABLE) == LBS_OWNERDRAWVARIABLE)
+	{
+		for(int i = nStartIndex; nCount > 0; i++, nCount--)
+		{
+			if((nHeight = GetItemHeight(i)) == LB_ERR)
+			{
+				return LB_ERR;
+			}
+			nTotal += nHeight;
+		}
+		return nTotal;
+	}
+	//non-variable style
+	else
+	{
+		if((nHeight = GetItemHeight(0)) == LB_ERR)
+		{
+			return LB_ERR;
+		}
+		return nHeight * nCount;
+	}
+}
+
+/* Return the item index of the point locate in */
+int CDropListBox::PointTest(CPoint point)
+{
+	int i = GetTopIndex(), nCount = GetCount(), nResult;
+	if(i == LB_ERR)
+	{
+		return LB_ERR;
+	}
+
+	CRect rect;
+	for(; i < nCount; i++)
+	{
+		if((nResult = GetItemRect(i, &rect)) == LB_ERR)
+		{
+			return LB_ERR;
+		}
+		if(PtInRect(&rect, point))
+		{
+			return i;
+		}
+	}
+	return LB_ERR;
 }
 
 

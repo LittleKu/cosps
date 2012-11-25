@@ -279,9 +279,7 @@ void CAdvComboBox::LoadString( UINT nStringID )
 		token = strtok( NULL, seps );
 	}
 
-
-	//
-	// Add item to list
+	delete [] szTok;
 }
 
 int CAdvComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -598,21 +596,25 @@ void CAdvComboBox::OnPaint()
 	//	clrOldTextColor = dc.SetTextColor( ::GetSysColor(COLOR_HIGHLIGHTTEXT) );
 		int nOldBkMode = dc.SetBkMode( TRANSPARENT );
 		CFont* pOldFont = dc.SelectObject( m_pFont );
-		if( m_bHasFocus && !m_bDropListVisible )
+
+		dc.FillSolidRect( rcText, bWndEnabled ? clrBackground : clrDisabledBkg );
+		if( m_bDropListVisible )
 		{
-			dc.FillSolidRect( rcText, bWndEnabled ? clrBackground : clrDisabledBkg );
-			clrOldTextColor = dc.SetTextColor( bWndEnabled ? ::GetSysColor(COLOR_HIGHLIGHTTEXT) : clrDisabledText );
-			dc.DrawText( m_strEdit.c_str(), &rcText, DT_SINGLELINE|DT_VCENTER);
+			clrOldTextColor = dc.SetTextColor( bWndEnabled ? RGB(255, 128, 0)/*::GetSysColor(COLOR_HIGHLIGHTTEXT)*/ : clrDisabledText );
 		}
 		else
 		{
-			dc.FillSolidRect( rcText, bWndEnabled ? ::GetSysColor(COLOR_HIGHLIGHTTEXT) : clrDisabledBkg );
 			clrOldTextColor = dc.SetTextColor( bWndEnabled ? ::GetSysColor(COLOR_BTNTEXT) : clrDisabledText );
-			dc.DrawText( m_strEdit.c_str(), &rcText, DT_SINGLELINE|DT_VCENTER);
 		}
 
+		CString changedText;
+		changedText.Format(_T("Changed Text: %s"), m_strEdit.c_str());
+		dc.DrawText( (LPCTSTR)changedText, &rcText, DT_SINGLELINE|DT_VCENTER);
+
+		dc.SetTextColor(clrOldTextColor);
 		dc.SelectObject( pOldFont );
 		dc.SetBkMode( nOldBkMode );
+		dc.SetBkColor(clrOldBkColor);
 	}
 	else
 	{
@@ -698,7 +700,7 @@ LONG CAdvComboBox::OnSelectedItem( WPARAM wParam, LPARAM lParam )
 
 	m_nCurSel = FindStringExact( 0, m_strEdit.c_str() );
 
-	SetWindowText( m_strEdit.c_str() );
+	//SetWindowText( m_strEdit.c_str() );
 	if( (GetStyle() & CBS_DROPDOWN) && !(GetStyle() & CBS_SIMPLE) )	// == CBS_DROPDOWN
 	{
 		if( m_pEdit )

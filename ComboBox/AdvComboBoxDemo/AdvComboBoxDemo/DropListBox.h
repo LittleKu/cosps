@@ -61,6 +61,8 @@ public:
 
 // Implementation
 public:
+	int GetTotalItemHeight(int nStartIndex, int nCount = -1);
+	int PointTest(CPoint point);
 	int SetCurSel( int nSelect );
 	void SetDLBStyle( DWORD dwStyle );
 	int AddListItem( LIST_ITEM& item );
@@ -87,12 +89,10 @@ protected:
 
 private:
 	CWnd* m_pComboParent;
-	CFont* m_pListFont;
+//	CFont* m_pListFont;
 	CDropScrollBar* m_pScroll;
 	int m_nLastTopIdx;
 	DWORD m_dwACBStyle;
-	BOOL m_bSelectDisabled;
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

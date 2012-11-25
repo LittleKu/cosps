@@ -186,9 +186,5 @@ SOURCE=.\res\bitmap1.bmp
 SOURCE=.\res\NewItem.bmp
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project

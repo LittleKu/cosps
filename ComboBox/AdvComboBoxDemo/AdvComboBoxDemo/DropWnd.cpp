@@ -43,17 +43,20 @@ CDropWnd::CDropWnd( CWnd* pComboParent, list<LIST_ITEM> &itemlist, DWORD dwACBSt
 {
 	m_bResizing = false;
 
-	m_pListFont = new CFont;
-	LOGFONT logFont;
-	memset( &logFont, 0, sizeof(LOGFONT) );
-	strcpy( logFont.lfFaceName, "MS Sans Serif" );
-	logFont.lfHeight = 12;
-	m_pListFont->CreateFontIndirect(&logFont);
+	m_nVScrollW = ::GetSystemMetrics(SM_CXVSCROLL);
+	m_nVScrollH = ::GetSystemMetrics(SM_CYVSCROLL);
+
+// 	m_pListFont = new CFont;
+// 	LOGFONT logFont;
+// 	memset( &logFont, 0, sizeof(LOGFONT) );
+// 	strcpy( logFont.lfFaceName, "MS Sans Serif" );
+// 	logFont.lfHeight = 12;
+// 	m_pListFont->CreateFontIndirect(&logFont);
 }
 
 CDropWnd::~CDropWnd()
 {
-	delete m_pListFont;
+//	delete m_pListFont;
 	delete m_scrollbar;
 	delete m_listbox;
 }
@@ -112,29 +115,49 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	//
 	// Create scrollbar
 	m_rcScroll = rcWnd;
-	m_rcScroll.left = m_rcScroll.right - ::GetSystemMetrics(SM_CXVSCROLL);
-	m_rcScroll.bottom -= ::GetSystemMetrics(SM_CYVSCROLL);
+	m_rcScroll.left = m_rcScroll.right - m_nVScrollW;
+	m_rcScroll.bottom -= m_nVScrollH;
 	m_scrollbar = new CDropScrollBar;
 	VERIFY(m_scrollbar->Create( SBS_VERT | SBS_RIGHTALIGN | WS_CHILD, m_rcScroll, this, 100));
 
 	//
 	// Create listbox
-	m_rcList.SetRect( lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->x+lpCreateStruct->cx-::GetSystemMetrics(SM_CXVSCROLL), lpCreateStruct->y+lpCreateStruct->cy );
+	m_rcList.SetRect( lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->x+lpCreateStruct->cx-m_nVScrollW, lpCreateStruct->y+lpCreateStruct->cy );
 	ScreenToClient( m_rcList );
 	m_listbox = new CDropListBox(m_pComboParent, m_scrollbar);
-	VERIFY(m_listbox->Create( /*WS_VISIBLE | */WS_CHILD | LBS_NOINTEGRALHEIGHT | LBS_OWNERDRAWFIXED, m_rcList, this, 101 ) );
+
+	DWORD dwListBoxStyle = /*WS_VISIBLE | */ WS_CHILD | LBS_NOINTEGRALHEIGHT;
+	//variable combobox
+	if(m_pComboParent->GetStyle() & CBS_OWNERDRAWVARIABLE == CBS_OWNERDRAWVARIABLE)
+	{
+		dwListBoxStyle |= LBS_OWNERDRAWVARIABLE;
+	}
+	else
+	{
+		dwListBoxStyle |= LBS_OWNERDRAWFIXED;
+	}
+	VERIFY(m_listbox->Create( dwListBoxStyle, m_rcList, this, 101 ) );
 	m_listbox->SetDLBStyle( m_dwACBStyle );
 	m_listbox->ShowWindow( SW_SHOW );
+
+	LIST_ITEM item;
+	list<LIST_ITEM>::iterator iter;
+	for( iter = m_list.begin(); iter != m_list.end(); ++iter )
+	{
+		item = *iter;
+		m_listbox->AddListItem( item );
+	}
 
 
 	//
 	// Resize this wnd so INTEGRAL_HEIGHT applies!?
 	CRect rc;
-	int nH = m_listbox->GetItemHeight(0);
-	nH = nH*m_list.size()+2;
+// 	int nH = m_listbox->GetItemHeight(0);
+// 	nH = nH*m_list.size()+2;
+	int nH = m_listbox->GetTotalItemHeight(0) + 2;
 	// Get screen size
-	int nScrX = GetSystemMetrics( SM_CXSCREEN );
-	int nScrY = GetSystemMetrics( SM_CYSCREEN );
+	int nScreenW = GetSystemMetrics( SM_CXSCREEN );
+	int nScreenH = GetSystemMetrics( SM_CYSCREEN );
 
 	int nDefaultItems = static_cast<CAdvComboBox*>(m_pComboParent)->GetDefaultVisibleItems();
 
@@ -142,9 +165,12 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Check to see if the window should be placed over the combobox
 	int nY = lpCreateStruct->y;
 	int nItems = m_list.size();
-	int nItemHeight = m_listbox->GetItemHeight(0);
-	int nVisHeight = nScrY - lpCreateStruct->y;
-	if( (nVisHeight / nItemHeight) < static_cast<CAdvComboBox*>(m_pComboParent)->GetMinVisibleItems() )
+	//int nItemHeight = m_listbox->GetItemHeight(0);
+	int nVisHeight = nScreenH - lpCreateStruct->y;
+
+	int nMinVisTotalHeight = m_listbox->GetTotalItemHeight(0, static_cast<CAdvComboBox*>(m_pComboParent)->GetMinVisibleItems());
+	//if( (nVisHeight / nItemHeight) < static_cast<CAdvComboBox*>(m_pComboParent)->GetMinVisibleItems() )
+	if(nVisHeight < nMinVisTotalHeight)
 	{
 		CRect rcCombo;
 		m_pComboParent->GetWindowRect( &rcCombo );
@@ -156,7 +182,8 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		}
 		else
 		{
-			nY = nComboTopY - nItemHeight*nDefaultItems;
+			//nY = nComboTopY - nItemHeight*nDefaultItems;
+			nY = nComboTopY - m_listbox->GetTotalItemHeight(0, nDefaultItems);
 			nY -= 2;
 			nY = nY < 0 ? 0 : nY;
 			nH = nComboTopY - nY;
@@ -169,20 +196,21 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		// Check height
 		if( nDefaultItems == -1 || nDefaultItems > nItems )
 		{
-			if( lpCreateStruct->y + nH > nScrY )
+			if( lpCreateStruct->y + nH > nScreenH )
 			{
-				nH = nScrY - lpCreateStruct->y;
+				nH = nScreenH - lpCreateStruct->y;
 			}
 			else
-			if( nH < ::GetSystemMetrics(SM_CYVSCROLL) )
+			if( nH < m_nVScrollH )
 			{
-				nH = ::GetSystemMetrics(SM_CYVSCROLL);
+				nH = m_nVScrollH;
 			}
 		}
 		else
 		{
-			nH = nDefaultItems * nItemHeight;
-			nH = (nY+nH) > nScrY ? nScrY-nY : nH;
+			//nH = nDefaultItems * nItemHeight;
+			nH = m_listbox->GetTotalItemHeight(0, nDefaultItems);
+			nH = (nY+nH) > nScreenH ? nScreenH-nY : nH;
 			nH += 2;
 		}
 	}
@@ -190,9 +218,9 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Calc width
 	int nW = 0;
 	CSize size(0,0);
-	for( m_iter = m_list.begin(); m_iter != m_list.end(); ++m_iter )
+	for( iter = m_list.begin(); iter != m_list.end(); ++iter )
 	{
-		m_listbox->GetTextSize( m_iter->strText.c_str(), m_iter->strText.length(), size );
+		m_listbox->GetTextSize( iter->strText.c_str(), iter->strText.length(), size );
 		nW = (size.cx > nW) ? size.cx : nW;
 	}
 	nW += m_rcScroll.Width() +8;
@@ -203,14 +231,14 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	// Check max width
 	int nX = lpCreateStruct->x;
-	if( nW > nScrX - lpCreateStruct->x )
+	if( nW > nScreenW - lpCreateStruct->x )
 	{
-		nX = nScrX - nW;
+		nX = nScreenW - nW;
 		if( nX < 0 )
 			nX = 0;
 	}
-	if( nX == 0 && nW > nScrX )
-		nW = nScrX;
+	if( nX == 0 && nW > nScreenW )
+		nW = nScreenW;
 
 	SetWindowPos( &wndTopMost, nX, nY, nW, nH, SWP_SHOWWINDOW|SWP_NOZORDER );
 
@@ -220,17 +248,17 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create sizehandle
 	m_rcSizeHandle = rcWnd;
 	GetClientRect( &m_rcSizeHandle );
-	m_rcSizeHandle.left = m_rcSizeHandle.right - ::GetSystemMetrics(SM_CXVSCROLL);
-	m_rcSizeHandle.top = m_rcSizeHandle.bottom - ::GetSystemMetrics(SM_CYVSCROLL);
+	m_rcSizeHandle.left = m_rcSizeHandle.right - m_nVScrollW;
+	m_rcSizeHandle.top = m_rcSizeHandle.bottom - m_nVScrollH;
 
 	//
 	// Add items to listbox
-	LIST_ITEM item;
-	for( m_iter = m_list.begin(); m_iter != m_list.end(); ++m_iter )
-	{
-		item = *m_iter;
-		m_listbox->AddListItem( item );
-	}
+// 	LIST_ITEM item;
+// 	for( m_iter = m_list.begin(); m_iter != m_list.end(); ++m_iter )
+// 	{
+// 		item = *m_iter;
+// 		m_listbox->AddListItem( item );
+// 	}
 
 	//
 	// Set values in scrollbar
@@ -267,22 +295,22 @@ void CDropWnd::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		CRect rcWnd;
 		GetWindowRect( &rcWnd );
-		if( point.x + m_nMouseDiffX >= ::GetSystemMetrics(SM_CXVSCROLL) )
+		if( point.x + m_nMouseDiffX >= m_nVScrollW )
 		{
 			rcWnd.right = rcWnd.left + point.x + m_nMouseDiffX +2;
 		}
 		else
 		{
-			rcWnd.right = rcWnd.left + ::GetSystemMetrics(SM_CXVSCROLL) +1;
+			rcWnd.right = rcWnd.left + m_nVScrollW +1;
 		}
 
-		if( point.y + m_nMouseDiffY >= ::GetSystemMetrics(SM_CYVSCROLL) )
+		if( point.y + m_nMouseDiffY >= m_nVScrollH )
 		{
 			rcWnd.bottom = rcWnd.top + point.y + m_nMouseDiffY +2;
 		}
 		else
 		{
-			rcWnd.bottom = rcWnd.top + ::GetSystemMetrics(SM_CXVSCROLL) +1;
+			rcWnd.bottom = rcWnd.top + m_nVScrollH +1;
 		}
 		MoveWindow( &rcWnd );
 		return;
@@ -331,7 +359,6 @@ void CDropWnd::OnLButtonDown(UINT nFlags, CPoint point)
 	if( m_rcSizeHandle.PtInRect( point ) )
 	{
 		m_bResizing = true;
-		m_ptLastResize = point;
 
 		CRect rcClient;
 		GetClientRect( &rcClient );
@@ -421,13 +448,13 @@ void CDropWnd::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
-	m_rcList.SetRect( 0, 0, cx-::GetSystemMetrics(SM_CXVSCROLL), cy );
+	m_rcList.SetRect( 0, 0, cx-m_nVScrollW, cy );
 	m_listbox->MoveWindow( &m_rcList );
 
-	m_rcScroll.SetRect( cx-::GetSystemMetrics(SM_CXVSCROLL), 0, cx, cy-::GetSystemMetrics(SM_CYVSCROLL) );
+	m_rcScroll.SetRect( cx-m_nVScrollW, 0, cx, cy-m_nVScrollH );
 	m_scrollbar->MoveWindow( &m_rcScroll );
 
-	m_rcSizeHandle.SetRect( cx-::GetSystemMetrics(SM_CXVSCROLL), cy-::GetSystemMetrics(SM_CYVSCROLL), cx, cy );
+	m_rcSizeHandle.SetRect( cx-m_nVScrollW, cy-m_nVScrollH, cx, cy );
 	InvalidateRect( &m_rcSizeHandle );
 
 	//
