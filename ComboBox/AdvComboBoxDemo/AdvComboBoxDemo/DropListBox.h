@@ -25,17 +25,11 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// DropListBox.h : header file
-//
-#include "DropWnd.h"
-#include "DropScrollBar.h"
 
-#define WM_SELECTED_ITEM		(WM_USER+1)
-#define WM_DESTROY_DROPLIST		(WM_USER+2)
-#define WM_VRC_SETCAPTURE		(WM_USER+3)
-#define WM_VRC_RELEASECAPTURE	(WM_USER+4)
+#include "AdvComboBoxDef.h"
 
-class CDropScrollBar;
+class CAdvComboBox;
+class CDropWnd;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDropListBox window
@@ -44,7 +38,8 @@ class CDropListBox : public CListBox
 {
 // Construction
 public:
-	CDropListBox( CWnd* pComboParent, CDropScrollBar* pScroll );
+	//Use CDropWnd for accessing data directly
+	CDropListBox( CAdvComboBox* pComboParent, CDropWnd* pDropWnd );
 
 // Attributes
 public:
@@ -64,8 +59,7 @@ public:
 	int GetTotalItemHeight(int nStartIndex, int nCount = -1);
 	int PointTest(CPoint point);
 	int SetCurSel( int nSelect );
-	void SetDLBStyle( DWORD dwStyle );
-	int AddListItem( LIST_ITEM& item );
+	int AddListItem( PLIST_ITEM pItem );
 	void GetTextSize( LPCTSTR lpszText, int nCount, CSize& size );
 	void SetTopIdx( int nPos, BOOL bUpdateScrollbar = FALSE );
 	int GetBottomIndex();
@@ -88,11 +82,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
-	CWnd* m_pComboParent;
-//	CFont* m_pListFont;
-	CDropScrollBar* m_pScroll;
+	CAdvComboBox* m_pComboParent;
+	CDropWnd* m_pDropWnd;
 	int m_nLastTopIdx;
-	DWORD m_dwACBStyle;
 };
 
 /////////////////////////////////////////////////////////////////////////////

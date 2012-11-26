@@ -21,9 +21,9 @@
 
 #include "stdafx.h"
 #include "DropWnd.h"
-
 #include "AdvComboBox.h"
 #include "DropListBox.h"
+#include "DropScrollBar.h"
 #include "VisualStylesXP.h"
 
 #ifdef _DEBUG
@@ -35,32 +35,36 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDropWnd
 
-CDropWnd::CDropWnd( CWnd* pComboParent, list<LIST_ITEM> &itemlist, DWORD dwACBStyle )
-:
-	m_pComboParent( pComboParent ),
-	m_list( itemlist ),
-	m_dwACBStyle( dwACBStyle )
+CDropWnd::CDropWnd( CAdvComboBox* pComboParent, list<LIST_ITEM> &itemlist )
+ : m_pComboParent( pComboParent )
 {
 	m_bResizing = false;
 
 	m_nVScrollW = ::GetSystemMetrics(SM_CXVSCROLL);
 	m_nVScrollH = ::GetSystemMetrics(SM_CYVSCROLL);
 
-// 	m_pListFont = new CFont;
-// 	LOGFONT logFont;
-// 	memset( &logFont, 0, sizeof(LOGFONT) );
-// 	strcpy( logFont.lfFaceName, "MS Sans Serif" );
-// 	logFont.lfHeight = 12;
-// 	m_pListFont->CreateFontIndirect(&logFont);
+	list<LIST_ITEM>::iterator iter = itemlist.begin();
+	for( ; iter != itemlist.end(); iter++)
+	{
+		PLIST_ITEM pItem = new LIST_ITEM();
+		*pItem = *iter;
+		m_pList.push_back(pItem);
+	}
 }
 
 CDropWnd::~CDropWnd()
 {
-//	delete m_pListFont;
 	delete m_scrollbar;
 	delete m_listbox;
-}
 
+	list<PLIST_ITEM>::iterator iter = m_pList.begin();
+	for( ; iter != m_pList.end(); iter++)
+	{
+		PLIST_ITEM pItem = *iter;
+		delete pItem;
+	}
+	m_pList.clear();
+}
 
 BEGIN_MESSAGE_MAP(CDropWnd, CWnd)
 	//{{AFX_MSG_MAP(CDropWnd)
@@ -124,11 +128,11 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Create listbox
 	m_rcList.SetRect( lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->x+lpCreateStruct->cx-m_nVScrollW, lpCreateStruct->y+lpCreateStruct->cy );
 	ScreenToClient( m_rcList );
-	m_listbox = new CDropListBox(m_pComboParent, m_scrollbar);
+	m_listbox = new CDropListBox(m_pComboParent, this);
 
 	DWORD dwListBoxStyle = /*WS_VISIBLE | */ WS_CHILD | LBS_NOINTEGRALHEIGHT;
 	//variable combobox
-	if(m_pComboParent->GetStyle() & CBS_OWNERDRAWVARIABLE == CBS_OWNERDRAWVARIABLE)
+	if((m_pComboParent->GetStyle() & CBS_OWNERDRAWVARIABLE) == CBS_OWNERDRAWVARIABLE)
 	{
 		dwListBoxStyle |= LBS_OWNERDRAWVARIABLE;
 	}
@@ -137,17 +141,13 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		dwListBoxStyle |= LBS_OWNERDRAWFIXED;
 	}
 	VERIFY(m_listbox->Create( dwListBoxStyle, m_rcList, this, 101 ) );
-	m_listbox->SetDLBStyle( m_dwACBStyle );
 	m_listbox->ShowWindow( SW_SHOW );
 
-	LIST_ITEM item;
-	list<LIST_ITEM>::iterator iter;
-	for( iter = m_list.begin(); iter != m_list.end(); ++iter )
+	list<PLIST_ITEM>::iterator iter = m_pList.begin();
+	for( ; iter != m_pList.end(); ++iter )
 	{
-		item = *iter;
-		m_listbox->AddListItem( item );
+		m_listbox->AddListItem( *iter );
 	}
-
 
 	//
 	// Resize this wnd so INTEGRAL_HEIGHT applies!?
@@ -159,16 +159,16 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	int nScreenW = GetSystemMetrics( SM_CXSCREEN );
 	int nScreenH = GetSystemMetrics( SM_CYSCREEN );
 
-	int nDefaultItems = static_cast<CAdvComboBox*>(m_pComboParent)->GetDefaultVisibleItems();
+	int nDefaultItems = m_pComboParent->GetDefaultVisibleItems();
 
 	//
 	// Check to see if the window should be placed over the combobox
 	int nY = lpCreateStruct->y;
-	int nItems = m_list.size();
+	int nItems = m_pList.size();
 	//int nItemHeight = m_listbox->GetItemHeight(0);
 	int nVisHeight = nScreenH - lpCreateStruct->y;
 
-	int nMinVisTotalHeight = m_listbox->GetTotalItemHeight(0, static_cast<CAdvComboBox*>(m_pComboParent)->GetMinVisibleItems());
+	int nMinVisTotalHeight = m_listbox->GetTotalItemHeight(0, m_pComboParent->GetMinVisibleItems());
 	//if( (nVisHeight / nItemHeight) < static_cast<CAdvComboBox*>(m_pComboParent)->GetMinVisibleItems() )
 	if(nVisHeight < nMinVisTotalHeight)
 	{
@@ -218,9 +218,9 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Calc width
 	int nW = 0;
 	CSize size(0,0);
-	for( iter = m_list.begin(); iter != m_list.end(); ++iter )
+	for( iter = m_pList.begin(); iter != m_pList.end(); ++iter )
 	{
-		m_listbox->GetTextSize( iter->strText.c_str(), iter->strText.length(), size );
+		m_listbox->GetTextSize( (*iter)->strText, (*iter)->strText.GetLength(), size );
 		nW = (size.cx > nW) ? size.cx : nW;
 	}
 	nW += m_rcScroll.Width() +8;
@@ -272,7 +272,15 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+PLIST_ITEM CDropWnd::GetListItem(int nPos)
+{
+	ASSERT(nPos >= 0 && nPos < m_pList.size());
 
+	list<PLIST_ITEM>::iterator iter = m_pList.begin();
+	advance(iter, nPos);
+	
+	return (iter == m_pList.end()) ? NULL : (*iter);
+}
 
 LONG CDropWnd::OnSetCapture( WPARAM wParam, LPARAM lParam )
 {
@@ -367,67 +375,15 @@ void CDropWnd::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
+	CRect rcClient;
+	GetClientRect(&rcClient);
 
-//
-// Clean up the code below...
-//
-
-	CRect rc;
-	CRect rcVScroll(0,0,0,0);
-	GetClientRect( &rc );
-	DWORD dwStyle = GetStyle();
-	
-	// Take away vertical scroll
-
-	if( rc.PtInRect( point ) )
+	//out of client area
+	if(!rcClient.PtInRect(point))
 	{
+		ReleaseCapture();
+		m_pComboParent->PostMessage( WM_DESTROY_DROPLIST );
 	}
-	else
-	{
-		//
-		// Calc the point in the parent(PropertyListBox)
-		CWnd* pParent = m_pComboParent->GetParent();
-		CRect rcParentClient;
-		CRect rcParentWnd;
-		pParent->GetClientRect( &rcParentClient );
-		pParent->GetWindowRect( &rcParentWnd );
-
-		CPoint pt = point;
-		ClientToScreen( &pt );
-			pt.x -= rcParentWnd.left;
-			pt.y -= rcParentWnd.top;
-
-		CAdvComboBox* pList = static_cast<CAdvComboBox*>(m_pComboParent);
-		if( !pList->PointInWindow( pt ) )
-		{
-			
-			ReleaseCapture();
-
-//			CString str;
-//			str.Format( "MousePos (NOT PtInRect): X:%d, y:%d\n", pt.x, pt.y );
-//			OutputDebugString( str );
-			m_pComboParent->PostMessage( WM_DESTROY_DROPLIST );
-		}
-		else
-		{
-//			CString str;
-//			str.Format( "MousePos in combo\n " );
-//			OutputDebugString( str );
-			ReleaseCapture();
-			m_pComboParent->PostMessage( WM_DESTROY_DROPLIST );
-		}
-		//
-		// Send input to parent
-/*		INPUT input;
-		input.type = INPUT_MOUSE;
-		input.mi.dx = pt.x;
-		input.mi.dy = pt.y;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		input.mi.time = 0;
-		SendInput( 1, &input, sizeof(INPUT) );
-*/
-	}
-
 	
 	CWnd::OnLButtonDown(nFlags, point);
 }

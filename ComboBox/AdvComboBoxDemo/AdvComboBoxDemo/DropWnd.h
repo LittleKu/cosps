@@ -30,55 +30,27 @@
 #pragma warning( disable : 4251 )
 #pragma warning( disable : 4786 )
 
+#include "AdvComboBoxDef.h"
 #include <list>
-#include <string>
 
 using namespace std;
-typedef struct _LIST_ITEM
-{
-	string strText;
-	BOOL bDisabled;
-	BOOL bChecked;
-	void* vpItemData;
 
-	_LIST_ITEM()
-	{
-		strText = "";
-		bDisabled = FALSE;
-		bChecked = FALSE;
-		vpItemData = NULL;
-	}
-
-	BOOL operator <(_LIST_ITEM other)
-	{
-		if( strText < other.strText )
-			return TRUE;
-		else
-			return FALSE;
-	}
-} LIST_ITEM, *PLIST_ITEM;
-
-
-#include "DropListBox.h"
-#include "DropScrollBar.h"
+class CAdvComboBox;
+class CDropListBox;
+class CDropScrollBar;
 
 /////////////////////////////////////////////////////////////////////////////
 // CDropWnd window
 
 class CDropWnd : public CWnd
 {
-// Construction
 public:
-	CDropWnd( CWnd* pComboParent, list<LIST_ITEM> &itemlist, DWORD dwACBStyle );
+	CDropWnd( CAdvComboBox* pComboParent, list<LIST_ITEM> &itemlist );
+	virtual ~CDropWnd();
 
-// Attributes
-public:
 	CDropListBox*	GetListBoxPtr() { return m_listbox; }
 	CDropScrollBar* GetScrollBarPtr() { return m_scrollbar; }
-
-// Operations
-public:
-	list<LIST_ITEM>& GetList() { return m_list; }
+	PLIST_ITEM GetListItem(int nPos);	
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -89,10 +61,6 @@ public:
 	protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CDropWnd();
 
 	// Generated message map functions
 protected:
@@ -111,22 +79,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
+	CAdvComboBox* m_pComboParent;
 	CDropListBox* m_listbox;
-	CRect m_rcList;
 	CDropScrollBar* m_scrollbar;
+
+	CRect m_rcList;
 	CRect m_rcScroll;
 	CRect m_rcSizeHandle;
 
-	CWnd* m_pComboParent;
-//	CFont* m_pListFont;
-
-	list<LIST_ITEM> m_list;
-//	list<LIST_ITEM>::iterator m_iter;
+	list<PLIST_ITEM> m_pList;
 
 	bool m_bResizing;
 	int m_nMouseDiffX;
 	int m_nMouseDiffY;
-	DWORD m_dwACBStyle;
 
 	int m_nVScrollW;
 	int m_nVScrollH;

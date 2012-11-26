@@ -21,9 +21,10 @@
 
 
 #include "stdafx.h"
-
 #include "DropListBox.h"
 #include "AdvComboBox.h"
+#include "DropWnd.h"
+#include "DropScrollBar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,26 +36,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDropListBox
 
-CDropListBox::CDropListBox( CWnd* pComboParent, CDropScrollBar* pScroll )
-:
-	m_pComboParent( pComboParent ),
-	m_pScroll( pScroll )
+CDropListBox::CDropListBox( CAdvComboBox* pComboParent, CDropWnd* pDropWnd )
+ : m_pComboParent( pComboParent ), m_pDropWnd( pDropWnd )
 {
-// 	m_pListFont = new CFont;
-// 	LOGFONT logFont;
-// 	memset( &logFont, 0, sizeof(LOGFONT) );
-// 	strcpy( logFont.lfFaceName, "MS Sans Serif" );
-// 	logFont.lfHeight = 20;
-// 	m_pListFont->CreateFontIndirect(&logFont);
-
 	m_nLastTopIdx = 0;
-
-	m_dwACBStyle = 0;
 }
 
 CDropListBox::~CDropListBox()
 {
-//	delete m_pListFont;
 }
 
 
@@ -91,7 +80,7 @@ int CDropListBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ShowWindow( SW_SHOW );
 	SetWindowPos( &wndTopMost, lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, lpCreateStruct->cy, SWP_SHOWWINDOW );
 
-	SetFont( static_cast<CAdvComboBox*>(m_pComboParent)->GetFont() ); 
+	SetFont( m_pComboParent->GetFont() ); 
 	return 0;
 }
 
@@ -107,8 +96,6 @@ LONG CDropListBox::OnReleaseCapture( WPARAM wParam, LPARAM lParam )
 	ReleaseCapture();
 	return FALSE;
 }
-
-
 
 void CDropListBox::OnMouseMove(UINT nFlags, CPoint point) 
 {
@@ -128,14 +115,14 @@ void CDropListBox::OnMouseMove(UINT nFlags, CPoint point)
 	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
 	if( nPos != LB_ERR && (DWORD)pItem != -1 && pItem != NULL)
 	{
-		if( GetCurSel() != nPos && !pItem->bDisabled )
+		if( GetCurSel() != nPos && !(pItem->state & ACBIS_DISABLED) )
 		{
 			SetCurSel( nPos );
 		}
 	}
 
 	//
-	// Check if we have autoscrolled
+	// Check if we have auto scrolled
 	if( m_nLastTopIdx != GetTopIndex() )
 	{
 		int nDiff = m_nLastTopIdx - GetTopIndex();
@@ -143,32 +130,26 @@ void CDropListBox::OnMouseMove(UINT nFlags, CPoint point)
 
 		SCROLLINFO info;
 		info.cbSize = sizeof(SCROLLINFO);
-		if( m_pScroll->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
+		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
 		{
 			info.nPos = m_nLastTopIdx;
-			m_pScroll->SetScrollInfo( &info );
+			m_pDropWnd->GetScrollBarPtr()->SetScrollInfo( &info );
 		}
 	}
 
-
-//	OutputDebugString( "DropListBox MouseMove\n" );
-
 	CListBox::OnMouseMove(nFlags, point);
-
 }
 
 
 void CDropListBox::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	// TODO: Add your message handler code here and/or call default
 	OnLButtonDown(nFlags, point);
 //	CListBox::OnLButtonUp(nFlags, point);
 }
 
 void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	//
-	// Is mouse within listbox
+	//Click in the client area?
 	CRect rcClient;
 	GetClientRect( rcClient );
 	if( !rcClient.PtInRect( point ) )
@@ -177,62 +158,44 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 		GetParent()->SendMessage( WM_VRC_SETCAPTURE );
 	}
 
-	//
-	// Set selection item under mouse
+	//Click on the disabled item is disallowed
 	int nPos = PointTest(point);
-	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
-	if( nPos != LB_ERR && (DWORD)pItem != -1 && pItem != NULL)
+
+	if(nPos != LB_ERR)
 	{
-		if( pItem->bDisabled )
+		PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
+		if((DWORD)pItem != -1 && pItem != NULL && (pItem->state & ACBIS_DISABLED))
 		{
 			return;
 		}
 	}
 
+	//Get current selected item
 	nPos = GetCurSel();
 
-	//
-	// Is selected item disabled
-	if( nPos != LB_ERR )
+	if(nPos != LB_ERR)
 	{
-		PLIST_ITEM pItem;
-		pItem = (PLIST_ITEM)GetItemDataPtr( nPos );
-		if( pItem->bDisabled )
+		PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
+		if((DWORD)pItem != -1 && pItem != NULL && (pItem->state & ACBIS_DISABLED))
 		{
 			return;
 		}
 	}
 
-// 	if(point.x < 5 && nPos % 5 == 0)
-// 	{
-// 		DeleteString(nPos+1);
-// 		DeleteString(nPos+2);
-// 		DeleteString(nPos+3);
-// 		DeleteString(nPos+4);
-// 		return;
-// 	}
-
-	//
-	// Send current selection to comboedit
-	if( nPos != -1 )
+	//send current selection to combobox
+	if(nPos != LB_ERR)
+	{
 		m_pComboParent->PostMessage( WM_SELECTED_ITEM, (WPARAM)nPos, 0 );
-//	CString str;
-//	str.Format( "DropListWnd: Selected item: %d\n", nPos );
-//	OutputDebugString( str );
+	}
 
-	//
-	// Destroy dropdown
+	//Destroy the dropdown list
 	ReleaseCapture();
-	//CAdvComboBox* pList = static_cast<CAdvComboBox*>(m_pComboParent);
 	m_pComboParent->PostMessage( WM_DESTROY_DROPLIST );
 
 	//
 	// Return so that the listbox can be destroyed
 //	CListBox::OnLButtonDown(nFlags, point);
 }
-
-
-
 
 int CDropListBox::GetBottomIndex()
 {
@@ -285,10 +248,10 @@ void CDropListBox::SetTopIdx(int nPos, BOOL bUpdateScrollbar)
 	{
 		SCROLLINFO info;
 		info.cbSize = sizeof(SCROLLINFO);
-		if( m_pScroll->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
+		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
 		{
 			info.nPos = m_nLastTopIdx;
-			m_pScroll->SetScrollInfo( &info );
+			m_pDropWnd->GetScrollBarPtr()->SetScrollInfo( &info );
 		}
 	}
 }
@@ -297,9 +260,9 @@ void CDropListBox::GetTextSize(LPCTSTR lpszText, int nCount, CSize &size)
 {
 	CClientDC dc(this);
 	int nSave = dc.SaveDC();
-	dc.SelectObject( static_cast<CAdvComboBox*>(m_pComboParent)->GetFont() );
+	dc.SelectObject( m_pComboParent->GetFont() );
 	size = dc.GetTextExtent( lpszText, nCount );
-	if( m_dwACBStyle & ACBS_CHECKED )
+	if( m_pComboParent->GetACBStyle() & ACBS_CHECKED )
 	{
 		size.cx += 14;
 	}
@@ -307,15 +270,14 @@ void CDropListBox::GetTextSize(LPCTSTR lpszText, int nCount, CSize &size)
 }
 
 
-int CDropListBox::AddListItem( LIST_ITEM& item )
+int CDropListBox::AddListItem( PLIST_ITEM pItem )
 {
-	PLIST_ITEM pItem = new LIST_ITEM;
-	*pItem = item;
-	int nPos = AddString( pItem->strText.c_str() );
+	ASSERT(pItem != NULL);
+
+	int nPos = AddString( pItem->strText );
 	SetItemDataPtr( nPos, (void*)pItem );
 	return nPos;
 }
-
 
 void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct) 
 {
@@ -336,8 +298,8 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 	CDC* pDC = CDC::FromHandle(pDIStruct->hDC);
 	pItem = (PLIST_ITEM)GetItemDataPtr(pDIStruct->itemID);
 
-	bIsDisabled = pItem->bDisabled;
-	bIsChecked = pItem->bChecked;
+	bIsDisabled = (pItem->state & ACBIS_DISABLED);
+	bIsChecked = (pItem->state & ACBIS_CHECKED);
 	if( (pDIStruct->itemAction | ODA_SELECT) && (pDIStruct->itemState & ODS_SELECTED) )
 		bIsSelected = TRUE;
 
@@ -350,7 +312,7 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(clrText);
 
-	if( m_dwACBStyle & ACBS_CHECKED )
+	if( m_pComboParent->GetACBStyle() & ACBS_CHECKED )
 	{
 		if( bIsChecked )
 		{
@@ -391,7 +353,7 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 	//
 	// Draw text
 	rcText.left += 2;
-	pDC->DrawText( pItem->strText.c_str(), &rcText, DT_SINGLELINE|DT_VCENTER);
+	pDC->DrawText( pItem->strText, &rcText, DT_SINGLELINE|DT_VCENTER);
 }
 
 int CDropListBox::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct) 
@@ -403,9 +365,20 @@ int CDropListBox::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
 void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
 	//only setting for variable
-	if(GetStyle() & LBS_OWNERDRAWVARIABLE)
+	if((GetStyle() & LBS_OWNERDRAWVARIABLE) == LBS_OWNERDRAWVARIABLE)
 	{
 		if(lpMeasureItemStruct->itemID % 5 == 0)
+		{
+			lpMeasureItemStruct->itemHeight = 40;
+		}
+		else
+		{
+			lpMeasureItemStruct->itemHeight = 20;
+		}
+
+		PLIST_ITEM pItem = m_pDropWnd->GetListItem(lpMeasureItemStruct->itemID);
+		ASSERT(pItem != NULL);
+		if(pItem->strText.Find(_T("wide")) >= 0)
 		{
 			lpMeasureItemStruct->itemHeight = 40;
 		}
@@ -416,25 +389,10 @@ void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	}
 }
 
-
 BOOL CDropListBox::DestroyWindow() 
-{
-	PLIST_ITEM pItem;
-	for( int i = 0; i < GetCount(); i++ )
-	{
-		pItem = (PLIST_ITEM)GetItemDataPtr( i );
-		delete pItem;
-	}
-	
+{	
 	return CListBox::DestroyWindow();
 }
-
-void CDropListBox::SetDLBStyle(DWORD dwStyle)
-{
-	m_dwACBStyle = dwStyle;
-}
-
-
 
 int CDropListBox::SetCurSel(int nSelect)
 {
@@ -450,7 +408,7 @@ int CDropListBox::SetCurSel(int nSelect)
 		pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
 		while( (DWORD)pItem != -1 )
 		{
-			if( !pItem->bDisabled )
+			if( !(pItem->state & ACBIS_DISABLED) )
 			{
 				nSelect = nTmp;
 				break;
@@ -466,7 +424,7 @@ int CDropListBox::SetCurSel(int nSelect)
 			pItem = (PLIST_ITEM)GetItemDataPtr( nTmp );
 			while( (DWORD)pItem != -1 )
 			{
-				if( !pItem->bDisabled )
+				if( !(pItem->state & ACBIS_DISABLED) )
 				{
 					nSelect = nTmp;
 					break;
@@ -479,7 +437,7 @@ int CDropListBox::SetCurSel(int nSelect)
 	pItem = (PLIST_ITEM)GetItemDataPtr( nSelect);
 	if( (DWORD)pItem != -1 )
 	{
-		if( pItem->bDisabled )
+		if(pItem->state & ACBIS_DISABLED)
 		{
 			return nSelect;
 		}
@@ -494,10 +452,10 @@ int CDropListBox::SetCurSel(int nSelect)
 
 		SCROLLINFO info;
 		info.cbSize = sizeof(SCROLLINFO);
-		if( m_pScroll->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
+		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
 		{
 			info.nPos = nTopIdx;
-			m_pScroll->SetScrollInfo( &info );
+			m_pDropWnd->GetScrollBarPtr()->SetScrollInfo( &info );
 		}
 	}
 	return nr;

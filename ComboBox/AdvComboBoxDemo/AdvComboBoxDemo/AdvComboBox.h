@@ -26,27 +26,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "DropListBox.h"
-#include "DropWnd.h"
-
-// AdvComboBox.h : header file
-//
-
-#define WM_ON_DROPDOWN_BUTTON  WM_USER+101
-
-#define ACBS_FLAT			0x0001
-#define ACBS_STANDARD		0x0002
-#define ACBS_CHECKED		0x0004
-#define ACBS_AUTOAPPEND		0x0008
-#define ACBS_AUTOSUGGEST	0x0010
-
 #pragma warning( disable : 4251 )
 #pragma warning( disable : 4786 )
 #pragma warning( disable : 4275 )
 
+#include "AdvComboBoxDef.h"
 #include <list>
-#include <map>
-#include <string>
+
 using namespace std;
 
 void AFXAPI DDX_ACBIndex( CDataExchange* pDX, int nIDC, int& index );
@@ -57,11 +43,13 @@ void AFXAPI DDX_ACBString( CDataExchange* pDX, int nIDC, CString& value );
 // CAdvComboBox window
 #define ADVCOMBOBOXCTRL_CLASSNAME    _T("AdvComboBoxCtrl")  // Window class name
 
+class CDropWnd;
+
 class CAdvComboBox : public CWnd
 {
 // Construction
 public:
-	CAdvComboBox( BOOL bInst = FALSE );
+	CAdvComboBox();
 
 	DECLARE_DYNAMIC(CAdvComboBox)
 
@@ -127,7 +115,7 @@ public:
 	int SetItemHeight( int nIndex,  int nHeight );
 	virtual ~CAdvComboBox();
 
-	CRect& GetComboRect() { return m_rcCombo; }
+	DWORD GetACBStyle() const { return m_dwACBStyle; }
 	void ModifyACBStyle( UINT nRemoveStyle, UINT nAddStyle );
 	BOOL PointInWindow( CPoint ptScreenPoint );
 
@@ -178,41 +166,33 @@ private:
 	void SelPrevItem();
 	void SelNextItem();
 
-	BOOL m_bInst;
 	int m_nCurSel;
 	CEdit* m_pEdit;
-	string m_strEdit;
+	CString m_strEdit;
 	CFont* m_pFont;
-	DWORD m_dwStyle;
 	DWORD m_dwACBStyle;
 
 	CRect m_rcCombo;
-	CRect m_rcStaticWnd;
-	CRect m_rcDropWnd;
-
+	CRect m_rcDropButton;
 
 	CDropWnd* m_pDropWnd;
-	CRect m_rcDropButton;
 	BOOL m_bDropListVisible;
-	bool m_bDropRectStored;
 
 	list<LIST_ITEM> m_list;
 	list<LIST_ITEM>::iterator m_iter;
 
 	int m_zDelta; // MouseWheel...
 
-	bool m_bHasFocus;
 	bool m_bHasSentFocus;
 	bool m_bSelItem;
 	bool m_bFirstPaint;
-	int m_nMinVisItems;
 	bool m_bCodeCreate;
 	BOOL m_bAutoAppend;
 	bool m_bDropButtonHot;
 	bool m_bTrackMouseLeave;
 
+	int m_nMinVisItems;
 	int m_nDefaultDropItems; // Number of items to be shown when dropwindow first shown.
-
 };
 
 

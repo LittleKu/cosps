@@ -135,6 +135,10 @@ SOURCE=.\AdvComboBox.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\AdvComboBoxDef.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\AdvComboBoxDemo.h
 # End Source File
 # Begin Source File

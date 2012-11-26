@@ -33,9 +33,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDropScrollBar
 
-CDropScrollBar::CDropScrollBar()
-:
-m_pListBox( 0 )
+CDropScrollBar::CDropScrollBar() : m_pListBox( NULL )
 {
 }
 
@@ -57,7 +55,26 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CDropScrollBar message handlers
 
-
+void CDropScrollBar::SetListBox( CDropListBox* pListBox )
+{
+	ASSERT( pListBox != NULL );
+	
+	m_pListBox = pListBox;
+	int nTop = m_pListBox->GetTopIndex();
+	int nBottom = m_pListBox->GetBottomIndex();
+	
+	SCROLLINFO info;
+	
+	info.cbSize = sizeof(SCROLLINFO);
+	info.fMask = SIF_ALL | SIF_DISABLENOSCROLL;
+	info.nMax = m_pListBox->GetCount()-1;
+	info.nMin = 0;
+	info.nPage = nBottom - nTop;
+	info.nPos = 0;
+	info.nTrackPos = 0;
+	
+	SetScrollInfo( &info );
+}
 
 void CDropScrollBar::OnMouseMove(UINT nFlags, CPoint point) 
 {
@@ -70,13 +87,22 @@ void CDropScrollBar::OnMouseMove(UINT nFlags, CPoint point)
 		ReleaseCapture();
 		GetParent()->SendMessage( WM_VRC_SETCAPTURE );
 	}
-	
-//	OutputDebugString( "DropScrollBar MouseMove\n" );
+
 	CScrollBar::OnMouseMove(nFlags, point);
 }
 
-
-
+void CDropScrollBar::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+	CRect rc;
+	GetClientRect( &rc );
+	if( !rc.PtInRect( point ) )
+	{
+		ReleaseCapture();
+		GetParent()->SendMessage( WM_VRC_SETCAPTURE );
+	}
+	
+	CScrollBar::OnLButtonDown(nFlags, point);
+}
 
 LONG CDropScrollBar::OnSetCapture( WPARAM wParam, LPARAM lParam )
 {
@@ -155,45 +181,6 @@ void CDropScrollBar::VScroll(UINT nSBCode, UINT nPos)
 		break;
 
 	}
-	SetScrollInfo( &info );
-			
-}
-
-
-
-void CDropScrollBar::SetListBox( CDropListBox* pListBox )
-{
-	ASSERT( pListBox != NULL );
-
-	m_pListBox = pListBox;
-	int nTop = m_pListBox->GetTopIndex();
-	int nBottom = m_pListBox->GetBottomIndex();
-	
-	SCROLLINFO info;
-
-	info.cbSize = sizeof(SCROLLINFO);
-	info.fMask = SIF_ALL | SIF_DISABLENOSCROLL;
-	info.nMax = m_pListBox->GetCount()-1;
-	info.nMin = 0;
-	info.nPage = nBottom - nTop;
-	info.nPos = 0;
-	info.nTrackPos = 0;
-
-	SetScrollInfo( &info );
-
-
-}
-
-void CDropScrollBar::OnLButtonDown(UINT nFlags, CPoint point) 
-{
-	CRect rc;
-	GetClientRect( &rc );
-	if( !rc.PtInRect( point ) )
-	{
-		ReleaseCapture();
-		GetParent()->SendMessage( WM_VRC_SETCAPTURE );
-	}
-	
-	CScrollBar::OnLButtonDown(nFlags, point);
+	SetScrollInfo( &info );		
 }
 
