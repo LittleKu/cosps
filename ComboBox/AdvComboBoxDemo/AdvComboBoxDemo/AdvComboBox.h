@@ -31,9 +31,7 @@
 #pragma warning( disable : 4275 )
 
 #include "AdvComboBoxDef.h"
-#include <list>
-
-using namespace std;
+#include <vector>
 
 void AFXAPI DDX_ACBIndex( CDataExchange* pDX, int nIDC, int& index );
 void AFXAPI DDX_ACBString( CDataExchange* pDX, int nIDC, CString& value );
@@ -72,6 +70,21 @@ public:
 // Implementation
 public:
 	void LoadString( UINT nStringID = 0 );
+
+	//String Operations
+	int AddString( LPCTSTR lpszString );
+	int InsertString( int nIndex, LPCTSTR lpszString );
+	int DeleteString( UINT nIndex );
+	void DeleteAllItems();
+	void ResetContent();
+	int FindString( int nStartAfter, LPCTSTR lpszString );
+	int FindStringExact( int nIndexStart, LPCTSTR lpszFind );
+	int SelectString( int nStartAfter, LPCTSTR lpszString );
+
+	//Item Operations
+	PLIST_ITEM AddItem(const LIST_ITEM* pListItem, PLIST_ITEM pParent = NULL);
+	int DeleteItem(UINT nIndex);
+
 	int GetDefaultVisibleItems();
 	void SetDefaultVisibleItems( int nItems = -1 );
 	virtual CFont* GetFont() {return m_pFont;}
@@ -80,9 +93,6 @@ public:
 	BOOL LimitText( int nMaxChars );
 	BOOL SetEditSel( int nStartChar, int nEndChar );
 	DWORD GetEditSel();
-	int FindStringExact( int nIndexStart, LPCTSTR lpszFind );
-	int InsertString( int nIndex, LPCTSTR lpszString );
-	int DeleteString( UINT nIndex );
 	BOOL GetExtendedUI();
 	int SetExtendedUI( BOOL bExtended = TRUE );
 	BOOL GetDroppedState();
@@ -95,7 +105,7 @@ public:
 	BOOL GetItemChecked( int nIndex );
 	void SetItemDisabled( int nIndex, BOOL bDisabled );
 	BOOL GetItemDisabled( int nIndex );
-	void ResetContent();
+	
 	void* GetItemDataPtr( int nIndex );
 	int SetItemDataPtr( int nIndex, void* pData );
 	DWORD GetItemData( int nIndex );
@@ -106,9 +116,6 @@ public:
 	void SetText( LPCTSTR lpszText );
 	void GetText( CString& rString );
 	int GetText( LPTSTR lpszText );
-	int AddString( LPCTSTR lpszString );
-	int FindString( int nStartAfter, LPCTSTR lpszString );
-	int SelectString( int nStartAfter, LPCTSTR lpszString );
 	void GetLBText( int nIndex, CString& rString );
 	int GetLBText( int nIndex, LPTSTR lpszText );
 	int GetLBTextLen(int nIndex );
@@ -162,9 +169,10 @@ protected:
     BOOL RegisterWindowClass();
 
 private:
-	void CreateDropList( list<LIST_ITEM> &droplist );
+	void CreateDropList( std::vector<PLIST_ITEM> &droplist );
 	void SelPrevItem();
 	void SelNextItem();
+	PLIST_ITEM GetListItem(int nIndex);
 
 	int m_nCurSel;
 	CEdit* m_pEdit;
@@ -178,8 +186,9 @@ private:
 	CDropWnd* m_pDropWnd;
 	BOOL m_bDropListVisible;
 
-	list<LIST_ITEM> m_list;
-	list<LIST_ITEM>::iterator m_iter;
+// 	list<LIST_ITEM> m_list;
+// 	list<LIST_ITEM>::iterator m_iter;
+	std::vector<PLIST_ITEM> m_list;
 
 	int m_zDelta; // MouseWheel...
 

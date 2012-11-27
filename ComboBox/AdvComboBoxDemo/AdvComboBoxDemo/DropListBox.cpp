@@ -140,15 +140,17 @@ void CDropListBox::OnMouseMove(UINT nFlags, CPoint point)
 	CListBox::OnMouseMove(nFlags, point);
 }
 
-
 void CDropListBox::OnLButtonUp(UINT nFlags, CPoint point) 
 {
+//	AfxTrace(_T("OnLButtonUp: [%d]\n"), count);
 	OnLButtonDown(nFlags, point);
 //	CListBox::OnLButtonUp(nFlags, point);
 }
 
 void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point) 
 {
+//	count++;
+//	AfxTrace(_T("OnLButtonDown: [%d]\n"), count);
 	//Click in the client area?
 	CRect rcClient;
 	GetClientRect( rcClient );
@@ -180,12 +182,28 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			return;
 		}
-	}
 
-	//send current selection to combobox
-	if(nPos != LB_ERR)
-	{
-		m_pComboParent->PostMessage( WM_SELECTED_ITEM, (WPARAM)nPos, 0 );
+		//send current selection to combobox
+		if(pItem->GetChildCount() <= 0)
+		{
+			m_pComboParent->PostMessage( WM_SELECTED_ITEM, (WPARAM)nPos, 0 );
+		}
+		else
+		{
+			AfxTrace(_T("OnLButtonDown: [%s]\n"), (pItem->state & ACBIS_COLLAPSED) ? "Y" : "N");
+			if(pItem->state & ACBIS_COLLAPSED)
+			{
+				Expand(pItem, LBE_EXPAND);
+				pItem->state &= ~ACBIS_COLLAPSED;
+			}
+			else
+			{
+				Expand(pItem, LBE_COLLAPSE);
+				pItem->state |= ACBIS_COLLAPSED;
+			}
+
+			return;
+		}
 	}
 
 	//Destroy the dropdown list
@@ -269,14 +287,103 @@ void CDropListBox::GetTextSize(LPCTSTR lpszText, int nCount, CSize &size)
 	dc.RestoreDC(nSave);
 }
 
-
 int CDropListBox::AddListItem( PLIST_ITEM pItem )
 {
+//	AfxTrace(_T("AddListItem: %d\n"), GetCount());
 	ASSERT(pItem != NULL);
+	m_list.push_back(pItem);
 
 	int nPos = AddString( pItem->strText );
-	SetItemDataPtr( nPos, (void*)pItem );
+	ASSERT(nPos == (m_list.size() - 1));
+
+	if(nPos >= 0)
+	{
+		SetItemDataPtr( nPos, (void*)pItem );
+		if( !(pItem->state & ACBIS_COLLAPSED) )
+		{
+			int i, nCount = pItem->GetChildCount();
+			for(i = 0; i < nCount; i++)
+			{
+				AddListItem(pItem->GetChildAt(i));
+			}
+		}
+	}
 	return nPos;
+}
+
+int CDropListBox::InsertListItem(int nIndex, PLIST_ITEM pItem)
+{
+//	AfxTrace(_T("InsertListItem: %d\n"), nIndex);
+	ASSERT(pItem != NULL);
+
+	if(nIndex < 0 || nIndex >= m_list.size())
+	{
+		return AddListItem(pItem);
+	}
+
+	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
+	std::advance(iter, nIndex);
+	if(iter == m_list.end())
+	{
+		return -1;
+	}
+
+	int nPos;
+
+	if( !(pItem->state & ACBIS_COLLAPSED) )
+	{
+		PLIST_ITEM pInsertItem;
+		int i;
+		for(i = pItem->GetChildCount() - 1; i >= 0; i--)
+		{
+			pInsertItem = pItem->GetChildAt(i);
+			
+			iter = m_list.insert(iter, pInsertItem);
+			nPos = InsertString(nIndex, pInsertItem->strText);
+			if(nPos >= 0)
+			{
+				ASSERT(nPos == nIndex);
+				SetItemDataPtr(nPos, (void*)pInsertItem);
+			}
+		}
+	}
+
+	iter = m_list.insert(iter, pItem);
+	nPos = InsertString(nIndex, pItem->strText);
+	if(nPos >= 0)
+	{
+		ASSERT(nPos == nIndex);
+		SetItemDataPtr(nPos, (void*)pItem);
+	}
+
+	return nPos;
+}
+
+int CDropListBox::DeleteListItem( UINT nIndex )
+{
+	if(nIndex < 0 || nIndex >= m_list.size())
+	{
+		return LB_ERR;
+	}
+	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
+	std::advance(iter, nIndex);
+	m_list.erase(iter);
+
+	int nRemain = DeleteString(nIndex);
+	ASSERT(nRemain == m_list.size());
+	return nRemain;
+}
+
+PLIST_ITEM CDropListBox::GetListItem(UINT nIndex)
+{
+	if(nIndex < 0 || nIndex >= m_list.size())
+	{
+		return NULL;
+	}
+	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
+	std::advance(iter, nIndex);
+	ASSERT(iter != m_list.end());
+	return (*iter);
 }
 
 void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct) 
@@ -339,7 +446,7 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 		pDC->SetBkColor( clrNormal );
 		pDC->SetTextColor( clrText );
 		pDC->FillSolidRect( rcItem, clrNormal);
-		if(pDIStruct->itemID % 5 == 0)
+		if(pItem->GetChildCount() > 0)
 		{
 			pDC->FillSolidRect( rcItem, RGB(245, 245, 245));
 		}
@@ -364,21 +471,14 @@ int CDropListBox::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct)
 
 void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
 {
+//	AfxTrace(_T("MeasureItem: %d\n"), lpMeasureItemStruct->itemID);
 	//only setting for variable
 	if((GetStyle() & LBS_OWNERDRAWVARIABLE) == LBS_OWNERDRAWVARIABLE)
 	{
-		if(lpMeasureItemStruct->itemID % 5 == 0)
-		{
-			lpMeasureItemStruct->itemHeight = 40;
-		}
-		else
-		{
-			lpMeasureItemStruct->itemHeight = 20;
-		}
-
-		PLIST_ITEM pItem = m_pDropWnd->GetListItem(lpMeasureItemStruct->itemID);
+		PLIST_ITEM pItem = GetListItem(lpMeasureItemStruct->itemID);
 		ASSERT(pItem != NULL);
-		if(pItem->strText.Find(_T("wide")) >= 0)
+
+		if(pItem->GetChildCount() > 0)
 		{
 			lpMeasureItemStruct->itemHeight = 40;
 		}
@@ -391,6 +491,7 @@ void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 
 BOOL CDropListBox::DestroyWindow() 
 {	
+	m_list.clear();
 	return CListBox::DestroyWindow();
 }
 
@@ -522,5 +623,93 @@ int CDropListBox::PointTest(CPoint point)
 	return LB_ERR;
 }
 
+int CDropListBox::GetItemIndex(PLIST_ITEM pItem)
+{
+	PLIST_ITEM ptr;
+	for(int i = GetCount() - 1; i >= 0; i--)
+	{
+		ptr = (PLIST_ITEM)GetItemDataPtr(i);
+
+		ASSERT(ptr != NULL && ((int)ptr != -1));
+		if(ptr != NULL && ((int)ptr != -1))
+		{
+			if(ptr == pItem)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+BOOL CDropListBox::Expand(PLIST_ITEM pItem, UINT nCode)
+{
+	if(pItem == NULL)
+	{
+		return FALSE;
+	}
+
+	BOOL bResult = TRUE;
+
+	if(nCode == LBE_COLLAPSE)
+	{
+		int i, nPos, nCount = pItem->GetChildCount();
+		for(i = 0; i < nCount; i++)
+		{
+			PLIST_ITEM pChild = pItem->GetChildAt(i);
+			ASSERT(pChild);
+			nPos = GetItemIndex(pChild);
+
+			//not in the listbox
+			if(nPos < 0)
+			{
+				continue;
+			}
+
+			DeleteListItem(nPos);
+		}
+	}
+	else if(nCode == LBE_EXPAND)
+	{
+		int i, nPos, nParentPos = GetItemIndex(pItem);
+		ASSERT(nParentPos >= 0);
+		if(nParentPos < 0 || pItem->GetChildCount() <= 0)
+		{
+			return FALSE;
+		}
+		for(i = pItem->GetChildCount() - 1; i >= 0; i--)
+		{
+			PLIST_ITEM pChild = pItem->GetChildAt(i);
+			ASSERT(pChild);
+			nPos = GetItemIndex(pChild);
+
+			//already in the listbox
+			if(nPos >= 0)
+			{
+				continue;
+			}
+			
+			InsertListItem(nParentPos + 1, pChild);
+		}
+	}
+	else
+	{
+		bResult = FALSE;
+	}
+
+	if(bResult)
+	{
+		SCROLLINFO info;
+		info.cbSize = sizeof(SCROLLINFO);
+		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
+		{
+			info.nPage = GetBottomIndex() - GetTopIndex();
+			info.nMax = GetCount()-1;
+			info.nMin = 0;
+			m_pDropWnd->GetScrollBarPtr()->SetScrollInfo( &info );
+		}
+	}
+	return bResult;
+}
 
 

@@ -35,21 +35,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CDropWnd
 
-CDropWnd::CDropWnd( CAdvComboBox* pComboParent, list<LIST_ITEM> &itemlist )
- : m_pComboParent( pComboParent )
+CDropWnd::CDropWnd( CAdvComboBox* pComboParent, std::vector<PLIST_ITEM> &itemlist )
+ : m_pComboParent( pComboParent ), m_pList(itemlist)
 {
 	m_bResizing = false;
 
 	m_nVScrollW = ::GetSystemMetrics(SM_CXVSCROLL);
 	m_nVScrollH = ::GetSystemMetrics(SM_CYVSCROLL);
-
-	list<LIST_ITEM>::iterator iter = itemlist.begin();
-	for( ; iter != itemlist.end(); iter++)
-	{
-		PLIST_ITEM pItem = new LIST_ITEM();
-		*pItem = *iter;
-		m_pList.push_back(pItem);
-	}
 }
 
 CDropWnd::~CDropWnd()
@@ -57,12 +49,6 @@ CDropWnd::~CDropWnd()
 	delete m_scrollbar;
 	delete m_listbox;
 
-	list<PLIST_ITEM>::iterator iter = m_pList.begin();
-	for( ; iter != m_pList.end(); iter++)
-	{
-		PLIST_ITEM pItem = *iter;
-		delete pItem;
-	}
 	m_pList.clear();
 }
 
@@ -143,10 +129,13 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	VERIFY(m_listbox->Create( dwListBoxStyle, m_rcList, this, 101 ) );
 	m_listbox->ShowWindow( SW_SHOW );
 
-	list<PLIST_ITEM>::iterator iter = m_pList.begin();
+	std::vector<PLIST_ITEM>::iterator iter = m_pList.begin();
 	for( ; iter != m_pList.end(); ++iter )
 	{
-		m_listbox->AddListItem( *iter );
+		if((*iter)->parent == NULL)
+		{
+			m_listbox->AddListItem( *iter );
+		}
 	}
 
 	//
@@ -276,10 +265,11 @@ PLIST_ITEM CDropWnd::GetListItem(int nPos)
 {
 	ASSERT(nPos >= 0 && nPos < m_pList.size());
 
-	list<PLIST_ITEM>::iterator iter = m_pList.begin();
-	advance(iter, nPos);
-	
-	return (iter == m_pList.end()) ? NULL : (*iter);
+	if(nPos < 0 || nPos >= m_pList.size())
+	{
+		return NULL;
+	}
+	return m_pList.at(nPos);
 }
 
 LONG CDropWnd::OnSetCapture( WPARAM wParam, LPARAM lParam )
@@ -397,9 +387,6 @@ void CDropWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-
-
-
 void CDropWnd::OnSize(UINT nType, int cx, int cy) 
 {
 	CWnd::OnSize(nType, cx, cy);
@@ -422,7 +409,6 @@ void CDropWnd::OnSize(UINT nType, int cx, int cy)
 		info.nPage = m_listbox->GetBottomIndex() - m_listbox->GetTopIndex();
 		m_scrollbar->SetScrollInfo( &info );
 	}
-
 }
 
 void CDropWnd::OnPaint() 

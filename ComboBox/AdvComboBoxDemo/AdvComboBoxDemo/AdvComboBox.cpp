@@ -25,6 +25,7 @@
 #include "DropWnd.h"
 #include "DropListBox.h"
 #include "VisualStylesXP.h"
+#include <algorithm>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,6 +79,7 @@ CAdvComboBox::~CAdvComboBox()
 		m_pEdit->DestroyWindow();
 		delete m_pEdit;
 	}
+	DeleteAllItems();
 }
 
 
@@ -154,7 +156,8 @@ LONG CAdvComboBox::OnGetCount( WPARAM wParam, LPARAM lParam )
 
 LONG CAdvComboBox::OnResetContent( WPARAM wParam, LPARAM lParam )
 {
-	m_list.clear();
+	DeleteAllItems();
+
 	m_strEdit = "";
 	m_nCurSel = -1;
 	SetWindowText( "" );
@@ -230,7 +233,7 @@ BOOL CAdvComboBox::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UI
 
 	m_dwACBStyle |= ACBS_STANDARD;
 
-	LoadString( nID );
+	//LoadString( nID );
 	
 	return CWnd::Create(NULL, "", dwStyle, m_rcCombo, pParentWnd, nID );
 }
@@ -300,7 +303,7 @@ int CAdvComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CAdvComboBox::PreSubclassWindow() 
 {
 	// TODO: Add your specialized code here and/or call the base class
-	LoadString();
+	//LoadString();
 
 	if( !m_pFont )
 	{
@@ -397,18 +400,34 @@ void CAdvComboBox::OnChildActivate()
 	}
 }
 
+void CAdvComboBox::DeleteAllItems()
+{
+	int i, nSize = m_list.size();
+	for(i = 0; i < nSize; i++)
+	{
+		PLIST_ITEM pItem = m_list.at(i);
+		delete pItem;
+	}
+	m_list.clear();
+}
+
+PLIST_ITEM CAdvComboBox::GetListItem(int nIndex)
+{
+	if(nIndex < 0 || nIndex >= m_list.size())
+	{
+		return NULL;
+	}
+	return m_list.at(nIndex);
+}
+
 void CAdvComboBox::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
 
-	if( m_nCurSel != -1 )
+	PLIST_ITEM pItem = GetListItem(m_nCurSel);
+	if(pItem)
 	{
-		m_iter = m_list.begin();
-		advance( m_iter, m_nCurSel );
-		if( m_iter != m_list.end() )
-		{
-			m_strEdit = m_iter->strText;
-		}
+		m_strEdit = pItem->strText;
 		if( m_bFirstPaint )
 		{
 			if( m_pEdit )
@@ -771,7 +790,7 @@ LONG CAdvComboBox::OnDestroyDropdownList( WPARAM wParam, LPARAM lParam )
 	return TRUE;
 }
 
-void CAdvComboBox::CreateDropList( list<LIST_ITEM> &droplist)
+void CAdvComboBox::CreateDropList( std::vector<PLIST_ITEM> &droplist)
 {
 	CRect rc;
 	if( m_pDropWnd )
@@ -807,58 +826,91 @@ void CAdvComboBox::CreateDropList( list<LIST_ITEM> &droplist)
 
 int CAdvComboBox::GetLBText(int nIndex, LPTSTR lpszText)
 {
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	advance( iter, nIndex );
-	if( iter == m_list.end() || nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
 	{
 		return CB_ERR;
 	}
 
-	_tcscpy(lpszText, (LPCTSTR)(iter->strText));
-	return iter->strText.GetLength() + 1;
-	//strcpy( lpszText, m_iter->strText.c_str() );
-	//return m_iter->strText.length()+1;
+	_tcscpy(lpszText, (LPCTSTR)(pItem->strText));
+	return pItem->strText.GetLength() + 1;
 }
 
 void CAdvComboBox::GetLBText(int nIndex, CString &rString)
 {
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	advance( iter, nIndex );
-	if( iter == m_list.end() || nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
 	{
-		rString = "";
+		rString = _T("");
 		return;
 	}
-	rString = iter->strText;
+	rString = pItem->strText;
 }
 
 int CAdvComboBox::GetLBTextLen(int nIndex )
 {
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	advance( iter, nIndex );
-	if( iter == m_list.end() || nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
 	{
 		return CB_ERR;
 	}
 
-	return iter->strText.GetLength()+1;
+	return pItem->strText.GetLength()+1;
+}
+
+static bool CompareListItemPtr(PLIST_ITEM p1, PLIST_ITEM p2) 
+{
+	if(p1 == NULL)
+	{
+		return true;
+	}
+	if(p2 == NULL)
+	{
+		return false;
+	}
+	return p1->strText < p2->strText;
 }
 
 int CAdvComboBox::AddString(LPCTSTR lpszString)
 {
-	LIST_ITEM item;
-	item.strText = lpszString;
-	m_list.push_back( item );
+	LIST_ITEM* pItem = new LIST_ITEM();
+	pItem->strText = lpszString;
+	m_list.push_back(pItem);
+	
 	if( GetStyle() & CBS_SORT )
-	{
-		m_list.sort();
+	{		
+		std::sort(m_list.begin(), m_list.end(), CompareListItemPtr);
 		// Find new item
-		return FindString( -1, item.strText );
+		return FindString( -1, pItem->strText );
 	}
 	else
 		return m_list.size()-1;
 }
 
+PLIST_ITEM CAdvComboBox::AddItem(const LIST_ITEM* pListItem, PLIST_ITEM pParent)
+{
+	LIST_ITEM* pItem = new LIST_ITEM();
+	*pItem = *pListItem;
+	if(pParent)
+	{
+		pItem->parent = pParent;
+
+		pParent->AddChild(pItem);
+	}
+	m_list.push_back(pItem);
+
+// 	if( GetStyle() & CBS_SORT )
+// 	{
+// 		std::sort(m_list.begin(), m_list.end(), CompareListItemPtr);
+// 	}
+
+	return pItem;
+}
+
+int CAdvComboBox::DeleteItem(UINT nIndex)
+{
+	return DeleteString(nIndex);
+}
 
 int CAdvComboBox::GetText(LPTSTR lpszText)
 {
@@ -904,14 +956,11 @@ BOOL CAdvComboBox::PointInWindow(CPoint ptScreenPoint)
 	return rc.PtInRect( ptScreenPoint );
 }
 
-
-
 BOOL CAdvComboBox::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 {
 	// TODO: Add your message handler code here and/or call default
 	if( !m_bDropListVisible )
 	{
-		string str;
 		//
 		// Select another string from the map
 		m_zDelta += zDelta;
@@ -1106,9 +1155,8 @@ int CAdvComboBox::SetCurSel(int nSelect)
 	else
 	{
 		m_nCurSel = nSelect;
-		m_iter = m_list.begin();
-		advance( m_iter, nSelect );
-		m_strEdit = m_iter->strText;
+		PLIST_ITEM pItem = GetListItem(m_nCurSel);
+		m_strEdit = pItem->strText;
 		Invalidate();
 		return m_nCurSel;
 	}
@@ -1116,127 +1164,79 @@ int CAdvComboBox::SetCurSel(int nSelect)
 
 int CAdvComboBox::FindString(int nStartAfter, LPCTSTR lpszString)
 {
-	int nPos = 0;
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	if( nStartAfter != -1 )
+	int nPos = 0, nSize = m_list.size();
+	if(nStartAfter >= 0)
 	{
-		advance( iter, nStartAfter );
 		nPos = nStartAfter;
 	}
-	for( ; iter != m_list.end(); ++iter )
+	for( ; nPos < nSize; nPos++)
 	{
-		if(iter->strText == lpszString)
+		if(m_list.at(nPos)->strText == lpszString)
 		{
 			return nPos;
 		}
-		nPos++;
 	}
 	return CB_ERR;
 }
 
 int CAdvComboBox::FindStringExact(int nIndexStart, LPCTSTR lpszFind)
 {
-	if( nIndexStart > m_list.size() && nIndexStart != -1 )
-		return CB_ERR;
-
-	int nPos = 0;
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	if( nIndexStart != -1 )
-	{
-		advance( iter, nIndexStart );
-		nPos = nIndexStart;
-	}
-	for( ; iter != m_list.end(); ++iter )
-	{
-		if(iter->strText == lpszFind)
-		{
-			return nPos;
-		}
-		nPos++;
-	}
-	return CB_ERR;
+	return FindString(nIndexStart, lpszFind);
 }
 
 int CAdvComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
 {
-	if( nStartAfter > m_list.size() )
+	int nPos = FindString(nStartAfter, lpszString);
+	if(nPos == CB_ERR)
+	{
 		return CB_ERR;
+	}
 
-	int nPos = 0;
-	list<LIST_ITEM>::iterator iter = m_list.begin();
-	if( nStartAfter != -1 )
-	{
-		advance( iter, nStartAfter );
-		nPos = nStartAfter;
-	}
-	for( ; iter != m_list.end(); ++iter )
-	{
-		if(iter->strText == lpszString)
-		{
-			m_nCurSel = nPos;
-			m_strEdit = iter->strText;
-			Invalidate();
-			return nPos;
-		}
-		nPos++;
-	}
-	return CB_ERR;
+	PLIST_ITEM pItem = m_list.at(nPos);
+	ASSERT(pItem);
+
+	m_strEdit = pItem->strText;
+	Invalidate();
+	return nPos;
 }
 
 int CAdvComboBox::SetItemData(int nIndex, DWORD dwItemData)
 {
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter == m_list.end() || nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
 	{
 		return CB_ERR;
 	}
-	m_iter->vpItemData = (void*)dwItemData;
+	pItem->vpItemData = (void*)dwItemData;
 	return CB_OKAY;
 }
 
 DWORD CAdvComboBox::GetItemData(int nIndex)
 {
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter == m_list.end() || nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
 	{
 		return CB_ERR;
 	}
-	return (DWORD)m_iter->vpItemData;
+	return (DWORD)pItem->vpItemData;
 }
 
 int CAdvComboBox::SetItemDataPtr(int nIndex, void *pData)
 {
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter == m_list.end() || nIndex > m_list.size() )
-	{
-		return CB_ERR;
-	}
-	m_iter->vpItemData = pData;
-	return CB_OKAY;
+	return SetItemData(nIndex, (DWORD)pData);
 }
 
 void* CAdvComboBox::GetItemDataPtr(int nIndex)
 {
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter == m_list.end() || nIndex > m_list.size() )
-	{
-		return (void*)CB_ERR;
-	}
-	return m_iter->vpItemData;
+	return (void*)GetListItem(nIndex);
 }
 
 void CAdvComboBox::ResetContent()
 {
-	m_list.clear();
+	DeleteAllItems();
 	m_strEdit = "";
 	Invalidate();
 }
-
-
 
 void AFXAPI DDX_ACBIndex( CDataExchange* pDX, int nIDC, int& index )
 {
@@ -1268,61 +1268,61 @@ void AFXAPI DDX_ACBString( CDataExchange* pDX, int nIDC, CString& value )
 	}
 }
 
-
-
-
-
 BOOL CAdvComboBox::GetItemDisabled( int nIndex )
 {
-	if( nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
+	{
 		return CB_ERR;
+	}
 
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	return (m_iter->state & ACBIS_DISABLED);
+	return (pItem->state & ACBIS_DISABLED);
 }
 
 void CAdvComboBox::SetItemDisabled(int nIndex, BOOL bDisabled)
 {
-	if( nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
+	{
 		return;
+	}
 
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
 	if(bDisabled)
 	{
-		m_iter->state |= ACBIS_DISABLED;
+		pItem->state |= ACBIS_DISABLED;
 	}
 	else
 	{
-		m_iter->state &= ~ACBIS_DISABLED;
+		pItem->state &= ~ACBIS_DISABLED;
 	}
 }
 
 BOOL CAdvComboBox::GetItemChecked( int nIndex )
 {
-	if( nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
+	{
 		return CB_ERR;
-
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	return (m_iter->state & ACBIS_CHECKED);
+	}
+	
+	return (pItem->state & ACBIS_CHECKED);
 }
 
 void CAdvComboBox::SetItemChecked(int nIndex, BOOL bChecked)
 {
-	if( nIndex > m_list.size() )
+	PLIST_ITEM pItem = GetListItem(nIndex);
+	if(pItem == NULL)
+	{
 		return;
-
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
+	}
+	
 	if(bChecked)
 	{
-		m_iter->state |= ACBIS_CHECKED;
+		pItem->state |= ACBIS_CHECKED;
 	}
 	else
 	{
-		m_iter->state &= ~ACBIS_CHECKED;
+		pItem->state &= ~ACBIS_CHECKED;
 	}
 }
 
@@ -1381,7 +1381,7 @@ BOOL CAdvComboBox::PreTranslateMessage(MSG* pMsg)
 		{
 			if( m_dwACBStyle & ACBS_AUTOAPPEND )
 			{
-				// If the cursor is at the end of the text, show autosuggest text
+				// If the cursor is at the end of the text, show auto suggest text
 				if( m_pEdit )
 				{
 					int nS, nE;
@@ -1432,25 +1432,27 @@ void CAdvComboBox::SelPrevItem()
 	}
 	else
 	{
-		m_iter = m_list.begin();
-		advance( m_iter, m_nCurSel );
-		--m_iter;
-		int nOldSel = m_nCurSel;
-		int nPos = m_nCurSel;
-		while( m_iter != m_list.end() )
+		int nOldSel = m_nCurSel, nPos = m_nCurSel - 1;
+		for( ; nPos >= 0; nPos--)
 		{
-			nPos--;
-			if( !(m_iter->state & ACBIS_DISABLED) )
+			PLIST_ITEM pItem = m_list.at(nPos);
+			ASSERT(pItem);
+
+			//make sure the item is enabled
+			if( !(pItem->state & ACBIS_DISABLED) )
 			{
-				m_strEdit = m_iter->strText;
-				if( m_pEdit )
-					m_pEdit->SetWindowText( m_strEdit );
+				m_strEdit = pItem->strText;
+				if(m_pEdit)
+				{
+					m_pEdit->SetWindowText(m_strEdit);
+				}
 				m_nCurSel = nPos;
 				Invalidate();
 				break;
 			}
-			--m_iter;
 		}
+
+		//selection changed
 		if( nOldSel != m_nCurSel )
 		{
 			// Send message to parent(dialog)
@@ -1472,25 +1474,26 @@ void CAdvComboBox::SelNextItem()
 	}
 	else
 	{
-		m_iter = m_list.begin();
-		advance( m_iter, m_nCurSel );
-		++m_iter;
-		int nOldSel = m_nCurSel;
-		int nPos = m_nCurSel;
-		while( m_iter != m_list.end() )
+		int nOldSel = m_nCurSel, nPos = m_nCurSel + 1;	
+		for( ; nPos < m_list.size(); nPos++)
 		{
-			nPos++;
-			if( !(m_iter->state & ACBIS_DISABLED) )
+			PLIST_ITEM pItem = m_list.at(nPos);
+			ASSERT(pItem);
+			
+			//make sure the item is enabled
+			if( !(pItem->state & ACBIS_DISABLED) )
 			{
-				m_strEdit = m_iter->strText;
-				if( m_pEdit )
-					m_pEdit->SetWindowText( m_strEdit );
-				Invalidate();
+				m_strEdit = pItem->strText;
+				if(m_pEdit)
+				{
+					m_pEdit->SetWindowText(m_strEdit);
+				}
 				m_nCurSel = nPos;
+				Invalidate();
 				break;
 			}
-			++m_iter;
 		}
+
 		if( nOldSel != m_nCurSel )
 		{
 			// Send message to parent(dialog)
@@ -1531,7 +1534,6 @@ int CAdvComboBox::InitStorage(int nItems, UINT nBytes)
 {
 	return nItems;
 }
-
 
 void CAdvComboBox::ShowDropDown(BOOL bShowIt)
 {
@@ -1578,53 +1580,43 @@ BOOL CAdvComboBox::GetExtendedUI()
 
 int CAdvComboBox::DeleteString(UINT nIndex)
 {
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter != m_list.end() || nIndex > m_list.size() )
-	{
-		m_list.erase( m_iter );
-		return m_list.size();
-	}
-	else
+	if(nIndex < 0 || nIndex >= m_list.size())
 	{
 		return CB_ERR;
 	}
+
+	std::vector<PLIST_ITEM>::iterator iter = m_list.begin();
+	std::advance(iter, nIndex);
+	ASSERT(iter != m_list.end());
+
+	PLIST_ITEM pItem = *iter;
+	delete pItem;
+
+	m_list.erase(iter);
+
+	return m_list.size();
 }
 
 int CAdvComboBox::InsertString(int nIndex, LPCTSTR lpszString)
 {
-	LIST_ITEM item;
-	item.strText = lpszString;
-	if( nIndex == -1 || (nIndex > m_list.size()) )
+	LIST_ITEM* pItem = new LIST_ITEM;
+	pItem->strText = lpszString;
+
+	//insert at the end
+	if(nIndex < 0 || nIndex >= m_list.size())
 	{
-		m_list.push_back( item );
-		return m_list.size()-1;
+		m_list.push_back(pItem);
+		return m_list.size() - 1;
 	}
 
-	if( nIndex == 0 && (m_list.size()==0) )
+	std::vector<PLIST_ITEM>::iterator iter = m_list.begin();
+	std::advance(iter, nIndex);
+	m_list.insert(iter, pItem);
+	if(nIndex <= m_nCurSel)
 	{
-		m_list.push_back( item );
-		return 0;
+		m_nCurSel++;
 	}
-
-	m_iter = m_list.begin();
-	advance( m_iter, nIndex );
-	if( m_iter != m_list.end() )
-	{
-		m_iter = m_list.insert( m_iter, item );
-		int nPos = 0;
-		while( m_iter != m_list.begin() )
-		{
-			nPos++;
-			--m_iter;
-		}
-		if( nIndex <= m_nCurSel )
-		{
-			m_nCurSel++;
-		}
-		return nPos;
-	}
-	return CB_ERR;
+	return nIndex;
 }
 
 
@@ -1632,25 +1624,21 @@ int CAdvComboBox::InsertString(int nIndex, LPCTSTR lpszString)
 
 DWORD CAdvComboBox::GetEditSel()
 {
-	if( (GetStyle() & CBS_DROPDOWN) && !(GetStyle() & CBS_SIMPLE) )	// == CBS_DROPDOWN
+	//CBS_DROPDOWN
+	if( ((GetStyle() & CBS_DROPDOWN) == CBS_DROPDOWN) && m_pEdit != NULL )
 	{
-		if( m_pEdit )
-		{
-			return m_pEdit->GetSel();
-		}
+		return m_pEdit->GetSel();
 	}
 	return CB_ERR;
 }
 
 BOOL CAdvComboBox::SetEditSel(int nStartChar, int nEndChar)
 {
-	if( (GetStyle() & CBS_DROPDOWN) && !(GetStyle() & CBS_SIMPLE) )	// == CBS_DROPDOWN
+	//CBS_DROPDOWN
+	if( ((GetStyle() & CBS_DROPDOWN) == CBS_DROPDOWN) && m_pEdit != NULL )
 	{
-		if( m_pEdit )
-		{
-			m_pEdit->SetSel( nStartChar, nEndChar, TRUE );
-			return TRUE;
-		}
+		m_pEdit->SetSel( nStartChar, nEndChar, TRUE );
+		return TRUE;
 	}
 	return CB_ERR;
 }
@@ -1686,21 +1674,21 @@ void CAdvComboBox::OnUpdateEdit()
 
 				m_pEdit->GetSel( nStartSel, nEndSel );
 
-				LIST_ITEM item;
-				m_iter = m_list.begin();
-				while( m_iter != m_list.end() )
+				PLIST_ITEM pItem;
+				std::vector<PLIST_ITEM>::iterator iter = m_list.begin();
+				for( ; iter != m_list.end(); iter++)
 				{
-					item = *m_iter;
-					int nPos = m_iter->strText.Find( str, 0 );
+					pItem = *iter;
+
+					int nPos = pItem->strText.Find( str, 0 );
 					if( nPos == 0 )
 					{
 						bAutoAppendInProgress = true;
-						m_pEdit->SetWindowText( m_iter->strText );
-						m_pEdit->SetSel( nEditLen, m_iter->strText.GetLength(), TRUE );
+						m_pEdit->SetWindowText( pItem->strText );
+						m_pEdit->SetSel( nEditLen, pItem->strText.GetLength(), TRUE );
 						bAutoAppendInProgress = false;
 						break;
 					}
-					++m_iter;
 				}
 			}
 		}
@@ -1709,8 +1697,6 @@ void CAdvComboBox::OnUpdateEdit()
 		{
 			if( m_dwACBStyle & ACBS_AUTOSUGGEST )
 			{
-				list<LIST_ITEM> suggestlist;
-				list<LIST_ITEM>::iterator suggestiter;
 				CString str = (LPCTSTR)strEdit;
 				int nEditLen = str.GetLength();
 				if( !nEditLen )
@@ -1724,17 +1710,19 @@ void CAdvComboBox::OnUpdateEdit()
 
 				m_pEdit->GetSel( nStartSel, nEndSel );
 
-				LIST_ITEM item;
-				m_iter = m_list.begin();
-				while( m_iter != m_list.end() )
+				std::vector<PLIST_ITEM> suggestlist;
+
+				PLIST_ITEM pItem;
+				std::vector<PLIST_ITEM>::iterator iter = m_list.begin();
+				for( ; iter != m_list.end(); iter++)
 				{
-					item = *m_iter;
-					int nPos = m_iter->strText.Find( str, 0 );
+					pItem = *iter;
+
+					int nPos = pItem->strText.Find( str, 0 );
 					if( nPos == 0 )
 					{
-						suggestlist.push_back( item );
+						suggestlist.push_back( pItem );
 					}
-					++m_iter;
 				}
 				if( m_pDropWnd )
 					SendMessage( WM_DESTROY_DROPLIST );
@@ -1751,11 +1739,6 @@ void CAdvComboBox::OnUpdateEdit()
 		GetParent()->SendMessage( WM_COMMAND, MAKEWPARAM(nId,CBN_EDITUPDATE), (LPARAM)m_hWnd );
 	}
 }
-
-
-
-
-
 
 void CAdvComboBox::OnEnable(BOOL bEnable) 
 {

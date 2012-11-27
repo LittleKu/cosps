@@ -31,9 +31,7 @@
 #pragma warning( disable : 4786 )
 
 #include "AdvComboBoxDef.h"
-#include <list>
-
-using namespace std;
+#include <vector>
 
 class CAdvComboBox;
 class CDropListBox;
@@ -45,7 +43,7 @@ class CDropScrollBar;
 class CDropWnd : public CWnd
 {
 public:
-	CDropWnd( CAdvComboBox* pComboParent, list<LIST_ITEM> &itemlist );
+	CDropWnd( CAdvComboBox* pComboParent, std::vector<PLIST_ITEM> &itemlist );
 	virtual ~CDropWnd();
 
 	CDropListBox*	GetListBoxPtr() { return m_listbox; }
@@ -87,7 +85,8 @@ private:
 	CRect m_rcScroll;
 	CRect m_rcSizeHandle;
 
-	list<PLIST_ITEM> m_pList;
+	//list<PLIST_ITEM> m_pList;
+	std::vector<PLIST_ITEM> m_pList;
 
 	bool m_bResizing;
 	int m_nMouseDiffX;

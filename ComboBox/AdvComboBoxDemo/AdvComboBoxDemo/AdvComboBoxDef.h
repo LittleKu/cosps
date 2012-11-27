@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <vector>
+
 #define WM_ON_DROPDOWN_BUTTON	(WM_USER+101)
 
 #define WM_SELECTED_ITEM		(WM_USER+201)
@@ -32,6 +34,10 @@ public:
 	UINT		state;
 	HBITMAP		hImage;
 	void*		vpItemData;
+
+	AdvComboBoxItem *parent;
+	std::vector<AdvComboBoxItem*> *children;
+
 public:
 	AdvComboBoxItem()
 	{
@@ -39,8 +45,42 @@ public:
 		state = ACBIS_NORMAL;
 		hImage = NULL;
 		vpItemData = NULL;
+		parent = NULL;
+		children = NULL;
+	}
+	~AdvComboBoxItem()
+	{
+		if(children != NULL && !children->empty())
+		{
+			children->clear();
+			delete children;
+			children = NULL;
+		}
 	}
 
+	void AddChild(AdvComboBoxItem* pItem)
+	{
+		if(children == NULL)
+		{
+			children = new std::vector<AdvComboBoxItem*>();
+		}
+		children->push_back(pItem);
+	}
+
+	int GetChildCount()
+	{
+		return children ? children->size() : 0;
+	}
+
+	AdvComboBoxItem* GetChildAt(int childIndex)
+	{
+		if(childIndex < 0 || childIndex >= GetChildCount())
+		{
+			return NULL;
+		}
+		return children->at(childIndex);
+	}
+	
 	bool operator < (const AdvComboBoxItem& other)
 	{
 		return strText < other.strText;

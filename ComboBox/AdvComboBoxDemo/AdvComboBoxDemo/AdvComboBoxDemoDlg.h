@@ -84,6 +84,8 @@ protected:
 	afx_msg void OnChangeVisibleItemsEdit();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+private:
+	void InitAdvComboBox();
 };
 
 //{{AFX_INSERT_LOCATION}}

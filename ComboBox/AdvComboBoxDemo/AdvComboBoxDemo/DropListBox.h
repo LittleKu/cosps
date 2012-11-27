@@ -27,6 +27,7 @@
 #endif // _MSC_VER > 1000
 
 #include "AdvComboBoxDef.h"
+#include <list>
 
 class CAdvComboBox;
 class CDropWnd;
@@ -34,13 +35,18 @@ class CDropWnd;
 /////////////////////////////////////////////////////////////////////////////
 // CDropListBox window
 
+#define LBE_COLLAPSE			1
+#define LBE_EXPAND				2
+#define LBE_TOGGLE				3
+#define LBE_COLLAPSERESET		4
+
 class CDropListBox : public CListBox
 {
 // Construction
 public:
 	//Use CDropWnd for accessing data directly
 	CDropListBox( CAdvComboBox* pComboParent, CDropWnd* pDropWnd );
-
+	virtual ~CDropListBox();
 // Attributes
 public:
 
@@ -56,14 +62,20 @@ public:
 
 // Implementation
 public:
+	int AddListItem( PLIST_ITEM pItem );
+	int InsertListItem(int nIndex, PLIST_ITEM pItem);
+	int DeleteListItem( UINT nIndex );
+	PLIST_ITEM GetListItem(UINT nIndex);
+	int GetItemIndex(PLIST_ITEM pItem);
+	
 	int GetTotalItemHeight(int nStartIndex, int nCount = -1);
 	int PointTest(CPoint point);
 	int SetCurSel( int nSelect );
-	int AddListItem( PLIST_ITEM pItem );
 	void GetTextSize( LPCTSTR lpszText, int nCount, CSize& size );
 	void SetTopIdx( int nPos, BOOL bUpdateScrollbar = FALSE );
 	int GetBottomIndex();
-	virtual ~CDropListBox();
+	
+	BOOL Expand(PLIST_ITEM pItem, UINT nCode);
 
 	// Generated message map functions
 protected:
@@ -85,6 +97,8 @@ private:
 	CAdvComboBox* m_pComboParent;
 	CDropWnd* m_pDropWnd;
 	int m_nLastTopIdx;
+
+	std::list<PLIST_ITEM> m_list;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -172,6 +172,7 @@ BOOL CAdvComboBoxDemoDlg::OnInitDialog()
 	m_ctlVisibleItemsSpin.SetRange32(-1,20);
 	m_ctlIndexSpin.SetRange32(0,20);
 
+	InitAdvComboBox();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -348,3 +349,21 @@ void CAdvComboBoxDemoDlg::OnChangeVisibleItemsEdit()
 	}
 }
 
+
+void CAdvComboBoxDemoDlg::InitAdvComboBox()
+{
+	//m_ctlAdvCombo.LoadString();
+	PLIST_ITEM pItem = NULL;
+	LIST_ITEM item, item2;
+	for(int i = 0; i < 5; i++)
+	{
+		item.strText.Format(_T("Parent node (%d)"), i + 1);
+		pItem = m_ctlAdvCombo.AddItem(&item);
+
+		for(int j = 0; j < 3; j++)
+		{
+			item2.strText.Format(_T("p(%d) - child(%d)"), i + 1, j + 1);
+			m_ctlAdvCombo.AddItem(&item2, pItem);
+		}
+	}
+}
