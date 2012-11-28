@@ -38,7 +38,6 @@ class CDropWnd;
 #define LBE_COLLAPSE			1
 #define LBE_EXPAND				2
 #define LBE_TOGGLE				3
-#define LBE_COLLAPSERESET		4
 
 class CDropListBox : public CListBox
 {
@@ -76,6 +75,8 @@ public:
 	int GetBottomIndex();
 	
 	BOOL Expand(PLIST_ITEM pItem, UINT nCode);
+	BOOL Expand(PLIST_ITEM pItem);
+	BOOL Collapse(PLIST_ITEM pItem);
 
 	// Generated message map functions
 protected:

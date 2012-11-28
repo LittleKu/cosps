@@ -142,15 +142,12 @@ void CDropListBox::OnMouseMove(UINT nFlags, CPoint point)
 
 void CDropListBox::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-//	AfxTrace(_T("OnLButtonUp: [%d]\n"), count);
 	OnLButtonDown(nFlags, point);
 //	CListBox::OnLButtonUp(nFlags, point);
 }
 
 void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-//	count++;
-//	AfxTrace(_T("OnLButtonDown: [%d]\n"), count);
 	//Click in the client area?
 	CRect rcClient;
 	GetClientRect( rcClient );
@@ -183,27 +180,15 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 			return;
 		}
 
-		//send current selection to combobox
-		if(pItem->GetChildCount() <= 0)
+		//parent node can not be selected
+		if(pItem->GetChildCount() > 0)
 		{
-			m_pComboParent->PostMessage( WM_SELECTED_ITEM, (WPARAM)nPos, 0 );
-		}
-		else
-		{
-			AfxTrace(_T("OnLButtonDown: [%s]\n"), (pItem->state & ACBIS_COLLAPSED) ? "Y" : "N");
-			if(pItem->state & ACBIS_COLLAPSED)
-			{
-				Expand(pItem, LBE_EXPAND);
-				pItem->state &= ~ACBIS_COLLAPSED;
-			}
-			else
-			{
-				Expand(pItem, LBE_COLLAPSE);
-				pItem->state |= ACBIS_COLLAPSED;
-			}
-
+			Expand(pItem, LBE_TOGGLE);
 			return;
 		}
+
+		//send current selection to combobox
+		m_pComboParent->PostMessage( WM_SELECTED_ITEM, (WPARAM)nPos, 0 );
 	}
 
 	//Destroy the dropdown list
@@ -254,7 +239,7 @@ int CDropListBox::GetBottomIndex()
 			nBottomIndex = GetCount();
 		}
 	}
-	AfxTrace(_T("GetBottomIndex=%d\n"), nBottomIndex);
+	//AfxTrace(_T("GetBottomIndex=%d\n"), nBottomIndex);
 	return nBottomIndex;
 }
 
@@ -393,32 +378,27 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 	BOOL			bIsSelected = FALSE;
 	BOOL			bIsDisabled = FALSE;
 	BOOL			bIsChecked = FALSE;
-	BOOL			bIsNew = FALSE; // 2002-08-19
 	COLORREF		clrNormal = ::GetSysColor(COLOR_WINDOW);
 	COLORREF		clrSelected = ::GetSysColor(COLOR_HIGHLIGHT);
 	COLORREF		clrText = ::GetSysColor(COLOR_WINDOWTEXT);
 	COLORREF		clrTextHilight = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-	COLORREF		clrBackground = ::GetSysColor(COLOR_HIGHLIGHT);
 	COLORREF		clrTextDisabled = ::GetSysColor(COLOR_GRAYTEXT);
-	PLIST_ITEM		pItem;
 
 	CDC* pDC = CDC::FromHandle(pDIStruct->hDC);
-	pItem = (PLIST_ITEM)GetItemDataPtr(pDIStruct->itemID);
+	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(pDIStruct->itemID);
 
 	bIsDisabled = (pItem->state & ACBIS_DISABLED);
 	bIsChecked = (pItem->state & ACBIS_CHECKED);
-	if( (pDIStruct->itemAction | ODA_SELECT) && (pDIStruct->itemState & ODS_SELECTED) )
+	if( /*(pDIStruct->itemAction | ODA_SELECT) &&*/ (pDIStruct->itemState & ODS_SELECTED) )
 		bIsSelected = TRUE;
 
 	CRect rcItem = pDIStruct->rcItem;
-	CRect rcBitmap = pDIStruct->rcItem;
 	CRect rcText = pDIStruct->rcItem;
-	CRect rcCenteredText = pDIStruct->rcItem;
 	CRect rcCheck = pDIStruct->rcItem;
 
-	pDC->SetBkMode(TRANSPARENT);
-	pDC->SetTextColor(clrText);
+	int nSavedDC = pDC->SaveDC();
 
+	pDC->SetBkMode(TRANSPARENT);
 	if( m_pComboParent->GetACBStyle() & ACBS_CHECKED )
 	{
 		if( bIsChecked )
@@ -430,37 +410,47 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 		rcItem.left += rcItem.Height()-4;
 	}
 
-	//
-	// Is item selected
-	if( bIsSelected )
+	//disabled
+	if(bIsDisabled)
 	{
-		if( !bIsDisabled )
-		{
-			pDC->SetBkColor( clrBackground );
-			pDC->SetTextColor( clrTextHilight );
-			pDC->FillSolidRect( rcItem, clrSelected);
-		}
-	}
-	else
-	{
-		pDC->SetBkColor( clrNormal );
-		pDC->SetTextColor( clrText );
 		pDC->FillSolidRect( rcItem, clrNormal);
-		if(pItem->GetChildCount() > 0)
-		{
-			pDC->FillSolidRect( rcItem, RGB(245, 245, 245));
-		}
-	}
 
-	if( bIsDisabled )
-	{
 		pDC->SetTextColor(clrTextDisabled);
 	}
+	//selected
+	else if(bIsSelected)
+	{
+		pDC->FillSolidRect( rcItem, clrSelected);
 
-	//
-	// Draw text
+		pDC->SetTextColor( clrTextHilight );
+	}
+	//normal
+	else
+	{
+		if(pItem->GetChildCount() > 0)
+		{
+			CRect rcTemp = rcItem;
+			rcTemp.bottom -= 1;
+			pDC->FillSolidRect(rcTemp, RGB(245, 245, 245));
+
+			rcTemp = rcItem;
+			rcTemp.top = rcTemp.bottom - 1;
+			pDC->FillSolidRect(rcTemp, RGB(200, 216, 255));
+		}
+		else
+		{
+			pDC->FillSolidRect( rcItem, clrNormal);
+		}
+
+		pDC->SetTextColor(clrText);
+	}
+
+	//Draw Text
 	rcText.left += 2;
 	pDC->DrawText( pItem->strText, &rcText, DT_SINGLELINE|DT_VCENTER);
+
+	//restore dc
+	pDC->RestoreDC(nSavedDC);
 }
 
 int CDropListBox::CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct) 
@@ -649,52 +639,25 @@ BOOL CDropListBox::Expand(PLIST_ITEM pItem, UINT nCode)
 		return FALSE;
 	}
 
-	BOOL bResult = TRUE;
-
+	BOOL bResult = FALSE;
 	if(nCode == LBE_COLLAPSE)
 	{
-		int i, nPos, nCount = pItem->GetChildCount();
-		for(i = 0; i < nCount; i++)
-		{
-			PLIST_ITEM pChild = pItem->GetChildAt(i);
-			ASSERT(pChild);
-			nPos = GetItemIndex(pChild);
-
-			//not in the listbox
-			if(nPos < 0)
-			{
-				continue;
-			}
-
-			DeleteListItem(nPos);
-		}
+		bResult = Collapse(pItem);
 	}
 	else if(nCode == LBE_EXPAND)
 	{
-		int i, nPos, nParentPos = GetItemIndex(pItem);
-		ASSERT(nParentPos >= 0);
-		if(nParentPos < 0 || pItem->GetChildCount() <= 0)
-		{
-			return FALSE;
-		}
-		for(i = pItem->GetChildCount() - 1; i >= 0; i--)
-		{
-			PLIST_ITEM pChild = pItem->GetChildAt(i);
-			ASSERT(pChild);
-			nPos = GetItemIndex(pChild);
-
-			//already in the listbox
-			if(nPos >= 0)
-			{
-				continue;
-			}
-			
-			InsertListItem(nParentPos + 1, pChild);
-		}
+		bResult = Expand(pItem);
 	}
-	else
+	else if(nCode == LBE_TOGGLE)
 	{
-		bResult = FALSE;
+		if(pItem->state & ACBIS_COLLAPSED)
+		{
+			bResult = Expand(pItem);
+		}
+		else
+		{
+			bResult = Collapse(pItem);
+		}
 	}
 
 	if(bResult)
@@ -710,6 +673,53 @@ BOOL CDropListBox::Expand(PLIST_ITEM pItem, UINT nCode)
 		}
 	}
 	return bResult;
+}
+
+BOOL CDropListBox::Expand(PLIST_ITEM pItem)
+{
+	int i, nPos, nParentPos = GetItemIndex(pItem);
+	ASSERT(nParentPos >= 0);
+	if(nParentPos < 0 || pItem->GetChildCount() <= 0)
+	{
+		return FALSE;
+	}
+	for(i = pItem->GetChildCount() - 1; i >= 0; i--)
+	{
+		PLIST_ITEM pChild = pItem->GetChildAt(i);
+		ASSERT(pChild);
+		nPos = GetItemIndex(pChild);
+		
+		//already in the listbox
+		if(nPos >= 0)
+		{
+			continue;
+		}
+		
+		InsertListItem(nParentPos + 1, pChild);
+	}
+
+	pItem->state &= ~ACBIS_COLLAPSED;
+	return TRUE;
+}
+BOOL CDropListBox::Collapse(PLIST_ITEM pItem)
+{
+	int i, nPos, nCount = pItem->GetChildCount();
+	for(i = 0; i < nCount; i++)
+	{
+		PLIST_ITEM pChild = pItem->GetChildAt(i);
+		ASSERT(pChild);
+		nPos = GetItemIndex(pChild);
+		
+		//not in the listbox
+		if(nPos < 0)
+		{
+			continue;
+		}
+		
+		DeleteListItem(nPos);
+	}
+	pItem->state |= ACBIS_COLLAPSED;
+	return TRUE;
 }
 
 
