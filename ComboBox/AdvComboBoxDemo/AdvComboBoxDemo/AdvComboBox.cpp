@@ -26,6 +26,8 @@
 #include "DropListBox.h"
 #include "VisualStylesXP.h"
 #include <algorithm>
+#include "AdvComboBoxDemo.h"
+#include "cflmfc/gdi_utils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,6 +61,7 @@ CAdvComboBox::CAdvComboBox() : m_pDropWnd(NULL), m_bDropListVisible(0)
 	m_dwACBStyle = ACBS_STANDARD;
 
 	m_pFont = NULL;
+	m_pen.CreatePen(PS_SOLID, 1, RGB(16, 16, 16));
 }
 
 
@@ -80,6 +83,7 @@ CAdvComboBox::~CAdvComboBox()
 		delete m_pEdit;
 	}
 	DeleteAllItems();
+	m_pen.DeleteObject();
 }
 
 
@@ -599,21 +603,19 @@ void CAdvComboBox::OnPaint()
 
 	if( (GetStyle() & CBS_DROPDOWN) && (GetStyle() & CBS_SIMPLE) )  // == CBS_DROPDOWNLIST
 	{
-		//
-		// Draw Text as selected
+		/*
 		COLORREF clrBackground;
 		COLORREF clrOldBkColor;
 		COLORREF clrOldTextColor;
 		clrBackground = ::GetSysColor(COLOR_HIGHLIGHT);
 		clrOldBkColor = dc.SetBkColor( clrBackground );
-	//	clrOldTextColor = dc.SetTextColor( ::GetSysColor(COLOR_HIGHLIGHTTEXT) );
 		int nOldBkMode = dc.SetBkMode( TRANSPARENT );
 		CFont* pOldFont = dc.SelectObject( m_pFont );
 
-		dc.FillSolidRect( rcText, bWndEnabled ? clrBackground : clrDisabledBkg );
+		//dc.FillSolidRect( rcText, bWndEnabled ? clrBackground : clrDisabledBkg );
 		if( m_bDropListVisible )
 		{
-			clrOldTextColor = dc.SetTextColor( bWndEnabled ? RGB(255, 128, 0)/*::GetSysColor(COLOR_HIGHLIGHTTEXT)*/ : clrDisabledText );
+			clrOldTextColor = dc.SetTextColor( bWndEnabled ? ::GetSysColor(COLOR_HIGHLIGHTTEXT) : clrDisabledText );
 		}
 		else
 		{
@@ -628,6 +630,69 @@ void CAdvComboBox::OnPaint()
 		dc.SelectObject( pOldFont );
 		dc.SetBkMode( nOldBkMode );
 		dc.SetBkColor(clrOldBkColor);
+		*/
+
+		int nSavedDC = dc.SaveDC();
+		GetClientRect(&rect);
+
+		CPen penBorder( PS_SOLID, 0, RGB(127, 157, 185) );
+		dc.SelectObject( &penBorder );
+		dc.Rectangle( &rect );
+		rect.DeflateRect(1, 1);
+		/*
+		HBITMAP hbmp = NULL;
+		if(m_bDropButtonHot || m_bDropListVisible)
+		{
+			hbmp = GetSysResMgr()->GetBitmap(BR_ACB_BKG_HOT);
+		}
+		else
+		{
+			hbmp = GetSysResMgr()->GetBitmap(BR_ACB_BKG_NORMAL);
+		}
+
+		BITMAP bmp;
+		::GetObject(hbmp, sizeof(bmp), &bmp);
+
+		HDC hMemDC = ::CreateCompatibleDC(dc.GetSafeHdc());
+		::SelectObject(hMemDC, hbmp);	
+
+		::StretchBlt(dc.GetSafeHdc(), rect.left, rect.top, rect.Width(), rect.Height(), 
+			hMemDC, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
+
+		::DeleteDC(hMemDC);
+		*/
+		if(m_bDropButtonHot || m_bDropListVisible)
+		{
+			dc.FillSolidRect(&rect, RGB(245, 245, 245));
+		}
+		else
+		{
+			dc.FillSolidRect(&rect, RGB(200, 200, 200));
+		}
+		
+
+		dc.SelectObject(&m_pen);
+
+		POINT ptOrigin;
+		ptOrigin.x = ptOrigin.y = 0;
+		CRect rcBox;
+		cfl::DrawTriangle(&dc, ptOrigin, cfl::GD_DOWN, 5, &rcBox, cfl::GDTF_CALCRECT);
+
+		ptOrigin.y = rect.top + (rect.Height() - rcBox.Height()) / 2;
+		ptOrigin.x = rect.right - rcBox.Width() - 5;
+		cfl::DrawTriangle(&dc, ptOrigin, cfl::GD_DOWN, 5);
+		rect.right -= rcBox.Width() + 15;
+
+		int nSel = GetCurSel();
+		PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nSel);
+		if(pItem != NULL)
+		{
+			dc.SetBkMode( TRANSPARENT );
+			dc.SelectObject( m_pFont );
+			dc.DrawText( (LPCTSTR)pItem->strText, &rect, DT_SINGLELINE|DT_VCENTER);
+		}
+		
+		dc.RestoreDC(nSavedDC);
 	}
 	else
 	{
@@ -1439,7 +1504,7 @@ void CAdvComboBox::SelPrevItem()
 			ASSERT(pItem);
 
 			//make sure the item is enabled
-			if( !(pItem->state & ACBIS_DISABLED) )
+			if( !(pItem->state & ACBIS_DISABLED) && (pItem->GetChildCount() <= 0) )
 			{
 				m_strEdit = pItem->strText;
 				if(m_pEdit)
@@ -1481,7 +1546,7 @@ void CAdvComboBox::SelNextItem()
 			ASSERT(pItem);
 			
 			//make sure the item is enabled
-			if( !(pItem->state & ACBIS_DISABLED) )
+			if( !(pItem->state & ACBIS_DISABLED) && (pItem->GetChildCount() <= 0))
 			{
 				m_strEdit = pItem->strText;
 				if(m_pEdit)
@@ -1825,7 +1890,7 @@ void CAdvComboBox::OnMouseMove(UINT nFlags, CPoint point)
 			SetTimer(1, 50, NULL);
 		}
 
-		InvalidateRect( &m_rcDropButton );
+		InvalidateRect( /*&m_rcDropButton*/ NULL);
 	}
 
 	CWnd::OnMouseMove(nFlags, point);
@@ -1839,7 +1904,7 @@ void CAdvComboBox::OnMouseLeave()
 	m_bTrackMouseLeave = false;
 
 	if( bChange != m_bDropButtonHot )
-		InvalidateRect( &m_rcDropButton );
+		InvalidateRect( /*&m_rcDropButton*/ NULL);
 }
 
 

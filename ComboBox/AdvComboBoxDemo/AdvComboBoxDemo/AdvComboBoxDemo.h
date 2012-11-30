@@ -31,6 +31,7 @@
 #endif
 
 #include "resource.h"		// main symbols
+#include "ResMgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CAdvComboBoxDemoApp:
@@ -41,6 +42,8 @@ class CAdvComboBoxDemoApp : public CWinApp
 {
 public:
 	CAdvComboBoxDemoApp();
+
+	CResMgr* GetResMgr();
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -56,7 +59,12 @@ public:
 		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	CResMgr* m_pResMgr;
 };
+
+CResMgr* GetSysResMgr();
 
 
 /////////////////////////////////////////////////////////////////////////////

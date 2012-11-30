@@ -357,12 +357,14 @@ void CAdvComboBoxDemoDlg::InitAdvComboBox()
 	LIST_ITEM item, item2;
 	for(int i = 0; i < 5; i++)
 	{
-		item.strText.Format(_T("Parent node (%d)"), i + 1);
+		item.strText.Format(_T("Parent node (%d) -- something to make the item wider"), i + 1);
+		//item.hImage = GetSysResMgr()->GetBitmap(BR_TEMP1 + (i % 5));
+		item.iImage = i % 5;
 		pItem = m_ctlAdvCombo.AddItem(&item);
 
 		for(int j = 0; j < 3; j++)
 		{
-			item2.strText.Format(_T("p(%d) - child(%d)"), i + 1, j + 1);
+			item2.strText.Format(_T("p(%d) - child(%d) -- something to make the item wider"), i + 1, j + 1);
 			m_ctlAdvCombo.AddItem(&item2, pItem);
 		}
 	}

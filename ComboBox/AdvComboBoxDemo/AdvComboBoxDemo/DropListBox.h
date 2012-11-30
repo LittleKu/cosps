@@ -39,6 +39,16 @@ class CDropWnd;
 #define LBE_EXPAND				2
 #define LBE_TOGGLE				3
 
+enum DropListBoxImageListEnum
+{
+	DLBIL_FIRST = 0,
+
+	DLBIL_NORMAL = 0,
+	DLBIL_STATE,
+
+	DLBIL_COUNT
+};
+
 class CDropListBox : public CListBox
 {
 // Construction
@@ -78,12 +88,23 @@ public:
 	BOOL Expand(PLIST_ITEM pItem);
 	BOOL Collapse(PLIST_ITEM pItem);
 
+	void SetImageList(CImageList* pImageList, int nImageList);
+	CImageList* GetImageList( int nImageList ) const;
+
+private:
+	BOOL PointTestState(CPoint point, CRect& rcItem);
+	int DrawStateImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap = 4);
+	int DrawItemImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap = 4);
+	int DrawImage(CRect& rect, CDC* pDC, CImageList* pImageList, int nImage, int nGap);
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CDropListBox)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnNcDestroy();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	afx_msg int CompareItem(LPCOMPAREITEMSTRUCT lpCompareItemStruct);
 	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
@@ -100,6 +121,9 @@ private:
 	int m_nLastTopIdx;
 
 	std::list<PLIST_ITEM> m_list;
+
+	CImageList*	m_pImageList[DLBIL_COUNT];
+	int m_nSpaceX;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -178,6 +178,7 @@ private:
 	CEdit* m_pEdit;
 	CString m_strEdit;
 	CFont* m_pFont;
+	CPen m_pen;
 	DWORD m_dwACBStyle;
 
 	CRect m_rcCombo;

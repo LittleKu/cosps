@@ -46,7 +46,7 @@ CAPTION "AdvComboBoxDemo"
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "",IDC_ADV_COMBO,"AdvComboBoxCtrl",WS_TABSTOP | 0x163,83,
-                    7,133,44
+                    7,120,27
     EDITTEXT        IDC_INDEX_EDIT,36,132,40,12,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_INDEX_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,77,132,11,

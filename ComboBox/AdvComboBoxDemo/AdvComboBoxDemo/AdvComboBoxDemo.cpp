@@ -71,6 +71,9 @@ BOOL CAdvComboBoxDemoApp::InitInstance()
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
 
+	m_pResMgr = new CResMgr();
+	m_pResMgr->Load(_T(".\\res"));
+
 	CAdvComboBoxDemoDlg dlg;
 	m_pMainWnd = &dlg;
 	int nResponse = dlg.DoModal();
@@ -85,7 +88,21 @@ BOOL CAdvComboBoxDemoApp::InitInstance()
 		//  dismissed with Cancel
 	}
 
+	m_pResMgr->UnLoad();
+	delete m_pResMgr;
+	m_pResMgr = NULL;
+
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+CResMgr* CAdvComboBoxDemoApp::GetResMgr()
+{
+	return m_pResMgr;
+}
+
+CResMgr* GetSysResMgr()
+{
+	return theApp.GetResMgr();
 }

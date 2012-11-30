@@ -23,8 +23,7 @@ enum AdvComboBoxItemState
 	ACBIS_NORMAL	= 0,
 	ACBIS_DISABLED	= 0x0001,
 	ACBIS_CHECKED	= 0x0002,
-	ACBIS_CHILDREN	= 0x0004,
-	ACBIS_COLLAPSED	= 0x0008
+	ACBIS_COLLAPSED	= 0x0004
 };
 
 class AdvComboBoxItem
@@ -32,7 +31,7 @@ class AdvComboBoxItem
 public:
 	CString		strText;
 	UINT		state;
-	HBITMAP		hImage;
+	int			iImage;
 	void*		vpItemData;
 
 	AdvComboBoxItem *parent;
@@ -43,7 +42,7 @@ public:
 	{
 		strText.Empty();
 		state = ACBIS_NORMAL;
-		hImage = NULL;
+		iImage = -1;
 		vpItemData = NULL;
 		parent = NULL;
 		children = NULL;

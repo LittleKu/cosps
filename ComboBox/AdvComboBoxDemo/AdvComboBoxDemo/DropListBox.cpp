@@ -25,6 +25,7 @@
 #include "AdvComboBox.h"
 #include "DropWnd.h"
 #include "DropScrollBar.h"
+#include "AdvComboBoxDemo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,6 +41,11 @@ CDropListBox::CDropListBox( CAdvComboBox* pComboParent, CDropWnd* pDropWnd )
  : m_pComboParent( pComboParent ), m_pDropWnd( pDropWnd )
 {
 	m_nLastTopIdx = 0;
+	m_nSpaceX = 4;
+	memset(m_pImageList, 0, sizeof(m_pImageList));
+
+	SetImageList(GetSysResMgr()->GetImageList(ILID_STATE), DLBIL_STATE);
+	SetImageList(GetSysResMgr()->GetImageList(ILID_NORMAL), DLBIL_NORMAL);
 }
 
 CDropListBox::~CDropListBox()
@@ -50,8 +56,10 @@ CDropListBox::~CDropListBox()
 BEGIN_MESSAGE_MAP(CDropListBox, CListBox)
 	//{{AFX_MSG_MAP(CDropListBox)
 	ON_WM_CREATE()
+	ON_WM_NCDESTROY()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DRAWITEM_REFLECT()
 	ON_WM_COMPAREITEM_REFLECT()
 	ON_WM_MEASUREITEM_REFLECT()
@@ -82,6 +90,19 @@ int CDropListBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	SetFont( m_pComboParent->GetFont() ); 
 	return 0;
+}
+
+void CDropListBox::OnNcDestroy()
+{
+	for(int i = DLBIL_FIRST; i < DLBIL_COUNT; i++)
+	{
+		if(m_pImageList[i] != NULL)
+		{
+			m_pImageList[i] = NULL;
+		}
+	}
+	
+	CListBox::OnNcDestroy();
 }
 
 
@@ -183,7 +204,12 @@ void CDropListBox::OnLButtonDown(UINT nFlags, CPoint point)
 		//parent node can not be selected
 		if(pItem->GetChildCount() > 0)
 		{
-			Expand(pItem, LBE_TOGGLE);
+			CRect rcItem;
+			GetItemRect(nPos, &rcItem);
+			if(PointTestState(point, rcItem))
+			{
+				Expand(pItem, LBE_TOGGLE);
+			}
 			return;
 		}
 
@@ -371,6 +397,106 @@ PLIST_ITEM CDropListBox::GetListItem(UINT nIndex)
 	return (*iter);
 }
 
+void DrawBitmap(CRect& rect, HBITMAP hbmp, CDC* pDC, int nGap = 2)
+{
+	if(hbmp == NULL)
+	{
+		return;
+	}
+
+	BITMAP bmp;
+	::GetObject(hbmp, sizeof(bmp), &bmp);
+
+	int top = 0, height = 0;
+	if(rect.Height() >= bmp.bmHeight)
+	{
+		top = rect.top + (rect.Height() - bmp.bmHeight) / 2;
+		height = bmp.bmHeight;
+	}
+	else
+	{
+		top = rect.top;
+		height = rect.Height();
+	}
+
+	HDC hMemDC = ::CreateCompatibleDC(pDC->GetSafeHdc());
+	::SelectObject(hMemDC, hbmp);	
+
+	::BitBlt(pDC->GetSafeHdc(), rect.left + nGap, top, bmp.bmWidth, height, hMemDC, 0, 0, SRCCOPY);
+	rect.left += bmp.bmWidth + nGap * 2;
+
+	::DeleteDC(hMemDC);
+}
+
+int CDropListBox::DrawImage(CRect& rect, CDC* pDC, CImageList* pImageList, int nImage, int nGap)
+{
+	if(rect.Width() <= 0 || pImageList == NULL || pImageList->GetImageCount() <= 0)
+	{
+		return 0;
+	}
+	if(nImage < 0 || nImage >= pImageList->GetImageCount())
+	{
+		return 0;
+	}
+	IMAGEINFO info;
+	if(!pImageList->GetImageInfo(nImage, &info))
+	{
+		return 0;
+	}
+	SIZE sizeImage;
+	sizeImage.cx = info.rcImage.right - info.rcImage.left;
+	sizeImage.cy = info.rcImage.bottom - info.rcImage.top;
+	if(sizeImage.cx <= 0 || sizeImage.cy <= 0)
+	{
+		return 0;
+	}
+
+	POINT point;
+	point.y = rect.top + ((rect.Height() - sizeImage.cy) >> 1);
+	point.x = rect.left + nGap;
+	
+	SIZE size;
+	size.cx = rect.Width() < sizeImage.cx ? rect.Width() : sizeImage.cx;
+	size.cy = rect.Height() < sizeImage.cy ? rect.Height() : sizeImage.cy;
+
+	pImageList->DrawIndirect(pDC, nImage, point, size, CPoint(0, 0));
+	
+	int nWidth = size.cx + 2 * nGap;
+	return nWidth;
+}
+
+int CDropListBox::DrawStateImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap)
+{
+	if(pItem == NULL || pItem->GetChildCount() <= 0)
+	{
+		return 0;
+	}
+	CImageList* pImageList = GetImageList(DLBIL_STATE);
+	if(pImageList == NULL)
+	{
+		return 0;
+	}
+
+	int nImage = (pItem->state & ACBIS_COLLAPSED) ? 1 : 0;
+
+	return DrawImage(rect, pDC, pImageList, nImage, nGap);
+}
+
+int CDropListBox::DrawItemImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap)
+{
+	if(pItem == NULL || pItem->iImage < 0)
+	{
+		return 0;
+	}
+	CImageList* pImageList = GetImageList(DLBIL_NORMAL);
+	if(pImageList == NULL)
+	{
+		return 0;
+	}
+	
+	return DrawImage(rect, pDC, pImageList, pItem->iImage, nGap);
+}
+
 void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct) 
 {
 	//
@@ -444,6 +570,12 @@ void CDropListBox::DrawItem(LPDRAWITEMSTRUCT pDIStruct)
 
 		pDC->SetTextColor(clrText);
 	}
+
+	int nWidth = DrawStateImage(rcText, pDC, pItem, m_nSpaceX);
+	rcText.left += nWidth;
+
+	nWidth = DrawItemImage(rcText, pDC, pItem, m_nSpaceX);
+	rcText.left += nWidth;
 
 	//Draw Text
 	rcText.left += 2;
@@ -613,6 +745,18 @@ int CDropListBox::PointTest(CPoint point)
 	return LB_ERR;
 }
 
+BOOL CDropListBox::PointTestState(CPoint point, CRect& rcItem)
+{
+	if(!rcItem.PtInRect(point))
+	{
+		return FALSE;
+	}
+	CRect rc = rcItem;
+	rc.left += 4;
+	rc.right = rc.left + 16;
+	return rc.PtInRect(point);
+}
+
 int CDropListBox::GetItemIndex(PLIST_ITEM pItem)
 {
 	PLIST_ITEM ptr;
@@ -720,6 +864,54 @@ BOOL CDropListBox::Collapse(PLIST_ITEM pItem)
 	}
 	pItem->state |= ACBIS_COLLAPSED;
 	return TRUE;
+}
+
+void CDropListBox::OnLButtonDblClk(UINT nFlags, CPoint point) 
+{
+	//Click in the client area?
+	CRect rcClient;
+	GetClientRect( rcClient );
+	if( !rcClient.PtInRect( point ) )
+	{
+		ReleaseCapture();
+		GetParent()->SendMessage( WM_VRC_SETCAPTURE );
+	}
+
+	int nPos = PointTest(point);
+	if(nPos != LB_ERR)
+	{
+		PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nPos);
+		if((int)pItem != -1 && pItem != NULL)
+		{
+			if(pItem->state & ACBIS_DISABLED)
+			{
+				return;
+			}
+			if(pItem->GetChildCount() > 0)
+			{
+				Expand(pItem, LBE_TOGGLE);
+				return;
+			}
+		}
+	}
+	CListBox::OnLButtonDblClk(nFlags, point);
+}
+
+void CDropListBox::SetImageList(CImageList* pImageList, int nImageList)
+{
+	if(nImageList < DLBIL_FIRST || nImageList >= DLBIL_COUNT)
+	{
+		return;
+	}
+	m_pImageList[nImageList] = pImageList;
+}
+CImageList* CDropListBox::GetImageList( int nImageList ) const
+{
+	if(nImageList < DLBIL_FIRST || nImageList >= DLBIL_COUNT)
+	{
+		return NULL;
+	}
+	return m_pImageList[nImageList];
 }
 
 
