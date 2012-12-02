@@ -28,6 +28,7 @@
 #include <algorithm>
 #include "AdvComboBoxDemo.h"
 #include "cflmfc/gdi_utils.h"
+#include "cflmfc/UiTheme.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -635,41 +636,18 @@ void CAdvComboBox::OnPaint()
 		int nSavedDC = dc.SaveDC();
 		GetClientRect(&rect);
 
-		CPen penBorder( PS_SOLID, 0, RGB(127, 157, 185) );
-		dc.SelectObject( &penBorder );
-		dc.Rectangle( &rect );
-		rect.DeflateRect(1, 1);
-		/*
-		HBITMAP hbmp = NULL;
-		if(m_bDropButtonHot || m_bDropListVisible)
-		{
-			hbmp = GetSysResMgr()->GetBitmap(BR_ACB_BKG_HOT);
-		}
-		else
-		{
-			hbmp = GetSysResMgr()->GetBitmap(BR_ACB_BKG_NORMAL);
-		}
+		cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE);
 
-		BITMAP bmp;
-		::GetObject(hbmp, sizeof(bmp), &bmp);
-
-		HDC hMemDC = ::CreateCompatibleDC(dc.GetSafeHdc());
-		::SelectObject(hMemDC, hbmp);	
-
-		::StretchBlt(dc.GetSafeHdc(), rect.left, rect.top, rect.Width(), rect.Height(), 
-			hMemDC, 0, 0, bmp.bmWidth, bmp.bmHeight, SRCCOPY);
-
-		::DeleteDC(hMemDC);
-		*/
-		if(m_bDropButtonHot || m_bDropListVisible)
+		int nStateID = cfl::UTSI_NORMAL;
+		if(m_bDropListVisible)
 		{
-			dc.FillSolidRect(&rect, RGB(245, 245, 245));
+			nStateID = cfl::UTSI_PRESSED;
 		}
-		else
+		else if(m_bDropButtonHot)
 		{
-			dc.FillSolidRect(&rect, RGB(200, 200, 200));
+			nStateID = cfl::UTSI_HOT;
 		}
-		
+		pTheme->DrawThemeBackground(&dc, 0, nStateID, &rect);		
 
 		dc.SelectObject(&m_pen);
 
@@ -680,6 +658,10 @@ void CAdvComboBox::OnPaint()
 
 		ptOrigin.y = rect.top + (rect.Height() - rcBox.Height()) / 2;
 		ptOrigin.x = rect.right - rcBox.Width() - 5;
+		if(m_bDropListVisible)
+		{
+			ptOrigin.y += 1;
+		}
 		cfl::DrawTriangle(&dc, ptOrigin, cfl::GD_DOWN, 5);
 		rect.right -= rcBox.Width() + 15;
 
@@ -689,6 +671,7 @@ void CAdvComboBox::OnPaint()
 		{
 			dc.SetBkMode( TRANSPARENT );
 			dc.SelectObject( m_pFont );
+			rect.left += 7;
 			dc.DrawText( (LPCTSTR)pItem->strText, &rect, DT_SINGLELINE|DT_VCENTER);
 		}
 		
@@ -794,7 +777,7 @@ LONG CAdvComboBox::OnSelectedItem( WPARAM wParam, LPARAM lParam )
 
 	//
 	// See to it that the drop button is redrawn
-	InvalidateRect( m_rcDropButton );
+	InvalidateRect( /*m_rcDropButton*/ NULL);
 
 	GetParent()->SendMessage( WM_COMMAND, MAKEWPARAM(nId,CBN_SELCHANGE), (LPARAM)m_hWnd );
 
@@ -840,7 +823,7 @@ LONG CAdvComboBox::OnDestroyDropdownList( WPARAM wParam, LPARAM lParam )
 		delete m_pDropWnd;
 		m_pDropWnd = NULL;
 
-		InvalidateRect( &m_rcDropButton );
+		InvalidateRect( /*&m_rcDropButton*/NULL );
 		int nId = GetDlgCtrlID();
 		if( !m_bSelItem )
 		{
