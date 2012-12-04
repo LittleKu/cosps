@@ -27,7 +27,6 @@
 #endif // _MSC_VER > 1000
 
 #include "AdvComboBoxDef.h"
-#include <list>
 
 class CAdvComboBox;
 class CDropWnd;
@@ -74,12 +73,12 @@ public:
 	int AddListItem( PLIST_ITEM pItem );
 	int InsertListItem(int nIndex, PLIST_ITEM pItem);
 	int DeleteListItem( UINT nIndex );
-	PLIST_ITEM GetListItem(UINT nIndex);
 	int GetItemIndex(PLIST_ITEM pItem);
 	
 	int GetTotalItemHeight(int nStartIndex, int nCount = -1);
 	int PointTest(CPoint point);
 	int SetCurSel( int nSelect );
+	int SetCurSel(PLIST_ITEM pItem);
 	void GetTextSize( LPCTSTR lpszText, int nCount, CSize& size );
 	void SetTopIdx( int nPos, BOOL bUpdateScrollbar = FALSE );
 	int GetBottomIndex();
@@ -96,6 +95,10 @@ private:
 	int DrawStateImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap = 4);
 	int DrawItemImage(CRect& rect, CDC* pDC, PLIST_ITEM pItem, int nGap = 4);
 	int DrawImage(CRect& rect, CDC* pDC, CImageList* pImageList, int nImage, int nGap);
+
+	int AtomicAddListItem( PLIST_ITEM pItem );
+	int AtomicInsertListItem(int nIndex, PLIST_ITEM pItem);
+	int AtomicDeleteListItem( PLIST_ITEM nIndex );
 
 	// Generated message map functions
 protected:
@@ -119,8 +122,6 @@ private:
 	CAdvComboBox* m_pComboParent;
 	CDropWnd* m_pDropWnd;
 	int m_nLastTopIdx;
-
-	std::list<PLIST_ITEM> m_list;
 
 	CImageList*	m_pImageList[DLBIL_COUNT];
 	int m_nSpaceX;

@@ -48,7 +48,8 @@ public:
 
 	CDropListBox*	GetListBoxPtr() { return m_listbox; }
 	CDropScrollBar* GetScrollBarPtr() { return m_scrollbar; }
-	PLIST_ITEM GetListItem(int nPos);	
+	PLIST_ITEM GetListBoxItem(int nPos);
+	PLIST_ITEM GetDropWndItem(int nPos);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

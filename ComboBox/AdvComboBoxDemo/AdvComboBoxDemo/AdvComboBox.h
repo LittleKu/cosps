@@ -167,12 +167,17 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
     BOOL RegisterWindowClass();
+	virtual void DrawDropDown(CDC* pDC);
+	virtual void DrawDropDownList(CDC* pDC);
+	BOOL DrawDropDownXPStyle(CDC* pDC);
+	void DrawDropDownDefaultStyle(CDC* pDC);
 
 private:
 	void CreateDropList( std::vector<PLIST_ITEM> &droplist );
 	void SelPrevItem();
 	void SelNextItem();
 	PLIST_ITEM GetListItem(int nIndex);
+	int ToComboBoxIndex(PLIST_ITEM pItem);
 
 	int m_nCurSel;
 	CEdit* m_pEdit;
@@ -181,14 +186,11 @@ private:
 	CPen m_pen;
 	DWORD m_dwACBStyle;
 
-	CRect m_rcCombo;
 	CRect m_rcDropButton;
 
 	CDropWnd* m_pDropWnd;
 	BOOL m_bDropListVisible;
 
-// 	list<LIST_ITEM> m_list;
-// 	list<LIST_ITEM>::iterator m_iter;
 	std::vector<PLIST_ITEM> m_list;
 
 	int m_zDelta; // MouseWheel...

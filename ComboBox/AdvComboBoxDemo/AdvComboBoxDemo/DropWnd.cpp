@@ -261,10 +261,28 @@ int CDropWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-PLIST_ITEM CDropWnd::GetListItem(int nPos)
+PLIST_ITEM CDropWnd::GetListBoxItem(int nPos)
+{
+	int nListBoxIndex = -1;
+	for(int i = 0; i < m_pList.size(); i++)
+	{
+		PLIST_ITEM pItem = m_pList.at(i);
+		if(pItem->state & ACBIS_INVISIBLE)
+		{
+			continue;
+		}
+		nListBoxIndex++;
+		if(nListBoxIndex == nPos)
+		{
+			return pItem;
+		}
+	}
+	return NULL;
+}
+PLIST_ITEM CDropWnd::GetDropWndItem(int nPos)
 {
 	ASSERT(nPos >= 0 && nPos < m_pList.size());
-
+	
 	if(nPos < 0 || nPos >= m_pList.size())
 	{
 		return NULL;

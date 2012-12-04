@@ -26,9 +26,9 @@
 #include "DropListBox.h"
 #include "VisualStylesXP.h"
 #include <algorithm>
-#include "AdvComboBoxDemo.h"
 #include "cflmfc/gdi_utils.h"
 #include "cflmfc/UiTheme.h"
+#include "memdc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -233,14 +233,13 @@ BOOL CAdvComboBox::RegisterWindowClass()
 
 BOOL CAdvComboBox::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID )
 {
-	m_rcCombo = rect;
 	m_bCodeCreate = true;
 
 	m_dwACBStyle |= ACBS_STANDARD;
 
 	//LoadString( nID );
 	
-	return CWnd::Create(NULL, "", dwStyle, m_rcCombo, pParentWnd, nID );
+	return CWnd::Create(NULL, "", dwStyle, rect, pParentWnd, nID );
 }
 
 void CAdvComboBox::LoadString( UINT nStringID )
@@ -428,6 +427,14 @@ PLIST_ITEM CAdvComboBox::GetListItem(int nIndex)
 void CAdvComboBox::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
+	CDC* pDC = &dc;
+
+#if 0
+	CRect rcClient;
+	GetClientRect(&rcClient);
+	CMemDC memDC(&dc, &rcClient, TRUE);
+	pDC = memDC;
+#endif
 
 	PLIST_ITEM pItem = GetListItem(m_nCurSel);
 	if(pItem)
@@ -443,254 +450,205 @@ void CAdvComboBox::OnPaint()
 			}
 		}
 	}
-	
-	// TODO: Add your message handler code here
-	CRect rect;
-	CRect rcText;
 
-	GetClientRect(rect);
-	rcText = rect;
-	rect.left = rect.right - ::GetSystemMetrics(SM_CXHSCROLL);
-	rcText.right = rect.left-1;
+	//dropdown list
+	if((GetStyle() & CBS_DROPDOWNLIST) == CBS_DROPDOWNLIST)
+	{
+		DrawDropDownList(pDC);
+	}
+	//dropdown
+	else if((GetStyle() & CBS_DROPDOWN) == CBS_DROPDOWN)
+	{
+		DrawDropDown(pDC);
+	}
+}
 
-	m_rcDropButton = rect;
-	GetClientRect(rect);
+BOOL CAdvComboBox::DrawDropDownXPStyle(CDC* pDC)
+{
+	//check if XP style active
+	BOOL bThemeActive = g_xpStyle.UseVisualStyles();
+	if(!bThemeActive)
+	{
+		return FALSE;
+	}
+
+	//Open Theme data
+	HTHEME hTheme = g_xpStyle.OpenThemeData( m_hWnd, L"COMBOBOX" );
+	if(hTheme == NULL)
+	{
+		return FALSE;
+	}
+
+	CRect rcClient;
+	GetClientRect(&rcClient);
+
+	//drop down button rect
+	m_rcDropButton = rcClient;
+	m_rcDropButton.left = m_rcDropButton.right - ::GetSystemMetrics(SM_CXHSCROLL);
 
 	BOOL bWndEnabled = IsWindowEnabled();
 
-	COLORREF clrDisabledBkg = ::GetSysColor(COLOR_BTNFACE);
-	COLORREF clrDisabledBorder = ::GetSysColor(COLOR_3DDKSHADOW);
-	COLORREF clrDisabledText = ::GetSysColor(COLOR_GRAYTEXT);
-
-	if( !bWndEnabled )
-	{
-		if( 1 ) // Draw disabled flat control with border? Change to '0'.
-		{
-			dc.FillSolidRect( rect, clrDisabledBkg );
-		}
-		else
-		{
-			CBrush brDisabled(clrDisabledBkg);
-			CBrush* pOldBrush = dc.SelectObject(&brDisabled);
-			CPen penDisabled( PS_SOLID, 0, clrDisabledBorder);
-			CPen* pOldPen = dc.SelectObject(&penDisabled);
-			dc.Rectangle(rect);
-			dc.SelectObject(pOldBrush);
-			dc.SelectObject(pOldPen);
-		}
-	}
-	else
-	{
-		COLORREF clrEnabledBkg = ::GetSysColor(COLOR_WINDOW);
-		dc.FillSolidRect( rect, clrEnabledBkg );
-	}
-
-
-	DWORD dwBtnStyle = 0;
-	if( !bWndEnabled )
-	{
-		dwBtnStyle |= DFCS_INACTIVE;
-	}
-	dwBtnStyle |= m_bDropListVisible ? (DFCS_SCROLLDOWN|DFCS_PUSHED|DFCS_FLAT) : DFCS_SCROLLDOWN;
-
-
-	BOOL bThemeActive = FALSE;
-	HRESULT hr;
-
-	bThemeActive = g_xpStyle.UseVisualStyles();
-
-	HTHEME hTheme = NULL;
-	if( bThemeActive )
-		hTheme = g_xpStyle.OpenThemeData( m_hWnd, L"COMBOBOX" );
+	//Fill background
+	pDC->FillSolidRect( &rcClient, bWndEnabled ? ::GetSysColor(COLOR_WINDOW) : ::GetSysColor(COLOR_BTNFACE) );
 
 	// Theme drop btn style
-	int nDropBtnThemeStyle = 0;
-	if( m_bDropListVisible )
+	int nDropBtnThemeStyle = CBXS_NORMAL;
+	if(m_bDropButtonHot)
+	{
+		nDropBtnThemeStyle = CBXS_HOT;
+	}
+	if(m_bDropListVisible)
 	{
 		nDropBtnThemeStyle = CBXS_PRESSED;
 	}
-	else
+	if(!bWndEnabled)
 	{
-		nDropBtnThemeStyle = CBXS_NORMAL;
-		if( m_bDropButtonHot )
-			nDropBtnThemeStyle = CBXS_HOT;
-		if( !bWndEnabled )
-			nDropBtnThemeStyle = CBXS_DISABLED;
+		nDropBtnThemeStyle = CBXS_DISABLED;
 	}
 
-	if( m_dwACBStyle & ACBS_FLAT )
-	{
-		if( bThemeActive )
-		{
-			hr = g_xpStyle.DrawThemeBackground( hTheme, dc.m_hDC, CP_DROPDOWNBUTTON, nDropBtnThemeStyle, &m_rcDropButton, NULL);
-		}
-		else
-		{
-			dc.DrawFrameControl(m_rcDropButton, DFC_SCROLL, dwBtnStyle );
-		}
-	}
-	else
+	HRESULT hr = 0L;
 	if( m_dwACBStyle & ACBS_STANDARD )
 	{
-		if( bThemeActive )
-		{
-			COLORREF clrBorder;
-			hr = g_xpStyle.GetThemeColor( hTheme, BP_PUSHBUTTON, bWndEnabled ? PBS_NORMAL : PBS_DISABLED, TMT_BORDERCOLOR, &clrBorder );
-			if( FAILED( hr ) )
-			{
-				clrBorder = RGB(0,0,0);
-			}
-			CPen penBorder( PS_SOLID, 0, clrBorder );
-			CPen* oldBorderPen = dc.SelectObject( &penBorder );
-			dc.Rectangle( &rect );
-			m_rcDropButton.DeflateRect(0,1,0,1);
-			m_rcDropButton.left -= 1;
-			m_rcDropButton.right -= 1;
+		//adjust dropdown button rect
+		m_rcDropButton.DeflateRect(0,1,0,1);
+		m_rcDropButton.left -= 1;
+		m_rcDropButton.right -= 1;
 
-			if( !bWndEnabled )
-			{
-				COLORREF clrDisabledLightBorder;
-				COLORREF clrDisabledFill;
-				hr = g_xpStyle.GetThemeColor( hTheme, BP_PUSHBUTTON, bWndEnabled ? PBS_NORMAL : PBS_DISABLED, TMT_FILLCOLOR, &clrDisabledLightBorder );
-				if( FAILED( hr ) )
-				{
-					clrDisabledLightBorder = RGB(255,255,255);
-				}
-				hr = g_xpStyle.GetThemeColor( hTheme, WP_DIALOG, 0, TMT_FILLCOLOR, &clrDisabledFill );
-				if( FAILED( hr ) )
-				{
-					clrDisabledFill = RGB(255,0,0);
-				}
-				CPen penDisBorder( PS_SOLID, 0, clrDisabledLightBorder );
-				CBrush brFill( clrDisabledBkg );//clrDisabledFill );
-				CRect rcl = rect;
-				rcl.DeflateRect(1,1);
-				rcl.right = m_rcDropButton.left;
-				CBrush *oldBr = dc.SelectObject( &brFill );
-				dc.SelectObject( &penDisBorder );
-				dc.Rectangle( &rcl );
-				dc.SelectObject( oldBr );
-			}
+		COLORREF clrBorder = RGB(0, 0, 0);
+		hr = g_xpStyle.GetThemeColor( hTheme, BP_PUSHBUTTON, bWndEnabled ? PBS_NORMAL : PBS_DISABLED, 
+			TMT_BORDERCOLOR, &clrBorder );
 
-			dc.SelectObject( &oldBorderPen );
-			// Button
-			hr = g_xpStyle.DrawThemeBackground( hTheme, dc.m_hDC, CP_DROPDOWNBUTTON, nDropBtnThemeStyle, &m_rcDropButton, NULL);
-		}
-		else
-		{
-			COLORREF clrTopLeft = ::GetSysColor(COLOR_3DSHADOW);
-			COLORREF clrBottomRight = ::GetSysColor(COLOR_3DHILIGHT);
-			dc.Draw3dRect( &rect, clrTopLeft, clrBottomRight );
-			clrTopLeft = ::GetSysColor(COLOR_3DDKSHADOW);
-			clrBottomRight = ::GetSysColor(COLOR_3DLIGHT);
-			rect.DeflateRect(1,1);
-			dc.Draw3dRect( &rect, clrTopLeft, clrBottomRight );
-			m_rcDropButton.DeflateRect(0,2,0,2);
-			m_rcDropButton.left -= 2;
-			m_rcDropButton.right -= 2;
-			// Button
-			dc.DrawFrameControl(m_rcDropButton, DFC_SCROLL, dwBtnStyle );
-		}
-
-		//
-		// Adjust rects
-		rcText.DeflateRect(4,3,2,3);
+		//draw border
+		//pDC->Draw3dRect(&rcClient, clrBorder, clrBorder);
+		CPen penBorder(PS_SOLID, 1, clrBorder);
+		CPen* pOldPen = pDC->SelectObject(&penBorder);
+		pDC->Rectangle(&rcClient);
+		pDC->SelectObject(pOldPen);
 	}
 
-	if( bThemeActive )
-		hr = g_xpStyle.CloseThemeData( hTheme );
+	//draw dropdown button
+	hr = g_xpStyle.DrawThemeBackground( hTheme, pDC->m_hDC, CP_DROPDOWNBUTTON, nDropBtnThemeStyle, &m_rcDropButton, NULL);
 
+	//Close Theme data
+	hr = g_xpStyle.CloseThemeData( hTheme );
 
+	return TRUE;
+}
+void CAdvComboBox::DrawDropDownDefaultStyle(CDC* pDC)
+{
+	CRect rcClient, rect;
+	GetClientRect(&rcClient);
 
-	if( (GetStyle() & CBS_DROPDOWN) && (GetStyle() & CBS_SIMPLE) )  // == CBS_DROPDOWNLIST
+	rect = rcClient;
+	
+	//drop down button rect
+	m_rcDropButton = rcClient;
+	m_rcDropButton.left = m_rcDropButton.right - ::GetSystemMetrics(SM_CXHSCROLL);
+	
+	BOOL bWndEnabled = IsWindowEnabled();
+	
+	//Fill background
+	pDC->FillSolidRect( &rcClient, bWndEnabled ? ::GetSysColor(COLOR_WINDOW) : ::GetSysColor(COLOR_BTNFACE) );
+	
+	
+	DWORD dwBtnStyle = DFCS_SCROLLDOWN;
+	if(m_bDropListVisible)
 	{
-		/*
-		COLORREF clrBackground;
-		COLORREF clrOldBkColor;
-		COLORREF clrOldTextColor;
-		clrBackground = ::GetSysColor(COLOR_HIGHLIGHT);
-		clrOldBkColor = dc.SetBkColor( clrBackground );
-		int nOldBkMode = dc.SetBkMode( TRANSPARENT );
-		CFont* pOldFont = dc.SelectObject( m_pFont );
-
-		//dc.FillSolidRect( rcText, bWndEnabled ? clrBackground : clrDisabledBkg );
-		if( m_bDropListVisible )
-		{
-			clrOldTextColor = dc.SetTextColor( bWndEnabled ? ::GetSysColor(COLOR_HIGHLIGHTTEXT) : clrDisabledText );
-		}
-		else
-		{
-			clrOldTextColor = dc.SetTextColor( bWndEnabled ? ::GetSysColor(COLOR_BTNTEXT) : clrDisabledText );
-		}
-
-		CString changedText;
-		changedText.Format(_T("Changed Text: %s"), (LPCTSTR)m_strEdit);
-		dc.DrawText( (LPCTSTR)changedText, &rcText, DT_SINGLELINE|DT_VCENTER);
-
-		dc.SetTextColor(clrOldTextColor);
-		dc.SelectObject( pOldFont );
-		dc.SetBkMode( nOldBkMode );
-		dc.SetBkColor(clrOldBkColor);
-		*/
-
-		int nSavedDC = dc.SaveDC();
-		GetClientRect(&rect);
-
-		cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE);
-
-		int nStateID = cfl::UTSI_NORMAL;
-		if(m_bDropListVisible)
-		{
-			nStateID = cfl::UTSI_PRESSED;
-		}
-		else if(m_bDropButtonHot)
-		{
-			nStateID = cfl::UTSI_HOT;
-		}
-		pTheme->DrawThemeBackground(&dc, 0, nStateID, &rect);		
-
-		dc.SelectObject(&m_pen);
-
-		POINT ptOrigin;
-		ptOrigin.x = ptOrigin.y = 0;
-		CRect rcBox;
-		cfl::DrawTriangle(&dc, ptOrigin, cfl::GD_DOWN, 5, &rcBox, cfl::GDTF_CALCRECT);
-
-		ptOrigin.y = rect.top + (rect.Height() - rcBox.Height()) / 2;
-		ptOrigin.x = rect.right - rcBox.Width() - 5;
-		if(m_bDropListVisible)
-		{
-			ptOrigin.y += 1;
-		}
-		cfl::DrawTriangle(&dc, ptOrigin, cfl::GD_DOWN, 5);
-		rect.right -= rcBox.Width() + 15;
-
-		int nSel = GetCurSel();
-		PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nSel);
-		if(pItem != NULL)
-		{
-			dc.SetBkMode( TRANSPARENT );
-			dc.SelectObject( m_pFont );
-			rect.left += 7;
-			dc.DrawText( (LPCTSTR)pItem->strText, &rect, DT_SINGLELINE|DT_VCENTER);
-		}
-		
-		dc.RestoreDC(nSavedDC);
+		dwBtnStyle |= (DFCS_PUSHED | DFCS_FLAT);
 	}
-	else
+	if(!bWndEnabled )
 	{
-		if( m_pEdit )
-		{
-			m_pEdit->SetFont( m_pFont );
-		}
+		dwBtnStyle |= DFCS_INACTIVE;
 	}
-	// Do not call CWnd::OnPaint() for painting messages
+
+	if( m_dwACBStyle & ACBS_STANDARD )
+	{
+		m_rcDropButton.DeflateRect(0,2,0,2);
+		m_rcDropButton.left -= 2;
+		m_rcDropButton.right -= 2;	
+
+		COLORREF clrTopLeft = ::GetSysColor(COLOR_3DSHADOW);
+		COLORREF clrBottomRight = ::GetSysColor(COLOR_3DHILIGHT);
+		pDC->Draw3dRect( &rect, clrTopLeft, clrBottomRight );
+		clrTopLeft = ::GetSysColor(COLOR_3DDKSHADOW);
+		clrBottomRight = ::GetSysColor(COLOR_3DLIGHT);
+		rect.DeflateRect(1,1);
+		pDC->Draw3dRect( &rect, clrTopLeft, clrBottomRight );	
+	}
+	// draw dropdown button
+	pDC->DrawFrameControl(m_rcDropButton, DFC_SCROLL, dwBtnStyle );
 }
 
+void CAdvComboBox::DrawDropDown(CDC* pDC)
+{
+	int nSavedDC = pDC->SaveDC();
+
+	if(!DrawDropDownXPStyle(pDC))
+	{
+		DrawDropDownDefaultStyle(pDC);
+	}
+
+	pDC->RestoreDC(nSavedDC);
+
+	if( m_pEdit )
+	{
+		m_pEdit->SetFont( m_pFont );
+	}
+}
+void CAdvComboBox::DrawDropDownList(CDC* pDC)
+{
+	int nSavedDC = pDC->SaveDC();
+
+	CRect rect;
+	GetClientRect(&rect);
+	
+	cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE);
+	ASSERT(pTheme != NULL);
+	
+	//Draw background
+	int nStateID = cfl::UTSI_NORMAL;
+	if(m_bDropListVisible)
+	{
+		nStateID = cfl::UTSI_PRESSED;
+	}
+	else if(m_bDropButtonHot)
+	{
+		nStateID = cfl::UTSI_HOT;
+	}
+	pTheme->DrawThemeBackground(pDC, 0, nStateID, &rect);
+	
+	//Draw triangle
+	POINT ptOrigin;
+	ptOrigin.x = ptOrigin.y = 0;
+	CRect rcBox;
+	cfl::DrawTriangle(pDC, ptOrigin, cfl::GD_DOWN, 5, &rcBox, cfl::GDTF_CALCRECT);
+	
+	ptOrigin.y = rect.top + (rect.Height() - rcBox.Height()) / 2;
+	ptOrigin.x = rect.right - rcBox.Width() - 4;
+	if(m_bDropListVisible)
+	{
+		ptOrigin.x += 1;
+		ptOrigin.y += 1;
+	}
+	cfl::DrawTriangle(pDC, ptOrigin, cfl::GD_DOWN, 5);
+	rect.right -= rcBox.Width() + 8;
+	
+	int nSel = GetCurSel();
+	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nSel);
+	if(pItem != NULL)
+	{
+		pDC->SetBkMode( TRANSPARENT );
+		pDC->SelectObject( m_pFont );
+		rect.left += 5;
+		pDC->DrawText( (LPCTSTR)pItem->strText, &rect, DT_SINGLELINE|DT_VCENTER);
+	}
+	
+	pDC->RestoreDC(nSavedDC);
+}
 BOOL CAdvComboBox::OnEraseBkgnd(CDC* pDC) 
 {
-	return CWnd::OnEraseBkgnd(pDC);
-//	return TRUE;	
+//	return CWnd::OnEraseBkgnd(pDC);
+	return TRUE;	
 }
 
 
@@ -730,13 +688,12 @@ void CAdvComboBox::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			SendMessage( WM_ON_DROPDOWN_BUTTON );
 			InvalidateRect( m_rcDropButton );
-			Invalidate();
 		}
 	}
 	else
 	if( (GetStyle() & CBS_DROPDOWN) && (GetStyle() & CBS_SIMPLE) )	// == CBS_DROPDOWNLIST
 	{
-		CRect rc = m_rcCombo;
+		CRect rc;
 		GetClientRect( &rc );
 		if( rc.PtInRect( point ) )
 		{
@@ -751,11 +708,11 @@ void CAdvComboBox::OnLButtonDown(UINT nFlags, CPoint point)
 LONG CAdvComboBox::OnSelectedItem( WPARAM wParam, LPARAM lParam )
 {
 	int nPos = (int)wParam;
-	PLIST_ITEM pItem = m_pDropWnd->GetListItem(nPos);
+	PLIST_ITEM pItem = m_pDropWnd->GetListBoxItem(nPos);
 	ASSERT(pItem != NULL);
 
 	m_strEdit = pItem->strText;
-	m_nCurSel = FindStringExact( 0, m_strEdit );
+	m_nCurSel = ToComboBoxIndex(pItem);
 
 	//SetWindowText( m_strEdit.c_str() );
 	if( (GetStyle() & CBS_DROPDOWN) && !(GetStyle() & CBS_SIMPLE) )	// == CBS_DROPDOWN
@@ -863,7 +820,7 @@ void CAdvComboBox::CreateDropList( std::vector<PLIST_ITEM> &droplist)
 	
 	int nStyle = WS_CHILD|WS_BORDER|LBS_DISABLENOSCROLL|LBS_NOTIFY;
 	m_pDropWnd->Create( nStyle , rc, 1 ? GetDesktopWindow() : this, 6 );
-	m_pDropWnd->GetListBoxPtr()->SetCurSel( m_nCurSel );
+	m_pDropWnd->GetListBoxPtr()->SetCurSel( GetListItem(m_nCurSel) );
 
 	m_pDropWnd->SetFont( m_pFont );
 
@@ -1182,6 +1139,7 @@ int CAdvComboBox::GetCurSel()
 
 int CAdvComboBox::SetCurSel(int nSelect)
 {
+	/*
 	if( nSelect == -1 )
 	{
 		m_nCurSel = nSelect;
@@ -1202,12 +1160,74 @@ int CAdvComboBox::SetCurSel(int nSelect)
 	}
 	else
 	{
-		m_nCurSel = nSelect;
-		PLIST_ITEM pItem = GetListItem(m_nCurSel);
-		m_strEdit = pItem->strText;
+		BOOL bValid = FALSE;
+		int nPos = nSelect;	
+		for( ; nPos < m_list.size(); nPos++)
+		{
+			PLIST_ITEM pItem = m_list.at(nPos);
+			ASSERT(pItem);
+			
+			//make sure the item is enabled
+			if( !(pItem->state & ACBIS_DISABLED) && (pItem->GetChildCount() <= 0))
+			{
+				m_nCurSel = nPos;
+				m_strEdit = pItem->strText;
+				bValid = TRUE;
+				break;
+			}
+		}
+
+		if(!bValid)
+		{
+			m_nCurSel = -1;
+			m_strEdit.Empty();
+		}
 		Invalidate();
+
 		return m_nCurSel;
 	}
+	*/
+	int nOldSelected = m_nCurSel;
+
+	int nResult = CB_ERR;
+	if(nSelect < 0 || nSelect >= m_list.size())
+	{
+		m_nCurSel = -1;
+		m_strEdit.Empty();
+		nResult = CB_ERR;
+	}
+	else
+	{
+		BOOL bFound = FALSE;
+		for(int nPos = nSelect; nPos < m_list.size(); nPos++)
+		{
+			PLIST_ITEM pItem = m_list.at(nPos);
+			ASSERT(pItem);
+			
+			//make sure the item is enabled
+			if( !(pItem->state & ACBIS_DISABLED) && (pItem->GetChildCount() <= 0))
+			{
+				m_nCurSel = nPos;
+				m_strEdit = pItem->strText;
+				bFound = TRUE;
+				break;
+			}
+		}
+		if(!bFound)
+		{
+			m_nCurSel = -1;
+			m_strEdit.Empty();
+		}
+
+		nResult = m_nCurSel;
+	}
+
+	if(nOldSelected != m_nCurSel)
+	{
+		Invalidate();
+	}
+	
+	return nResult;
 }
 
 int CAdvComboBox::FindString(int nStartAfter, LPCTSTR lpszString)
@@ -1667,9 +1687,6 @@ int CAdvComboBox::InsertString(int nIndex, LPCTSTR lpszString)
 	return nIndex;
 }
 
-
-
-
 DWORD CAdvComboBox::GetEditSel()
 {
 	//CBS_DROPDOWN
@@ -1843,8 +1860,9 @@ void CAdvComboBox::OnMouseMove(UINT nFlags, CPoint point)
 	else
 	if( (GetStyle() & CBS_DROPDOWN) && (GetStyle() & CBS_SIMPLE) )  // == CBS_DROPDOWNLIST
 	{
-		GetClientRect( &m_rcCombo );
-		if( m_rcCombo.PtInRect( point ) )
+		CRect rcClient;
+		GetClientRect( &rcClient );
+		if( rcClient.PtInRect( point ) )
 		{
 			m_bDropButtonHot = true;
 		}
@@ -1910,8 +1928,9 @@ void CAdvComboBox::OnTimer(UINT nIDEvent)
 		else
 		if( (GetStyle() & CBS_DROPDOWN) && (GetStyle() & CBS_SIMPLE) )  // == CBS_DROPDOWNLIST
 		{
-			GetClientRect( &m_rcCombo );
-			if( !m_rcCombo.PtInRect( point ) )
+			CRect rcClient;
+			GetClientRect( &rcClient );
+			if( !rcClient.PtInRect( point ) )
 			{
 				KillTimer( 1 );
 				OnMouseLeave();
@@ -1931,4 +1950,16 @@ int CAdvComboBox::GetDefaultVisibleItems()
 void CAdvComboBox::SetDefaultVisibleItems(int nItems)
 {
 	m_nDefaultDropItems = nItems;
+}
+
+int CAdvComboBox::ToComboBoxIndex(PLIST_ITEM pItem)
+{
+	for(int i = 0; i < m_list.size(); i++)
+	{
+		if(pItem == m_list.at(i))
+		{
+			return i;
+		}
+	}
+	return -1;
 }

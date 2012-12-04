@@ -79,6 +79,7 @@ protected:
 	afx_msg void OnChangeIndexEdit();
 	afx_msg void OnGettextButton();
 	afx_msg void OnGetidxButton();
+	afx_msg void OnBtnEnable();
 	afx_msg void OnAutosuggestCheck();
 	afx_msg void OnAutoappendCheck();
 	afx_msg void OnChangeVisibleItemsEdit();

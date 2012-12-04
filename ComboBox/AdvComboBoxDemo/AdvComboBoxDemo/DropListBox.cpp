@@ -298,27 +298,75 @@ void CDropListBox::GetTextSize(LPCTSTR lpszText, int nCount, CSize &size)
 	dc.RestoreDC(nSave);
 }
 
-int CDropListBox::AddListItem( PLIST_ITEM pItem )
+int CDropListBox::AtomicAddListItem( PLIST_ITEM pItem )
 {
-//	AfxTrace(_T("AddListItem: %d\n"), GetCount());
-	ASSERT(pItem != NULL);
-	m_list.push_back(pItem);
+	int nOldState = pItem->state;
 
-	int nPos = AddString( pItem->strText );
-	ASSERT(nPos == (m_list.size() - 1));
+	pItem->state &= ~ACBIS_INVISIBLE;
+	int nPos = AddString(pItem->strText);
 
 	if(nPos >= 0)
 	{
 		SetItemDataPtr( nPos, (void*)pItem );
-		if( !(pItem->state & ACBIS_COLLAPSED) )
+	}
+	else
+	{
+		pItem->state = nOldState;
+	}
+	return nPos;
+}
+int CDropListBox::AtomicInsertListItem(int nIndex, PLIST_ITEM pItem)
+{
+	int nOldState = pItem->state;
+
+	pItem->state &= ~ACBIS_INVISIBLE;
+	int nPos = InsertString(nIndex, pItem->strText);
+	if(nPos >= 0)
+	{
+		SetItemDataPtr( nPos, (void*)pItem );
+	}
+	else
+	{
+		pItem->state = nOldState;
+	}
+	return nPos;
+}
+int CDropListBox::AtomicDeleteListItem( PLIST_ITEM pItem )
+{
+	int nPos = GetItemIndex(pItem);
+	//not in the listbox
+	if(nPos < 0)
+	{
+		return nPos;
+	}
+	
+	pItem->state |= ACBIS_INVISIBLE;
+	DeleteString(nPos);
+
+	return nPos;
+}
+
+int CDropListBox::AddListItem( PLIST_ITEM pItem )
+{
+//	AfxTrace(_T("AddListItem: %d\n"), GetCount());
+	ASSERT(pItem != NULL);
+
+	int nPos = AtomicAddListItem(pItem);
+
+	if(nPos >= 0)
+	{
+		//add children if needed
+		if( !(pItem->state & ACBIS_COLLAPSED) && (pItem->GetChildCount() > 0) )
 		{
 			int i, nCount = pItem->GetChildCount();
 			for(i = 0; i < nCount; i++)
 			{
-				AddListItem(pItem->GetChildAt(i));
+				PLIST_ITEM pChild = pItem->GetChildAt(i);
+				AddListItem(pChild);
 			}
 		}
 	}
+
 	return nPos;
 }
 
@@ -327,74 +375,36 @@ int CDropListBox::InsertListItem(int nIndex, PLIST_ITEM pItem)
 //	AfxTrace(_T("InsertListItem: %d\n"), nIndex);
 	ASSERT(pItem != NULL);
 
-	if(nIndex < 0 || nIndex >= m_list.size())
+	if(nIndex < 0 || nIndex >= GetCount())
 	{
 		return AddListItem(pItem);
 	}
 
-	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
-	std::advance(iter, nIndex);
-	if(iter == m_list.end())
+	//add children firstly
+	if( !(pItem->state & ACBIS_COLLAPSED) && (pItem->GetChildCount() > 0) )
 	{
-		return -1;
-	}
-
-	int nPos;
-
-	if( !(pItem->state & ACBIS_COLLAPSED) )
-	{
-		PLIST_ITEM pInsertItem;
-		int i;
-		for(i = pItem->GetChildCount() - 1; i >= 0; i--)
+		PLIST_ITEM pChild;
+		for(int i = pItem->GetChildCount() - 1; i >= 0; i--)
 		{
-			pInsertItem = pItem->GetChildAt(i);
-			
-			iter = m_list.insert(iter, pInsertItem);
-			nPos = InsertString(nIndex, pInsertItem->strText);
-			if(nPos >= 0)
-			{
-				ASSERT(nPos == nIndex);
-				SetItemDataPtr(nPos, (void*)pInsertItem);
-			}
+			pChild = pItem->GetChildAt(i);
+			AtomicInsertListItem(nIndex, pChild);
 		}
 	}
 
-	iter = m_list.insert(iter, pItem);
-	nPos = InsertString(nIndex, pItem->strText);
-	if(nPos >= 0)
-	{
-		ASSERT(nPos == nIndex);
-		SetItemDataPtr(nPos, (void*)pItem);
-	}
-
+	//insert parent at last
+	int nPos = AtomicInsertListItem(nIndex, pItem);
 	return nPos;
 }
 
 int CDropListBox::DeleteListItem( UINT nIndex )
 {
-	if(nIndex < 0 || nIndex >= m_list.size())
+	if(nIndex < 0 || nIndex >= GetCount())
 	{
 		return LB_ERR;
 	}
-	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
-	std::advance(iter, nIndex);
-	m_list.erase(iter);
 
 	int nRemain = DeleteString(nIndex);
-	ASSERT(nRemain == m_list.size());
 	return nRemain;
-}
-
-PLIST_ITEM CDropListBox::GetListItem(UINT nIndex)
-{
-	if(nIndex < 0 || nIndex >= m_list.size())
-	{
-		return NULL;
-	}
-	std::list<PLIST_ITEM>::iterator iter = m_list.begin();
-	std::advance(iter, nIndex);
-	ASSERT(iter != m_list.end());
-	return (*iter);
 }
 
 void DrawBitmap(CRect& rect, HBITMAP hbmp, CDC* pDC, int nGap = 2)
@@ -597,7 +607,7 @@ void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 	//only setting for variable
 	if((GetStyle() & LBS_OWNERDRAWVARIABLE) == LBS_OWNERDRAWVARIABLE)
 	{
-		PLIST_ITEM pItem = GetListItem(lpMeasureItemStruct->itemID);
+		PLIST_ITEM pItem = m_pDropWnd->GetListBoxItem(lpMeasureItemStruct->itemID);/*GetListItem(lpMeasureItemStruct->itemID);*/
 		ASSERT(pItem != NULL);
 
 		if(pItem->GetChildCount() > 0)
@@ -613,7 +623,6 @@ void CDropListBox::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 
 BOOL CDropListBox::DestroyWindow() 
 {	
-	m_list.clear();
 	return CListBox::DestroyWindow();
 }
 
@@ -673,6 +682,41 @@ int CDropListBox::SetCurSel(int nSelect)
 		// Set scrollbar
 		int nTopIdx = GetTopIndex();
 
+		SCROLLINFO info;
+		info.cbSize = sizeof(SCROLLINFO);
+		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
+		{
+			info.nPos = nTopIdx;
+			m_pDropWnd->GetScrollBarPtr()->SetScrollInfo( &info );
+		}
+	}
+	return nr;
+}
+
+int CDropListBox::SetCurSel(PLIST_ITEM pItem)
+{
+	int nSelected = -1, i = 0, nCount = GetCount();
+	for(i = 0; i < nCount; i++)
+	{
+		PLIST_ITEM pListItem = (PLIST_ITEM)GetItemDataPtr( i );
+		if(pListItem == pItem)
+		{
+			nSelected = i;
+			break;
+		}
+	}
+	if((nSelected < 0) || (pItem->state & ACBIS_DISABLED))
+	{
+		return nSelected;
+	}
+
+	int nr = CListBox::SetCurSel( nSelected );
+	if( nr != -1 )
+	{
+		//
+		// Set scrollbar
+		int nTopIdx = GetTopIndex();
+		
 		SCROLLINFO info;
 		info.cbSize = sizeof(SCROLLINFO);
 		if( m_pDropWnd->GetScrollBarPtr()->GetScrollInfo( &info, SIF_ALL|SIF_DISABLENOSCROLL ) )
@@ -831,8 +875,8 @@ BOOL CDropListBox::Expand(PLIST_ITEM pItem)
 	{
 		PLIST_ITEM pChild = pItem->GetChildAt(i);
 		ASSERT(pChild);
+
 		nPos = GetItemIndex(pChild);
-		
 		//already in the listbox
 		if(nPos >= 0)
 		{
@@ -847,20 +891,13 @@ BOOL CDropListBox::Expand(PLIST_ITEM pItem)
 }
 BOOL CDropListBox::Collapse(PLIST_ITEM pItem)
 {
-	int i, nPos, nCount = pItem->GetChildCount();
+	int i, nCount = pItem->GetChildCount();
 	for(i = 0; i < nCount; i++)
 	{
 		PLIST_ITEM pChild = pItem->GetChildAt(i);
 		ASSERT(pChild);
-		nPos = GetItemIndex(pChild);
-		
-		//not in the listbox
-		if(nPos < 0)
-		{
-			continue;
-		}
-		
-		DeleteListItem(nPos);
+
+		AtomicDeleteListItem(pChild);
 	}
 	pItem->state |= ACBIS_COLLAPSED;
 	return TRUE;

@@ -132,6 +132,7 @@ BEGIN_MESSAGE_MAP(CAdvComboBoxDemoDlg, CDialog)
 	ON_EN_CHANGE(IDC_INDEX_EDIT, OnChangeIndexEdit)
 	ON_BN_CLICKED(IDC_GETTEXT_BUTTON, OnGettextButton)
 	ON_BN_CLICKED(IDC_GETIDX_BUTTON, OnGetidxButton)
+	ON_BN_CLICKED(IDC_BTN_ENABLE, OnBtnEnable)
 	ON_BN_CLICKED(IDC_AUTOSUGGEST_CHECK, OnAutosuggestCheck)
 	ON_BN_CLICKED(IDC_AUTOAPPEND_CHECK, OnAutoappendCheck)
 	ON_EN_CHANGE(IDC_VISIBLE_ITEMS_EDIT, OnChangeVisibleItemsEdit)
@@ -301,7 +302,12 @@ void CAdvComboBoxDemoDlg::OnGetidxButton()
 }
 
 
-
+void CAdvComboBoxDemoDlg::OnBtnEnable() 
+{
+	// TODO: Add your control notification handler code here
+	UpdateData();
+	m_ctlAdvCombo.EnableWindow(!m_ctlAdvCombo.IsWindowEnabled());
+}
 
 
 void CAdvComboBoxDemoDlg::OnAutosuggestCheck() 
@@ -353,7 +359,7 @@ void CAdvComboBoxDemoDlg::OnChangeVisibleItemsEdit()
 void CAdvComboBoxDemoDlg::InitAdvComboBox()
 {
 	//m_ctlAdvCombo.LoadString();
-	PLIST_ITEM pItem = NULL;
+	PLIST_ITEM pItem = NULL, pChild = NULL;
 	LIST_ITEM item, item2;
 	for(int i = 0; i < 5; i++)
 	{
@@ -361,11 +367,20 @@ void CAdvComboBoxDemoDlg::InitAdvComboBox()
 		//item.hImage = GetSysResMgr()->GetBitmap(BR_TEMP1 + (i % 5));
 		item.iImage = i % 5;
 		pItem = m_ctlAdvCombo.AddItem(&item);
+		if(i <= 2)
+		{
+			pItem->state |= ACBIS_COLLAPSED;
+		}
 
 		for(int j = 0; j < 3; j++)
 		{
-			item2.strText.Format(_T("p(%d) - child(%d) -- something to make the item wider"), i + 1, j + 1);
-			m_ctlAdvCombo.AddItem(&item2, pItem);
+			item2.strText.Format(_T("p(%d) - child(%d)"), i + 1, j + 1);
+			pChild = m_ctlAdvCombo.AddItem(&item2, pItem);
+			if(pItem->state & ACBIS_COLLAPSED)
+			{
+				pChild->state |= ACBIS_INVISIBLE;
+			}
 		}
 	}
+	m_ctlAdvCombo.SetCurSel(0);
 }
