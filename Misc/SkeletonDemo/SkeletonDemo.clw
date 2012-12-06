@@ -2,24 +2,25 @@
 
 [General Info]
 Version=1
-LastClass=CMainReBar
-LastTemplate=CStatic
+LastClass=CTaskListCtrl
+LastTemplate=CListCtrl
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "SkeletonDemo.h"
 
-ClassCount=6
+ClassCount=7
 Class1=CSkeletonDemoApp
 Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=5
-Resource1=IDD_VC_DLG
+Resource1=IDD_MAIN_DLG
 Resource2=IDR_MAINFRAME
 Resource3=IDD_ABOUTBOX
-Resource4=IDD_MAIN_DLG
+Resource4=IDD_VC_DLG
 Class4=CVCDlg
 Class5=CMainToolBar
 Class6=CMainReBar
+Class7=CTaskListCtrl
 Resource5=IDR_MAIN_MENU
 
 [CLS:CSkeletonDemoApp]
@@ -58,11 +59,11 @@ Class=CVCDlg
 ControlCount=10
 Control1=IDC_TASK_TREE,SysTreeView32,1350631424
 Control2=IDC_SPLITTER_TREE_TABLE,static,1342177287
-Control3=IDC_TASK_LIST_CTRL,SysListView32,1350631425
+Control3=IDC_TASK_LISTCTRL,SysListView32,1350631425
 Control4=IDC_SPLITTER_TABLE_OUTPUT,static,1342177287
 Control5=IDC_OUTPUT_GROUPBOX,button,1342177287
-Control6=IDC_COMBOBOX_DEVICE,static,1342177287
-Control7=IDC_COMBOBOX_PROFILE,static,1342177287
+Control6=IDC_COMBOBOX_DEVICE,AdvComboBoxCtrl,1342243171
+Control7=IDC_COMBOBOX_PROFILE,AdvComboBoxCtrl,1342243171
 Control8=IDC_LABEL_DEVICE,static,1342308352
 Control9=IDC_LABEL_PROFILE,static,1342308352
 Control10=IDC_OUTPUT_PROP_LIST,static,1342177287
@@ -108,4 +109,12 @@ ImplementationFile=MainReBar.cpp
 BaseClass=CStatic
 Filter=W
 VirtualFilter=WC
+
+[CLS:CTaskListCtrl]
+Type=0
+HeaderFile=TaskListCtrl.h
+ImplementationFile=TaskListCtrl.cpp
+BaseClass=CListCtrl
+Filter=W
+VirtualFilter=FWC
 

@@ -197,7 +197,25 @@ HCURSOR CMainDlg::OnQueryDragIcon()
 
 BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
 {
-	// TODO: Add your specialized code here and/or call the base class
+	BOOL bProcessed = TRUE;
+	switch(wParam)
+	{
+	case ID_MAIN_TBBTN_ADD_FILES:
+		{
+			m_pVCDlg->AddFiles();
+		}
+		break;
+	default:
+		{
+			bProcessed = FALSE;
+		}
+		break;
+	}
+
+	if(bProcessed)
+	{
+		return TRUE;
+	}
 	
 	return CResizableDialog::OnCommand(wParam, lParam);
 }

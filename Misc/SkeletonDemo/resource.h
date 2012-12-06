@@ -18,7 +18,7 @@
 #define IDB_SPLITTER_H_BKG              139
 #define IDC_TASK_TREE                   1000
 #define IDC_SPLITTER_TREE_TABLE         1002
-#define IDC_TASK_LIST_CTRL              1003
+#define IDC_TASK_LISTCTRL              1003
 #define IDC_SPLITTER_TABLE_OUTPUT       1004
 #define IDC_OUTPUT_GROUPBOX             1006
 #define IDC_LABEL_DEVICE                1008

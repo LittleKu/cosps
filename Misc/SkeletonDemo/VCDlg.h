@@ -8,6 +8,8 @@
 //
 
 #include "cflmfc/SplitterControl.h"
+#include "TaskListCtrl.h"
+#include "AdvComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
@@ -21,12 +23,14 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CVCDlg)
 	enum { IDD = IDD_VC_DLG };
-	CStatic	m_deviceComboBox;
-	CStatic	m_profileComboBox;
+// 	CStatic	m_deviceComboBox;
+// 	CStatic	m_profileComboBox;
+	CAdvComboBox	m_deviceComboBox;
+	CAdvComboBox	m_profileComboBox;
 	CStatic	m_wndOutputPropListPos;
 	cfl::CSplitterControl	m_splitterTableOutput;
 	cfl::CSplitterControl	m_splitterTreeTable;
-	CListCtrl	m_taskListCtrl;
+	CTaskListCtrl	m_taskListCtrl;
 	CTreeCtrl	m_taskTreeCtrl;
 	//}}AFX_DATA
 
@@ -45,13 +49,20 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CVCDlg)
 	virtual BOOL OnInitDialog();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+public:
+	void AddFiles();
+
 private:
 	void InitResizableDlgAnchor();
 	void InitTaskListCtrl();
 	void InitTaskTree();
+	void InitDeviceComboBox();
+	void InitProfileComboBox();
 	void InitSplitters();
 	void SetSplitterTreeTableRange();
 	void SetSplitterTableOutputRange();
@@ -61,6 +72,7 @@ private:
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
+	int		m_nMinWidth;
 };
 
 //{{AFX_INSERT_LOCATION}}
