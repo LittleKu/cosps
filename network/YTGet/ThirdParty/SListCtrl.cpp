@@ -64,6 +64,8 @@ CSListCtrl::~CSListCtrl()
 BEGIN_MESSAGE_MAP(CSListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CSListCtrl)
 	ON_WM_PAINT()
+	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
 	ON_WM_DESTROY()
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_NOTIFY_REFLECT_EX(NM_CLICK, OnClick)
@@ -88,30 +90,56 @@ void CSListCtrl::PreSubclassWindow()
 	CListCtrl::PreSubclassWindow();
 }
 
+BOOL CSListCtrl::OnEraseBkgnd(CDC* pDC)
+{
+	return TRUE;
+}
+void CSListCtrl::OnSize( UINT nType, int cx, int cy  )
+{
+	CListCtrl::OnSize(nType, cx, cy);
+	
+    GetClientRect(m_rectClient);
+	
+    CHeaderCtrl* pHC;
+    pHC = GetHeaderCtrl();
+    if (pHC != NULL)
+    {
+        CRect rectHeader;
+        pHC->GetItemRect( 0, &rectHeader );
+        m_rectClient.top += rectHeader.bottom;
+    }
+}
 void CSListCtrl::OnPaint()
 {
+	CPaintDC dc(this);
+	
+    // Paint to a memory device context to reduce screen flicker.
+    CMemDC memDC(&dc, &m_rectClient, FALSE);
+		
+	// Let the window do its default painting...
+    CWnd::DefWindowProc( WM_PAINT, (WPARAM)memDC.m_hDC, 0 );
 //	CListCtrl::OnPaint();
-    Default();
-	if (GetItemCount() <= 0)
-	{
-		CDC* pDC = GetDC();
-		int nSavedDC = pDC->SaveDC();
-
-		//Get Content client area
-		CRect rcClient;
-		GetClientRect(&rcClient);
-
-		CRect rcHeaderWindow;
-		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
-		rcClient.top += rcHeaderWindow.Height();
-
-		//Draw
-		DrawEmptyBk(pDC, rcClient);
-
-		//Restore
-		pDC->RestoreDC(nSavedDC);
-		ReleaseDC(pDC);
-	}
+//     Default();
+// 	if (GetItemCount() <= 0)
+// 	{
+// 		CDC* pDC = GetDC();
+// 		int nSavedDC = pDC->SaveDC();
+// 
+// 		//Get Content client area
+// 		CRect rcClient;
+// 		GetClientRect(&rcClient);
+// 
+// 		CRect rcHeaderWindow;
+// 		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
+// 		rcClient.top += rcHeaderWindow.Height();
+// 
+// 		//Draw
+// 		DrawEmptyBk(pDC, rcClient);
+// 
+// 		//Restore
+// 		pDC->RestoreDC(nSavedDC);
+// 		ReleaseDC(pDC);
+// 	}
 }
 
 void CSListCtrl::DrawEmptyBk(CDC* pDC, CRect rcClient)

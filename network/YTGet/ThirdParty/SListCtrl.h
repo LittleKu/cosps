@@ -112,6 +112,8 @@ public:
 protected:
 	//{{AFX_MSG(CSListCtrl)
 	afx_msg void OnPaint();
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnSize( UINT nType, int cx, int cy  );
 	afx_msg void OnDestroy();
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);	
 	afx_msg BOOL OnClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -120,6 +122,8 @@ protected:
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
+
+	CRect m_rectClient;
 };
 
 class CSListCtrl::CListImage

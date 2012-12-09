@@ -83,8 +83,9 @@ void CTaskListCtrl::Init()
 		hditem.mask = HDI_IMAGE | HDI_FORMAT;
 		GetHeaderCtrl()->GetItem(i, &hditem);
 		
-		hditem.fmt |=  HDF_IMAGE | columns[i].nAlign;
-		hditem.iImage = columns[i].nType;
+		hditem.fmt |= columns[i].nAlign;
+// 		hditem.fmt |=  HDF_IMAGE | columns[i].nAlign;
+// 		hditem.iImage = columns[i].nType;
 		
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}

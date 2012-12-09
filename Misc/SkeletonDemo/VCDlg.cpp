@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CVCDlg, CResizableDialog)
 	//{{AFX_MSG_MAP(CVCDlg)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
+	ON_WM_ERASEBKGND()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -63,6 +64,16 @@ int CVCDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_nMinWidth = rcClient.Width();
 
 	return 0;
+}
+
+BOOL CVCDlg::OnEraseBkgnd(CDC* pDC) 
+{
+	CRect rcClient;
+	GetClientRect(&rcClient);
+	
+	pDC->FillSolidRect(&rcClient, RGB(250, 250, 250));
+	
+	return TRUE;
 }
 
 BOOL CVCDlg::OnInitDialog() 
@@ -262,6 +273,18 @@ void CVCDlg::DoSizeTableOutput(int delta)
 	SetSplitterTableOutputRange();
 }
 
+void CVCDlg::UpdateTaskTreeWindow()
+{
+	CRect rect;
+	m_taskTreeCtrl.GetWindowRect(&rect);
+	ScreenToClient(&rect);
+	
+	m_taskTreeCtrl.Invalidate();
+	m_taskTreeCtrl.UpdateWindow();
+	
+	InvalidateRect(&rect);
+	UpdateWindow();
+}
 
 void CVCDlg::AddFiles()
 {

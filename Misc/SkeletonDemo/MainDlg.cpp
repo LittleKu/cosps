@@ -242,7 +242,17 @@ void CMainDlg::InitGUI()
 	SetSizeGripVisibility(FALSE);
 	UpdateSizeGrip();
 
-	EnableSaveRestore(_T("MainDlg"));
+	EnableSaveRestore(_T("MainDlg"), FALSE);
+
+// 	WINDOWPLACEMENT wp;
+// 	wp.length = sizeof(wp);
+// 	if(GetWindowPlacement(&wp))
+// 	{
+// 		SetWindowPlacement(&wp);
+// 		CenterWindow();
+// 	}
+
+	m_pVCDlg->UpdateTaskTreeWindow();
 }
 
 CWnd* CMainDlg::InitMainToolBar()
