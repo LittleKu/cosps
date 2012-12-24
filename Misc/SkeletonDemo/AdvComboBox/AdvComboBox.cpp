@@ -133,7 +133,7 @@ END_MESSAGE_MAP()
 
 LONG CAdvComboBox::OnAddString( WPARAM wParam, LPARAM lString )
 {
-	char* pStr = (char*)lString;
+	LPCTSTR pStr = (LPCTSTR)lString;
 	return AddString( pStr );
 }
 
@@ -151,7 +151,7 @@ LONG CAdvComboBox::OnGetCurSel( WPARAM wParam, LPARAM lParam )
 LONG CAdvComboBox::OnSelectString( WPARAM wItemStart, LPARAM lString )
 {
 	int nItem = (int)wItemStart;
-	char* pStr = (char*)lString;
+	LPCTSTR pStr = (LPCTSTR)lString;
 	int nIndex = FindStringExact( nItem, pStr );
 	return SetCurSel( nIndex );
 }
@@ -167,10 +167,10 @@ LONG CAdvComboBox::OnResetContent( WPARAM wParam, LPARAM lParam )
 
 	m_strEdit = "";
 	m_nCurSel = -1;
-	SetWindowText( "" );
+	SetWindowText( _T("") );
 	if( m_pEdit )
 	{
-		m_pEdit->SetWindowText( "" );
+		m_pEdit->SetWindowText( _T("") );
 	}
 	Invalidate();
 	return CB_OKAY;
@@ -179,7 +179,7 @@ LONG CAdvComboBox::OnResetContent( WPARAM wParam, LPARAM lParam )
 LONG CAdvComboBox::OnGetLBText( WPARAM wIndex, LPARAM lString )
 {
 	int nIndex = (int)wIndex;
-	char* pOutStr = (char*)lString;
+	LPTSTR pOutStr = (LPTSTR)lString;
 	return GetLBText( nIndex, pOutStr );
 }
 
@@ -241,7 +241,7 @@ BOOL CAdvComboBox::Create( DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UI
 
 	//LoadString( nID );
 	
-	return CWnd::Create(NULL, "", dwStyle, rect, pParentWnd, nID );
+	return CWnd::Create(NULL, _T(""), dwStyle, rect, pParentWnd, nID );
 }
 
 void CAdvComboBox::LoadString( UINT nStringID )
@@ -268,18 +268,18 @@ void CAdvComboBox::LoadString( UINT nStringID )
 
 	//
 	// Go through the string and look after '\n'.
-	char seps[] = "\n";
-	char *token;
+	TCHAR seps[] = _T("\n");
+	TCHAR *token;
 	int nLen = strItems.GetLength();
-	char* szTok = new char[nLen+5];
+	TCHAR* szTok = new TCHAR[nLen+5];
 	memset( szTok, 0, nLen+5 );
-	strcpy( szTok, (LPCTSTR)strItems );
+	_tcscpy( szTok, (LPCTSTR)strItems );
 
-	token = strtok( szTok, seps );
+	token = _tcstok( szTok, seps );
 	while( token != NULL )
 	{
 		AddString( token );
-		token = strtok( NULL, seps );
+		token = _tcstok( NULL, seps );
 	}
 
 	delete [] szTok;

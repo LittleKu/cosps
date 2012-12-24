@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "MainReBar.h"
-#include "cflmfc/UiTheme.h"
+#include "cflmfc/gdi_utils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,9 +37,8 @@ BOOL CMainReBar::OnEraseBkgnd(CDC* pDC)
 	CRect rcClient;
 	GetClientRect(&rcClient);
 
-	pDC->FillSolidRect(&rcClient, RGB(255, 255, 255));
-	cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE);
-	pTheme->DrawThemeBackground(pDC, 0, cfl::UTSI_HOT, &rcClient);	
+	cfl::DrawGradient4(pDC, rcClient, RGB(223, 237, 244), RGB(191, 217, 232), 
+		RGB(178, 209, 228), RGB(220, 234, 242), FALSE);
 
 	return TRUE;
 }

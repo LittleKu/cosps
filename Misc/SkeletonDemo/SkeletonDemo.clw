@@ -23,8 +23,8 @@ Class6=CMainReBar
 Class7=CTaskListCtrl
 Resource5=IDR_MAIN_MENU
 Resource6=IDD_VC_DLG (English (U.S.))
-Resource7=IDD_MAIN_DLG (English (U.S.))
-Resource8=IDD_ABOUTBOX (English (U.S.))
+Resource7=IDD_ABOUTBOX (English (U.S.))
+Resource8=IDD_MAIN_DLG (English (U.S.))
 Resource9=IDR_MAIN_MENU (English (U.S.))
 
 [CLS:CSkeletonDemoApp]
@@ -124,7 +124,7 @@ VirtualFilter=FWC
 
 [DLG:IDD_VC_DLG (English (U.S.))]
 Type=1
-Class=?
+Class=CVCDlg
 ControlCount=10
 Control1=IDC_TASK_TREE,SysTreeView32,1350631424
 Control2=IDC_SPLITTER_TREE_TABLE,static,1342177287
@@ -139,7 +139,7 @@ Control10=IDC_OUTPUT_PROP_LIST,static,1342177287
 
 [DLG:IDD_ABOUTBOX (English (U.S.))]
 Type=1
-Class=?
+Class=CAboutDlg
 ControlCount=4
 Control1=IDC_STATIC,static,1342177283
 Control2=IDC_STATIC,static,1342308480
@@ -148,7 +148,7 @@ Control4=IDOK,button,1342373889
 
 [DLG:IDD_MAIN_DLG (English (U.S.))]
 Type=1
-Class=?
+Class=CMainDlg
 ControlCount=0
 
 [MNU:IDR_MAIN_MENU (English (U.S.))]

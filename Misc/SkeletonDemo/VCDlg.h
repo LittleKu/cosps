@@ -10,6 +10,7 @@
 #include "cflmfc/SplitterControl.h"
 #include "TaskListCtrl.h"
 #include "AdvComboBox.h"
+#include "PropListMgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
@@ -52,6 +53,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -70,11 +72,13 @@ private:
 	void SetSplitterTableOutputRange();
 	void DoSizeTreeTable(int delta);
 	void DoSizeTableOutput(int delta);
+	void InitPropList();
 
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
 	int		m_nMinWidth;
+	CPropListMgr m_propListMgr;
 };
 
 //{{AFX_INSERT_LOCATION}}

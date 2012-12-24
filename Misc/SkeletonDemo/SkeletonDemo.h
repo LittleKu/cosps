@@ -19,16 +19,21 @@
 // See SkeletonDemo.cpp for the implementation of this class
 //
 
-class CSkeletonDemoApp : public CWinApp
+class CSkeletonDemoApp : public CWinApp, public CBCGPWorkspace
 {
 public:
 	CSkeletonDemoApp();
-
+	virtual ~CSkeletonDemoApp();
+	COLORREF m_crSysBkColor;
+	CBrush*  m_pSysBkBrush;
+	CString  m_szWorkDir;
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CSkeletonDemoApp)
 	public:
 	virtual BOOL InitInstance();
+	virtual int ExitInstance();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -38,8 +43,15 @@ public:
 		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+private:
+	void InitWorkDir();
+	void InitLog4cplus();
+	void InitAppVariables();
+	void InitBCG();
+	void DeInitBCG();
 };
 
+CSkeletonDemoApp* SYS_APP();
 
 /////////////////////////////////////////////////////////////////////////////
 

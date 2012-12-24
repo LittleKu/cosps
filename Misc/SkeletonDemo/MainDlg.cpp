@@ -183,7 +183,7 @@ BOOL CMainDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	
-	pDC->FillSolidRect(&rcClient, RGB(250, 250, 250));
+	pDC->FillSolidRect(&rcClient, SYS_APP()->m_crSysBkColor);
 	
 	return TRUE;
 }
@@ -231,7 +231,7 @@ void CMainDlg::InitGUI()
 	CRect rcClient, rcToolbar;
 	GetClientRect(&rcClient);
 	pWndToolBar->GetWindowRect(&rcToolbar);
-	rcClient.top += rcToolbar.Height() + 2;
+	rcClient.top += rcToolbar.Height();
 	
 	m_pVCDlg->SetWindowPos(NULL, rcClient.left, rcClient.top, rcClient.Width(), rcClient.Height(), SWP_NOZORDER);
 	

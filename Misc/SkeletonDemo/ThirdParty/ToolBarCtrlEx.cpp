@@ -33,7 +33,6 @@ BOOL CToolBarCtrlEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, U
 		return FALSE;
 	}
 	ASSERT(pParentWnd != NULL && pParentWnd->m_hWnd != NULL);
-	AfxTrace("Add Msg Receiver: %x\n", pParentWnd->m_hWnd);
 	m_msgReceivers.Add(pParentWnd->m_hWnd);
 	return TRUE;
 }
@@ -127,7 +126,6 @@ void CToolBarCtrlEx::Refresh()
 	LRESULT lr = 0;
 	for(int i = 0; i < nMsgReceiverCount; i++)
 	{
-		AfxTrace("Send Msg to: %x\n", m_msgReceivers.GetAt(i));
 		lr = ::SendMessage(m_msgReceivers.GetAt(i), UM_TOOLBARCTRLX_REFRESH, 0, 0);
 	}
 }

@@ -16,7 +16,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
 
-
 CVCDlg::CVCDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CVCDlg::IDD, pParent)
 {
@@ -47,6 +46,7 @@ BEGIN_MESSAGE_MAP(CVCDlg, CResizableDialog)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
+	ON_WM_CTLCOLOR()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -71,9 +71,21 @@ BOOL CVCDlg::OnEraseBkgnd(CDC* pDC)
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	
-	pDC->FillSolidRect(&rcClient, RGB(250, 250, 250));
+	pDC->FillSolidRect(&rcClient, SYS_APP()->m_crSysBkColor);
 	
 	return TRUE;
+}
+
+HBRUSH CVCDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+{
+	HBRUSH hbr = CResizableDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	if(nCtlColor == CTLCOLOR_STATIC)
+    {
+		pDC->SetBkMode(TRANSPARENT);
+		
+		return (HBRUSH)(SYS_APP()->m_pSysBkBrush->GetSafeHandle());
+    }
+	return hbr;
 }
 
 BOOL CVCDlg::OnInitDialog() 
@@ -87,6 +99,7 @@ BOOL CVCDlg::OnInitDialog()
 	InitDeviceComboBox();
 	InitProfileComboBox();
 	InitSplitters();
+	InitPropList();
 
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
@@ -286,8 +299,11 @@ void CVCDlg::UpdateTaskTreeWindow()
 	UpdateWindow();
 }
 
+static const char* lpXmlFile = ".\\dat\\profile\\temp.xml";
+
 void CVCDlg::AddFiles()
 {
+	/*
 	static const TCHAR *FILTERS =
 		_T("Windows Media Files (*.wmv;*.avi;*.asf;*.dvr-ms;*.ms-dvr)|*.wmv; *.avi; *.asf; *.dvr-ms; *.ms-dvr|")
         _T("MPEG4 Files (*.mp4;*.m4v;*.mpeg4)|*.mp4; *.m4v; *.mpeg4|")
@@ -297,7 +313,7 @@ void CVCDlg::AddFiles()
 		_T("Flash Media Files (*.flv;*.f4v)|*.flv; *.f4v|")
 		_T("All Files (*.*)|*.*|")
 		_T("|");
-	cfl::CFileDialogEx dlg(TRUE, "", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT, FILTERS);
+	cfl::CFileDialogEx dlg(TRUE, _T(""), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT, FILTERS);
 	
 	int nFileBufferLen = (1 << 15);
 	TCHAR* lpFileBuffer = new TCHAR[nFileBufferLen];
@@ -323,4 +339,35 @@ void CVCDlg::AddFiles()
 
 	delete [] lpFileBuffer;
 	lpFileBuffer = NULL;
+	*/
+
+	static int count = 0;
+	count++;
+	if(count % 2 == 0)
+	{
+		lpXmlFile = ".\\dat\\profile\\temp1.xml";
+	}
+	else
+	{
+		lpXmlFile = ".\\dat\\profile\\temp.xml";
+	}
+	m_propListMgr.Init(lpXmlFile);
+}
+
+void CVCDlg::InitPropList()
+{
+ 	CRect rcPropList;
+	CWnd* pWnd = GetDlgItem(IDC_OUTPUT_PROP_LIST);
+	ASSERT(pWnd != NULL);
+	pWnd->GetWindowRect(&rcPropList);
+	ScreenToClient(&rcPropList);
+
+	pWnd->DestroyWindow();
+
+	if(!m_propListMgr.CreatePropList(rcPropList, this, IDC_OUTPUT_PROP_LIST))
+	{
+		return;
+	}
+
+	m_propListMgr.Init(lpXmlFile);
 }
