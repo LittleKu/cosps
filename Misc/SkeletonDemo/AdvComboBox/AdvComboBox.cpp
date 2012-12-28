@@ -431,7 +431,7 @@ void CAdvComboBox::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	CDC* pDC = &dc;
 
-#if 0
+#if 1
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	CMemDC memDC(&dc, &rcClient, TRUE);
@@ -636,7 +636,7 @@ void CAdvComboBox::DrawDropDownList(CDC* pDC)
 	rect.right -= rcBox.Width() + 8;
 	
 	int nSel = GetCurSel();
-	PLIST_ITEM pItem = (PLIST_ITEM)GetItemDataPtr(nSel);
+	PLIST_ITEM pItem = (PLIST_ITEM)GetListItem(nSel);
 	if(pItem != NULL)
 	{
 		pDC->SetBkMode( TRANSPARENT );
@@ -1298,7 +1298,7 @@ int CAdvComboBox::SetItemDataPtr(int nIndex, void *pData)
 
 void* CAdvComboBox::GetItemDataPtr(int nIndex)
 {
-	return (void*)GetListItem(nIndex);
+	return (void*)GetItemData(nIndex);
 }
 
 void CAdvComboBox::ResetContent()

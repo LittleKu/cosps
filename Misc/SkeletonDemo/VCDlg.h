@@ -11,6 +11,7 @@
 #include "TaskListCtrl.h"
 #include "AdvComboBox.h"
 #include "PropListMgr.h"
+#include "ProfileLoader.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
@@ -33,6 +34,7 @@ public:
 	cfl::CSplitterControl	m_splitterTreeTable;
 	CTaskListCtrl	m_taskListCtrl;
 	CTreeCtrl	m_taskTreeCtrl;
+	CPropListMgr m_propListMgr;
 	//}}AFX_DATA
 
 
@@ -42,6 +44,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -60,6 +63,7 @@ protected:
 public:
 	void UpdateTaskTreeWindow();
 	void AddFiles();
+	void OnStartButton();
 
 private:
 	void InitResizableDlgAnchor();
@@ -73,12 +77,15 @@ private:
 	void DoSizeTreeTable(int delta);
 	void DoSizeTableOutput(int delta);
 	void InitPropList();
+	void OnCategorySelChanged();
+	void OnProfileSelChanged();
+	PLIST_ITEM AddProfile(ProfileNode* pProfile, PLIST_ITEM pListItem);
 
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
 	int		m_nMinWidth;
-	CPropListMgr m_propListMgr;
+	CProfileLoader m_profileLoader;
 };
 
 //{{AFX_INSERT_LOCATION}}

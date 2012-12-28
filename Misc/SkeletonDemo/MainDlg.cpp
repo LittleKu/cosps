@@ -205,6 +205,11 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pVCDlg->AddFiles();
 		}
 		break;
+	case ID_MAIN_TBBTN_START:
+		{
+			m_pVCDlg->OnStartButton();
+		}
+		break;
 	default:
 		{
 			bProcessed = FALSE;

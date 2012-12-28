@@ -150,7 +150,7 @@ void CSkeletonDemoApp::InitWorkDir()
 void CSkeletonDemoApp::InitLog4cplus()
 {
 #ifdef ENABLE_LOG4CPLUS
-	std::locale::global(std::locale(""));
+	std::locale::global(std::locale("chs"));
 	LPCTSTR pLogFileSuffixName = _T("LOG_FILE_SUFFIX");
 	CString szLogFileSuffix = _tgetenv(pLogFileSuffixName);
 	
@@ -177,8 +177,12 @@ void CSkeletonDemoApp::InitLog4cplus()
 		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::INFO_LOG_LEVEL))
 		{
 			TIME_ZONE_INFORMATION tzi;
-			GetTimeZoneInformation(&tzi);	
-			LOG4CPLUS_INFO(THE_LOGGER, "Application Initialized. TimeZone="<<(-(tzi.Bias)))
+			GetTimeZoneInformation(&tzi);
+			
+			cfl::tstring szCurLocaleName = CFL_STRING_TO_TSTRING(std::locale().name());
+			cfl::tstring szLog;
+			cfl::tformat(szLog, _T("Application Initialized. TimeZone=%d, Locale=%s"), (-(tzi.Bias)), szCurLocaleName.c_str());
+			LOG4CPLUS_INFO_STR(THE_LOGGER, szLog)
 		}
 	}
 	catch(...) 

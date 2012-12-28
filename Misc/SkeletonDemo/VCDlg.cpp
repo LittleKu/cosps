@@ -6,12 +6,22 @@
 #include "VCDlg.h"
 #include "cflmfc/FileDialogEx.h"
 #include "AdvComboBox.h"
+#include "SysUtils.h"
+#include "Converter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+DECLARE_THE_LOGGER_NAME(_T("CVCDlg"))
+
+#define PF_ATTRIB_ID	"id"
+#define PF_ATTRIB_NAME	"name"
+#define PF_ATTRIB_ICON	"icon"
+#define PF_ATTRIB_DESC	"desc"
+#define PF_ATTRIB_FILE	"file"
 
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
@@ -92,14 +102,19 @@ BOOL CVCDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	
-	// TODO: Add extra initialization here
+	//Initialize the profile tree firstly
+	CString szPath;
+	if(SysUtils::GetProfile(szPath, _T("profiles.xml")))
+	{
+		m_profileLoader.LoadProfileTree(CFL_T2A((LPCTSTR)szPath));
+	}
 
 	InitTaskTree();
 	InitTaskListCtrl();
+	InitPropList();
 	InitDeviceComboBox();
 	InitProfileComboBox();
 	InitSplitters();
-	InitPropList();
 
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
@@ -127,6 +142,46 @@ LRESULT CVCDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CResizableDialog::DefWindowProc(message, wParam, lParam);
 }
 
+BOOL CVCDlg::OnCommand(WPARAM wParam, LPARAM lParam) 
+{
+	BOOL bProcessed = TRUE;
+
+	DWORD nCtrlID = LOWORD(wParam);
+	DWORD nNotifyID = HIWORD(wParam);
+
+	switch (nCtrlID)
+	{
+	case IDC_COMBOBOX_DEVICE:
+		{
+			if(nNotifyID == CBN_SELCHANGE)
+			{
+				OnCategorySelChanged();
+			}
+		}
+		break;
+	case IDC_COMBOBOX_PROFILE:
+		{
+			if(nNotifyID == CBN_SELCHANGE)
+			{
+				OnProfileSelChanged();
+			}
+		}
+		break;
+	default:
+		{
+			bProcessed = FALSE;
+		}
+		break;
+	}
+	
+	if(bProcessed)
+	{
+		return TRUE;
+	}
+	
+	return CResizableDialog::OnCommand(wParam, lParam);
+}
+
 void CVCDlg::OnSize(UINT nType, int cx, int cy) 
 {
 	CResizableDialog::OnSize(nType, cx, cy);
@@ -145,12 +200,120 @@ void CVCDlg::InitTaskListCtrl()
 	m_taskListCtrl.Init();
 }
 
+void CVCDlg::InitPropList()
+{
+	CRect rcPropList;
+	CWnd* pWnd = GetDlgItem(IDC_OUTPUT_PROP_LIST);
+	ASSERT(pWnd != NULL);
+	pWnd->GetWindowRect(&rcPropList);
+	ScreenToClient(&rcPropList);
+	
+	pWnd->DestroyWindow();
+	
+	if(!m_propListMgr.CreatePropList(rcPropList, this, IDC_OUTPUT_PROP_LIST))
+	{
+		return;
+	}
+}
+
 void CVCDlg::InitDeviceComboBox()
 {
+	ProfileNode* pRoot = m_profileLoader.GetRootProfile();
+	int nChildCount = ((pRoot == NULL) ? 0 : pRoot->GetChildCount());
+
+	std::string szText;
+	for(int i = 0; i < nChildCount; i++)
+	{
+		ProfileNode* pProfile = pRoot->GetChildAt(i);
+
+		if(!pProfile->attribMap.Get(PF_ATTRIB_DESC, szText))
+		{
+			pProfile->attribMap.Get(PF_ATTRIB_NAME, szText);
+		}
+		LIST_ITEM item;
+		item.strText = CFL_A2T(szText.c_str());
+		item.vpItemData = pProfile;
+		m_deviceComboBox.AddItem(&item);
+	}
+
+	if(nChildCount > 0)
+	{
+		m_deviceComboBox.SetCurSel(0);
+		OnCategorySelChanged();
+	}
 }
 void CVCDlg::InitProfileComboBox()
 {
+}
 
+void CVCDlg::OnCategorySelChanged()
+{
+	m_profileComboBox.DeleteAllItems();
+	int nCurSel = m_deviceComboBox.GetCurSel();
+	if(nCurSel >= 0)
+	{
+		ProfileNode* pParent = (ProfileNode*)m_deviceComboBox.GetItemDataPtr(nCurSel);
+		
+		int nChildCount = ((pParent == NULL) ? 0 : pParent->GetChildCount());
+		for(int i = 0; i < nChildCount; i++)
+		{
+			ProfileNode* pProfile = pParent->GetChildAt(i);
+			AddProfile(pProfile, NULL);
+		}
+		
+		if(nChildCount > 0)
+		{
+			m_profileComboBox.SetCurSel(0);
+			OnProfileSelChanged();
+		}
+	}
+}
+
+void CVCDlg::OnProfileSelChanged()
+{
+	int nCurSel = m_profileComboBox.GetCurSel();
+	if(nCurSel >= 0)
+	{
+		ProfileNode* pProfile = (ProfileNode*)m_profileComboBox.GetItemDataPtr(nCurSel);
+		std::string szProfileFile;
+		if(pProfile != NULL && pProfile->attribMap.Get(PF_ATTRIB_FILE, szProfileFile))
+		{
+			//Initialize the profile tree firstly
+			CString szPath;
+			if(SysUtils::GetProfile(szPath, CFL_A2T(szProfileFile.c_str())))
+			{
+				m_propListMgr.Init(CFL_T2A((LPCTSTR)szPath));
+			}
+		}
+	}
+}
+
+PLIST_ITEM CVCDlg::AddProfile(ProfileNode* pProfile, PLIST_ITEM pItemParent)
+{
+	if(pProfile == NULL)
+	{
+		return NULL;
+	}
+	std::string szText;
+	if(!pProfile->attribMap.Get(PF_ATTRIB_DESC, szText))
+	{
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("Can't find the [desc] attribute"));
+		LOG4CPLUS_INFO_STR(THE_LOGGER, szLog)
+		return NULL;
+	}
+	LIST_ITEM item;
+	item.strText = CFL_A2T(szText.c_str());
+	item.vpItemData = pProfile;
+	PLIST_ITEM pCurrItem = m_profileComboBox.AddItem(&item, pItemParent);
+
+	int nChildCount = ((pProfile == NULL) ? 0 : pProfile->GetChildCount());
+	for(int i = 0; i < nChildCount; i++)
+	{
+		AddProfile(pProfile->GetChildAt(i), pCurrItem);
+	}
+
+	return pCurrItem;
 }
 void CVCDlg::InitSplitters()
 {
@@ -299,11 +462,8 @@ void CVCDlg::UpdateTaskTreeWindow()
 	UpdateWindow();
 }
 
-static const char* lpXmlFile = ".\\dat\\profile\\temp.xml";
-
 void CVCDlg::AddFiles()
 {
-	/*
 	static const TCHAR *FILTERS =
 		_T("Windows Media Files (*.wmv;*.avi;*.asf;*.dvr-ms;*.ms-dvr)|*.wmv; *.avi; *.asf; *.dvr-ms; *.ms-dvr|")
         _T("MPEG4 Files (*.mp4;*.m4v;*.mpeg4)|*.mp4; *.m4v; *.mpeg4|")
@@ -339,35 +499,18 @@ void CVCDlg::AddFiles()
 
 	delete [] lpFileBuffer;
 	lpFileBuffer = NULL;
-	*/
-
-	static int count = 0;
-	count++;
-	if(count % 2 == 0)
-	{
-		lpXmlFile = ".\\dat\\profile\\temp1.xml";
-	}
-	else
-	{
-		lpXmlFile = ".\\dat\\profile\\temp.xml";
-	}
-	m_propListMgr.Init(lpXmlFile);
 }
 
-void CVCDlg::InitPropList()
+void CVCDlg::OnStartButton()
 {
- 	CRect rcPropList;
-	CWnd* pWnd = GetDlgItem(IDC_OUTPUT_PROP_LIST);
-	ASSERT(pWnd != NULL);
-	pWnd->GetWindowRect(&rcPropList);
-	ScreenToClient(&rcPropList);
-
-	pWnd->DestroyWindow();
-
-	if(!m_propListMgr.CreatePropList(rcPropList, this, IDC_OUTPUT_PROP_LIST))
+	CDefaultConverter cvter;
+	
+	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
+	while(pos != NULL)
 	{
-		return;
+		int nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
+		ASSERT(pTaskInfo);
+		cvter.Convert(pTaskInfo->m_szFileName);
 	}
-
-	m_propListMgr.Init(lpXmlFile);
 }

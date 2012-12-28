@@ -11,6 +11,8 @@
 
 #include <vector>
 #include <string>
+#include "cflbase/tstring.h"
+#include "OptionContext.h"
 
 class TiXmlElement;
 
@@ -22,10 +24,13 @@ public:
 
 	virtual BOOL CreatePropList(const RECT& rect, CWnd* pParentWnd, UINT nID);
 	virtual BOOL Init(LPCSTR lpszXmlFile);
+	virtual BOOL GetPropMap(OptionContext* pPropMap);
 
 private:
 	BOOL InitProp(CBCGPProp* pParentProp, TiXmlElement *pParentXml);
 	void RemoveAllPropData();
+	void CStr2TString(const char* str, cfl::tstring& szResult);
+	void GetPropValue(CBCGPProp* pProp, OptionContext* pPropMap);
 protected:
 	CBCGPPropList	m_wndPropList;
 	std::vector<std::string*> m_pPropDataVec;

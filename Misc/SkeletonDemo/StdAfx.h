@@ -47,6 +47,8 @@
 #include "log4cplus_config.h"
 
 #include "BCGCBProInc.h"
+#include "OptionExpDef.h"
+#include "SysUtils.h"
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

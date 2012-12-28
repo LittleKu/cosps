@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".\ThirdParty" /I ".\AdvComboBox" /I ".\OptionExp" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I ".\OptionExp" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -98,7 +98,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".\ThirdParty" /I ".\AdvComboBox" /I ".\OptionExp" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
@@ -125,7 +125,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I ".\OptionExp" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -150,6 +150,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\Converter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainDlg.cpp
 # End Source File
 # Begin Source File
@@ -159,6 +163,14 @@ SOURCE=.\MainReBar.cpp
 # Begin Source File
 
 SOURCE=.\MainToolBar.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\Preferences.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProfileLoader.cpp
 # End Source File
 # Begin Source File
 
@@ -211,6 +223,10 @@ SOURCE=.\CommonDef.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Converter.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\MainDlg.h
 # End Source File
 # Begin Source File
@@ -220,6 +236,14 @@ SOURCE=.\MainReBar.h
 # Begin Source File
 
 SOURCE=.\MainToolBar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Preferences.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProfileLoader.h
 # End Source File
 # Begin Source File
 
@@ -332,6 +356,66 @@ SOURCE=.\AdvComboBox\DropWnd.cpp
 # Begin Source File
 
 SOURCE=.\AdvComboBox\DropWnd.h
+# End Source File
+# End Group
+# Begin Group "OptionExp"
+
+# PROP Default_Filter "cpp;c;cxx;h"
+# Begin Source File
+
+SOURCE=.\OptionExp\CmdBuilder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\CmdBuilder.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\DefaultOptionExp.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\DefaultOptionExp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\DefaultOptionExpBuilder.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\DefaultOptionExpBuilder.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionContext.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionContext.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExp.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExpDef.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExpDef.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExpTree.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OptionExp\OptionExpTree.h
 # End Source File
 # End Group
 # End Target

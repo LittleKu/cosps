@@ -71,6 +71,8 @@ BOOL CPropListMgr::Init(LPCSTR lpszXmlFile)
 	bool loadOkay = doc.LoadFile();	
 	if ( !loadOkay )
 	{
+		//FIXME! remove to the last call
+		m_wndPropList.Invalidate();
 		cfl::tstring szLog;
 		cfl::tformat(szLog, _T("Failed to load file %s. Error=%s."), CFL_A2T(lpszXmlFile), CFL_A2T(doc.ErrorDesc()));
 		LOG4CPLUS_ERROR_STR(THE_LOGGER, szLog)
@@ -93,13 +95,14 @@ BOOL CPropListMgr::Init(LPCSTR lpszXmlFile)
 	pElement = pNode->ToElement();
 	ASSERT(pElement);
 	
-	
+	cfl::tstring szVal;
 	for(pNode = pElement->FirstChild(); pNode != NULL; pNode = pNode->NextSibling())
 	{
 		pElement = pNode->ToElement();
 		ASSERT(pElement);
 		
-		CBCGPProp* pGroup = new CBCGPProp (pElement->Value());
+		CStr2TString(pElement->Value(), szVal);
+		CBCGPProp* pGroup = new CBCGPProp (szVal.c_str());
 		
 		if(!InitProp(pGroup, pElement))
 		{
@@ -122,6 +125,7 @@ BOOL CPropListMgr::InitProp(CBCGPProp* pParentProp, TiXmlElement *pParentXml)
 	const char* szDesc = NULL;
 	const char* szValue = NULL;
 	const char* szDefault = NULL;
+	cfl::tstring tname, tdesc, tvalue;
 	bool bDefSet = false;
 	for(pNode = pParentXml->FirstChild(); pNode != NULL; pNode = pNode->NextSibling())
 	{
@@ -146,8 +150,10 @@ BOOL CPropListMgr::InitProp(CBCGPProp* pParentProp, TiXmlElement *pParentXml)
 		{
 			szDesc = szName;
 		}
+		CStr2TString(szName, tname);
+		CStr2TString(szDesc, tdesc);
 		
-		CBCGPProp* pProp = new CBCGPProp(CFL_A2T(szName), _T(""), CFL_A2T(szDesc), (DWORD_PTR)pDataPtr);
+		CBCGPProp* pProp = new CBCGPProp(tname.c_str(), _T(""), tdesc.c_str(), (DWORD_PTR)pDataPtr);
 		bDefSet = false;
 		for(pChildNode = pElement->FirstChild(); pChildNode != NULL; pChildNode = pChildNode->NextSibling())
 		{
@@ -157,15 +163,18 @@ BOOL CPropListMgr::InitProp(CBCGPProp* pParentProp, TiXmlElement *pParentXml)
 			szValue = pChildElement->Attribute("value");
 			if(szValue)
 			{
-				pProp->AddOption(CFL_A2T(szValue));
+				CStr2TString(szValue, tvalue);
+				pProp->AddOption(tvalue.c_str());
+				
+				szDefault = pChildElement->Attribute("default");
+				if(szDefault != NULL && stricmp(szDefault, "true") == 0)
+				{
+					pProp->SetOriginalValue(tvalue.c_str());
+					pProp->SetValue(tvalue.c_str());
+					bDefSet = true;
+				}
 			}
-			szDefault = pChildElement->Attribute("default");
-			if(szDefault != NULL && stricmp(szDefault, "true") == 0)
-			{
-				pProp->SetOriginalValue(szValue);
-				pProp->SetValue(szValue);
-				bDefSet = true;
-			}
+			
 		}
 		if(!bDefSet && pProp->GetOptionCount() > 0)
 		{
@@ -182,4 +191,57 @@ BOOL CPropListMgr::InitProp(CBCGPProp* pParentProp, TiXmlElement *pParentXml)
 	}
 	
 	return TRUE;
+}
+
+void CPropListMgr::CStr2TString(const char* str, cfl::tstring& szResult)
+{
+#if defined(_UNICODE) || defined(UNICODE)
+	cfl::char2wstring(szResult, str, -1, CP_UTF8);
+#else
+	std::wstring wstr;
+	if(cfl::char2wstring(wstr, str, -1, CP_UTF8))
+	{
+		cfl::wstring2string(szResult, wstr, CP_ACP);
+	}
+#endif
+}
+
+BOOL CPropListMgr::GetPropMap(OptionContext* pPropMap)
+{
+	int n = m_wndPropList.GetPropertyCount();
+	
+	CBCGPProp* pProp = NULL;
+	for(int i = 0; i < n; i++)
+	{
+		pProp = m_wndPropList.GetProperty(i);
+		GetPropValue(pProp, pPropMap);
+	}
+	
+	return TRUE;
+}
+
+void CPropListMgr::GetPropValue(CBCGPProp* pProp, OptionContext* pPropMap)
+{
+	if(pProp == NULL)
+	{
+		return;
+	}
+	
+	//use id as key
+	std::string* pData = (std::string*)pProp->GetData();
+	if(pData != NULL)
+	{
+		//value
+		std::string szVal;
+		SysUtils::Val2Str(pProp->GetValue(), szVal);
+		
+		
+		pPropMap->Put(pData->c_str(), szVal.c_str());
+		opt_msg(OPT_LL_TRACE, "%s=%s\n", pData->c_str(), szVal.c_str());
+	}
+	
+	for(int i = 0; i < pProp->GetSubItemsCount(); i++)
+	{
+		GetPropValue(pProp->GetSubItem(i), pPropMap);
+	}
 }

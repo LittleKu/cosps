@@ -13,19 +13,19 @@ Class2=CMainDlg
 Class3=CAboutDlg
 
 ResourceCount=9
-Resource1=IDD_MAIN_DLG
+Resource1=IDR_MAIN_MENU (English (U.S.))
 Resource2=IDR_MAINFRAME
 Resource3=IDD_ABOUTBOX
-Resource4=IDD_VC_DLG
+Resource4=IDD_MAIN_DLG
 Class4=CVCDlg
 Class5=CMainToolBar
 Class6=CMainReBar
 Class7=CTaskListCtrl
-Resource5=IDR_MAIN_MENU
+Resource5=IDD_VC_DLG
 Resource6=IDD_VC_DLG (English (U.S.))
 Resource7=IDD_ABOUTBOX (English (U.S.))
 Resource8=IDD_MAIN_DLG (English (U.S.))
-Resource9=IDR_MAIN_MENU (English (U.S.))
+Resource9=IDR_MAIN_MENU
 
 [CLS:CSkeletonDemoApp]
 Type=0
