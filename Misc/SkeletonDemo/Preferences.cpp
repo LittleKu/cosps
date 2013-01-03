@@ -11,6 +11,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+DECLARE_THE_LOGGER_NAME(_T("Preferences"))
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -34,5 +36,5 @@ CPreferences::CPreferences()
 
 CPreferences::~CPreferences()
 {
-	LOG4CPLUS_DEBUG_STR(ROOT_LOGGER, "CPreferences::~CPreferences() called.")
+	LOG4CPLUS_DEBUG_STR(THE_LOGGER, _T("CPreferences::~CPreferences() called"))
 }

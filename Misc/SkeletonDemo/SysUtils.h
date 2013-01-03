@@ -34,10 +34,12 @@ public:
 
 	static bool GetBinFile(CString& szFQPath, LPCTSTR lpFileName);
 
+	/*
 	static bool BuildFullFilePath(std::string& str, const char* szOutputFolder, const char* szOutputFileExt, 
 		const char* szSrcFile, bool bHasQuote = true);
 	static bool BuildFullFilePath(std::string& str, const char* szOutputFolder, const char* szOutputFileName, 
 		bool bHasQuote = true);
+		*/
 	
 	static bool Val2Str(const _variant_t& var, std::string& str);
 	static bool Val2WStr(const _variant_t& var, std::wstring& str);

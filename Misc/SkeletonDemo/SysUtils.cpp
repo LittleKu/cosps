@@ -15,6 +15,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+DECLARE_THE_LOGGER_NAME(_T("SysUtils"))
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -66,6 +68,7 @@ bool SysUtils::GetBinFile(CString& szFQPath, LPCTSTR lpFileName)
 	return true;
 }
 
+/*
 bool SysUtils::BuildFullFilePath(std::string& str, const char* szOutputFolder, const char* szOutputFileExt, 
 								  const char* szSrcFile, bool bHasQuote)
 {
@@ -111,7 +114,7 @@ bool SysUtils::BuildFullFilePath(std::string& str, const char* szOutputFolder, c
 	}
 	return true;
 }
-
+*/
 bool SysUtils::Val2Str(const _variant_t& var, std::string& str)
 {
 	bool bDone = true;
@@ -127,7 +130,12 @@ bool SysUtils::Val2Str(const _variant_t& var, std::string& str)
 		catch (...)
 		{
 			bDone = false;
-			opt_msg(OPT_LL_WARN, "Val2Str failed\n");
+			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::WARN_LOG_LEVEL))
+			{
+				cfl::tstring szLog;
+				cfl::tformat(szLog, _T("Val2Str failed"));
+				LOG4CPLUS_WARN_STR(THE_LOGGER, szLog)
+			}
 		}
 		break;
 	case VT_EMPTY:
@@ -154,7 +162,12 @@ bool SysUtils::Val2WStr(const _variant_t& var, std::wstring& str)
 		catch (...)
 		{
 			bDone = false;
-			opt_msg(OPT_LL_WARN, "Val2WStr failed\n");
+			if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::WARN_LOG_LEVEL))
+			{
+				cfl::tstring szLog;
+				cfl::tformat(szLog, _T("Val2WStr failed"));
+				LOG4CPLUS_WARN_STR(THE_LOGGER, szLog)
+			}
 		}
 		break;
 	case VT_EMPTY:

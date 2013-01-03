@@ -237,7 +237,12 @@ void CPropListMgr::GetPropValue(CBCGPProp* pProp, OptionContext* pPropMap)
 		
 		
 		pPropMap->Put(pData->c_str(), szVal.c_str());
-		opt_msg(OPT_LL_TRACE, "%s=%s\n", pData->c_str(), szVal.c_str());
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
+		{
+			cfl::tstring szLog;
+			cfl::tformat(szLog, _T("%s=%s"), CFL_A2T(pData->c_str()), CFL_A2T(szVal.c_str()));
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
+		}
 	}
 	
 	for(int i = 0; i < pProp->GetSubItemsCount(); i++)
