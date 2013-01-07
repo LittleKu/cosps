@@ -11,6 +11,9 @@
 #include "DefaultOptionExpBuilder.h"
 #include "CmdBuilder.h"
 #include "Preferences.h"
+#include "ContainerCmdBuilder.h"
+#include "OptionExpDef.h"
+#include "MEncoderConverter.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -46,65 +49,56 @@ int CDefaultConverter::Convert(LPCTSTR lpszInputFile)
 	CVCDlg* pDlg = ((CMainDlg*)SYS_APP()->GetMainWnd())->m_pVCDlg;
 
 	//Get profile context
-	OptionContext context;
-	pDlg->m_propListMgr.GetPropMap(&context);
+	OptionContext optionCxt;
+	pDlg->m_propListMgr.GetPropMap(&optionCxt);
 
 	//Input file
-	context.Put(IFILE, CFL_T2A(lpszInputFile));
+	//optionCxt.Put(IFILE, CFL_T2A(lpszInputFile));
 
 	//Process size
-	ProcessSize(&context);
+	ProcessSize(&optionCxt);
 	
 	//Builder
 	CString szBinFile;
 	SysUtils::GetBinFile(szBinFile, _T("mencoder.exe"));
 
-	DefaultOptionExpBuilder builder;
-	MeCmdBuilder mcb;
-	mcb.SetBinFile(szBinFile).SetOptionExpBuilder(&builder).SetOutputFolder(CFL_T2A((LPCTSTR)SYS_PREF()->szOutputFolder));
+	ContainerCmdBuilder builder;
+	builder.SetContainer(_T("mp4"));
+	builder.SetMEncoderBin(szBinFile);
 
-	std::vector<cfl::tstring> cmdList;
-	cfl::tstring szCmdLine;
+	SysUtils::GetBinFile(szBinFile, _T("mp4creator.exe"));
+	builder.SetMP4CreatorBin(szBinFile);
+	builder.SetInput(lpszInputFile);
+	builder.SetOutputFolder(SYS_PREF()->szOutputFolder);
+	builder.SetOptionContext(&optionCxt);
 
-	std::string val;
-	if(context.Get(PASS_COUNT, val) && val.compare(0, 1, "2") == 0)
+	std::vector<CmdInfo> commands;
+	StrObjPtrContext builderCxt;
+	if(!builder.Build(commands, builderCxt))
 	{
-		OptionContext mutableCxt;
-		for(int pass = 1; pass <= 2; pass++)
-		{
-			mutableCxt = context;
-			mcb.SetPass(pass).SetOptionContext(&mutableCxt);
-			
-			if(!mcb.Build(szCmdLine))
-			{
-				cfl::tstring szLog;
-				cfl::tformat(szLog, _T("Cmd build failed at pass [%d]"), pass);
-				LOG4CPLUS_FATAL_STR(THE_LOGGER, szLog)
-				return pass;
-			}
-			
-			//TODO
-			cmdList.push_back(szCmdLine);
-		}
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("Cmd Build failed"));
+		LOG4CPLUS_FATAL_STR(THE_LOGGER, szLog)
 	}
-	else
+	int i;
+	for(i = 0; i < commands.size(); i++)
 	{
-		mcb.SetOptionContext(&context);
-		if(!mcb.Build(szCmdLine))
-		{
-			cfl::tstring szLog;
-			cfl::tformat(szLog, _T("Cmd build failed"));
-			LOG4CPLUS_FATAL_STR(THE_LOGGER, szLog)
-			return 100;
-		}
+		LOG4CPLUS_INFO_STR(THE_LOGGER, commands.at(i).m_szCmdLine)
 
-		cmdList.push_back(szCmdLine);
+		pDlg->m_cmdInfos.push_back(commands.at(i));
 	}
 
-	//TODO: show out now
-	for(int i = 0; i < cmdList.size(); i++)
+	//Find the del list
+	TStrVectorObj* pStrVecObj = NULL;
+	builderCxt.Get(PARAM_DEL_LIST, (cfl::Object**)&pStrVecObj);
+	ASSERT(pStrVecObj != NULL);
+	TStrVector* pDelList = (TStrVector*)pStrVecObj->GetData();
+	ASSERT(pDelList != NULL);
+
+	for(i = 0; i < pDelList->size(); i++)
 	{
-		LOG4CPLUS_INFO_STR(THE_LOGGER, cmdList.at(i))
+		LOG4CPLUS_INFO_STR(THE_LOGGER, pDelList->at(i))
+		pDlg->m_delList.push_back(pDelList->at(i));
 	}
 
 	return 0;

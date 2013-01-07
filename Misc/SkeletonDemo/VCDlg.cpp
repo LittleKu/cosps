@@ -8,6 +8,9 @@
 #include "AdvComboBox.h"
 #include "SysUtils.h"
 #include "Converter.h"
+#include "cflbase/FileUtils.h"
+#include <Shlwapi.h>
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,8 +36,21 @@ CVCDlg::CVCDlg(CWnd* pParent /*=NULL*/)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
 	m_nMinWidth = -1;
+	m_pProcExecutor = new ProcessExecutor();
+
+	m_cmdInfos.clear();
+	m_nCurCmd = -1;
+	m_delList.clear();
 }
 
+CVCDlg::~CVCDlg()
+{
+	if(m_pProcExecutor)
+	{
+		delete m_pProcExecutor;
+		m_pProcExecutor = NULL;
+	}
+}
 
 void CVCDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -57,6 +73,11 @@ BEGIN_MESSAGE_MAP(CVCDlg, CResizableDialog)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
+	ON_WM_DESTROY()
+
+	ON_MESSAGE(RSP_START_PROCESS, OnRspStart)
+	ON_MESSAGE(NOTIFY_PROCESS_END, OnNotifyProcEnd)
+	ON_MESSAGE(NOTIFY_PROCESS_PROGRESS, OnNotifyProcProgress)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -74,6 +95,14 @@ int CVCDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_nMinWidth = rcClient.Width();
 
 	return 0;
+}
+
+
+void CVCDlg::OnDestroy() 
+{
+	m_pProcExecutor->Destroy();
+	
+	CDialog::OnDestroy();	
 }
 
 BOOL CVCDlg::OnEraseBkgnd(CDC* pDC) 
@@ -118,6 +147,15 @@ BOOL CVCDlg::OnInitDialog()
 
 	//ResizableDialog Init
 	InitResizableDlgAnchor();
+
+	m_pProcExecutor->SetResponseWnd(GetSafeHwnd());
+	
+	if(m_pProcExecutor->Create())
+	{
+		EndDialog(-1);
+		TRACE0("Warning: Message queue create failed during dialog init.\n");
+		return FALSE;
+	}
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -501,6 +539,13 @@ void CVCDlg::AddFiles()
 	lpFileBuffer = NULL;
 }
 
+void CVCDlg::GetStreamDumpFile(cfl::tstring& szDumpFile, const cfl::tstring& szBinFQPath, LPCTSTR lpszStreamName, int nIndex)
+{
+	cfl::FileUtils::GetFileNameOnly(szDumpFile, szBinFQPath);
+	cfl::tformat(szDumpFile, _T("%s\\%s_%s_%d.dump"), (LPCTSTR)(SYS_PREF()->szTempFolder), 
+		szDumpFile.c_str(), lpszStreamName, nIndex);
+}
+
 void CVCDlg::OnStartButton()
 {
 	CDefaultConverter cvter;
@@ -511,6 +556,98 @@ void CVCDlg::OnStartButton()
 		int nItem = m_taskListCtrl.GetNextSelectedItem(pos);
 		CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
 		ASSERT(pTaskInfo);
+
+		m_cmdInfos.clear();
+		m_nCurCmd = -1;
+		m_delList.clear();
+
 		cvter.Convert(pTaskInfo->m_szFileName);
+
+		//Execute now
+		m_nCurCmd = 0;
+		if(m_nCurCmd < m_cmdInfos.size())
+		{
+			ExecArgument* pExecArg = new ExecArgument();
+			pExecArg->szCmdLine = m_cmdInfos.at(m_nCurCmd).m_szCmdLine;
+			GetStreamDumpFile(pExecArg->szOutDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("out"), m_nCurCmd);
+			GetStreamDumpFile(pExecArg->szErrDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("err"), m_nCurCmd);
+			pExecArg->pOutParser = new ContentParser();
+			pExecArg->pErrParser = new ContentParser();
+
+			m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
+		}
 	}
+}
+
+LRESULT CVCDlg::OnRspStart(WPARAM wParam, LPARAM lParam)
+{
+	bool bOk = (lParam == 0);
+	
+	//TODO: if start failed, stop to continue;
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	if(pTaskInfo == NULL)
+	{
+		return 0L;
+	}
+
+	cfl::tstring szBinName;
+	if(m_nCurCmd < m_cmdInfos.size())
+	{
+		cfl::FileUtils::GetFileNameOnly(szBinName, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath);
+		pTaskInfo->m_szInfo.Format(_T("%s - %s"), szBinName.c_str(), (bOk ? _T("OK") : _T("Failed")));
+	}
+	else
+	{
+		pTaskInfo->m_szInfo.Format(_T("CmdInfo unknown - %s"), (bOk ? _T("OK") : _T("Failed")));
+	}
+	m_taskListCtrl.UpdateRow(0);
+
+	return 0L;
+}
+
+LRESULT CVCDlg::OnNotifyProcEnd(WPARAM wParam, LPARAM lParam)
+{
+	//The current process terminated, execute the next one
+	m_nCurCmd++;
+	if(m_nCurCmd < m_cmdInfos.size())
+	{
+		ExecArgument* pExecArg = new ExecArgument();
+		pExecArg->szCmdLine = m_cmdInfos.at(m_nCurCmd).m_szCmdLine;
+		GetStreamDumpFile(pExecArg->szOutDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("out"), m_nCurCmd);
+		GetStreamDumpFile(pExecArg->szErrDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("err"), m_nCurCmd);
+		pExecArg->pOutParser = new ContentParser();
+		pExecArg->pErrParser = new ContentParser();
+		
+		m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
+	}
+	else
+	{
+		//all the tasks has finished, update the information
+		CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+		if(pTaskInfo == NULL)
+		{
+			return 0L;
+		}
+		
+		pTaskInfo->m_szInfo.Format(_T("All Tasks finished"));
+		m_taskListCtrl.UpdateRow(0);
+
+		//delete temp files
+		for(int i = 0; i < m_delList.size(); i++)
+		{
+			if(::PathFileExists(m_delList.at(i).c_str()))
+			{
+				::DeleteFile(m_delList.at(i).c_str());
+			}
+		}
+	}
+	
+	return 0L;
+}
+
+LRESULT CVCDlg::OnNotifyProcProgress(WPARAM wParam, LPARAM lParam)
+{
+	//TODO: update progress information
+	
+	return 0L;
 }

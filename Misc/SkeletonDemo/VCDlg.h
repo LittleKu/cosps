@@ -12,6 +12,8 @@
 #include "AdvComboBox.h"
 #include "PropListMgr.h"
 #include "ProfileLoader.h"
+#include "ProcessExecutor.h"
+#include "CmdBuilder.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CVCDlg dialog
@@ -21,7 +23,7 @@ class CVCDlg : public CResizableDialog
 // Construction
 public:
 	CVCDlg(CWnd* pParent = NULL);   // standard constructor
-
+	virtual ~CVCDlg();
 // Dialog Data
 	//{{AFX_DATA(CVCDlg)
 	enum { IDD = IDD_VC_DLG };
@@ -36,6 +38,12 @@ public:
 	CTreeCtrl	m_taskTreeCtrl;
 	CPropListMgr m_propListMgr;
 	//}}AFX_DATA
+
+	
+	ProcessExecutor* m_pProcExecutor;
+	std::vector<CmdInfo> m_cmdInfos;
+	int m_nCurCmd;
+	TStrVector m_delList;
 
 
 // Overrides
@@ -57,6 +65,11 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnDestroy();
+
+	afx_msg LRESULT OnRspStart(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnNotifyProcEnd(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnNotifyProcProgress(WPARAM wParam, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -80,6 +93,8 @@ private:
 	void OnCategorySelChanged();
 	void OnProfileSelChanged();
 	PLIST_ITEM AddProfile(ProfileNode* pProfile, PLIST_ITEM pListItem);
+
+	void GetStreamDumpFile(cfl::tstring& szDumpFile, const cfl::tstring& szBinFQPath, LPCTSTR lpszStreamName, int nIndex);
 
 private:
 	CBitmap m_splitterVBkBitmap;

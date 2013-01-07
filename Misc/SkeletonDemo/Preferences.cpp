@@ -32,6 +32,7 @@ CPreferences* CPreferences::GetInstance()
 CPreferences::CPreferences()
 {
 	szOutputFolder.Format(_T("C:\\Temp"));
+	szTempFolder.Format(_T("C:\\Temp"));
 }
 
 CPreferences::~CPreferences()

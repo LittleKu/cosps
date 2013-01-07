@@ -19,6 +19,7 @@ public:
 
 public:
 	CString szOutputFolder;
+	CString	szTempFolder;
 
 private:
 	CPreferences();

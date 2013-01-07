@@ -35,7 +35,7 @@ public:
 
 	//Insert Functions
 	int  AddRow(CTaskInfo* pTaskInfo);
-	void UpdateRow(int nIndex, CTaskInfo* pTaskInfo);
+	void UpdateRow(int nIndex);
 
 	//Delete Functions
 	BOOL DeleteItem(int nItem);

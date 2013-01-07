@@ -136,9 +136,35 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	return nResult;
 }
 
-void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pTaskInfo)
+void CTaskListCtrl::UpdateRow(int nIndex)
 {
+	CTaskInfo* pTaskInfo = (CTaskInfo*)GetItemData(nIndex);
 
+	//update row: TODO 
+	CString szTemp;
+    int iSubItem = 0;
+	
+	//file name
+	szTemp = pTaskInfo->m_szFileName;
+	::PathStripPath(szTemp.GetBuffer(0));
+	szTemp.ReleaseBuffer(-1);
+	
+	SetItemText(nIndex, iSubItem, szTemp);
+	iSubItem++;
+	
+	//file format
+	SetItemText(nIndex, iSubItem, pTaskInfo->m_szFormat);
+	iSubItem++;
+	
+	//duration
+	szTemp.Format(_T("%d ms"), pTaskInfo->m_nDuration);
+	SetItemText(nIndex, iSubItem, szTemp);
+	iSubItem++;
+	
+	//state
+	//szTemp.Format(_T("%d"), pTaskInfo->m_nState);
+	SetItemText(nIndex, iSubItem, pTaskInfo->m_szInfo);
+	iSubItem++;
 }
 
 BOOL CTaskListCtrl::DeleteItem(int nItem)

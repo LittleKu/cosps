@@ -25,6 +25,7 @@
 //application header files
 #include "CommonCmds.h"
 #include "ResizableDialog.h"
+#include "CommonDef.h"
 
 //config log4cplus
 

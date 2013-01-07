@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 Shlwapi.lib ResizableLib.lib cflbase.lib cflmfc.lib tinyxml.lib OptionExpS.lib /nologo /subsystem:windows /machine:I386 /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:"..\..\tinyxml_2_5_3\Release"
+# ADD LINK32 Shlwapi.lib ResizableLib.lib cflbase.lib cflwin.lib cflmfc.lib tinyxml.lib OptionExpS.lib /nologo /subsystem:windows /machine:I386 /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release" /libpath:"..\..\tinyxml_2_5_3\Release"
 
 !ELSEIF  "$(CFG)" == "SkeletonDemo - Win32 Debug"
 
@@ -71,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\include" /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\include" /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /Zm200 /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 MFC42D.lib Shlwapi.lib ResizableLib.lib cflbaseD.lib cflmfcD.lib tinyxmld.lib OptionExpSD.lib /nologo /subsystem:windows /debug /machine:I386 /out:"./SkeletonDemoD.exe" /pdbtype:sept /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# ADD LINK32 MFC42D.lib Shlwapi.lib ResizableLib.lib cflbaseD.lib cflwinD.lib cflmfcD.lib tinyxmld.lib OptionExpSD.lib /nologo /subsystem:windows /debug /machine:I386 /out:"./SkeletonDemoD.exe" /pdbtype:sept /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug" /libpath:"..\..\tinyxml_2_5_3\Debug"
 
 !ELSEIF  "$(CFG)" == "SkeletonDemo - Win32 UniRelease"
 
@@ -108,7 +108,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 MFC42.lib Shlwapi.lib ResizableLib.lib cflbase.lib cflmfc.lib /nologo /subsystem:windows /machine:I386 /libpath:"..\..\ResizableLib\1.3\ResizableLib\Release"
-# ADD LINK32 Shlwapi.lib ResizableLib.lib cflbaseU.lib cflmfcU.lib tinyxml.lib OptionExpSU.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /out:"./SkeletonDemoU.exe" /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\UniRelease" /libpath:"..\..\tinyxml_2_5_3\Release"
+# ADD LINK32 Shlwapi.lib ResizableLib.lib cflbaseU.lib cflwinU.lib cflmfcU.lib tinyxml.lib OptionExpSU.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386 /out:"./SkeletonDemoU.exe" /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\UniRelease" /libpath:"..\..\tinyxml_2_5_3\Release"
 
 !ELSEIF  "$(CFG)" == "SkeletonDemo - Win32 UniDebug"
 
@@ -125,7 +125,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\include" /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\include" /I ".\ThirdParty" /I ".\AdvComboBox" /I "..\..\ResizableLib\1.3\ResizableLib" /I "..\..\tinyxml_2_5_3" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_UNICODE" /D "UNICODE" /Yu"stdafx.h" /FD /GZ /Zm200 /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -135,7 +135,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 MFC42D.lib Shlwapi.lib ResizableLib.lib cflbaseD.lib cflmfcD.lib /nologo /subsystem:windows /debug /machine:I386 /out:"./SkeletonDemoD.exe" /pdbtype:sept /libpath:"..\..\ResizableLib\1.3\ResizableLib\Debug"
-# ADD LINK32 MFC42UD.lib Shlwapi.lib ResizableLib.lib cflbaseUD.lib cflmfcUD.lib tinyxmld.lib OptionExpSUD.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /out:"./SkeletonDemoUD.exe" /pdbtype:sept /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\UniDebug" /libpath:"..\..\tinyxml_2_5_3\Debug"
+# ADD LINK32 MFC42UD.lib Shlwapi.lib ResizableLib.lib cflbaseUD.lib cflwinUD.lib cflmfcUD.lib tinyxmld.lib OptionExpSUD.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /out:"./SkeletonDemoUD.exe" /pdbtype:sept /libpath:".\lib" /libpath:"..\..\ResizableLib\1.3\ResizableLib\UniDebug" /libpath:"..\..\tinyxml_2_5_3\Debug"
 
 !ENDIF 
 
@@ -166,7 +166,15 @@ SOURCE=.\MainToolBar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MEncoderConverter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Preferences.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProcessExecutor.cpp
 # End Source File
 # Begin Source File
 
@@ -239,7 +247,15 @@ SOURCE=.\MainToolBar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MEncoderConverter.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Preferences.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ProcessExecutor.h
 # End Source File
 # Begin Source File
 
