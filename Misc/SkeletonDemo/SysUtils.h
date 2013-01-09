@@ -24,6 +24,8 @@ enum GetFileFQPathMode
 	FQPM_DEFAULT
 };
 
+#include <vector>
+
 class SysUtils  
 {
 public:
@@ -43,6 +45,16 @@ public:
 	
 	static bool Val2Str(const _variant_t& var, std::string& str);
 	static bool Val2WStr(const _variant_t& var, std::wstring& str);
+
+	static bool GetMatches(const std::string& str, const std::string szPattern, const int groupIndex[], 
+		const int n, std::vector<std::string>* pResultVec = NULL);
+	static bool GetMatch(const std::string& str, const std::string szPattern, int groupIndex, 
+		std::string* pResult = NULL);
+
+	static int GetLimitLength();
+
+	static bool GetTaskStateText(int nTaskState, CString& rText);
+	static bool Equals(double d1, double d2);
 
 private:
 	SysUtils();

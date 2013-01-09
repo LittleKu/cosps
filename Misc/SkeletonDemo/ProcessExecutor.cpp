@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "ProcessExecutor.h"
+#include <WinCon.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -146,7 +147,12 @@ LRESULT ProcessExecutor::ProcessMsg(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//http://en.wikipedia.org/wiki/ASCII
 			if(m_pProcess != NULL)
 			{
-				m_pProcess->WriteToStdin("\x03", 1);
+				PROCESS_INFORMATION pi;
+				m_pProcess->GetProcessInfo(&pi);
+				::TerminateProcess(pi.hProcess, 110);
+
+				//Write Std Input doesn't work under Windows
+				//m_pProcess->WriteToStdin("\x03", 1);
 			}
 		}
 		break;
@@ -311,10 +317,10 @@ DWORD ProcessExecutor::ErrProc()
 DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pParser, LPCTSTR szName)
 {
 	cfl::tstring szLog;
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		cfl::tformat(szLog, _T("[%s]: thread enter"), szName);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, szLog)
+		LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
 	}
 	
 	int nByteCount = 0, nLineCount = 0;
@@ -334,10 +340,10 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 			break;
 		}
 		
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 		{
 			cfl::tformat(szLog, _T("[%s]: thread start to read line"), szName);
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, szLog)
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
 		}
 		while( (nByteCount = pBuffer->ReadLine(szLine)) >= 0 )
 		{
@@ -348,10 +354,10 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 			//parse
 			pParser->ParseContent(szLine, nLineCount);
 		}
-		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 		{
 			cfl::tformat(szLog, _T("[%s]: thread read line done. nLineCount=%d"), szName, nLineCount);
-			LOG4CPLUS_DEBUG_STR(THE_LOGGER, szLog)
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
 		}
 		
 	} while (FALSE);
@@ -362,10 +368,10 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 		fp = NULL;
 	}
 	
-	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::DEBUG_LOG_LEVEL))
+	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{
 		cfl::tformat(szLog, _T("[%s]: thread exit"), szName);
-		LOG4CPLUS_DEBUG_STR(THE_LOGGER, szLog)
+		LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
 	}
 	
 	return 817;

@@ -11,6 +11,7 @@
 #endif // _MSC_VER > 1000
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define _WIN32_WINNT 0x0500
 
 #pragma warning( disable : 4786 )
 

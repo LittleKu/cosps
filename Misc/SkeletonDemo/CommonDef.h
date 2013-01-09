@@ -5,6 +5,25 @@
 
 #include "cflbase/tstring.h"
 
+enum TaskStateEnum
+{
+	TSE_READY,
+	TSE_RUNNING,
+	TSE_STOPPED,
+	TSE_ERROR,		/* some error happened, have the same effect as TSE_STOPPED */
+	TSE_DONE,
+	TSE_COUNT
+};
+
+enum TaskInfoFlag
+{
+	TIF_FILE_NAME	= (1 << 0),
+	TIF_STATUS		= (1 << 1),
+	TIF_PROGRESS	= (1 << 2),
+	TIF_FORMAT		= (1 << 3),
+	TIF_DURATION	= (1 << 4)
+};
+
 class CTaskInfo
 {
 public:
@@ -12,8 +31,11 @@ public:
 	CString		m_szFileName;
 	CString		m_szFormat;
 	DWORD		m_nDuration;
-	DWORD		m_nState;
 	CString		m_szInfo;
+
+	DWORD		m_nState;
+	CString		m_szStatus;
+	double		m_dProgress;
 
 	//internal data
 	int			m_nTaskID;
@@ -28,7 +50,8 @@ public:
 		m_szFileName.Empty();
 		m_szFormat.Empty();
 		m_nDuration = 0;
-		m_nState = 0;
+		m_nState = TSE_READY;
+		m_szStatus.Empty();
 		m_szInfo.Empty();
 		m_nTaskID = -1;
 	}

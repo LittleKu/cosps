@@ -46,7 +46,8 @@ static ToolBarButtonData tbbuttons[] =
 {
 	{_T("Add Files\0\0"), 0, ID_MAIN_TBBTN_ADD_FILES, IDB_TB_ADD, RGB(255, 255, 255)},
 	{_T("Start\0\0"), 1, ID_MAIN_TBBTN_START, IDB_TB_START, RGB(255, 0, 255)},
-	{_T("Options\0\0"), 2, ID_MAIN_TBBTN_OPTIONS, IDB_TB_OPTIONS, RGB(255, 255, 255)}
+	{_T("Stop\0\0"), 2, ID_MAIN_TBBTN_STOP, IDB_TB_STOP, RGB(255, 0, 255)},
+	{_T("Options\0\0"), 3, ID_MAIN_TBBTN_OPTIONS, IDB_TB_OPTIONS, RGB(255, 255, 255)}
 };
 
 void CMainToolBar::Init()

@@ -210,6 +210,11 @@ BOOL CMainDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			m_pVCDlg->OnStartButton();
 		}
 		break;
+	case ID_MAIN_TBBTN_STOP:
+		{
+			m_pVCDlg->OnStopButton();
+		}
+		break;
 	default:
 		{
 			bProcessed = FALSE;

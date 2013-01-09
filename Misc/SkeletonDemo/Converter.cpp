@@ -13,7 +13,6 @@
 #include "Preferences.h"
 #include "ContainerCmdBuilder.h"
 #include "OptionExpDef.h"
-#include "MEncoderConverter.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -57,6 +56,16 @@ int CDefaultConverter::Convert(LPCTSTR lpszInputFile)
 
 	//Process size
 	ProcessSize(&optionCxt);
+
+	//Limit file length
+	if(SysUtils::GetLimitLength() > 0)
+	{
+		optionCxt.Put(SEEK_TIME, "0");
+
+		std::string szEndTime;
+		cfl::format(szEndTime, "%d", SysUtils::GetLimitLength());
+		optionCxt.Put(END_TIME, szEndTime.c_str());
+	}
 	
 	//Builder
 	CString szBinFile;

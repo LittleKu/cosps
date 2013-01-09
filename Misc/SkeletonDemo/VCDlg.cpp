@@ -11,6 +11,8 @@
 #include "cflbase/FileUtils.h"
 #include <Shlwapi.h>
 #include "Preferences.h"
+#include "StdStreamParser.h"
+#include "MainDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,6 +43,13 @@ CVCDlg::CVCDlg(CWnd* pParent /*=NULL*/)
 	m_cmdInfos.clear();
 	m_nCurCmd = -1;
 	m_delList.clear();
+
+	m_nCurRow = -1;
+	m_selRows.clear();
+
+	m_nProgressBase = 0;
+
+	m_nCurTaskState = TSE_READY;
 }
 
 CVCDlg::~CVCDlg()
@@ -542,49 +551,58 @@ void CVCDlg::AddFiles()
 void CVCDlg::GetStreamDumpFile(cfl::tstring& szDumpFile, const cfl::tstring& szBinFQPath, LPCTSTR lpszStreamName, int nIndex)
 {
 	cfl::FileUtils::GetFileNameOnly(szDumpFile, szBinFQPath);
-	cfl::tformat(szDumpFile, _T("%s\\%s_%s_%d.dump"), (LPCTSTR)(SYS_PREF()->szTempFolder), 
-		szDumpFile.c_str(), lpszStreamName, nIndex);
+	cfl::tformat(szDumpFile, _T("%s\\%d_%s_%s.dump"), (LPCTSTR)(SYS_PREF()->szTempFolder), 
+		nIndex, lpszStreamName, szDumpFile.c_str());
 }
 
 void CVCDlg::OnStartButton()
 {
-	CDefaultConverter cvter;
-	
+	m_nCurRow = 0;
+	m_selRows.clear();
+
+	int nItem;
 	POSITION pos = m_taskListCtrl.GetFirstSelectedItemPosition();
 	while(pos != NULL)
 	{
-		int nItem = m_taskListCtrl.GetNextSelectedItem(pos);
-		CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(nItem);
-		ASSERT(pTaskInfo);
+		nItem = m_taskListCtrl.GetNextSelectedItem(pos);
+		m_selRows.push_back(nItem);
 
-		m_cmdInfos.clear();
-		m_nCurCmd = -1;
-		m_delList.clear();
+		CTaskInfo taskInfo;
+		taskInfo.mask = TIF_STATUS | TIF_PROGRESS;
+		taskInfo.m_nState = TSE_READY;
+		taskInfo.m_dProgress = 0;
+		m_taskListCtrl.UpdateRow(nItem, &taskInfo);
+	}
 
-		cvter.Convert(pTaskInfo->m_szFileName);
+	if(m_selRows.empty())
+	{
+		return;
+	}
+	ChangeState(TSE_RUNNING);
+	//start the first task
+	StartTask();
+}
 
-		//Execute now
-		m_nCurCmd = 0;
-		if(m_nCurCmd < m_cmdInfos.size())
-		{
-			ExecArgument* pExecArg = new ExecArgument();
-			pExecArg->szCmdLine = m_cmdInfos.at(m_nCurCmd).m_szCmdLine;
-			GetStreamDumpFile(pExecArg->szOutDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("out"), m_nCurCmd);
-			GetStreamDumpFile(pExecArg->szErrDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("err"), m_nCurCmd);
-			pExecArg->pOutParser = new ContentParser();
-			pExecArg->pErrParser = new ContentParser();
-
-			m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
-		}
+void CVCDlg::OnStopButton()
+{
+	if(m_nCurTaskState == TSE_RUNNING)
+	{
+		ChangeState(TSE_STOPPED);
+		m_pProcExecutor->PostMsg(REQ_STOP_PROCESS);
 	}
 }
 
 LRESULT CVCDlg::OnRspStart(WPARAM wParam, LPARAM lParam)
 {
 	bool bOk = (lParam == 0);
-	
+	if(!bOk)
+	{
+		ChangeState(TSE_ERROR);
+		UpdateStatus(m_selRows.at(m_nCurRow), m_nCurTaskState);
+	}
 	//TODO: if start failed, stop to continue;
-	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
+	/*
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(m_selRows.at(m_nCurRow));
 	if(pTaskInfo == NULL)
 	{
 		return 0L;
@@ -600,37 +618,98 @@ LRESULT CVCDlg::OnRspStart(WPARAM wParam, LPARAM lParam)
 	{
 		pTaskInfo->m_szInfo.Format(_T("CmdInfo unknown - %s"), (bOk ? _T("OK") : _T("Failed")));
 	}
-	m_taskListCtrl.UpdateRow(0);
-
+	m_taskListCtrl.UpdateRow(m_selRows.at(m_nCurRow));
+	*/
 	return 0L;
+}
+
+void CVCDlg::StartProcess(const CmdInfo& cmdInfo, int nIndex)
+{
+	ExecArgument* pExecArg = new ExecArgument();
+	pExecArg->szCmdLine = cmdInfo.m_szCmdLine;
+	GetStreamDumpFile(pExecArg->szOutDumpFile, cmdInfo.m_szBinFQPath, _T("out"), nIndex);
+	GetStreamDumpFile(pExecArg->szErrDumpFile, cmdInfo.m_szBinFQPath, _T("err"), nIndex);
+
+	cfl::tstring szBinName;
+	cfl::FileUtils::GetFileNameOnly(szBinName, cmdInfo.m_szBinFQPath);
+
+	//TODO: parser depends on command line
+	if(szBinName.compare(_T("mencoder")) == 0)
+	{
+		pExecArg->pOutParser = new MEncoderOutParser(GetSafeHwnd());
+	}
+	else
+	{
+		pExecArg->pOutParser = new ContentParser();
+	}
+	
+	pExecArg->pErrParser = new ContentParser();
+
+	m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
+}
+
+void CVCDlg::StartTask()
+{
+	//The validation check is done by the caller
+	ASSERT(m_nCurRow >= 0 && m_nCurRow < m_selRows.size());
+
+	//generate command line list for the current row
+	CDefaultConverter cvter;
+
+	CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(m_selRows.at(m_nCurRow));
+	ASSERT(pTaskInfo);
+	
+	m_nProgressBase = 0;
+	m_cmdInfos.clear();
+	m_nCurCmd = -1;
+	m_delList.clear();
+	
+	cvter.Convert(pTaskInfo->m_szFileName);
+	
+	//Execute now
+	m_nCurCmd = 0;
+	if(m_nCurCmd < m_cmdInfos.size())
+	{
+		UpdateStatus(m_selRows.at(m_nCurRow), TSE_RUNNING);
+		StartProcess(m_cmdInfos.at(m_nCurCmd), m_nCurCmd);
+	}
 }
 
 LRESULT CVCDlg::OnNotifyProcEnd(WPARAM wParam, LPARAM lParam)
 {
+	if(m_nCurTaskState != TSE_RUNNING)
+	{
+		//update status
+		UpdateStatus(m_selRows.at(m_nCurRow), m_nCurTaskState);
+
+		//clean up task list and temp files
+		for(int i = 0; i < m_delList.size(); i++)
+		{
+			if(::PathFileExists(m_delList.at(i).c_str()))
+			{
+				::DeleteFile(m_delList.at(i).c_str());
+			}
+		}
+		return 0L;
+	}
 	//The current process terminated, execute the next one
+	m_nProgressBase += m_cmdInfos.at(m_nCurCmd).m_nWeight;
 	m_nCurCmd++;
 	if(m_nCurCmd < m_cmdInfos.size())
 	{
-		ExecArgument* pExecArg = new ExecArgument();
-		pExecArg->szCmdLine = m_cmdInfos.at(m_nCurCmd).m_szCmdLine;
-		GetStreamDumpFile(pExecArg->szOutDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("out"), m_nCurCmd);
-		GetStreamDumpFile(pExecArg->szErrDumpFile, m_cmdInfos.at(m_nCurCmd).m_szBinFQPath, _T("err"), m_nCurCmd);
-		pExecArg->pOutParser = new ContentParser();
-		pExecArg->pErrParser = new ContentParser();
-		
-		m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
+		UpdateProgress(m_selRows.at(m_nCurRow), m_nProgressBase);
+
+		//start next command
+		StartProcess(m_cmdInfos.at(m_nCurCmd), m_nCurCmd);
 	}
 	else
 	{
-		//all the tasks has finished, update the information
-		CTaskInfo* pTaskInfo = (CTaskInfo*)m_taskListCtrl.GetItemData(0);
-		if(pTaskInfo == NULL)
-		{
-			return 0L;
-		}
-		
-		pTaskInfo->m_szInfo.Format(_T("All Tasks finished"));
-		m_taskListCtrl.UpdateRow(0);
+		//The current task done.
+		CTaskInfo taskInfo;
+		taskInfo.mask = TIF_STATUS | TIF_PROGRESS;
+		taskInfo.m_nState = TSE_DONE;
+		taskInfo.m_dProgress = 100;
+		m_taskListCtrl.UpdateRow(m_selRows.at(m_nCurRow), &taskInfo);
 
 		//delete temp files
 		for(int i = 0; i < m_delList.size(); i++)
@@ -640,14 +719,80 @@ LRESULT CVCDlg::OnNotifyProcEnd(WPARAM wParam, LPARAM lParam)
 				::DeleteFile(m_delList.at(i).c_str());
 			}
 		}
+
+		//start the next task
+		m_nCurRow++;
+		//The last task done
+		if(m_nCurRow >= m_selRows.size())
+		{
+			ChangeState(TSE_DONE);
+		}
+		else
+		{
+			StartTask();
+		}
 	}
 	
 	return 0L;
 }
 
+void CVCDlg::UpdateStatus(int nItem, int nState)
+{
+	CTaskInfo taskInfo;
+	taskInfo.mask = TIF_STATUS;
+	taskInfo.m_nState = nState;
+	m_taskListCtrl.UpdateRow(nItem, &taskInfo);
+}
+void CVCDlg::UpdateProgress(int nItem, double dPercent)
+{
+	CTaskInfo taskInfo;
+	taskInfo.mask = TIF_PROGRESS;
+	taskInfo.m_dProgress = dPercent;
+	m_taskListCtrl.UpdateRow(nItem, &taskInfo);
+}
+
 LRESULT CVCDlg::OnNotifyProcProgress(WPARAM wParam, LPARAM lParam)
 {
-	//TODO: update progress information
+	std::string* pVal = (std::string*)wParam;
+	std::string* pPercent = (std::string*)lParam;
+	
+	double dPercent = 0, dCurVal = 0;
+	if(SysUtils::GetLimitLength() > 0 && pVal != NULL)
+	{
+		dCurVal = atof(pVal->c_str());
+		dPercent = ((dCurVal * 100 / SysUtils::GetLimitLength()) * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
+		dPercent += (double)m_nProgressBase;
+	}
+	else
+	{
+		dCurVal = atof(pPercent->c_str());
+		dPercent = (dCurVal * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
+		dPercent += (double)m_nProgressBase;
+	}
+
+	UpdateProgress(m_selRows.at(m_nCurRow), dPercent);
 	
 	return 0L;
+}
+
+void CVCDlg::EnableButtons(BOOL bRunning)
+{
+	CMainDlg* pMainWnd = (CMainDlg*)AfxGetMainWnd();
+	if(pMainWnd == NULL || pMainWnd->m_pMainToolBarCtrl == NULL)
+	{
+		return;
+	}
+	//ASSERT(pMainWnd != NULL && pMainWnd->m_pMainToolBarCtrl != NULL);
+	
+	pMainWnd->m_pMainToolBarCtrl->EnableButton(ID_MAIN_TBBTN_START, !bRunning);
+	pMainWnd->m_pMainToolBarCtrl->EnableButton(ID_MAIN_TBBTN_STOP, bRunning);
+}
+
+void CVCDlg::ChangeState(int newState)
+{
+	if(m_nCurTaskState != newState)
+	{
+		m_nCurTaskState = newState;
+		EnableButtons(m_nCurTaskState == TSE_RUNNING);
+	}
 }

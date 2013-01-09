@@ -166,10 +166,6 @@ SOURCE=.\MainToolBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MEncoderConverter.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Preferences.cpp
 # End Source File
 # Begin Source File
@@ -199,11 +195,19 @@ SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\StdStreamParser.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SysUtils.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\TaskListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TaskMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -247,10 +251,6 @@ SOURCE=.\MainToolBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\MEncoderConverter.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Preferences.h
 # End Source File
 # Begin Source File
@@ -279,11 +279,19 @@ SOURCE=.\StdAfx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\StdStreamParser.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\SysUtils.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\TaskListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TaskMgr.h
 # End Source File
 # Begin Source File
 
@@ -332,6 +340,10 @@ SOURCE=.\res\tb_option.bmp
 # Begin Source File
 
 SOURCE=.\res\tb_start.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\tb_stop.bmp
 # End Source File
 # End Group
 # Begin Group "AdvComboBox"

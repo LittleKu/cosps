@@ -8,6 +8,7 @@
 #include <shlwapi.h>
 #include "cflbase/FileUtils.h"
 #include "cflbase/tstring.h"
+#include <boost/regex.hpp>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -178,4 +179,121 @@ bool SysUtils::Val2WStr(const _variant_t& var, std::wstring& str)
 		break;
 	}
 	return bDone;
+}
+
+
+static bool GetMatches(const std::string& str, const std::string szPattern, boost::smatch& matches)
+{
+	bool bResult = false;
+	try
+	{
+		boost::regex pat( szPattern );
+		
+		bResult = boost::regex_match(str, matches, pat);
+		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
+		{
+			cfl::tstring szLog;
+			if(bResult)
+			{
+				cfl::tstring szTmp;
+				szLog.append(_T("[Y]:"));
+				for(int i = 0; i < matches.size(); i++)
+				{
+					if(i > 0)
+					{
+						szLog.append(_T(","));
+					}
+					cfl::tformat(szTmp, _T("[%d]=[%s]"), i, CFL_STRING_TO_T_STR(matches[i]));
+					szLog.append(szTmp);
+				}
+			}
+			else
+			{
+				szLog.assign(_T("[N]"));
+			}
+			LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
+		}
+	}
+	catch(const boost::regex_error& r)
+	{
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("regex_error: %s"), CFL_C_STR_TO_T_STR(r.what()));
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, szLog)
+	}
+	catch(...)
+	{
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, _T("Unexpected exception of unknown type"))
+	}
+	return bResult;
+}
+
+bool SysUtils::GetMatches(const std::string& str, const std::string szPattern, const int groupIndex[], 
+		const int n, std::vector<std::string>* pResultVec)
+{
+	boost::smatch matches;
+
+	bool bResult = ::GetMatches(str, szPattern, matches);
+	if(bResult && pResultVec != NULL)
+	{
+		int i;
+		if(n < 0)
+		{
+			for(i = 0; i < matches.size(); i++)
+			{
+				pResultVec->push_back(matches[i]);
+			}
+		}
+		else
+		{
+			for(i = 0; i < n; i++)
+			{
+				pResultVec->push_back(matches[groupIndex[i]]);
+			}
+		}
+	}
+
+	return bResult;
+}
+
+bool SysUtils::GetMatch(const std::string& str, const std::string szPattern, int groupIndex, std::string* pResult)
+{
+	boost::smatch matches;
+	
+	bool bResult = ::GetMatches(str, szPattern, matches);
+	if(bResult && pResult)
+	{
+		pResult->assign(matches[groupIndex]);
+	}
+	return bResult;
+}
+
+int SysUtils::GetLimitLength()
+{
+	//FIXME: false when release
+	//return 20;
+	return -1;
+}
+
+static const TCHAR* StatusText[] = 
+{
+	_T("Ready"),
+	_T("Running"),
+	_T("Stopped"),
+	_T("Error"),
+	_T("Done")
+};
+bool SysUtils::GetTaskStateText(int nTaskState, CString& rText)
+{
+	ASSERT(nTaskState >= 0 && nTaskState < TSE_COUNT);
+	if(nTaskState < 0 || nTaskState >= TSE_COUNT)
+	{
+		return false;
+	}
+	rText = StatusText[nTaskState];
+	return true;
+}
+bool SysUtils::Equals(double d1, double d2)
+{
+	double diff = d1 - d2;
+	return (diff > -0.000001f) && (diff < 0.000001f);
 }

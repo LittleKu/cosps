@@ -35,7 +35,7 @@ public:
 
 	//Insert Functions
 	int  AddRow(CTaskInfo* pTaskInfo);
-	void UpdateRow(int nIndex);
+	void UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo);
 
 	//Delete Functions
 	BOOL DeleteItem(int nItem);
@@ -44,7 +44,23 @@ public:
 	//APIs
 	int AddTask(LPCTSTR lpszFileName);
 
+	
+	BOOL GetTaskInfo(int nTaskID, int* nIndex, CTaskInfo** ppTaskInfo);
+
 	virtual ~CTaskListCtrl();
+
+private:
+	enum TaskInfoColum
+	{
+		COL_FILE_NAME = 0,
+		COL_FORMAT,
+		COL_DURATION,
+		COL_STATUS,
+		COL_PROGRESS,
+		COL_COUNT
+	};
+
+	void FormatProgress(double dPercent, CString& rText);
 
 	// Generated message map functions
 protected:

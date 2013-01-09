@@ -608,14 +608,14 @@ void CAdvComboBox::DrawDropDownList(CDC* pDC)
 	ASSERT(pTheme != NULL);
 	
 	//Draw background
-	int nStateID = cfl::UTSI_NORMAL;
+	int nStateID = cfl::UTSI_HOT;
 	if(m_bDropListVisible)
 	{
 		nStateID = cfl::UTSI_PRESSED;
 	}
 	else if(m_bDropButtonHot)
 	{
-		nStateID = cfl::UTSI_HOT;
+		nStateID = cfl::UTSI_NORMAL;
 	}
 	pTheme->DrawThemeBackground(pDC, 0, nStateID, &rect);
 	

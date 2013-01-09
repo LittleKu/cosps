@@ -44,6 +44,9 @@ public:
 	std::vector<CmdInfo> m_cmdInfos;
 	int m_nCurCmd;
 	TStrVector m_delList;
+	int m_nCurRow;
+	std::vector<int> m_selRows;
+	int m_nProgressBase;
 
 
 // Overrides
@@ -77,6 +80,7 @@ public:
 	void UpdateTaskTreeWindow();
 	void AddFiles();
 	void OnStartButton();
+	void OnStopButton();
 
 private:
 	void InitResizableDlgAnchor();
@@ -95,12 +99,21 @@ private:
 	PLIST_ITEM AddProfile(ProfileNode* pProfile, PLIST_ITEM pListItem);
 
 	void GetStreamDumpFile(cfl::tstring& szDumpFile, const cfl::tstring& szBinFQPath, LPCTSTR lpszStreamName, int nIndex);
+	void StartProcess(const CmdInfo& cmdInfo, int nIndex);
+	void StartTask();
+	void UpdateProgress(int nItem, double dPercent);
+	void UpdateStatus(int nItem, int nState);
+	void EnableButtons(BOOL bRunning);
+	void ChangeState(int newState);
 
 private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
 	int		m_nMinWidth;
 	CProfileLoader m_profileLoader;
+
+	BOOL	m_bStopped;
+	int		m_nCurTaskState;
 };
 
 //{{AFX_INSERT_LOCATION}}

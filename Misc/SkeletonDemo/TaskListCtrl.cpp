@@ -25,7 +25,8 @@ static ColumnInfo columns[] =
 	{ _T("Name"),		0,	170,	HDF_LEFT	},
     { _T("Format"),  	0,	70,		HDF_LEFT	},
     { _T("Duration"),  	0,	80,		HDF_RIGHT	},
-	{ _T("Status"),  	0,	170,	HDF_LEFT	}
+	{ _T("Status"),  	0,	80,		HDF_LEFT	},
+	{ _T("Progress"),  	0,	90,		HDF_LEFT	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -119,52 +120,71 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
-	//file format
-	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
+	//file format : TODO
+	//SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
 	iSubItem++;
 
-	//duration
-	szTemp.Format(_T("%d ms"), pTaskInfo->m_nDuration);
+	//duration : TODO
+	//szTemp.Format(_T("%d ms"), pTaskInfo->m_nDuration);
+	//SetItemText(lvi.iItem, iSubItem, szTemp);
+	iSubItem++;
+
+	//Status
+	SysUtils::GetTaskStateText(pTaskInfo->m_nState, szTemp);
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
-	//state
-	szTemp.Format(_T("%d"), pTaskInfo->m_nState);
+	//Progress
+	FormatProgress(pTaskInfo->m_dProgress, szTemp);
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
 	return nResult;
 }
 
-void CTaskListCtrl::UpdateRow(int nIndex)
+void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 {
-	CTaskInfo* pTaskInfo = (CTaskInfo*)GetItemData(nIndex);
+	ASSERT(pNewTaskInfo != NULL);
+	ASSERT(nIndex >= 0 && nIndex < GetItemCount());
+	
+	CTaskInfo* pItemData = (CTaskInfo*)GetItemData(nIndex);
+	ASSERT(pItemData != NULL);
 
-	//update row: TODO 
+	int pSubItems[COL_COUNT];
+	int nSubItemCount = 0;
 	CString szTemp;
-    int iSubItem = 0;
 	
-	//file name
-	szTemp = pTaskInfo->m_szFileName;
-	::PathStripPath(szTemp.GetBuffer(0));
-	szTemp.ReleaseBuffer(-1);
+	//File Name
+	if((pNewTaskInfo->mask & TIF_FILE_NAME) && pItemData->m_szFileName.Compare(pNewTaskInfo->m_szFileName) != 0)
+	{
+		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
+		SetItemText(nIndex, COL_FILE_NAME, pItemData->m_szFileName);
+		
+		pSubItems[nSubItemCount++] = COL_FILE_NAME;
+	}
 	
-	SetItemText(nIndex, iSubItem, szTemp);
-	iSubItem++;
-	
-	//file format
-	SetItemText(nIndex, iSubItem, pTaskInfo->m_szFormat);
-	iSubItem++;
-	
-	//duration
-	szTemp.Format(_T("%d ms"), pTaskInfo->m_nDuration);
-	SetItemText(nIndex, iSubItem, szTemp);
-	iSubItem++;
-	
-	//state
-	//szTemp.Format(_T("%d"), pTaskInfo->m_nState);
-	SetItemText(nIndex, iSubItem, pTaskInfo->m_szInfo);
-	iSubItem++;
+	//Status
+	if((pNewTaskInfo->mask & TIF_STATUS) && (pItemData->m_nState != pNewTaskInfo->m_nState))
+	{
+		pItemData->m_nState = pNewTaskInfo->m_nState;
+
+		SysUtils::GetTaskStateText(pItemData->m_nState, szTemp);
+		SetItemText(nIndex, COL_STATUS, szTemp);
+
+		pSubItems[nSubItemCount++] = COL_STATUS;
+	}
+
+	//Progress
+	if((pNewTaskInfo->mask & TIF_PROGRESS) && !SysUtils::Equals(pItemData->m_dProgress, pNewTaskInfo->m_dProgress))
+	{
+		pItemData->m_dProgress = pNewTaskInfo->m_dProgress;
+		FormatProgress(pItemData->m_dProgress, szTemp);
+		SetItemText(nIndex, COL_PROGRESS, szTemp);
+
+		pSubItems[nSubItemCount++] = COL_PROGRESS;
+	}
+
+	//TODO: invalidate the changed columns
 }
 
 BOOL CTaskListCtrl::DeleteItem(int nItem)
@@ -199,4 +219,68 @@ int CTaskListCtrl::AddTask(LPCTSTR lpszFileName)
 
 	//TODO: parse file
 	return AddRow(pTaskInfo);
+}
+
+BOOL CTaskListCtrl::GetTaskInfo(int nTaskID, int* pIndex, CTaskInfo** ppTaskInfo)
+{
+	ASSERT(pIndex != NULL && ppTaskInfo != NULL);
+	
+	//Treat nTaskID as row Index now
+	if(nTaskID < 0 || nTaskID >= GetItemCount())
+	{
+		return FALSE;
+	}
+
+	int nIndex = nTaskID;
+	*pIndex = nIndex;
+	CTaskInfo* ptr = (CTaskInfo*)GetItemData(nIndex);
+	ASSERT(ptr != NULL);
+	*ppTaskInfo = ptr;
+	return TRUE;
+
+	/*
+	int i, nRowCount;
+	CTaskInfo* ptr = NULL;
+	for(i = 0, nRowCount = GetItemCount(); i < nRowCount; i++)
+	{
+		ptr = (CTaskInfo*)GetItemData(i);
+		ASSERT(ptr != NULL);
+		
+		if(ptr->m_nTaskID == nTaskID)
+		{
+			*pIndex = i;
+			*ppTaskInfo = ptr;			
+			return TRUE;
+		}
+	}
+	
+	return FALSE;
+	*/
+}
+
+void CTaskListCtrl::FormatProgress(double dPercent, CString& rText)
+{
+	//bound check
+	if(dPercent < 0)
+	{
+		dPercent = 0;
+	}
+	else if(dPercent > 100) 
+	{
+		dPercent = 100;
+	}
+
+	//special process for 0 and 100
+	if(SysUtils::Equals(dPercent, 0))
+	{
+		rText = _T("0%");
+	}
+	else if(SysUtils::Equals(dPercent, 100))
+	{
+		rText = _T("100%");
+	}
+	else
+	{
+		rText.Format(_T("%.2f%c"), dPercent, _T('%'));
+	}
 }

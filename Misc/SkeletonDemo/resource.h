@@ -16,9 +16,10 @@
 #define IDB_MAIN_TOOLBAR_BKG            137
 #define IDB_SPLITTER_V_BKG              138
 #define IDB_SPLITTER_H_BKG              139
+#define IDB_TB_STOP                     140
 #define IDC_TASK_TREE                   1000
 #define IDC_SPLITTER_TREE_TABLE         1002
-#define IDC_TASK_LISTCTRL              1003
+#define IDC_TASK_LISTCTRL               1003
 #define IDC_SPLITTER_TABLE_OUTPUT       1004
 #define IDC_OUTPUT_GROUPBOX             1006
 #define IDC_LABEL_DEVICE                1008
@@ -39,7 +40,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1013
 #define _APS_NEXT_SYMED_VALUE           101
