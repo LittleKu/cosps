@@ -120,13 +120,13 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
-	//file format : TODO
-	//SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
+	//file format
+	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
 	iSubItem++;
 
-	//duration : TODO
-	//szTemp.Format(_T("%d ms"), pTaskInfo->m_nDuration);
-	//SetItemText(lvi.iItem, iSubItem, szTemp);
+	//duration
+	SysUtils::FormatTime(pTaskInfo->m_nDuration, szTemp);
+	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
 	//Status

@@ -29,6 +29,11 @@ enum GetFileFQPathMode
 class SysUtils  
 {
 public:
+	enum
+	{
+		SECONDS_IN_MINUTE	= 60,
+		SECONDS_IN_HOUR		= 3600,
+	};
 	static bool GetDataFileFQPath(CString& szFQPath, LPCTSTR lpFileName, LPCTSTR lpSubDir, 
 		int nMode = FQPM_AUTO, LPCTSTR lpBaseDir = NULL);
 
@@ -55,6 +60,7 @@ public:
 
 	static bool GetTaskStateText(int nTaskState, CString& rText);
 	static bool Equals(double d1, double d2);
+	static void FormatTime(UINT nSeconds, CString& rText);
 
 private:
 	SysUtils();

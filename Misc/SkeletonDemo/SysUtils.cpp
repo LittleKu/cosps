@@ -297,3 +297,10 @@ bool SysUtils::Equals(double d1, double d2)
 	double diff = d1 - d2;
 	return (diff > -0.000001f) && (diff < 0.000001f);
 }
+void SysUtils::FormatTime(UINT nSeconds, CString& rText)
+{
+	UINT nHour = nSeconds / SECONDS_IN_HOUR;
+	UINT nMinute = (nSeconds % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE;
+	UINT nSecond = (nSeconds % SECONDS_IN_HOUR) % SECONDS_IN_MINUTE;
+	rText.Format(_T("%02u:%02u:%02u"), nHour, nMinute, nSecond);
+}

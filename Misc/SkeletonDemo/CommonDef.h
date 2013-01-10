@@ -28,33 +28,19 @@ class CTaskInfo
 {
 public:
 	UINT		mask;
-	CString		m_szFileName;
-	CString		m_szFormat;
-	DWORD		m_nDuration;
-	CString		m_szInfo;
 
-	DWORD		m_nState;
-	CString		m_szStatus;
-	double		m_dProgress;
+	CString		m_szFileName;	/* Input file name */
+	CString		m_szFormat;		/* Input file format */
+	DWORD		m_nDuration;	/* Input file duration */
+	DWORD		m_nState;		/* Task state */
+	double		m_dProgress;	/* Task progress */
 
 	//internal data
 	int			m_nTaskID;
 
-	CTaskInfo()
-	{
-		Reset();
-	}
-	void Reset()
-	{
-		mask = 0;
-		m_szFileName.Empty();
-		m_szFormat.Empty();
-		m_nDuration = 0;
-		m_nState = TSE_READY;
-		m_szStatus.Empty();
-		m_szInfo.Empty();
-		m_nTaskID = -1;
-	}
+	CTaskInfo();
+	~CTaskInfo();
+	void Reset();
 };
 
 typedef enum _PROCESS_CMD_TAG
@@ -80,24 +66,30 @@ typedef enum _PROCESS_CMD_TAG
 
 } ProcessCmdCode;
 
-typedef struct _START_PLAYER_PARAM
-{
-	cfl::tstring szAppPath;
-	cfl::tstring szInFile;
-	HWND hWnd;
-} StartPlayerParam;
-
-typedef struct _CONVERT_PARAM
-{
-	cfl::tstring szCmdLine;
-} ConvertParam;
-
 class ContentParser
 {
 public:
 	virtual ~ContentParser() {}
-	virtual void Reset() {}
+	//virtual void Reset() {}
 	virtual void ParseContent(std::string& szLine, int nLineCount) {}
+	virtual bool Init() { return true; }
+	virtual bool DeInit() { return true; }
 };
+
+
+class ExecArgument
+{
+public:
+	cfl::tstring	szCmdLine;		/* Process execute command line */
+	cfl::tstring	szOutDumpFile;	/* Output stream dump file */
+	cfl::tstring	szErrDumpFile;	/* Error stream dump file */
+	ContentParser*	pOutParser;		/* Output stream content parser */
+	ContentParser*	pErrParser;		/* Error stream content parser */
+	
+public:
+	ExecArgument();
+	~ExecArgument();
+};
+
 
 #endif

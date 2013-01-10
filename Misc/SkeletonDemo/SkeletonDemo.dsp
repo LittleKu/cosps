@@ -150,6 +150,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\CommonDef.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Converter.cpp
 # End Source File
 # Begin Source File
@@ -163,6 +167,14 @@ SOURCE=.\MainReBar.cpp
 # Begin Source File
 
 SOURCE=.\MainToolBar.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MetaProbe.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MPlayerMetaProbe.cpp
 # End Source File
 # Begin Source File
 
@@ -196,6 +208,10 @@ SOURCE=.\StdAfx.cpp
 # Begin Source File
 
 SOURCE=.\StdStreamParser.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SyncProcessExecutor.cpp
 # End Source File
 # Begin Source File
 
@@ -251,6 +267,14 @@ SOURCE=.\MainToolBar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MetaProbe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MPlayerMetaProbe.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Preferences.h
 # End Source File
 # Begin Source File
@@ -280,6 +304,10 @@ SOURCE=.\StdAfx.h
 # Begin Source File
 
 SOURCE=.\StdStreamParser.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SyncProcessExecutor.h
 # End Source File
 # Begin Source File
 

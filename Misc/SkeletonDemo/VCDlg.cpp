@@ -13,6 +13,7 @@
 #include "Preferences.h"
 #include "StdStreamParser.h"
 #include "MainDlg.h"
+#include "MPlayerMetaProbe.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -533,13 +534,29 @@ void CVCDlg::AddFiles()
 	{
 		CString szFileName;
 
+		std::string val;
 		POSITION pos = dlg.GetStartPosition();
 		while(pos != NULL)
 		{
 			szFileName = dlg.GetNextPathName(pos);
 			if(!szFileName.IsEmpty())
 			{
-				m_taskListCtrl.AddTask(szFileName);
+				CTaskInfo* pTaskInfo = new CTaskInfo;
+				pTaskInfo->m_szFileName = szFileName;
+
+				MPlayerMetaProbe probe;
+				if(probe.Probe(szFileName) == 0)
+				{
+					if(probe.GetMeta(ID_VIDEO_FORMAT, val))
+					{
+						pTaskInfo->m_szFormat = CFL_STRING_TO_T_STR(val);
+					}
+					if(probe.GetMeta(ID_LENGTH, val))
+					{
+						pTaskInfo->m_nDuration = atoi(val.c_str());
+					}
+				}
+				m_taskListCtrl.AddRow(pTaskInfo);
 			}
 		}
 	}
@@ -634,16 +651,12 @@ void CVCDlg::StartProcess(const CmdInfo& cmdInfo, int nIndex)
 	cfl::FileUtils::GetFileNameOnly(szBinName, cmdInfo.m_szBinFQPath);
 
 	//TODO: parser depends on command line
+	pExecArg->pOutParser = new SaveFileParser(pExecArg->szOutDumpFile.c_str());
+	pExecArg->pErrParser = new SaveFileParser(pExecArg->szErrDumpFile.c_str());
 	if(szBinName.compare(_T("mencoder")) == 0)
 	{
-		pExecArg->pOutParser = new MEncoderOutParser(GetSafeHwnd());
+		pExecArg->pOutParser = new MEncoderOutParser(GetSafeHwnd(), pExecArg->pOutParser);
 	}
-	else
-	{
-		pExecArg->pOutParser = new ContentParser();
-	}
-	
-	pExecArg->pErrParser = new ContentParser();
 
 	m_pProcExecutor->PostMsg(REQ_START_PROCESS, 0, (LPARAM)pExecArg);
 }

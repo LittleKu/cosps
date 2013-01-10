@@ -14,30 +14,6 @@
 #include "cflwin/SyncBuffer.h"
 #include "cflwin/MsgQueue.h"
 
-/*
-class ContentParser
-{
-public:
-	virtual ~ContentParser() {}
-	virtual void Reset() {}
-	virtual void ParseContent(std::string& szLine, int nLineCount) = 0;
-};
-*/
-
-class ExecArgument
-{
-public:
-	cfl::tstring	szCmdLine;		/* Process execute command line */
-	cfl::tstring	szOutDumpFile;	/* Output stream dump file */
-	cfl::tstring	szErrDumpFile;	/* Error stream dump file */
-	ContentParser*	pOutParser;		/* Output stream content parser */
-	ContentParser*	pErrParser;		/* Error stream content parser */
-
-public:
-	ExecArgument();
-	~ExecArgument();
-};
-
 class ProcessExecutor : public cfl::MsgHandler
 {
 public:

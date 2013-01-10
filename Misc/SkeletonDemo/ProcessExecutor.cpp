@@ -17,24 +17,6 @@ DECLARE_THE_LOGGER_NAME(_T("ProcessExecutor"))
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
-
-ExecArgument::ExecArgument() : pOutParser(NULL), pErrParser(NULL)
-{
-}
-ExecArgument::~ExecArgument()
-{
-	if(pOutParser)
-	{
-		delete pOutParser;
-		pOutParser = NULL;
-	}
-	if(pErrParser)
-	{
-		delete pErrParser;
-		pErrParser = NULL;
-	}
-}
-
 DWORD WINAPI ProcessExecutor::ExeThreadProc(LPVOID lpParameter)
 {
 	ProcessExecutor* pThis = (ProcessExecutor*)lpParameter;
@@ -151,7 +133,7 @@ LRESULT ProcessExecutor::ProcessMsg(UINT uMsg, WPARAM wParam, LPARAM lParam)
 				m_pProcess->GetProcessInfo(&pi);
 				::TerminateProcess(pi.hProcess, 110);
 
-				//Write Std Input doesn't work under Windows
+				//Write CTRL+C to stdin doesn't work under Windows
 				//m_pProcess->WriteToStdin("\x03", 1);
 			}
 		}
@@ -325,21 +307,20 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 	
 	int nByteCount = 0, nLineCount = 0;
 	std::string szLine;
-	FILE* fp = NULL;
-	
+	bool bRet = false;
+
 	pBuffer->Reset();
-	pParser->Reset();
 	
 	do 
 	{
-		fp = _tfopen(szName, _T("wb"));
-		if(fp == NULL)
+		bRet = pParser->Init();
+		if(!bRet)
 		{
-			cfl::tformat(szLog, _T("[%s]: failed to open file [%s]"), szName, szName);
-			LOG4CPLUS_WARN_STR(THE_LOGGER, szLog)
+			cfl::tformat(szLog, _T("[%s]: parser init failed"), szName);
+			LOG4CPLUS_ERROR_STR(THE_LOGGER, szLog)
 			break;
 		}
-		
+
 		if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 		{
 			cfl::tformat(szLog, _T("[%s]: thread start to read line"), szName);
@@ -348,9 +329,6 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 		while( (nByteCount = pBuffer->ReadLine(szLine)) >= 0 )
 		{
 			nLineCount++;
-			fwrite(szLine.data(), 1, szLine.size(), fp);
-			fwrite("\n", 1, 1, fp);
-			
 			//parse
 			pParser->ParseContent(szLine, nLineCount);
 		}
@@ -360,13 +338,12 @@ DWORD ProcessExecutor::OutStreamProc(cfl::SyncBuffer* pBuffer, ContentParser* pP
 			LOG4CPLUS_TRACE_STR(THE_LOGGER, szLog)
 		}
 		
+		bRet = true;
+
 	} while (FALSE);
 	
-	if(fp != NULL)
-	{
-		fclose(fp);
-		fp = NULL;
-	}
+	//always call DeInit
+	pParser->DeInit();
 	
 	if(IS_LOG_ENABLED(THE_LOGGER, log4cplus::TRACE_LOG_LEVEL))
 	{

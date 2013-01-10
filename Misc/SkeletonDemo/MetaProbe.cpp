@@ -1,0 +1,26 @@
+// MetaProbe.cpp: implementation of the MetaProbe class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "MetaProbe.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+MetaProbe::MetaProbe()
+{
+
+}
+
+MetaProbe::~MetaProbe()
+{
+
+}

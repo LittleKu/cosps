@@ -14,25 +14,124 @@ static char THIS_FILE[]=__FILE__;
 
 DECLARE_THE_LOGGER_NAME(_T("StdStreamParser"))
 
-MEncoderOutParser::MEncoderOutParser(HWND hWnd) : m_hWnd(hWnd)
+FilterContentParser::FilterContentParser(ContentParser* parser /* = NULL */) : m_parser(parser)
+{
+}
+FilterContentParser::~FilterContentParser()
+{
+	if(m_parser)
+	{
+		delete m_parser;
+		m_parser = NULL;
+	}
+}
+bool FilterContentParser::Init()
+{
+	return ((m_parser == NULL) ? true : m_parser->Init());
+}
+bool FilterContentParser::DeInit()
+{
+	return ((m_parser == NULL) ? true : m_parser->DeInit());
+}
+void FilterContentParser::ParseContent(std::string& szLine, int nLineCount)
+{
+	if(m_parser)
+	{
+		m_parser->ParseContent(szLine, nLineCount);
+	}
+}
+
+SaveFileParser::SaveFileParser(LPCTSTR lpszFile) : m_fp(NULL)
+{
+	if(lpszFile)
+	{
+		m_szOutFile.assign(lpszFile);
+	}
+}
+
+SaveFileParser::~SaveFileParser()
+{
+
+}
+
+bool SaveFileParser::Init()
+{
+	if(m_szOutFile.empty())
+	{
+		return false;
+	}
+
+	m_fp = _tfopen(m_szOutFile.c_str(), _T("wb"));
+	if(m_fp == NULL)
+	{
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("[SaveFileParser]: failed to open file [%s]"), m_szOutFile.c_str());
+		LOG4CPLUS_WARN_STR(THE_LOGGER, szLog)
+	}
+
+	return m_fp != NULL;
+}
+
+bool SaveFileParser::DeInit()
+{
+	bool bRet = true;
+	if(m_fp != NULL)
+	{
+		bRet = (fclose(m_fp) == 0);
+		m_fp = NULL;
+	}
+	return bRet;
+}
+
+void SaveFileParser::ParseContent(std::string& szLine, int nLineCount)
+{
+	if(m_fp)
+	{
+		fwrite(szLine.data(), 1, szLine.size(), m_fp);
+		fwrite("\n", 1, 1, m_fp);
+	}
+}
+
+MEncoderOutParser::MEncoderOutParser(HWND hWnd, ContentParser* parser)
+ : m_parser(parser), m_hWnd(hWnd)
 {
 	
 }
 
 MEncoderOutParser::~MEncoderOutParser()
 {
-	
+	if(m_parser)
+	{
+		delete m_parser;
+		m_parser = NULL;
+	}
+}
+bool MEncoderOutParser::Init()
+{
+	if(m_parser)
+	{
+		m_parser->Init();
+	}
+	return true;
+}
+bool MEncoderOutParser::DeInit()
+{
+	if(m_parser)
+	{
+		m_parser->DeInit();
+	}
+	return true;
 }
 
-void MEncoderOutParser::Reset()
-{
-	
-}
 void MEncoderOutParser::ParseContent(std::string& szLine, int nLineCount)
 {
 	static const std::string szProgressPat = "Pos:([\\s]*)(.*?)s(.*?)\\(([\\s]*)(\\d+)%\\)(.*?)";
 	static const int groupIndex[] = {2, 5};
 
+	if(m_parser)
+	{
+		m_parser->ParseContent(szLine, nLineCount);
+	}
 	std::vector<std::string> resultVec;
 	if(SysUtils::GetMatches(szLine, szProgressPat, groupIndex, 2, &resultVec))
 	{
