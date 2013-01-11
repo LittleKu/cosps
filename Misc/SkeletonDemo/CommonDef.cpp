@@ -20,12 +20,18 @@ ExecArgument::~ExecArgument()
 
 CTaskInfo::CTaskInfo()
 {
+	m_pMetaMap = new MetaMap();
 	Reset();
 }
 
 CTaskInfo::~CTaskInfo()
 {
-
+	if(m_pMetaMap)
+	{
+		m_pMetaMap->Clear();
+		delete m_pMetaMap;
+		m_pMetaMap = NULL;
+	}
 }
 void CTaskInfo::Reset()
 {
@@ -35,4 +41,9 @@ void CTaskInfo::Reset()
 	m_nDuration = 0;
 	m_nState = TSE_READY;
 	m_nTaskID = -1;
+
+	if(m_pMetaMap)
+	{
+		m_pMetaMap->Clear();
+	}
 }

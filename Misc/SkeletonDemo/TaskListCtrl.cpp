@@ -222,9 +222,7 @@ int CTaskListCtrl::AddTask(LPCTSTR lpszFileName)
 }
 
 BOOL CTaskListCtrl::GetTaskInfo(int nTaskID, int* pIndex, CTaskInfo** ppTaskInfo)
-{
-	ASSERT(pIndex != NULL && ppTaskInfo != NULL);
-	
+{	
 	//Treat nTaskID as row Index now
 	if(nTaskID < 0 || nTaskID >= GetItemCount())
 	{
@@ -232,10 +230,19 @@ BOOL CTaskListCtrl::GetTaskInfo(int nTaskID, int* pIndex, CTaskInfo** ppTaskInfo
 	}
 
 	int nIndex = nTaskID;
-	*pIndex = nIndex;
+	if(pIndex)
+	{
+		*pIndex = nIndex;
+	}
+	
 	CTaskInfo* ptr = (CTaskInfo*)GetItemData(nIndex);
 	ASSERT(ptr != NULL);
-	*ppTaskInfo = ptr;
+
+	if(ppTaskInfo)
+	{
+		*ppTaskInfo = ptr;
+	}
+	
 	return TRUE;
 
 	/*
@@ -283,4 +290,14 @@ void CTaskListCtrl::FormatProgress(double dPercent, CString& rText)
 	{
 		rText.Format(_T("%.2f%c"), dPercent, _T('%'));
 	}
+}
+
+bool CTaskListCtrl::GetMetaInfo(int nTaskID, int nMetaID, std::string& val)
+{
+	CTaskInfo* pTaskInfo = NULL;
+	if(GetTaskInfo(nTaskID, NULL, &pTaskInfo))
+	{
+		return pTaskInfo->m_pMetaMap->Get(nMetaID, val);
+	}
+	return false;
 }

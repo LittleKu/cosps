@@ -4,6 +4,7 @@
 #pragma once
 
 #include "cflbase/tstring.h"
+#include "cfltemplate/TreeMap.h"
 
 enum TaskStateEnum
 {
@@ -24,6 +25,8 @@ enum TaskInfoFlag
 	TIF_DURATION	= (1 << 4)
 };
 
+typedef cfl::TreeMap<int, std::string> MetaMap;
+
 class CTaskInfo
 {
 public:
@@ -37,6 +40,7 @@ public:
 
 	//internal data
 	int			m_nTaskID;
+	MetaMap*	m_pMetaMap;
 
 	CTaskInfo();
 	~CTaskInfo();

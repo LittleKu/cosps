@@ -31,7 +31,7 @@ enum MetaID
 class MPlayerMetaProbe : public MetaProbe  
 {
 public:
-	MPlayerMetaProbe();
+	MPlayerMetaProbe(MetaMap* pMap);
 	virtual ~MPlayerMetaProbe();
 	virtual int Probe(LPCTSTR lpszFileName);
 	virtual bool GetMeta(int nMetaID, std::string& val);
@@ -42,17 +42,17 @@ private:
 	class MPlayerMetaOutParser : public ContentParser
 	{
 	public:
-		MPlayerMetaOutParser(ismap* pMap, ContentParser* parser = NULL);
+		MPlayerMetaOutParser(MetaMap* pMap, ContentParser* parser = NULL);
 		virtual ~MPlayerMetaOutParser();
 		virtual void ParseContent(std::string& szLine, int nLineCount);
 		virtual bool Init();
 		virtual bool DeInit();
 	private:
-		ismap*	m_pMap;
+		MetaMap*	m_pMap;
 		ContentParser* m_pParser;
 	};
 	
-	ismap	m_map;
+	MetaMap*	m_pMap;
 };
 
 #endif // !defined(AFX_MPLAYERMETAPROBE_H__EDBAAA0C_0A25_44F0_AE44_002F6DFF83E2__INCLUDED_)

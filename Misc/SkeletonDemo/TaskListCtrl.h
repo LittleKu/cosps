@@ -46,6 +46,7 @@ public:
 
 	
 	BOOL GetTaskInfo(int nTaskID, int* nIndex, CTaskInfo** ppTaskInfo);
+	bool GetMetaInfo(int nTaskID, int nMetaID, std::string& val);
 
 	virtual ~CTaskListCtrl();
 

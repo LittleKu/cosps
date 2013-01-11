@@ -544,7 +544,7 @@ void CVCDlg::AddFiles()
 				CTaskInfo* pTaskInfo = new CTaskInfo;
 				pTaskInfo->m_szFileName = szFileName;
 
-				MPlayerMetaProbe probe;
+				MPlayerMetaProbe probe(pTaskInfo->m_pMetaMap);
 				if(probe.Probe(szFileName) == 0)
 				{
 					if(probe.GetMeta(ID_VIDEO_FORMAT, val))
@@ -770,10 +770,16 @@ LRESULT CVCDlg::OnNotifyProcProgress(WPARAM wParam, LPARAM lParam)
 	std::string* pPercent = (std::string*)lParam;
 	
 	double dPercent = 0, dCurVal = 0;
-	if(SysUtils::GetLimitLength() > 0 && pVal != NULL)
+	std::string val;
+
+	if(pVal != NULL && m_taskListCtrl.GetMetaInfo(m_selRows.at(m_nCurRow), ID_LENGTH, val))
 	{
 		dCurVal = atof(pVal->c_str());
-		dPercent = ((dCurVal * 100 / SysUtils::GetLimitLength()) * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
+		double dTotal = atof(val.c_str());
+		if(dTotal > 0)
+		{
+			dPercent = ((dCurVal * 100 / dTotal) * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
+		}
 		dPercent += (double)m_nProgressBase;
 	}
 	else

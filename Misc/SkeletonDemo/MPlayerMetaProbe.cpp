@@ -39,7 +39,7 @@ static const id_value_pair id_value_pairs[] =
 	{ -1, NULL }
 };
 
-MPlayerMetaProbe::MPlayerMetaOutParser::MPlayerMetaOutParser(ismap* pMap, ContentParser* parser /* = NULL */)
+MPlayerMetaProbe::MPlayerMetaOutParser::MPlayerMetaOutParser(MetaMap* pMap, ContentParser* parser /* = NULL */)
 {
 	m_pMap = pMap;
 	m_pParser = parser;
@@ -66,7 +66,8 @@ void MPlayerMetaProbe::MPlayerMetaOutParser::ParseContent(std::string& szLine, i
 		nLen = strlen(id_value_pairs[i].szValue);
 		if((szLine.size() >= nLen) && (szLine.compare(0, nLen, id_value_pairs[i].szValue, nLen) == 0))
 		{
-			(*m_pMap)[id_value_pairs[i].nID] = szLine.substr(nLen);
+			//(*m_pMap)[id_value_pairs[i].nID] = szLine.substr(nLen);
+			m_pMap->Put(id_value_pairs[i].nID, szLine.substr(nLen));
 		}
 	}
 }
@@ -87,7 +88,7 @@ bool MPlayerMetaProbe::MPlayerMetaOutParser::DeInit()
 	return true;
 }
 
-MPlayerMetaProbe::MPlayerMetaProbe()
+MPlayerMetaProbe::MPlayerMetaProbe(MetaMap* pMap) : m_pMap(pMap)
 {
 
 }
@@ -107,13 +108,14 @@ int MPlayerMetaProbe::Probe(LPCTSTR lpszFileName)
 	//out file
 	cfl::tformat(szDumpFile, _T("%s\\out_mplayer.dump"), (LPCTSTR)(SYS_PREF()->szTempFolder));
 	pArg->pOutParser = new SaveFileParser(szDumpFile.c_str());
-	pArg->pOutParser = new MPlayerMetaOutParser(&m_map, pArg->pOutParser);
+	pArg->pOutParser = new MPlayerMetaOutParser(m_pMap, pArg->pOutParser);
 
 	//err file
 	cfl::tformat(szDumpFile, _T("%s\\err_mplayer.dump"), (LPCTSTR)(SYS_PREF()->szTempFolder));
 	pArg->pErrParser = new SaveFileParser(szDumpFile.c_str());
 
-	m_map.clear();
+	//m_map.clear();
+	m_pMap->Clear();
 	SyncProcessExecutor spExecutor;
 	int rc = spExecutor.Execute(pArg);
 
@@ -121,11 +123,5 @@ int MPlayerMetaProbe::Probe(LPCTSTR lpszFileName)
 }
 bool MPlayerMetaProbe::GetMeta(int nMetaID, std::string& val)
 {
-	ismap::iterator iter = m_map.find(nMetaID);
-	if(iter != m_map.end())
-	{
-		val.assign(iter->second);
-		return true;
-	}
-	return false;
+	return m_pMap->Get(nMetaID, val);
 }
