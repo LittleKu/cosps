@@ -313,6 +313,10 @@ SOURCE=.\MainToolBarCtrl.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\MemDC.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\OptionDlg.h
 # End Source File
 # Begin Source File

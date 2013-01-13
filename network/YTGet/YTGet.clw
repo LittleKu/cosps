@@ -12,7 +12,7 @@ Class1=CYTGetApp
 Class2=CMainDlg
 Class3=CAboutDlg
 
-ResourceCount=9
+ResourceCount=17
 Resource1=IDD_PROPPAGE_GENERAL
 Resource2=IDR_MAINFRAME
 Resource3=IDD_PROPPAGE_CONNECTION
@@ -29,6 +29,14 @@ Class9=CPPgConnection
 Resource8=IDD_YTGET_DIALOG
 Class10=CPPgProxy
 Resource9=IDR_MAIN_MENU
+Resource10=IDD_PROPPAGE_CONNECTION (English (U.S.))
+Resource11=IDD_ADD_TASK_DIALOG (English (U.S.))
+Resource12=IDD_PROPPAGE_GENERAL (English (U.S.))
+Resource13=IDD_MAIN_DIALOG (English (U.S.))
+Resource14=IDD_YTGET_DIALOG (English (U.S.))
+Resource15=IDD_ABOUTBOX (English (U.S.))
+Resource16=IDD_PROPPAGE_PROXY (English (U.S.))
+Resource17=IDR_MAIN_MENU (English (U.S.))
 
 [CLS:CYTGetApp]
 Type=0
@@ -193,4 +201,85 @@ BaseClass=CPropertyPage
 Filter=D
 LastObject=IDC_EDIT_PROXY_ADDRESS
 VirtualFilter=idWC
+
+[DLG:IDD_YTGET_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=1
+Control1=IDC_TASK_LIST,SysListView32,1350632457
+
+[DLG:IDD_ABOUTBOX (English (U.S.))]
+Type=1
+Class=?
+ControlCount=4
+Control1=IDC_STATIC,static,1342177283
+Control2=IDC_STATIC,static,1342308480
+Control3=IDC_STATIC,static,1342308352
+Control4=IDOK,button,1342373889
+
+[DLG:IDD_MAIN_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=0
+
+[DLG:IDD_ADD_TASK_DIALOG (English (U.S.))]
+Type=1
+Class=?
+ControlCount=9
+Control1=IDOK,button,1342242817
+Control2=IDCANCEL,button,1342242816
+Control3=IDC_TXT_NEW_ADDRESS,static,1342308352
+Control4=IDC_NEW_ADDRESS,edit,1350631552
+Control5=IDC_STATIC,static,1342308352
+Control6=IDC_EDIT_SAVE_TO_FILE_NAME,edit,1350631552
+Control7=IDC_STATIC,button,1342177287
+Control8=IDC_RADIO_START_AUTO,button,1342177289
+Control9=IDC_RADIO_START_MANUALLY,button,1342177289
+
+[DLG:IDD_PROPPAGE_GENERAL (English (U.S.))]
+Type=1
+Class=?
+ControlCount=7
+Control1=IDC_STATIC,button,1342177287
+Control2=IDC_STATIC,static,1342308352
+Control3=IDC_EDIT_OUTPUT_DIR,edit,1350631552
+Control4=IDC_BTN_OUTPUT_DIR,button,1342242816
+Control5=IDC_EDIT_TEMP_DIR,edit,1350631552
+Control6=IDC_BTN_TEMP_DIR,button,1342242816
+Control7=IDC_STATIC,static,1342308352
+
+[DLG:IDD_PROPPAGE_CONNECTION (English (U.S.))]
+Type=1
+Class=?
+ControlCount=9
+Control1=IDC_STATIC,button,1342177287
+Control2=IDC_STATIC,static,1342308352
+Control3=IDC_EDIT_MAX_TASK_COUNT,edit,1350631552
+Control4=IDC_STATIC,static,1342308352
+Control5=IDC_EDIT_MAX_CONNECTION_COUNT,edit,1350631552
+Control6=IDC_EDIT_MIN_SEGMENT_SIZE,edit,1350631552
+Control7=IDC_EDIT_MAX_RETRY_TIMES,edit,1350631552
+Control8=IDC_STATIC,static,1342308352
+Control9=IDC_STATIC,static,1342308352
+
+[DLG:IDD_PROPPAGE_PROXY (English (U.S.))]
+Type=1
+Class=?
+ControlCount=8
+Control1=IDC_STATIC,button,1342177287
+Control2=IDC_RADIO_NO_PROXY,button,1342177289
+Control3=IDC_RADIO_PROXY_MANUALLY,button,1342177289
+Control4=IDC_RADIO_PROXY_FROM_IE,button,1342177289
+Control5=IDC_STATIC,static,1342308352
+Control6=IDC_STATIC,static,1342308352
+Control7=IDC_EDIT_PROXY_ADDRESS,edit,1350631552
+Control8=IDC_EDIT_PROXY_PORT,edit,1350631552
+
+[MNU:IDR_MAIN_MENU (English (U.S.))]
+Type=1
+Class=?
+Command1=IDM_FILE_EXIT
+Command2=IDM_TOOLS_OPTIONS
+Command3=IDM_HELP_ABOUT
+CommandCount=3
 

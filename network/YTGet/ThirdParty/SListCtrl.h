@@ -34,6 +34,7 @@ public:
 	COLORREF		m_crHighLightText;
 	COLORREF		m_crWindow;
 	COLORREF		m_crWindowText;
+	COLORREF        m_crWindowTextBk;
 	int             m_nRowHeight;
 	CImageList      m_ILRowHeight;
 // Operations
@@ -75,6 +76,7 @@ public:
 
 protected:
 	virtual void DrawEmptyBk(CDC* pDC, CRect rcClient);
+	void SetColors();
 
 private:
 	CSListCtrl::CListSubItemData* GetSubItemData(int nItem, int nSubItem);
@@ -104,6 +106,8 @@ private:
 	//{{AFX_VIRTUAL(CSListCtrl)
 	protected:
 	virtual void PreSubclassWindow();
+	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -124,6 +128,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	CRect m_rectClient;
+	NMLVCUSTOMDRAW  m_lvcd;
+	BOOL            m_bCustomDraw;
 };
 
 class CSListCtrl::CListImage

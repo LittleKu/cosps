@@ -26,10 +26,16 @@ ASSERT_COL_COUNT(nSubItem)
 #define ASSERT_ROW_COL_COUNT(nItem, nSubItem)
 #endif
 
+#ifndef LVBKIF_TYPE_WATERMARK
+#define LVBKIF_TYPE_WATERMARK   0x10000000
+#endif
+
 UINT WM_SLISTCTRL_CHECKBOX_CLICKED = ::RegisterWindowMessage(_T("WM_SLISTCTRL_CHECKBOX_CLICKED"));
 
 CSListCtrl::CSListCtrl()
 {
+	m_bCustomDraw			= false;
+
 	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
 	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
 	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
@@ -44,6 +50,7 @@ CSListCtrl::CSListCtrl()
 
 	//background color for non-selection items
 	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
+	m_crWindowTextBk = m_crWindow;
 
 	//text color for non-selection items
 	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
@@ -67,7 +74,7 @@ BEGIN_MESSAGE_MAP(CSListCtrl, CListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
+//	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_NOTIFY_REFLECT_EX(NM_CLICK, OnClick)
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 // 	ON_NOTIFY(HDN_ITEMCLICKA, 0, OnHeaderClick) 
@@ -87,11 +94,140 @@ void CSListCtrl::PreSubclassWindow()
 		VERIFY(m_HeaderCtrl.SubclassWindow(pHeader->m_hWnd));
 	}
 	
+	SetColors();
 	CListCtrl::PreSubclassWindow();
+}
+
+void CSListCtrl::SetColors()
+{
+	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
+	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
+	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+	//background color for lost focus selection items
+	m_crBtnFace				= RGB(198, 215, 192);
+	
+	//background color for focus selection items
+	m_crHighLight			= RGB(179, 200, 232);
+	
+	//text color for focus selection items
+	m_crHighLightText       = ::GetSysColor(COLOR_WINDOWTEXT);
+	
+	//background color for non-selection items
+	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
+	m_crWindowTextBk = m_crWindow;
+	
+	//text color for non-selection items
+	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
+
+	SetBkColor(m_crWindow);
+	SetTextBkColor(m_crWindowTextBk);
+	SetTextColor(m_crWindowText);
+	
+	// Must explicitly set a NULL watermark bitmap, to clear any already set watermark bitmap.
+// 	LVBKIMAGE lvimg = {0};
+// 	lvimg.ulFlags = LVBKIF_TYPE_WATERMARK;
+// 	SetBkImage(&lvimg);
+}
+
+BOOL CSListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	if(message != WM_DRAWITEM) {
+		//catch the prepaint and copy struct
+		if(message == WM_NOTIFY && ((NMHDR*)lParam)->code == NM_CUSTOMDRAW &&
+			((LPNMLVCUSTOMDRAW)lParam)->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
+			
+			m_bCustomDraw = CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
+			if(m_bCustomDraw)
+				m_lvcd = *((LPNMLVCUSTOMDRAW)lParam);
+			
+			return m_bCustomDraw;
+		}
+		
+		return CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
+	}
+	
+	ASSERT(pResult == NULL); // no return value expected
+	
+	DrawItem((LPDRAWITEMSTRUCT)lParam);
+	return TRUE;
+}
+
+void CSListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
+	CRect rcItem(lpDrawItemStruct->rcItem);
+	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
+	CMemDC pDC(oDC, &rcItem, m_crWindow);
+	CFont *pOldFont = pDC->SelectObject(GetFont());
+
+	int iCount = GetHeaderCtrl()->GetItemCount();
+	for(int i = 0; i < iCount; i++) 
+	{
+		DrawItem(lpDrawItemStruct->itemID, i, pDC);
+	}
+
+	//pDC->Flush();
+	pDC->SelectObject(pOldFont);
 }
 
 BOOL CSListCtrl::OnEraseBkgnd(CDC* pDC)
 {
+// 	if(1)
+// 	{
+// 		RECT clientRect;
+// 		GetClientRect(&clientRect);
+// 		pDC->FillSolidRect(&clientRect,GetBkColor());
+// 		return TRUE;
+// 	}
+	int itemCount = GetItemCount();
+// 	if (!itemCount)
+// 		return CListCtrl::OnEraseBkgnd(pDC);
+	
+	RECT clientRect;
+	RECT itemRect;
+	int topIndex = GetTopIndex();
+	int maxItems = GetCountPerPage();
+	int drawnItems = itemCount < maxItems ? itemCount : maxItems;
+	CRect rcClip;
+	
+	//draw top portion
+	GetClientRect(&clientRect);
+	rcClip = clientRect;
+	GetItemRect(topIndex, &itemRect, LVIR_BOUNDS);
+	clientRect.bottom = itemRect.top;
+	if (m_crWindowTextBk != CLR_NONE)
+		pDC->FillSolidRect(&clientRect,GetBkColor());
+	else
+		rcClip.top = itemRect.top;
+	
+	//draw bottom portion if we have to
+	if(topIndex + maxItems >= itemCount) {
+		GetClientRect(&clientRect);
+		GetItemRect(topIndex + drawnItems - 1, &itemRect, LVIR_BOUNDS);
+		clientRect.top = itemRect.bottom;
+		rcClip.bottom = itemRect.bottom;
+		if (m_crWindowTextBk != CLR_NONE)
+			pDC->FillSolidRect(&clientRect, GetBkColor());
+	}
+	
+	//draw right half if we need to
+	if (itemRect.right < clientRect.right) {
+		GetClientRect(&clientRect);
+		clientRect.left = itemRect.right;
+		rcClip.right = itemRect.right;
+		if (m_crWindowTextBk != CLR_NONE)
+			pDC->FillSolidRect(&clientRect, GetBkColor());
+	}
+	
+	if (m_crWindowTextBk == CLR_NONE){
+		CRect rcClipBox;
+		pDC->GetClipBox(&rcClipBox);
+		rcClipBox.SubtractRect(&rcClipBox, &rcClip);
+		if (!rcClipBox.IsRectEmpty()){
+			pDC->ExcludeClipRect(&rcClip);
+			CListCtrl::OnEraseBkgnd(pDC);
+			InvalidateRect(&rcClip, FALSE);
+		}
+	}
 	return TRUE;
 }
 void CSListCtrl::OnSize( UINT nType, int cx, int cy  )
@@ -111,41 +247,41 @@ void CSListCtrl::OnSize( UINT nType, int cx, int cy  )
 }
 void CSListCtrl::OnPaint()
 {
-	CPaintDC dc(this);
+//	CPaintDC dc(this);
 	
     // Paint to a memory device context to reduce screen flicker.
-    CMemDC memDC(&dc, &m_rectClient, FALSE);
+//    CMemDC memDC(&dc, &m_rectClient, FALSE);
 		
 	// Let the window do its default painting...
-    CWnd::DefWindowProc( WM_PAINT, (WPARAM)memDC.m_hDC, 0 );
+//    CWnd::DefWindowProc( WM_PAINT, (WPARAM)memDC.m_hDC, 0 );
 //	CListCtrl::OnPaint();
-//     Default();
-// 	if (GetItemCount() <= 0)
-// 	{
-// 		CDC* pDC = GetDC();
-// 		int nSavedDC = pDC->SaveDC();
-// 
-// 		//Get Content client area
-// 		CRect rcClient;
-// 		GetClientRect(&rcClient);
-// 
-// 		CRect rcHeaderWindow;
-// 		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
-// 		rcClient.top += rcHeaderWindow.Height();
-// 
-// 		//Draw
-// 		DrawEmptyBk(pDC, rcClient);
-// 
-// 		//Restore
-// 		pDC->RestoreDC(nSavedDC);
-// 		ReleaseDC(pDC);
-// 	}
+    Default();
+	if (GetItemCount() <= 0)
+	{
+		CDC* pDC = GetDC();
+		int nSavedDC = pDC->SaveDC();
+
+		//Get Content client area
+		CRect rcClient;
+		GetClientRect(&rcClient);
+
+		CRect rcHeaderWindow;
+		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
+		rcClient.top += rcHeaderWindow.Height();
+
+		//Draw
+		DrawEmptyBk(pDC, rcClient);
+
+		//Restore
+		pDC->RestoreDC(nSavedDC);
+		ReleaseDC(pDC);
+	}
 }
 
 void CSListCtrl::DrawEmptyBk(CDC* pDC, CRect rcClient)
 {
 	//1. Draw background
-	pDC->FillSolidRect(&rcClient, m_crWindow);
+	pDC->FillSolidRect(&rcClient, /*m_crWindow*/RGB(255, 128, 0));
 
 	//No valid row height, don't draw anything
 	if(m_nRowHeight <= 0 || rcClient.Height() < (2 * m_nRowHeight))
