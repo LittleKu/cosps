@@ -375,14 +375,7 @@ void CSHeaderCtrl::SetHeight(int nHeight)
 }
 int  CSHeaderCtrl::GetHeight() 
 { 
-	if(m_nHeight >= 0)
-	{
-		return m_nHeight;
-	}
-
-	CRect rcWindow;
-	GetWindowRect(&rcWindow);
-	return rcWindow.Height(); 
+	return m_nHeight; 
 }
 
 BOOL CSHeaderCtrl::GetCheckBoxRect(int nSubItem, CRect& chkboxRect)

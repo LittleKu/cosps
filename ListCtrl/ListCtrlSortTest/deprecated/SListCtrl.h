@@ -34,7 +34,6 @@ public:
 	COLORREF		m_crHighLightText;
 	COLORREF		m_crWindow;
 	COLORREF		m_crWindowText;
-	COLORREF        m_crWindowTextBk;
 	int             m_nRowHeight;
 	CImageList      m_ILRowHeight;
 // Operations
@@ -55,7 +54,6 @@ public:
 	DWORD GetItemData(int nItem) const;
 	BOOL GetSubItemRect(int nItem, int nSubItem, int nArea, CRect& rect);
 	void InvalidateSubItem(int nItem, int nSubItem);
-	void InvalidateSubItems(int nItem, int pSubItems[], int nSubItemCount);
 	
 	//Check Box Related functions
 	void SetItemCheckedState(int nItem, int nSubItem, int nCheckedState);
@@ -73,11 +71,6 @@ public:
 
 	void SetRowHeight(int nRowHeight);
 	int  GetRowHeight();
-
-protected:
-	virtual void DrawEmptyBk(CDC* pDC, CRect rcClient);
-	void SetColors();
-
 private:
 	CSListCtrl::CListSubItemData* GetSubItemData(int nItem, int nSubItem);
 
@@ -106,8 +99,6 @@ private:
 	//{{AFX_VIRTUAL(CSListCtrl)
 	protected:
 	virtual void PreSubclassWindow();
-	virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -115,9 +106,6 @@ public:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CSListCtrl)
-	afx_msg void OnPaint();
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnSize( UINT nType, int cx, int cy  );
 	afx_msg void OnDestroy();
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);	
 	afx_msg BOOL OnClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -126,10 +114,6 @@ protected:
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
-
-	CRect m_rectClient;
-	NMLVCUSTOMDRAW  m_lvcd;
-	BOOL            m_bCustomDraw;
 };
 
 class CSListCtrl::CListImage

@@ -26,16 +26,29 @@ ASSERT_COL_COUNT(nSubItem)
 #define ASSERT_ROW_COL_COUNT(nItem, nSubItem)
 #endif
 
-#ifndef LVBKIF_TYPE_WATERMARK
-#define LVBKIF_TYPE_WATERMARK   0x10000000
-#endif
-
 UINT WM_SLISTCTRL_CHECKBOX_CLICKED = ::RegisterWindowMessage(_T("WM_SLISTCTRL_CHECKBOX_CLICKED"));
 
 CSListCtrl::CSListCtrl()
 {
-	m_bCustomDraw			= false;
-	m_pSortable				= new CSorter(this);
+	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
+	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
+
+	//background color for lost focus selection items
+	m_crBtnFace				= RGB(179, 200, 232);
+	
+	//background color for focus selection items
+	m_crHighLight			= ::GetSysColor(COLOR_HIGHLIGHT);
+
+	//text color for focus selection items
+	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+	//background color for non-selection items
+	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
+
+	//text color for non-selection items
+	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
+
+	m_pSortable = new CSorter(this);
 }
 
 CSListCtrl::~CSListCtrl()
@@ -50,11 +63,8 @@ CSListCtrl::~CSListCtrl()
 
 BEGIN_MESSAGE_MAP(CSListCtrl, CListCtrl)
 	//{{AFX_MSG_MAP(CSListCtrl)
-	ON_WM_PAINT()
-	ON_WM_ERASEBKGND()
-	ON_WM_SIZE()
 	ON_WM_DESTROY()
-//	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_NOTIFY_REFLECT_EX(NM_CLICK, OnClick)
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 // 	ON_NOTIFY(HDN_ITEMCLICKA, 0, OnHeaderClick) 
@@ -74,211 +84,7 @@ void CSListCtrl::PreSubclassWindow()
 		VERIFY(m_HeaderCtrl.SubclassWindow(pHeader->m_hWnd));
 	}
 	
-	SetColors();
 	CListCtrl::PreSubclassWindow();
-}
-
-void CSListCtrl::SetColors()
-{
-	m_crBtnFace             = ::GetSysColor(COLOR_BTNFACE);
-	m_crHighLight           = ::GetSysColor(COLOR_HIGHLIGHT);
-	m_crHighLightText       = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-	//background color for lost focus selection items
-	m_crBtnFace				= RGB(198, 215, 192);
-	
-	//background color for focus selection items
-	m_crHighLight			= RGB(179, 200, 232);
-	
-	//text color for focus selection items
-	m_crHighLightText       = ::GetSysColor(COLOR_WINDOWTEXT);
-	
-	//background color for non-selection items
-	m_crWindow              = ::GetSysColor(COLOR_WINDOW);
-	m_crWindowTextBk = m_crWindow;
-	
-	//text color for non-selection items
-	m_crWindowText          = ::GetSysColor(COLOR_WINDOWTEXT);
-
-	SetBkColor(m_crWindow);
-	SetTextBkColor(m_crWindowTextBk);
-	SetTextColor(m_crWindowText);
-	
-	// Must explicitly set a NULL watermark bitmap, to clear any already set watermark bitmap.
-// 	LVBKIMAGE lvimg = {0};
-// 	lvimg.ulFlags = LVBKIF_TYPE_WATERMARK;
-// 	SetBkImage(&lvimg);
-}
-
-BOOL CSListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
-{
-	if(message != WM_DRAWITEM) {
-		//catch the prepaint and copy struct
-		if(message == WM_NOTIFY && ((NMHDR*)lParam)->code == NM_CUSTOMDRAW &&
-			((LPNMLVCUSTOMDRAW)lParam)->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
-			
-			m_bCustomDraw = CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
-			if(m_bCustomDraw)
-				m_lvcd = *((LPNMLVCUSTOMDRAW)lParam);
-			
-			return m_bCustomDraw;
-		}
-		
-		return CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
-	}
-	
-	ASSERT(pResult == NULL); // no return value expected
-	
-	DrawItem((LPDRAWITEMSTRUCT)lParam);
-	return TRUE;
-}
-
-void CSListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
-{
-	CRect rcItem(lpDrawItemStruct->rcItem);
-	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-	CMemDC pDC(oDC, &rcItem, m_crWindow);
-	CFont *pOldFont = pDC->SelectObject(GetFont());
-
-	int iCount = GetHeaderCtrl()->GetItemCount();
-	for(int i = 0; i < iCount; i++) 
-	{
-		DrawItem(lpDrawItemStruct->itemID, i, pDC);
-	}
-
-	//pDC->Flush();
-	pDC->SelectObject(pOldFont);
-}
-
-BOOL CSListCtrl::OnEraseBkgnd(CDC* pDC)
-{
-	int itemCount = GetItemCount();
-	if (!itemCount)
-		return CListCtrl::OnEraseBkgnd(pDC);
-	
-	RECT clientRect;
-	RECT itemRect;
-	int topIndex = GetTopIndex();
-	int maxItems = GetCountPerPage();
-	int drawnItems = itemCount < maxItems ? itemCount : maxItems;
-	CRect rcClip;
-	
-	//draw top portion
-	GetClientRect(&clientRect);
-	rcClip = clientRect;
-	GetItemRect(topIndex, &itemRect, LVIR_BOUNDS);
-	clientRect.bottom = itemRect.top;
-	if (m_crWindowTextBk != CLR_NONE)
-		pDC->FillSolidRect(&clientRect,GetBkColor());
-	else
-		rcClip.top = itemRect.top;
-	
-	//draw bottom portion if we have to
-	if(topIndex + maxItems >= itemCount) {
-		GetClientRect(&clientRect);
-		GetItemRect(topIndex + drawnItems - 1, &itemRect, LVIR_BOUNDS);
-		clientRect.top = itemRect.bottom;
-		rcClip.bottom = itemRect.bottom;
-		if (m_crWindowTextBk != CLR_NONE)
-			pDC->FillSolidRect(&clientRect, GetBkColor());
-	}
-	
-	//draw right half if we need to
-	if (itemRect.right < clientRect.right) {
-		GetClientRect(&clientRect);
-		clientRect.left = itemRect.right;
-		rcClip.right = itemRect.right;
-		if (m_crWindowTextBk != CLR_NONE)
-			pDC->FillSolidRect(&clientRect, GetBkColor());
-	}
-	
-	if (m_crWindowTextBk == CLR_NONE){
-		CRect rcClipBox;
-		pDC->GetClipBox(&rcClipBox);
-		rcClipBox.SubtractRect(&rcClipBox, &rcClip);
-		if (!rcClipBox.IsRectEmpty()){
-			pDC->ExcludeClipRect(&rcClip);
-			CListCtrl::OnEraseBkgnd(pDC);
-			InvalidateRect(&rcClip, FALSE);
-		}
-	}
-	return TRUE;
-}
-void CSListCtrl::OnSize( UINT nType, int cx, int cy  )
-{
-	CListCtrl::OnSize(nType, cx, cy);
-	
-    GetClientRect(m_rectClient);
-	
-    CHeaderCtrl* pHC;
-    pHC = GetHeaderCtrl();
-    if (pHC != NULL)
-    {
-        CRect rectHeader;
-        pHC->GetItemRect( 0, &rectHeader );
-        m_rectClient.top += rectHeader.bottom;
-    }
-}
-void CSListCtrl::OnPaint()
-{
-    Default();
-	if (GetItemCount() <= 0)
-	{
-		CDC* pDC = GetDC();
-		int nSavedDC = pDC->SaveDC();
-
-		//Get Content client area
-		CRect rcClient;
-		GetClientRect(&rcClient);
-
-		CRect rcHeaderWindow;
-		m_HeaderCtrl.GetWindowRect(&rcHeaderWindow);
-		rcClient.top += rcHeaderWindow.Height();
-
-		//Draw
-		DrawEmptyBk(pDC, rcClient);
-
-		//Restore
-		pDC->RestoreDC(nSavedDC);
-		ReleaseDC(pDC);
-	}
-}
-
-void CSListCtrl::DrawEmptyBk(CDC* pDC, CRect rcClient)
-{
-	//1. Draw background
-	pDC->FillSolidRect(&rcClient, m_crWindow/*RGB(255, 128, 0)*/);
-
-	//No valid row height, don't draw anything
-	if(m_nRowHeight <= 0 || rcClient.Height() < (2 * m_nRowHeight))
-	{
-		return;
-	}
-
-	COLORREF crGridLine = RGB(236, 233, 216)/*RGB(255, 128, 0)*/;
-
-	//Draw horizontal lines
-	for(int nRowY = rcClient.top + m_nRowHeight; nRowY < rcClient.bottom; nRowY += (m_nRowHeight + 1))
-	{
-		pDC->FillSolidRect(rcClient.left, nRowY, rcClient.Width(), 1, crGridLine);
-	}
-
-	//Get horizontal scroll bar distance
-	int nMinPos, nMaxPos, nCurPos;
-	GetScrollRange(SB_HORZ, &nMinPos, &nMaxPos);
-	nCurPos = GetScrollPos(SB_HORZ);
-
-	int nHorzDistance = nCurPos - nMinPos;
-
-	//Draw vertical lines
-	CRect rcHeaderCol;
-	for(int nCol = 0; nCol < m_HeaderCtrl.GetItemCount(); nCol++)
-	{
-		m_HeaderCtrl.GetItemRect(nCol, &rcHeaderCol);
-		if(rcHeaderCol.right >= nHorzDistance)
-		{
-			pDC->FillSolidRect(rcHeaderCol.right - nHorzDistance, rcClient.top, 1, rcClient.Height(), crGridLine);
-		}
-	}
 }
 
 void CSListCtrl::OnDestroy() 
@@ -373,7 +179,7 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
 	*pResult = 0;
 
-	//AfxTrace("[OnColumnClick]: iItem=%d\n", pNMListView->iSubItem);
+	AfxTrace("[OnColumnClick]: iItem=%d\n", pNMListView->iSubItem);
 	
 	int nSubItem = pNMListView->iSubItem;
 
@@ -401,7 +207,6 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 			if (GetItemCheckedState(nItem, nSubItem) != SHC_NONE_CHECK_BOX)
 			{
 				SetItemCheckedState(nItem, nSubItem, nCheckedState);
-				InvalidateSubItem(nItem, nSubItem);
 			}
 		}
 		UpdateWindow();
@@ -553,7 +358,7 @@ void CSListCtrl::SetItemImage(int nItem, int nSubItem, int nImage, CImageList* p
 	}
 	
 	//2. Update window
-	//InvalidateSubItem(nItem, nSubItem);
+	InvalidateSubItem(nItem, nSubItem);
 }
 
 //Progress Related functions
@@ -576,7 +381,7 @@ void CSListCtrl::SetItemProgress(int nItem, int nSubItem, int nCurrValue, int nM
 	}
 	
 	//2. Update window
-	//InvalidateSubItem(nItem, nSubItem);
+	InvalidateSubItem(nItem, nSubItem);
 }
 
 void CSListCtrl::SetRowHeight(int nRowHeight)
@@ -613,31 +418,9 @@ void CSListCtrl::InvalidateSubItem(int nItem, int nSubItem)
 		GetSubItemRect(nItem, nSubItem, LVIR_BOUNDS, rect);
 	}
 	
-	//rect.InflateRect(1, 1);
+	rect.InflateRect(1, 1);
 	
 	InvalidateRect(&rect);
-}
-
-void CSListCtrl::InvalidateSubItems(int nItem, int pSubItems[], int nSubItemCount)
-{
-	ASSERT_ROW_COUNT(nItem);
-
-	CRgn rgnTotal;
-	rgnTotal.CreateRectRgn(0, 0, 0, 0);
-
-	CRect rect;
-	for(int i = 0; i < nSubItemCount; i++)
-	{
-		ASSERT_COL_COUNT(pSubItems[i]);
-		GetSubItemRect(nItem, pSubItems[i], LVIR_BOUNDS, rect);
-
-		CRgn rgnTemp;
-		rgnTemp.CreateRectRgnIndirect(&rect);
-
-		rgnTotal.CombineRgn(&rgnTotal, &rgnTemp, RGN_OR);
-	}
-
-	InvalidateRgn(&rgnTotal);
 }
 ///////////////////////////////////////////////////////////////////////////////
 // GetSubItemRect
@@ -701,7 +484,6 @@ void CSListCtrl::SetItemCheckedStateByClick(int nItem, int nSubItem, int nChecke
 
 	//1. Update data: checked state
 	SetItemCheckedState(nItem, nSubItem, nCheckedState);
-	InvalidateSubItem(nItem, nSubItem);
 	
 	//3. Update header
 	if(bUpdateHeader)
@@ -741,7 +523,7 @@ void CSListCtrl::SetItemCheckedState(int nItem, int nSubItem, int nCheckedState)
 	pData->m_pSubItemDatas[nSubItem].m_nCheckState = nCheckedState;
 	
 	//2. Update window
-	//InvalidateSubItem(nItem, nSubItem);
+	InvalidateSubItem(nItem, nSubItem);
 }
 int  CSListCtrl::GetItemCheckedState(int nItem, int nSubItem)
 {
@@ -892,31 +674,9 @@ void CSListCtrl::DrawImage(int nItem, int nSubItem, CDC *pDC)
 	}
 	
 	CListImage* pListImage = GetSubItemData(nItem, nSubItem)->m_pListImage;
-	ASSERT(pListImage != NULL && pListImage->m_imageList != NULL);
-	pListImage->m_imageList->DrawIndirect(pDC, pListImage->m_nImage, imgRect.TopLeft(), imgRect.Size(), CPoint(0, 0));
-	/*
-	//Picked up from WINCTRL7.CPP	
-	IMAGELISTDRAWPARAMS drawing;
+	ASSERT(pListImage != NULL);
 	
-	drawing.i = pListImage->m_nImage;
-	drawing.hdcDst = pDC->m_hDC;
-	drawing.x = imgRect.left;
-	drawing.y = imgRect.top;
-	drawing.cx = imgRect.Width();
-	drawing.cy = imgRect.Height();
-	drawing.xBitmap = 0;
-	drawing.yBitmap = 0;
-	drawing.rgbBk = CLR_NONE;
-	drawing.rgbFg = CLR_DEFAULT;
-	drawing.fStyle = ILD_NORMAL;
-	drawing.dwRop = SRCCOPY;
-
-	ASSERT_POINTER(&drawing, IMAGELISTDRAWPARAMS);	
-	drawing.cbSize = sizeof(IMAGELISTDRAWPARAMS);
-	drawing.himl = pListImage->m_hImageList;
-	BOOL bResult = ImageList_DrawIndirect(&drawing);
-	AfxTrace("%d\n", bResult);
-	*/
+	pListImage->m_imageList->DrawIndirect(pDC, pListImage->m_nImage, imgRect.TopLeft(), imgRect.Size(), CPoint(0, 0));
 }
 void CSListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC, BOOL bProgressText)
 {
@@ -987,22 +747,10 @@ void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 
 	//3. Draw the actual progress
 	CListProgress* pListPrgsBar = GetSubItemData(nItem, nSubItem)->m_pListPrgsBar;
-	ASSERT(pListPrgsBar != NULL);
+	ASSERT(pListPrgsBar != NULL && pListPrgsBar->m_nMaxValue > 0);
+	ASSERT(pListPrgsBar->m_nValue <= pListPrgsBar->m_nMaxValue);
 
-	int w = 0;
-	if(pListPrgsBar->m_nMaxValue > 0 && pListPrgsBar->m_nValue > 0)
-	{
-		// <= 100%
-		if(pListPrgsBar->m_nMaxValue >= pListPrgsBar->m_nValue)
-		{
-			w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
-		}
-		// > 100%, abnormal case
-		else
-		{
-			w = rcPrgs.Width();
-		}
-	}
+	int w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
 	rcPrgs.right = rcPrgs.left + w;
 
 //	pDC->FillSolidRect(rcPrgs, RGB(46, 211, 49));
@@ -1061,10 +809,8 @@ BOOL CSListCtrl::CalcImageRect(int nItem, int nSubItem, CRect& rcImage)
 	//2. Check if there's a check box in the left side
 	if(CalcCheckBoxRect(nItem, nSubItem, rcCheckBox))
 	{
-		rcItem.left = rcCheckBox.right;
+		rcItem.left = rcCheckBox.right + m_HeaderCtrl.m_nSpace;
 	}
-	rcItem.left += m_HeaderCtrl.m_nSpace;
-
 	//no more space
 	if(rcItem.Width() <= 0)
 	{
@@ -1075,7 +821,6 @@ BOOL CSListCtrl::CalcImageRect(int nItem, int nSubItem, CRect& rcImage)
 	sizeImage.cx = sizeImage.cy = 0;
 
 	IMAGEINFO info;
-//	if(ImageList_GetImageInfo(pSubItemData->m_pListImage->m_hImageList, pSubItemData->m_pListImage->m_nImage, &info))
 	if(pSubItemData->m_pListImage->m_imageList->GetImageInfo(pSubItemData->m_pListImage->m_nImage, &info))
 	{
 		//if imageOnly we only return the rect of the image.
@@ -1129,7 +874,7 @@ BOOL CSListCtrl::CalcProgressRect(int nItem, int nSubItem, CRect& rcProgress)
 	CListSubItemData* pSubItemData = GetSubItemData(nItem, nSubItem);
 	ASSERT(pSubItemData);
 	
-	if(pSubItemData->m_pListPrgsBar == NULL)
+	if(pSubItemData->m_pListPrgsBar == NULL || pSubItemData->m_pListPrgsBar->m_nMaxValue <= 0)
 	{
 		return FALSE;
 	}

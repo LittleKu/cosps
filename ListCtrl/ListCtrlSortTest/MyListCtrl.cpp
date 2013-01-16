@@ -189,20 +189,22 @@ void CMyListCtrl::Init()
 		hditem.iImage = srcDirColumns[i].nType;
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
+}
 
-	for(i = 0; i < 10; i++)
+void CMyListCtrl::InitData()
+{
+	for(int i = 0; i < 10; i++)
 	{
 		CRowData* pRowData = new CRowData();
 		pRowData->m_nC1 = /*(i + 4) % 2 + 1*/i + 4;
 		pRowData->m_szDir.Format("Hello %d", i % 4);
 		pRowData->m_nC3 = (i + 11) % 2 + 1;
-
+		
 		pRowData->m_szReserved.Format("adcdefd %d", i % 8);
-
+		
 		AddRow(pRowData);
 	}
 }
-
 void CMyListCtrl::AddRow(CRowData* pRowData)
 {
 	ASSERT(pRowData != NULL);
@@ -226,7 +228,6 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 	SetItemText(nItem, 0, szTemp);
 	SetItemCheckedState(nItem, 0, (pRowData->m_nC1 % 2) + 1);
 	SetItemImage(nItem, 0, (pRowData->m_nC1 % 5), &m_ILTaskStatus);
-//	SetProgress(nItem, 0, pRowData->m_nC1 + 60, 100, FALSE);
 	SetItemProgress(nItem, 0, (pRowData->m_nC1 * 20) % 101, 100);
 	
 	SetItemText(nItem, 1, pRowData->m_szDir);
@@ -242,6 +243,7 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 
 CComparator* CMyListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
 {
+//	return NULL;
 	if(m_pComparator == NULL)
 	{
 		m_pComparator = new CMyComparator(pSortCondtions, nCount);

@@ -11,6 +11,9 @@
 #define IDB_TASK_STATUS                 130
 #define IDB_TASK_CATEGORY               131
 #define IDC_LIST_MAIN                   1000
+#define IDC_BTN_START                   1001
+#define IDC_BTN_STOP                    1002
+#define IDC_BTN_INIT                    1003
 
 // Next default values for new objects
 // 
@@ -18,7 +21,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        132
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_CONTROL_VALUE         1004
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

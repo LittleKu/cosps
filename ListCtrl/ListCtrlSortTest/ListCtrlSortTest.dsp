@@ -136,6 +136,10 @@ SOURCE=.\ListCtrlSortTest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\MemDC.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ListCtrlSortTestDlg.h
 # End Source File
 # Begin Source File

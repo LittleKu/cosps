@@ -40,8 +40,15 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg void OnBtnStart();
+	afx_msg void OnBtnStop();
+	afx_msg LRESULT OnMyMsg(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBtnInit();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+private:
+	BOOL m_bInit;
 };
 
 //{{AFX_INSERT_LOCATION}}

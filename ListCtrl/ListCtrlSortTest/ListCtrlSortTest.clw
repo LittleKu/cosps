@@ -55,10 +55,13 @@ Control4=IDOK,button,1342373889
 [DLG:IDD_LISTCTRLSORTTEST_DIALOG]
 Type=1
 Class=CListCtrlSortTestDlg
-ControlCount=3
+ControlCount=6
 Control1=IDOK,button,1342242817
 Control2=IDCANCEL,button,1342242816
-Control3=IDC_LIST_MAIN,SysListView32,1350631425
+Control3=IDC_LIST_MAIN,SysListView32,1350632449
+Control4=IDC_BTN_START,button,1342242816
+Control5=IDC_BTN_STOP,button,1342242816
+Control6=IDC_BTN_INIT,button,1342242816
 
 [CLS:CSHeaderCtrl]
 Type=0

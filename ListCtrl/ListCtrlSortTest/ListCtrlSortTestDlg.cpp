@@ -11,6 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define WM_MYMSG	(WM_USER + 19)
+
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDlg dialog used for App About
 
@@ -67,6 +69,7 @@ CListCtrlSortTestDlg::CListCtrlSortTestDlg(CWnd* pParent /*=NULL*/)
 	//}}AFX_DATA_INIT
 	// Note that LoadIcon does not require a subsequent DestroyIcon in Win32
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_bInit = FALSE;
 }
 
 void CListCtrlSortTestDlg::DoDataExchange(CDataExchange* pDX)
@@ -82,6 +85,10 @@ BEGIN_MESSAGE_MAP(CListCtrlSortTestDlg, CDialog)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BTN_START, OnBtnStart)
+	ON_BN_CLICKED(IDC_BTN_STOP, OnBtnStop)
+	ON_MESSAGE(WM_MYMSG, OnMyMsg)
+	ON_BN_CLICKED(IDC_BTN_INIT, OnBtnInit)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -168,4 +175,61 @@ void CListCtrlSortTestDlg::OnPaint()
 HCURSOR CListCtrlSortTestDlg::OnQueryDragIcon()
 {
 	return (HCURSOR) m_hIcon;
+}
+
+static int count = 0;
+static BOOL bRunning = FALSE;
+static UINT MyThreadProc( LPVOID pParam )
+{
+	HWND hWnd = (HWND)pParam;
+
+	bRunning = TRUE;
+	while(bRunning)
+	{
+		//::Sleep(1);
+		count++;
+		::SendMessage(hWnd, WM_MYMSG, count, 0);
+	}
+
+	return 0;
+}
+
+LRESULT CListCtrlSortTestDlg::OnMyMsg(WPARAM wParam, LPARAM lParam)
+{
+	int n = (int)wParam;
+	AfxTrace(_T("OnMyMsg: %d\n"), n);
+
+	CString szText;
+	for(int i = 0; i < 10; i++)
+	{
+		m_myListCtrl.SetItemProgress(i, 0, (n + i) % 101, 100);
+		szText.Format(_T("%.2f%c"), ((((double)((n + i) % 101)) * 100) / 100), _T('%'));
+		m_myListCtrl.SetItemText(i, 0, szText);
+		m_myListCtrl.InvalidateSubItem(i, 0);
+	}
+	return 0;
+}
+
+void CListCtrlSortTestDlg::OnBtnStart() 
+{
+	if(bRunning)
+	{
+		return;
+	}
+	AfxBeginThread(MyThreadProc, GetSafeHwnd());
+}
+
+void CListCtrlSortTestDlg::OnBtnStop() 
+{
+	bRunning = FALSE;
+}
+
+void CListCtrlSortTestDlg::OnBtnInit() 
+{
+	if(m_bInit)
+	{
+		return;
+	}
+	m_myListCtrl.InitData();
+	m_bInit = TRUE;
 }
