@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "SListCtrl.h"
 #include "MemDC.h"
-#include "gtb.h"
+#include "cflmfc/gdi_utils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -381,7 +381,10 @@ BOOL CSListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 	if(!m_HeaderCtrl.IsClickedCheckBox(nSubItem))
 	{
 		//CTRL key is pressed
-		m_pSortable->SortColumn(nSubItem, ::GetKeyState( VK_CONTROL ) < 0);
+		if(IsSortable())
+		{
+			m_pSortable->SortColumn(nSubItem, ::GetKeyState( VK_CONTROL ) < 0);
+		}
 		return FALSE;
 	}
 	
@@ -413,9 +416,14 @@ void CSListCtrl::OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	HD_NOTIFY *phdn = (HD_NOTIFY *) pNMHDR;
 	
-	AfxTrace("[OnHeaderClick]: iItem=%d, iButton=%d\n", phdn->iItem, phdn->iButton);
+	AfxTrace(_T("[OnHeaderClick]: iItem=%d, iButton=%d\n"), phdn->iItem, phdn->iButton);
 	
 	*pResult = 1;
+}
+
+BOOL CSListCtrl::IsSortable()
+{
+	return FALSE;
 }
 
 CComparator* CSListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
@@ -574,6 +582,28 @@ void CSListCtrl::SetItemProgress(int nItem, int nSubItem, int nCurrValue, int nM
 	{
 		pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_nMaxValue = nMaxValue;
 	}
+	if(pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_nMaxValue > 0)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_dPercent = 
+			(double)pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_nValue / (double)pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_nMaxValue;
+	}
+	//2. Update window
+	//InvalidateSubItem(nItem, nSubItem);
+}
+
+void CSListCtrl::SetItemProgress(int nItem, int nSubItem, double dPercent)
+{
+	ASSERT_ROW_COL_COUNT(nItem, nSubItem);
+	
+	//1. Update data: checked state
+	CListItemData *pData = (CListItemData *) CListCtrl::GetItemData(nItem);
+	ASSERT(pData && pData->m_pSubItemDatas);
+	
+	if(pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar == NULL)
+	{
+		pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar = new CListProgress();
+	}
+	pData->m_pSubItemDatas[nSubItem].m_pListPrgsBar->m_dPercent = dPercent;
 	
 	//2. Update window
 	//InvalidateSubItem(nItem, nSubItem);
@@ -816,7 +846,7 @@ BOOL CSListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 		bResult = checkboxRect.PtInRect(pt);
 	}
 
-	AfxTrace("IsPtInSubItemCheckBox: %d\n", bResult);
+	AfxTrace(_T("IsPtInSubItemCheckBox: %d\n"), bResult);
 	return bResult;
 }
 
@@ -879,7 +909,7 @@ void CSListCtrl::DrawCheckBox(int nItem, int nSubItem, CDC *pDC)
 	CRect chkboxrect;
 	if(CalcCheckBoxRect(nItem, nSubItem, chkboxrect))
 	{
-		gtb::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
+		cfl::DrawCheckBox(pDC, &chkboxrect, bDrawMark, m_crWindow);
 	}
 }
 void CSListCtrl::DrawImage(int nItem, int nSubItem, CDC *pDC)
@@ -970,6 +1000,15 @@ void CSListCtrl::DrawText(int nItem, int nSubItem, CDC *pDC, BOOL bProgressText)
 }
 void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 {
+	//3. Draw the actual progress
+	CListProgress* pListPrgsBar = GetSubItemData(nItem, nSubItem)->m_pListPrgsBar;
+	ASSERT(pListPrgsBar != NULL);
+	//out of range, don't draw
+	if(pListPrgsBar->m_dPercent < 0.0f || pListPrgsBar->m_dPercent > 1.0f)
+	{
+		return;
+	}
+
 	CRect rcPrgs;
 	if(!CalcProgressRect(nItem, nSubItem, rcPrgs))
 	{
@@ -985,28 +1024,19 @@ void CSListCtrl::DrawProgressBar(int nItem, int nSubItem, CDC *pDC)
 	pDC->FillSolidRect(rcPrgs, RGB(255, 240, 240));
 //	gtb::DrawGradient2(pDC, rcPrgs, RGB(226, 226, 226), RGB(164, 164, 164), RGB(213, 213, 213), FALSE);
 
-	//3. Draw the actual progress
-	CListProgress* pListPrgsBar = GetSubItemData(nItem, nSubItem)->m_pListPrgsBar;
-	ASSERT(pListPrgsBar != NULL);
-
 	int w = 0;
-	if(pListPrgsBar->m_nMaxValue > 0 && pListPrgsBar->m_nValue > 0)
+	if(Equals(pListPrgsBar->m_dPercent, 1.0))
 	{
-		// <= 100%
-		if(pListPrgsBar->m_nMaxValue >= pListPrgsBar->m_nValue)
-		{
-			w = ::MulDiv(rcPrgs.Width(), pListPrgsBar->m_nValue, pListPrgsBar->m_nMaxValue);
-		}
-		// > 100%, abnormal case
-		else
-		{
-			w = rcPrgs.Width();
-		}
+		w = rcPrgs.Width();
+	}
+	else if(!Equals(pListPrgsBar->m_dPercent, 0.0))
+	{
+		w = (int)(pListPrgsBar->m_dPercent * rcPrgs.Width());
 	}
 	rcPrgs.right = rcPrgs.left + w;
 
 //	pDC->FillSolidRect(rcPrgs, RGB(46, 211, 49));
-	gtb::DrawGradient2(pDC, rcPrgs, RGB(205, 255, 205), RGB(0, 200, 38), RGB(90, 233, 107), FALSE);
+	cfl::DrawGradient2(pDC, rcPrgs, RGB(205, 255, 205), RGB(0, 200, 38), RGB(90, 233, 107), FALSE);
 
 	//4. Draw Progress Text
 	DrawText(nItem, nSubItem, pDC, TRUE);
@@ -1025,7 +1055,7 @@ BOOL CSListCtrl::CalcCheckBoxRect(int nItem, int nSubItem, CRect& chkboxrect)
 	boundRect.DeflateRect(m_HeaderCtrl.m_nSpace, 0); // line up checkbox with header checkbox
 
 	BOOL bCenter = GetItemText(nItem, nSubItem).IsEmpty();
-	BOOL bResult = gtb::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
+	BOOL bResult = cfl::CalcCheckBoxRect(boundRect, chkboxrect, bCenter);
 	if(bResult)
 	{
 		CRect rcTemp;
@@ -1173,4 +1203,14 @@ void CSListCtrl::GetDrawColors(int nItem, int nSubItem, COLORREF& colorText, COL
 	
 	colorText = crText;
 	colorBkgnd = crBkgnd;
+}
+
+BOOL CSListCtrl::Equals(double d1, double d2)
+{
+	double diff = d1 - d2;
+	if(diff > -0.000001f && diff < 0.000001f)
+	{
+		return TRUE;
+	}
+	return FALSE;
 }

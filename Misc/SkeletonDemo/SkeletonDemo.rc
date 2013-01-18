@@ -104,7 +104,8 @@ BEGIN
     CONTROL         "",IDC_SPLITTER_TREE_TABLE,"Static",SS_BLACKFRAME,120,0,
                     3,350
     CONTROL         "List1",IDC_TASK_LISTCTRL,"SysListView32",LVS_REPORT | 
-                    WS_BORDER | WS_TABSTOP,123,0,330,350
+                    LVS_OWNERDRAWFIXED | WS_BORDER | WS_TABSTOP,123,0,330,
+                    350
     CONTROL         "",IDC_SPLITTER_TABLE_OUTPUT,"Static",SS_BLACKFRAME,453,
                     0,3,350
     GROUPBOX        "Output Profile",IDC_OUTPUT_GROUPBOX,457,0,203,80
@@ -225,6 +226,7 @@ IDB_MAIN_TOOLBAR_BKG    BITMAP  DISCARDABLE     "res\\MainToolBarBkg.bmp"
 IDB_SPLITTER_V_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgV.bmp"
 IDB_SPLITTER_H_BKG      BITMAP  DISCARDABLE     "res\\SplitterBkgH.bmp"
 IDB_TB_STOP             BITMAP  DISCARDABLE     "res\\tb_stop.bmp"
+IDB_TASK_STATUS         BITMAP  DISCARDABLE     "res\\TaskStatus.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

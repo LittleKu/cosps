@@ -8,11 +8,12 @@
 //
 
 #include "CommonDef.h"
+#include "SListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTaskListCtrl window
 
-class CTaskListCtrl : public CListCtrl
+class CTaskListCtrl : public CSListCtrl
 {
 // Construction
 public:
@@ -20,7 +21,8 @@ public:
 
 // Attributes
 public:
-
+	CImageList m_ILTaskStatus;
+	CImageList m_ILShell;
 // Operations
 public:
 
@@ -53,15 +55,17 @@ public:
 private:
 	enum TaskInfoColum
 	{
-		COL_FILE_NAME = 0,
+		COL_CHECK = 0,
+		COL_STATUS,
+		COL_FILE_NAME,
 		COL_FORMAT,
 		COL_DURATION,
-		COL_STATUS,
 		COL_PROGRESS,
 		COL_COUNT
 	};
 
 	void FormatProgress(double dPercent, CString& rText);
+	int StatusToILIndex(int nStatus);
 
 	// Generated message map functions
 protected:

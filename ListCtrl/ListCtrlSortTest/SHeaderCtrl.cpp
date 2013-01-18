@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include "SHeaderCtrl.h"
 #include "MemDC.h"
-#include "gtb.h"
 #include "SortSupport.h"
+#include "cflmfc/gdi_utils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -146,7 +146,7 @@ void CSHeaderCtrl::DrawCtrl(CDC* pDC)
 //    pDC->FillSolidRect(rectClient, m_cr3DFace);
 	COLORREF colorStart = RGB(255, 255, 255);
 	COLORREF colorEnd	= RGB(199, 210, 226);
-	gtb::DrawGradient(pDC, &rectClient, colorStart, colorEnd, FALSE);
+	cfl::DrawGradient(pDC, &rectClient, colorStart, colorEnd, FALSE);
 	
 	int iItems = GetItemCount();
 	ASSERT(iItems >= 0);
@@ -275,7 +275,8 @@ int  CSHeaderCtrl::DrawCheckBox(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 	CRect chkboxRect;
 	if(GetCheckBoxRect(rect, lphdi, chkboxRect))
 	{
-		gtb::DrawCheckBox(pDC, &chkboxRect, SHC_STATE_TO_INDEX_CHECK(lphdi->iImage) == SHC_CHECKED, ::GetSysColor(COLOR_WINDOW));	
+		cfl::DrawCheckBox(pDC, &chkboxRect, SHC_STATE_TO_INDEX_CHECK(lphdi->iImage) == SHC_CHECKED, 
+			::GetSysColor(COLOR_WINDOW));	
 		iWidth = chkboxRect.right - rect.left;
 	}
 	
@@ -300,15 +301,29 @@ int  CSHeaderCtrl::DrawSortImage(CDC* pDC, const CRect& rect, LPHDITEM lphdi)
 			size.cx = rect.Width() < m_sizeImage.cx ? rect.Width() : m_sizeImage.cx;
 			size.cy = m_sizeImage.cy;
 			
-			// save image list background color
-			COLORREF rgb = pImageList->GetBkColor();
-			
 			// set image list background color to same as header control
 			pImageList->DrawIndirect(pDC, GetIndexOfImageList(nSortIndex), point, size, CPoint(0, 0));
 			
 			iWidth = size.cx;
 		}
-		
+		/*
+		if(nSortIndex == SHC_SORT_ASC || nSortIndex == SHC_SORT_DES)
+		{
+			int nHeight = 2;
+			POINT point;
+			point.y = rect.CenterPoint().y - ((nHeight+1) >> 1);
+			point.x = rect.left;
+
+			int nDir = ((nSortIndex == SHC_SORT_ASC) ? cfl::GD_UP : cfl::GD_DOWN);
+			CRect rcClipBox;
+			CPen pen(PS_SOLID, 1, RGB(0, 0, 0));
+			pDC->SelectObject(&pen);
+
+			cfl::DrawTriangle(pDC, point, nDir, nHeight, &rcClipBox);
+
+			iWidth = rcClipBox.Width();
+		}
+		*/
 	}
 	return iWidth;
 }
@@ -416,7 +431,7 @@ BOOL CSHeaderCtrl::GetCheckBoxRect(const CRect& rectItem, LPHDITEM lphdi, CRect&
 		return FALSE;
 	}
 	
-	BOOL bResult = gtb::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
+	BOOL bResult = cfl::CalcCheckBoxRect(rectItem, chkboxRect, (lstrlen(lphdi->pszText) == 0));
 	
 	return bResult;
 }

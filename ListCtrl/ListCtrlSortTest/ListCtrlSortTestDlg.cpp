@@ -197,8 +197,7 @@ static UINT MyThreadProc( LPVOID pParam )
 LRESULT CListCtrlSortTestDlg::OnMyMsg(WPARAM wParam, LPARAM lParam)
 {
 	int n = (int)wParam;
-	AfxTrace(_T("OnMyMsg: %d\n"), n);
-
+	//AfxTrace(_T("OnMyMsg: %d\n"), n);
 	CString szText;
 	for(int i = 0; i < 10; i++)
 	{
@@ -207,6 +206,9 @@ LRESULT CListCtrlSortTestDlg::OnMyMsg(WPARAM wParam, LPARAM lParam)
 		m_myListCtrl.SetItemText(i, 0, szText);
 		m_myListCtrl.InvalidateSubItem(i, 0);
 	}
+
+	//m_myListCtrl.Invalidate();
+
 	return 0;
 }
 

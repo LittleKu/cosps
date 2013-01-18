@@ -710,7 +710,7 @@ LRESULT CVCDlg::OnNotifyProcEnd(WPARAM wParam, LPARAM lParam)
 	m_nCurCmd++;
 	if(m_nCurCmd < m_cmdInfos.size())
 	{
-		UpdateProgress(m_selRows.at(m_nCurRow), m_nProgressBase);
+		UpdateProgress(m_selRows.at(m_nCurRow), (double)m_nProgressBase / 100);
 
 		//start next command
 		StartProcess(m_cmdInfos.at(m_nCurCmd), m_nCurCmd);
@@ -721,7 +721,7 @@ LRESULT CVCDlg::OnNotifyProcEnd(WPARAM wParam, LPARAM lParam)
 		CTaskInfo taskInfo;
 		taskInfo.mask = TIF_STATUS | TIF_PROGRESS;
 		taskInfo.m_nState = TSE_DONE;
-		taskInfo.m_dProgress = 100;
+		taskInfo.m_dProgress = 1.0f;
 		m_taskListCtrl.UpdateRow(m_selRows.at(m_nCurRow), &taskInfo);
 
 		//delete temp files
@@ -789,7 +789,7 @@ LRESULT CVCDlg::OnNotifyProcProgress(WPARAM wParam, LPARAM lParam)
 		dPercent += (double)m_nProgressBase;
 	}
 
-	UpdateProgress(m_selRows.at(m_nCurRow), dPercent);
+	UpdateProgress(m_selRows.at(m_nCurRow), (double)dPercent / 100);
 	
 	return 0L;
 }

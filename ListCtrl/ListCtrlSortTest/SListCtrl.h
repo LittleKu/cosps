@@ -42,6 +42,7 @@ public:
 	//Sort Support
 	virtual LPARAM GetAppData(LPARAM lParam);
 	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
+	virtual BOOL IsSortable();
 
 	//Insert Functions
 	int  InsertItem( int nItem, LPCTSTR lpszItem );
@@ -70,6 +71,7 @@ public:
 
 	//Progress Related functions
 	void SetItemProgress(int nItem, int nSubItem, int nCurrValue, int nMaxValue = -1);
+	void SetItemProgress(int nItem, int nSubItem, double dPercent);
 
 	void SetRowHeight(int nRowHeight);
 	int  GetRowHeight();
@@ -98,6 +100,7 @@ private:
 	void SetItemCheckedStateByClick(int nItem, int nSubItem, int nCheckedState, BOOL bUpdateHeader = TRUE);
 	BOOL IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt);
 	inline int SwitchCheckedState(int nCheckedState);
+	inline BOOL Equals(double d1, double d2);
 private:
 	//Attributes
 	CSortable* m_pSortable;
@@ -163,7 +166,11 @@ public:
 	//m_maxvalue.
 	//Default value: 0
 	int m_nValue;
-	CListProgress() : m_nMaxValue(-1), m_nValue(0) {}
+
+	//percentage
+	double m_dPercent;
+
+	CListProgress() : m_nMaxValue(-1), m_nValue(0), m_dPercent(-1.0f) {}
 };
 
 class CSListCtrl::CListSubItemData

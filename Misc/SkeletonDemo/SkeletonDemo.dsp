@@ -194,11 +194,23 @@ SOURCE=.\PropListMgr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\SHeaderCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\SkeletonDemo.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\SkeletonDemo.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\SListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\Sorter.cpp
 # End Source File
 # Begin Source File
 
@@ -267,6 +279,10 @@ SOURCE=.\MainToolBar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\MemDC.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\MetaProbe.h
 # End Source File
 # Begin Source File
@@ -295,7 +311,23 @@ SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ThirdParty\SHeaderCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\SkeletonDemo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\SListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\Sorter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ThirdParty\SortSupport.h
 # End Source File
 # Begin Source File
 
@@ -356,6 +388,10 @@ SOURCE=.\res\SplitterBkgH.bmp
 # Begin Source File
 
 SOURCE=.\res\SplitterBkgV.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\TaskStatus.bmp
 # End Source File
 # Begin Source File
 

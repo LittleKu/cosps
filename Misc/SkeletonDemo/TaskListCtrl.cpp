@@ -5,6 +5,7 @@
 #include "SkeletonDemo.h"
 #include "TaskListCtrl.h"
 #include <Shlwapi.h>
+#include "cflwin/ShellUtils.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,11 +23,12 @@ struct ColumnInfo
 
 static ColumnInfo columns[] =
 {
-	{ _T("Name"),		0,	170,	HDF_LEFT	},
-    { _T("Format"),  	0,	70,		HDF_LEFT	},
-    { _T("Duration"),  	0,	80,		HDF_RIGHT	},
-	{ _T("Status"),  	0,	80,		HDF_LEFT	},
-	{ _T("Progress"),  	0,	90,		HDF_LEFT	}
+	{ _T(""),			SHC_INDEX_TO_STATE(SHC_UNCHECKED, SHC_NONE_SORT),		40,		HDF_LEFT	},
+	{ _T("Status"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	80,		HDF_LEFT	},
+	{ _T("Name"),		SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	170,	HDF_LEFT	},
+    { _T("Format"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	50,		HDF_LEFT	},
+    { _T("Duration"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	60,		HDF_RIGHT	},
+	{ _T("Progress"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	90,		HDF_LEFT	}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ CTaskListCtrl::~CTaskListCtrl()
 }
 
 
-BEGIN_MESSAGE_MAP(CTaskListCtrl, CListCtrl)
+BEGIN_MESSAGE_MAP(CTaskListCtrl, CSListCtrl)
 	//{{AFX_MSG_MAP(CTaskListCtrl)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
@@ -53,15 +55,34 @@ END_MESSAGE_MAP()
 void CTaskListCtrl::OnDestroy() 
 {
 	DeleteAllItems();
-	CListCtrl::OnDestroy();
+	CSListCtrl::OnDestroy();
+
+	m_ILShell.Detach();
 }
 
 void CTaskListCtrl::Init()
 {
+	//Shell ImageList
+	HIMAGELIST hShellImageList = cfl::ShellUtils::GetFileSysImageList(GetSafeHwnd());
+	ImageList_SetBkColor(hShellImageList, CLR_NONE);
+	m_ILShell.Attach(hShellImageList);
+
+	//Task Status ImageList
+	m_ILTaskStatus.Create(16, 16, ILC_COLOR24 | ILC_MASK, 0, 1);
+	{
+		CBitmap bmp;
+		bmp.LoadBitmap(IDB_TASK_STATUS);
+		m_ILTaskStatus.Add(&bmp, RGB(255, 0, 255));
+	}
+
+	SetRowHeight(20);
+
 	//1. Set Extended Style
 	DWORD dwExtendedStyle = GetExtendedStyle();
 	dwExtendedStyle = (dwExtendedStyle | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	SetExtendedStyle(dwExtendedStyle);
+
+	ModifyStyle(0, LVS_SHOWSELALWAYS, 0);
 	
 	//2. Insert Columns
     LVCOLUMN    lvc;
@@ -84,9 +105,8 @@ void CTaskListCtrl::Init()
 		hditem.mask = HDI_IMAGE | HDI_FORMAT;
 		GetHeaderCtrl()->GetItem(i, &hditem);
 		
-		hditem.fmt |= columns[i].nAlign;
-// 		hditem.fmt |=  HDF_IMAGE | columns[i].nAlign;
-// 		hditem.iImage = columns[i].nType;
+ 		hditem.fmt |=  HDF_IMAGE | columns[i].nAlign;
+ 		hditem.iImage = columns[i].nType;
 		
 		GetHeaderCtrl()->SetItem(i, &hditem);
 	}
@@ -108,15 +128,28 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 		return nResult;
 	}
 
-	//update row: TODO 
 	CString szTemp;
     int iSubItem = 0;
+
+	//check
+	SetItemCheckedState(lvi.iItem, iSubItem, SHC_CHECKED);
+	iSubItem++;
+
+	//Status
+	SetItemImage(lvi.iItem, iSubItem, StatusToILIndex(pTaskInfo->m_nState), &m_ILTaskStatus);
+	SysUtils::GetTaskStateText(pTaskInfo->m_nState, szTemp);
+	SetItemText(lvi.iItem, iSubItem, szTemp);
+	iSubItem++;
 
 	//file name
 	szTemp = pTaskInfo->m_szFileName;
 	::PathStripPath(szTemp.GetBuffer(0));
 	szTemp.ReleaseBuffer(-1);
 
+	if(!szTemp.IsEmpty())
+	{
+		SetItemImage(lvi.iItem, iSubItem, cfl::ShellUtils::GetFileSysIconIndex(pTaskInfo->m_szFileName), &m_ILShell);
+	}
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
@@ -129,12 +162,8 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
-	//Status
-	SysUtils::GetTaskStateText(pTaskInfo->m_nState, szTemp);
-	SetItemText(lvi.iItem, iSubItem, szTemp);
-	iSubItem++;
-
 	//Progress
+	SetItemProgress(lvi.iItem, iSubItem, pTaskInfo->m_dProgress);
 	FormatProgress(pTaskInfo->m_dProgress, szTemp);
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
@@ -153,20 +182,16 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 	int pSubItems[COL_COUNT];
 	int nSubItemCount = 0;
 	CString szTemp;
+
 	
-	//File Name
-	if((pNewTaskInfo->mask & TIF_FILE_NAME) && pItemData->m_szFileName.Compare(pNewTaskInfo->m_szFileName) != 0)
-	{
-		pItemData->m_szFileName = pNewTaskInfo->m_szFileName;
-		SetItemText(nIndex, COL_FILE_NAME, pItemData->m_szFileName);
-		
-		pSubItems[nSubItemCount++] = COL_FILE_NAME;
-	}
+	//File Name: TODO?
 	
 	//Status
 	if((pNewTaskInfo->mask & TIF_STATUS) && (pItemData->m_nState != pNewTaskInfo->m_nState))
 	{
 		pItemData->m_nState = pNewTaskInfo->m_nState;
+
+		SetItemImage(nIndex, COL_STATUS, StatusToILIndex(pItemData->m_nState), &m_ILTaskStatus);
 
 		SysUtils::GetTaskStateText(pItemData->m_nState, szTemp);
 		SetItemText(nIndex, COL_STATUS, szTemp);
@@ -178,13 +203,17 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 	if((pNewTaskInfo->mask & TIF_PROGRESS) && !SysUtils::Equals(pItemData->m_dProgress, pNewTaskInfo->m_dProgress))
 	{
 		pItemData->m_dProgress = pNewTaskInfo->m_dProgress;
+
+		SetItemProgress(nIndex, COL_PROGRESS, pItemData->m_dProgress);
+
 		FormatProgress(pItemData->m_dProgress, szTemp);
 		SetItemText(nIndex, COL_PROGRESS, szTemp);
 
 		pSubItems[nSubItemCount++] = COL_PROGRESS;
 	}
 
-	//TODO: invalidate the changed columns
+	//invalidate the changed columns
+	InvalidateSubItems(nIndex, pSubItems, nSubItemCount);
 }
 
 BOOL CTaskListCtrl::DeleteItem(int nItem)
@@ -195,7 +224,7 @@ BOOL CTaskListCtrl::DeleteItem(int nItem)
 	if(pTaskInfo)
 		delete pTaskInfo;
 	
-	return CListCtrl::DeleteItem(nItem);
+	return CSListCtrl::DeleteItem(nItem);
 }
 BOOL CTaskListCtrl::DeleteAllItems()
 {
@@ -209,7 +238,7 @@ BOOL CTaskListCtrl::DeleteAllItems()
 			delete pTaskInfo;
 	}
 	
-	return CListCtrl::DeleteAllItems();
+	return CSListCtrl::DeleteAllItems();
 }
 
 int CTaskListCtrl::AddTask(LPCTSTR lpszFileName)
@@ -272,11 +301,12 @@ void CTaskListCtrl::FormatProgress(double dPercent, CString& rText)
 	{
 		dPercent = 0;
 	}
-	else if(dPercent > 100) 
+	else if(dPercent > 1.0f) 
 	{
-		dPercent = 100;
+		dPercent = 1.0f;
 	}
 
+	dPercent *= 100;
 	//special process for 0 and 100
 	if(SysUtils::Equals(dPercent, 0))
 	{
@@ -300,4 +330,9 @@ bool CTaskListCtrl::GetMetaInfo(int nTaskID, int nMetaID, std::string& val)
 		return pTaskInfo->m_pMetaMap->Get(nMetaID, val);
 	}
 	return false;
+}
+
+int CTaskListCtrl::StatusToILIndex(int nStatus)
+{
+	return nStatus + 1;
 }

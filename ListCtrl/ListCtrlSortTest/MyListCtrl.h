@@ -65,6 +65,7 @@ public:
 	void AddRow(CRowData* pRowData);
 	void Init();
 	void InitData();
+	virtual BOOL IsSortable();
 	virtual CComparator* CreateComparator(CSortCondition* pSortCondtions, int nCount);
 	virtual ~CMyListCtrl();
 private:

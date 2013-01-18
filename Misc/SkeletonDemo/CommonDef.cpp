@@ -40,6 +40,8 @@ void CTaskInfo::Reset()
 	m_szFormat.Empty();
 	m_nDuration = 0;
 	m_nState = TSE_READY;
+	m_dProgress = 0.0f;
+
 	m_nTaskID = -1;
 
 	if(m_pMetaMap)

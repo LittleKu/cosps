@@ -204,6 +204,16 @@ void CMyListCtrl::InitData()
 		
 		AddRow(pRowData);
 	}
+
+	SetItemProgress(5, 0, 100, 100);
+	
+	SetItemProgress(6, 0, 0.0);
+	
+	SetItemProgress(7, 0, 1.0);
+	
+	SetItemProgress(8, 0, 1.00001f);
+	
+	SetItemProgress(9, 0, -0.00001f);
 }
 void CMyListCtrl::AddRow(CRowData* pRowData)
 {
@@ -239,6 +249,11 @@ void CMyListCtrl::AddRow(CRowData* pRowData)
 	SetItemText(nItem, 3, pRowData->m_szReserved);
 
 	SetItemImage(nItem, 4, (pRowData->m_nC1 % 12), &m_ILTaskStatus);
+}
+
+BOOL CMyListCtrl::IsSortable()
+{
+	return TRUE;
 }
 
 CComparator* CMyListCtrl::CreateComparator(CSortCondition* pSortCondtions, int nCount)
