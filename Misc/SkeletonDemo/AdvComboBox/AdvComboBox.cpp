@@ -604,7 +604,7 @@ void CAdvComboBox::DrawDropDownList(CDC* pDC)
 	CRect rect;
 	GetClientRect(&rect);
 	
-	cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE);
+	cfl::UiTheme* pTheme = cfl::GetSysThemeMgr()->GetThemeData(cfl::UTI_BLUE_RECT_BORDER);
 	ASSERT(pTheme != NULL);
 	
 	//Draw background

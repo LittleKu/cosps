@@ -34,6 +34,9 @@ public:
 
 	CString		m_szFileName;	/* Input file name */
 	CString		m_szFormat;		/* Input file format */
+
+	CString		m_szWidth;
+	CString		m_szHeight;		
 	DWORD		m_nDuration;	/* Input file duration */
 	DWORD		m_nState;		/* Task state */
 	double		m_dProgress;	/* Task progress */

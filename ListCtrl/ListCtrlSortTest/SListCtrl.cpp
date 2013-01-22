@@ -416,7 +416,7 @@ void CSListCtrl::OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	HD_NOTIFY *phdn = (HD_NOTIFY *) pNMHDR;
 	
-	AfxTrace(_T("[OnHeaderClick]: iItem=%d, iButton=%d\n"), phdn->iItem, phdn->iButton);
+	//AfxTrace(_T("[OnHeaderClick]: iItem=%d, iButton=%d\n"), phdn->iItem, phdn->iButton);
 	
 	*pResult = 1;
 }
@@ -846,7 +846,7 @@ BOOL CSListCtrl::IsPtInSubItemCheckBox(int nItem, int nSubItem, POINT pt)
 		bResult = checkboxRect.PtInRect(pt);
 	}
 
-	AfxTrace(_T("IsPtInSubItemCheckBox: %d\n"), bResult);
+	//AfxTrace(_T("IsPtInSubItemCheckBox: %d\n"), bResult);
 	return bResult;
 }
 
@@ -1198,6 +1198,17 @@ void CSListCtrl::GetDrawColors(int nItem, int nSubItem, COLORREF& colorText, COL
 					crBkgnd = colorBkgnd;
 				}
 			}
+		}
+	}
+	else
+	{
+		if(nItem % 2 == 0)
+		{
+			crBkgnd = RGB(253, 253, 253);
+		}
+		else
+		{
+			crBkgnd = RGB(242, 242, 234);
 		}
 	}
 	

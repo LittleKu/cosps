@@ -38,6 +38,10 @@ void CTaskInfo::Reset()
 	mask = 0;
 	m_szFileName.Empty();
 	m_szFormat.Empty();
+
+	m_szWidth.Empty();
+	m_szHeight.Empty();
+
 	m_nDuration = 0;
 	m_nState = TSE_READY;
 	m_dProgress = 0.0f;

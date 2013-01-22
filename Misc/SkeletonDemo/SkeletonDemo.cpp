@@ -81,6 +81,7 @@ BOOL CSkeletonDemoApp::InitInstance()
 	InitLog4cplus();
 	InitAppVariables();
 	InitBCG();
+	LOG4CPLUS_INFO_STR(THE_LOGGER, _T("Application InitInstance Done. Start to Show Main Window"))
 
 	CMainDlg dlg;
 	m_pMainWnd = &dlg;
@@ -97,7 +98,7 @@ BOOL CSkeletonDemoApp::InitInstance()
 	}
 
 	DeInitBCG();
-	LOG4CPLUS_INFO_STR(THE_LOGGER, _T("Application InitInstance Done"))
+	LOG4CPLUS_INFO_STR(THE_LOGGER, _T("Application InitInstance Exit"))
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
@@ -150,7 +151,9 @@ void CSkeletonDemoApp::InitWorkDir()
 void CSkeletonDemoApp::InitLog4cplus()
 {
 #ifdef ENABLE_LOG4CPLUS
-	std::locale::global(std::locale("chs"));
+	std::string szCurrLocale;
+	cfl::format(szCurrLocale, ".%d", GetACP());
+	std::locale::global(std::locale(szCurrLocale.c_str()));
 	LPCTSTR pLogFileSuffixName = _T("LOG_FILE_SUFFIX");
 	CString szLogFileSuffix = _tgetenv(pLogFileSuffixName);
 	
@@ -181,7 +184,8 @@ void CSkeletonDemoApp::InitLog4cplus()
 			
 			cfl::tstring szCurLocaleName = CFL_STRING_TO_TSTRING(std::locale().name());
 			cfl::tstring szLog;
-			cfl::tformat(szLog, _T("Application Initialized. TimeZone=%d, Locale=%s"), (-(tzi.Bias)), szCurLocaleName.c_str());
+			cfl::tformat(szLog, _T("Application Initialized. TimeZone=%d, Locale=%s, szCurrLocale=%s"), 
+				(-(tzi.Bias)), szCurLocaleName.c_str(), CFL_STRING_TO_T_STR(szCurrLocale));
 			LOG4CPLUS_INFO_STR(THE_LOGGER, szLog)
 		}
 	}

@@ -114,6 +114,9 @@ private:
 
 	BOOL	m_bStopped;
 	int		m_nCurTaskState;
+
+	TCHAR*	m_lpFileBuffer;
+	int		m_nFileBufferLen;
 };
 
 //{{AFX_INSERT_LOCATION}}

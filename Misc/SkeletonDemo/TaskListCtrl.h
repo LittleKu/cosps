@@ -65,6 +65,7 @@ private:
 	};
 
 	void FormatProgress(double dPercent, CString& rText);
+	void FormatFrameSize(const CString& szWidth, const CString& szHeight, CString& rText);
 	int StatusToILIndex(int nStatus);
 
 	// Generated message map functions

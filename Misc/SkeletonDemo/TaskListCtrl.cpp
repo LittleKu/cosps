@@ -6,6 +6,7 @@
 #include "TaskListCtrl.h"
 #include <Shlwapi.h>
 #include "cflwin/ShellUtils.h"
+#include "MPlayerMetaProbe.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,11 +24,11 @@ struct ColumnInfo
 
 static ColumnInfo columns[] =
 {
-	{ _T(""),			SHC_INDEX_TO_STATE(SHC_UNCHECKED, SHC_NONE_SORT),		40,		HDF_LEFT	},
-	{ _T("Status"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	80,		HDF_LEFT	},
-	{ _T("Name"),		SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	170,	HDF_LEFT	},
-    { _T("Format"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	50,		HDF_LEFT	},
-    { _T("Duration"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	60,		HDF_RIGHT	},
+	{ _T(""),			SHC_INDEX_TO_STATE(SHC_UNCHECKED, SHC_NONE_SORT),		30,		HDF_LEFT	},
+	{ _T("Status"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	75,		HDF_LEFT	},
+	{ _T("Name"),		SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	160,	HDF_LEFT	},
+    { _T("Frame Size"), SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	70,		HDF_LEFT	},
+    { _T("Duration"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	55,		HDF_RIGHT	},
 	{ _T("Progress"),  	SHC_INDEX_TO_STATE(SHC_NONE_CHECK_BOX, SHC_NONE_SORT),	90,		HDF_LEFT	}
 };
 
@@ -75,7 +76,7 @@ void CTaskListCtrl::Init()
 		m_ILTaskStatus.Add(&bmp, RGB(255, 0, 255));
 	}
 
-	SetRowHeight(20);
+	SetRowHeight(18);
 
 	//1. Set Extended Style
 	DWORD dwExtendedStyle = GetExtendedStyle();
@@ -153,8 +154,13 @@ int CTaskListCtrl::AddRow(CTaskInfo *pTaskInfo)
 	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
-	//file format
-	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
+// 	//file format
+// 	SetItemText(lvi.iItem, iSubItem, pTaskInfo->m_szFormat);
+// 	iSubItem++;
+
+	//frame size
+	FormatFrameSize(pTaskInfo->m_szWidth, pTaskInfo->m_szHeight, szTemp);
+	SetItemText(lvi.iItem, iSubItem, szTemp);
 	iSubItem++;
 
 	//duration
@@ -182,9 +188,6 @@ void CTaskListCtrl::UpdateRow(int nIndex, CTaskInfo* pNewTaskInfo)
 	int pSubItems[COL_COUNT];
 	int nSubItemCount = 0;
 	CString szTemp;
-
-	
-	//File Name: TODO?
 	
 	//Status
 	if((pNewTaskInfo->mask & TIF_STATUS) && (pItemData->m_nState != pNewTaskInfo->m_nState))
@@ -243,10 +246,26 @@ BOOL CTaskListCtrl::DeleteAllItems()
 
 int CTaskListCtrl::AddTask(LPCTSTR lpszFileName)
 {
-	CTaskInfo* pTaskInfo = new CTaskInfo();
+	CTaskInfo* pTaskInfo = new CTaskInfo;
 	pTaskInfo->m_szFileName = lpszFileName;
-
-	//TODO: parse file
+	
+	MPlayerMetaProbe probe(pTaskInfo->m_pMetaMap);
+	if(probe.Probe(lpszFileName) == 0)
+	{
+		std::string val;
+		if(probe.GetMeta(ID_VIDEO_WIDTH, val))
+		{
+			pTaskInfo->m_szWidth = CFL_STRING_TO_T_STR(val);
+		}
+		if(probe.GetMeta(ID_VIDEO_HEIGHT, val))
+		{
+			pTaskInfo->m_szHeight = CFL_STRING_TO_T_STR(val);
+		}
+		if(probe.GetMeta(ID_LENGTH, val))
+		{
+			pTaskInfo->m_nDuration = atoi(val.c_str());
+		}
+	}
 	return AddRow(pTaskInfo);
 }
 
@@ -319,6 +338,21 @@ void CTaskListCtrl::FormatProgress(double dPercent, CString& rText)
 	else
 	{
 		rText.Format(_T("%.2f%c"), dPercent, _T('%'));
+	}
+}
+
+void CTaskListCtrl::FormatFrameSize(const CString& szWidth, const CString& szHeight, CString& rText)
+{
+	int w = _ttoi(szWidth);
+	int h = _ttoi(szHeight);
+
+	if(w > 0 && h > 0)
+	{
+		rText.Format(_T("%dx%d"), w, h);
+	}
+	else
+	{
+		rText.Empty();
 	}
 }
 

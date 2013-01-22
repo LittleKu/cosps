@@ -21,6 +21,18 @@ DECLARE_THE_LOGGER_NAME(_T("SysUtils"))
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+LPCTSTR SysUtils::lpszInputFileFilter = 
+	_T("All Supported Media Files|*.wmv; *.avi; *.asf; *.dvr-ms; *.ms-dvr;")
+	_T(" *.mp4; *.m4v; *.mpeg4; *.m2v; *.mpg; *.vob; *.mpeg; *.mpeg2; *.m2p; *.mod;")
+	_T(" *.m1v; *.mpg; *.mpv, *.mpeg; *.mpeg1; *.dat; *.rm; *.rmvb; *.rv; *.flv; *.f4v|")
+	_T("Windows Media Files (*.wmv;*.avi;*.asf;*.dvr-ms;*.ms-dvr)|*.wmv; *.avi; *.asf; *.dvr-ms; *.ms-dvr|")
+	_T("MPEG4 Files (*.mp4;*.m4v;*.mpeg4)|*.mp4; *.m4v; *.mpeg4|")
+	_T("MPEG2 Video Files (*.m2v;*.mpg;*.vob;*.mpeg;*.mpeg2;*.m2p;*.mod)|*.m2v; *.mpg; *.vob; *.mpeg; *.mpeg2; *.m2p; *.mod|")
+	_T("MPEG1 Video Files (*.m1v;*.mpg;*.mpv,*.mpeg;*.mpeg1;*.dat)|*.m1v; *.mpg; *.mpv, *.mpeg; *.mpeg1; *.dat|")
+	_T("Real Media Files (*.rm;*.rmvb;*.rv)|*.rm; *.rmvb; *.rv|")
+	_T("Flash Media Files (*.flv;*.f4v)|*.flv; *.f4v|")
+	_T("All Files (*.*)|*.*|")
+	_T("|");
 
 SysUtils::SysUtils()
 {
@@ -196,6 +208,7 @@ static bool GetMatches(const std::string& str, const std::string szPattern, boos
 			if(bResult)
 			{
 				cfl::tstring szTmp;
+				std::string szMatch;
 				szLog.append(_T("[Y]:"));
 				for(int i = 0; i < matches.size(); i++)
 				{
@@ -203,7 +216,8 @@ static bool GetMatches(const std::string& str, const std::string szPattern, boos
 					{
 						szLog.append(_T(","));
 					}
-					cfl::tformat(szTmp, _T("[%d]=[%s]"), i, CFL_STRING_TO_T_STR(matches[i]));
+					szMatch = matches[i];
+					cfl::tformat(szTmp, _T("[%d]=[%s]"), i, CFL_STRING_TO_T_STR(szMatch));
 					szLog.append(szTmp);
 				}
 			}

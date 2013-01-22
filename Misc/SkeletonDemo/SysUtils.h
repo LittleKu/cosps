@@ -29,6 +29,8 @@ enum GetFileFQPathMode
 class SysUtils  
 {
 public:
+	static LPCTSTR lpszInputFileFilter;
+public:
 	enum
 	{
 		SECONDS_IN_MINUTE	= 60,

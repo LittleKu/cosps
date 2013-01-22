@@ -51,6 +51,9 @@ CVCDlg::CVCDlg(CWnd* pParent /*=NULL*/)
 	m_nProgressBase = 0;
 
 	m_nCurTaskState = TSE_READY;
+
+	m_lpFileBuffer = NULL;
+	m_nFileBufferLen = (1 << 15);
 }
 
 CVCDlg::~CVCDlg()
@@ -59,6 +62,12 @@ CVCDlg::~CVCDlg()
 	{
 		delete m_pProcExecutor;
 		m_pProcExecutor = NULL;
+	}
+
+	if(m_lpFileBuffer)
+	{
+		delete [] m_lpFileBuffer;
+		m_lpFileBuffer = NULL;
 	}
 }
 
@@ -512,57 +521,33 @@ void CVCDlg::UpdateTaskTreeWindow()
 
 void CVCDlg::AddFiles()
 {
-	static const TCHAR *FILTERS =
-		_T("Windows Media Files (*.wmv;*.avi;*.asf;*.dvr-ms;*.ms-dvr)|*.wmv; *.avi; *.asf; *.dvr-ms; *.ms-dvr|")
-        _T("MPEG4 Files (*.mp4;*.m4v;*.mpeg4)|*.mp4; *.m4v; *.mpeg4|")
-		_T("MPEG2 Video Files (*.m2v;*.mpg;*.vob;*.mpeg;*.mpeg2;*.m2p;*.mod)|*.m2v; *.mpg; *.vob; *.mpeg; *.mpeg2; *.m2p; *.mod|")
-        _T("MPEG1 Video Files (*.m1v;*.mpg;*.mpv,*.mpeg;*.mpeg1;*.dat)|*.m1v; *.mpg; *.mpv, *.mpeg; *.mpeg1; *.dat|")
-		_T("Real Media Files (*.rm;*.rmvb;*.rv)|*.rm; *.rmvb; *.rv|")
-		_T("Flash Media Files (*.flv;*.f4v)|*.flv; *.f4v|")
-		_T("All Files (*.*)|*.*|")
-		_T("|");
-	cfl::CFileDialogEx dlg(TRUE, _T(""), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT, FILTERS);
+	cfl::CFileDialogEx dlg(TRUE, _T(""), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT, 
+		SysUtils::lpszInputFileFilter);
 	
-	int nFileBufferLen = (1 << 15);
-	TCHAR* lpFileBuffer = new TCHAR[nFileBufferLen];
-	memset(lpFileBuffer, 0, sizeof(TCHAR) * nFileBufferLen);
-	dlg.m_ofn.lpstrFile = lpFileBuffer;
-	dlg.m_ofn.nMaxFile = nFileBufferLen;
+	if(m_lpFileBuffer == NULL)
+	{
+		m_nFileBufferLen = (1 << 15);
+		m_lpFileBuffer = new TCHAR[m_nFileBufferLen];
+	}
+	ASSERT(m_lpFileBuffer != NULL);
+	memset(m_lpFileBuffer, 0, sizeof(TCHAR) * m_nFileBufferLen);
+	dlg.m_ofn.lpstrFile = m_lpFileBuffer;
+	dlg.m_ofn.nMaxFile = m_nFileBufferLen;
 
 	int nResult = dlg.DoModal();
 	if(nResult == IDOK)
 	{
 		CString szFileName;
-
-		std::string val;
 		POSITION pos = dlg.GetStartPosition();
 		while(pos != NULL)
 		{
 			szFileName = dlg.GetNextPathName(pos);
 			if(!szFileName.IsEmpty())
 			{
-				CTaskInfo* pTaskInfo = new CTaskInfo;
-				pTaskInfo->m_szFileName = szFileName;
-
-				MPlayerMetaProbe probe(pTaskInfo->m_pMetaMap);
-				if(probe.Probe(szFileName) == 0)
-				{
-					if(probe.GetMeta(ID_VIDEO_FORMAT, val))
-					{
-						pTaskInfo->m_szFormat = CFL_STRING_TO_T_STR(val);
-					}
-					if(probe.GetMeta(ID_LENGTH, val))
-					{
-						pTaskInfo->m_nDuration = atoi(val.c_str());
-					}
-				}
-				m_taskListCtrl.AddRow(pTaskInfo);
+				m_taskListCtrl.AddTask(szFileName);
 			}
 		}
 	}
-
-	delete [] lpFileBuffer;
-	lpFileBuffer = NULL;
 }
 
 void CVCDlg::GetStreamDumpFile(cfl::tstring& szDumpFile, const cfl::tstring& szBinFQPath, LPCTSTR lpszStreamName, int nIndex)
