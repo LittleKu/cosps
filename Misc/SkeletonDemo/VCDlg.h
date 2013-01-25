@@ -81,6 +81,7 @@ public:
 	void AddFiles();
 	void OnStartButton();
 	void OnStopButton();
+	ProfileNode* GetSelectedProfile();
 
 private:
 	void InitResizableDlgAnchor();
@@ -110,7 +111,7 @@ private:
 	CBitmap m_splitterVBkBitmap;
 	CBitmap m_splitterHBkBitmap;
 	int		m_nMinWidth;
-	CProfileLoader m_profileLoader;
+	//CProfileLoader m_profileLoader;
 
 	BOOL	m_bStopped;
 	int		m_nCurTaskState;

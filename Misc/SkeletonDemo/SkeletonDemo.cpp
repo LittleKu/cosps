@@ -6,6 +6,7 @@
 #include "MainDlg.h"
 #include "cflbase/tstring.h"
 #include "cflbase/FileUtils.h"
+#include "ProfileMgr.h"
 
 #ifdef ENABLE_LOG4CPLUS
 #include <log4cplus/configurator.h>
@@ -77,10 +78,7 @@ BOOL CSkeletonDemoApp::InitInstance()
 #else
 	Enable3dControlsStatic();	// Call this when linking to MFC statically
 #endif
-	InitWorkDir();
-	InitLog4cplus();
-	InitAppVariables();
-	InitBCG();
+	InitApp();
 	LOG4CPLUS_INFO_STR(THE_LOGGER, _T("Application InitInstance Done. Start to Show Main Window"))
 
 	CMainDlg dlg;
@@ -97,7 +95,7 @@ BOOL CSkeletonDemoApp::InitInstance()
 		//  dismissed with Cancel
 	}
 
-	DeInitBCG();
+	DeInitApp();
 	LOG4CPLUS_INFO_STR(THE_LOGGER, _T("Application InitInstance Exit"))
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
@@ -242,4 +240,26 @@ void CSkeletonDemoApp::InitBCG()
 void CSkeletonDemoApp::DeInitBCG()
 {
 	BCGCBProCleanUp();
+}
+
+void CSkeletonDemoApp::InitApp()
+{
+	InitWorkDir();
+	InitLog4cplus();
+	InitAppVariables();
+	InitBCG();
+
+	//Init Profile Information
+	CString szPath;
+	if(SysUtils::GetProfile(szPath, _T("profiles.xml")))
+	{
+		CProfileLoader::GetInstance()->LoadProfileTree(CFL_T2A((LPCTSTR)szPath));
+	}
+
+	//Init ProfileMgr
+	ProfileMgr::GetInstance();
+}
+void CSkeletonDemoApp::DeInitApp()
+{
+	DeInitBCG();
 }

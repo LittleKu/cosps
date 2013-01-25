@@ -10,9 +10,13 @@
 #endif // _MSC_VER > 1000
 
 #include "cfltemplate/TreeMap.h"
+#include "cflbase/TreeNode.h"
+
+#define PF_ATTRIB_TAG	"tag"
 
 typedef cfl::TreeMap<std::string, std::string> AttribMap;
 
+/*
 class ProfileNode
 {
 public:
@@ -27,16 +31,23 @@ public:
 	ProfileNode* GetChildAt(int nChildIndex);
 	void AddChild(ProfileNode* pChild);
 };
+*/
+
+typedef cfl::MutableTreeNode ProfileNode;
 
 class CProfileLoader  
 {
 public:
 	CProfileLoader();
 	virtual ~CProfileLoader();
+	static CProfileLoader* GetInstance();
 
 	bool LoadProfileTree(const char* lpFile);
 	ProfileNode* GetRootProfile() { return m_pRootProfile; }
 
+private:
+	ProfileNode* CreateNode();
+	void DestoryNode(ProfileNode* pNode);
 private:
 	ProfileNode*	m_pRootProfile;
 };

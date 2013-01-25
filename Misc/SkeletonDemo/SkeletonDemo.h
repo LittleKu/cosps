@@ -44,6 +44,8 @@ public:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
+	void InitApp();
+	void DeInitApp();
 	void InitWorkDir();
 	void InitLog4cplus();
 	void InitAppVariables();

@@ -151,11 +151,6 @@ BOOL CVCDlg::OnInitDialog()
 	CResizableDialog::OnInitDialog();
 	
 	//Initialize the profile tree firstly
-	CString szPath;
-	if(SysUtils::GetProfile(szPath, _T("profiles.xml")))
-	{
-		m_profileLoader.LoadProfileTree(CFL_T2A((LPCTSTR)szPath));
-	}
 
 	InitTaskTree();
 	InitTaskListCtrl();
@@ -275,17 +270,19 @@ void CVCDlg::InitPropList()
 
 void CVCDlg::InitDeviceComboBox()
 {
-	ProfileNode* pRoot = m_profileLoader.GetRootProfile();
+	ProfileNode* pRoot = CProfileLoader::GetInstance()->GetRootProfile();
 	int nChildCount = ((pRoot == NULL) ? 0 : pRoot->GetChildCount());
 
 	std::string szText;
+	AttribMap* pAttribMap = NULL;
 	for(int i = 0; i < nChildCount; i++)
 	{
-		ProfileNode* pProfile = pRoot->GetChildAt(i);
+		ProfileNode* pProfile = (ProfileNode*)pRoot->GetChild(i);
 
-		if(!pProfile->attribMap.Get(PF_ATTRIB_DESC, szText))
+		pAttribMap = (AttribMap*)pProfile->GetData();
+		if(!pAttribMap->Get(PF_ATTRIB_DESC, szText))
 		{
-			pProfile->attribMap.Get(PF_ATTRIB_NAME, szText);
+			pAttribMap->Get(PF_ATTRIB_NAME, szText);
 		}
 		LIST_ITEM item;
 		item.strText = CFL_A2T(szText.c_str());
@@ -314,7 +311,7 @@ void CVCDlg::OnCategorySelChanged()
 		int nChildCount = ((pParent == NULL) ? 0 : pParent->GetChildCount());
 		for(int i = 0; i < nChildCount; i++)
 		{
-			ProfileNode* pProfile = pParent->GetChildAt(i);
+			ProfileNode* pProfile = (ProfileNode*)pParent->GetChild(i);
 			AddProfile(pProfile, NULL);
 		}
 		
@@ -332,17 +329,33 @@ void CVCDlg::OnProfileSelChanged()
 	if(nCurSel >= 0)
 	{
 		ProfileNode* pProfile = (ProfileNode*)m_profileComboBox.GetItemDataPtr(nCurSel);
+		AttribMap* pAttribMap = NULL;
 		std::string szProfileFile;
-		if(pProfile != NULL && pProfile->attribMap.Get(PF_ATTRIB_FILE, szProfileFile))
+		if(pProfile != NULL)
 		{
-			//Initialize the profile tree firstly
-			CString szPath;
-			if(SysUtils::GetProfile(szPath, CFL_A2T(szProfileFile.c_str())))
+			pAttribMap = (AttribMap*)pProfile->GetData();
+			if(pAttribMap->Get(PF_ATTRIB_FILE, szProfileFile))
 			{
-				m_propListMgr.Init(CFL_T2A((LPCTSTR)szPath));
+				//Initialize the profile tree firstly
+				CString szPath;
+				if(SysUtils::GetProfile(szPath, CFL_A2T(szProfileFile.c_str())))
+				{
+					m_propListMgr.Init(CFL_T2A((LPCTSTR)szPath));
+				}
 			}
 		}
 	}
+}
+
+ProfileNode* CVCDlg::GetSelectedProfile()
+{
+	int nCurSel = m_profileComboBox.GetCurSel();
+	if(nCurSel >= 0)
+	{
+		ProfileNode* pProfile = (ProfileNode*)m_profileComboBox.GetItemDataPtr(nCurSel);
+		return pProfile;
+	}
+	return NULL;
 }
 
 PLIST_ITEM CVCDlg::AddProfile(ProfileNode* pProfile, PLIST_ITEM pItemParent)
@@ -352,7 +365,8 @@ PLIST_ITEM CVCDlg::AddProfile(ProfileNode* pProfile, PLIST_ITEM pItemParent)
 		return NULL;
 	}
 	std::string szText;
-	if(!pProfile->attribMap.Get(PF_ATTRIB_DESC, szText))
+	AttribMap* pAttribMap = (AttribMap*)pProfile->GetData();
+	if(!pAttribMap->Get(PF_ATTRIB_DESC, szText))
 	{
 		cfl::tstring szLog;
 		cfl::tformat(szLog, _T("Can't find the [desc] attribute"));
@@ -367,7 +381,7 @@ PLIST_ITEM CVCDlg::AddProfile(ProfileNode* pProfile, PLIST_ITEM pItemParent)
 	int nChildCount = ((pProfile == NULL) ? 0 : pProfile->GetChildCount());
 	for(int i = 0; i < nChildCount; i++)
 	{
-		AddProfile(pProfile->GetChildAt(i), pCurrItem);
+		AddProfile((ProfileNode*)pProfile->GetChild(i), pCurrItem);
 	}
 
 	return pCurrItem;
