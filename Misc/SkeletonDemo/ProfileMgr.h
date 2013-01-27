@@ -9,20 +9,21 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "cfltemplate/TreeMap.h"
+#include "cflbase/TreeNode.h"
 #include "CmdBuilder.h"
 
-typedef std::map<std::string, std::string> ssmap;
+#define PF_ATTRIB_TAG	"tag"
 
-class ProfileCmdBuildInfo
-{
-public:
-	std::string			m_BuilderName;
-	ssmap*				m_pBuilderProp;
+typedef cfl::TreeMap<std::string, std::string> SSTreeMap;
 
-	ProfileCmdBuildInfo();
-	~ProfileCmdBuildInfo();
-};
-typedef std::map<std::string, ProfileCmdBuildInfo*> ProfileInfoMap;
+typedef cfl::TreeMap<std::string, std::string> AttribMap;
+
+typedef cfl::TreeNode ProfileNode;
+
+typedef cfl::TreeMap<std::string, std::string> ProfileCmdBuildInfo;
+typedef cfl::TreeMap<std::string, SSTreeMap*> ProfilePropMap;
+typedef cfl::TreeMap<std::string, CmdListBuilder*> BuilderMap;
 
 class ProfileMgr  
 {
@@ -34,13 +35,14 @@ public:
 	virtual CmdListBuilder* CreateBuilder(const std::string& szProfile, StrObjPtrContext* pContext);
 
 private:
-	void InitProfileGroupMap();
 	void InitBuilderMap();
 
+	void InitProfileGroupMap();
+	ProfileNode* CreateNode();
+	void DestoryNode(ProfileNode* pNode);
 private:
-	typedef std::map<std::string, CmdListBuilder*> BuilderMap;
-
-	ProfileInfoMap m_mapProfile2Group;
+	ProfileNode*	m_pRootProfile;
+	ProfilePropMap m_mapProfile2Group;
 	BuilderMap m_mapGroup2Builder;
 };
 

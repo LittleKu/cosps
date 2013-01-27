@@ -768,27 +768,36 @@ LRESULT CVCDlg::OnNotifyProcProgress(WPARAM wParam, LPARAM lParam)
 	std::string* pVal = (std::string*)wParam;
 	std::string* pPercent = (std::string*)lParam;
 	
-	double dPercent = 0, dCurVal = 0;
+	double dPercent = 0;
 	std::string val;
 
 	if(pVal != NULL && m_taskListCtrl.GetMetaInfo(m_selRows.at(m_nCurRow), ID_LENGTH, val))
 	{
-		dCurVal = atof(pVal->c_str());
+		double dCurVal = atof(pVal->c_str());
 		double dTotal = atof(val.c_str());
 		if(dTotal > 0)
 		{
-			dPercent = ((dCurVal * 100 / dTotal) * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
+			dPercent = (dCurVal / dTotal);
 		}
-		dPercent += (double)m_nProgressBase;
 	}
 	else
 	{
-		dCurVal = atof(pPercent->c_str());
-		dPercent = (dCurVal * m_cmdInfos.at(m_nCurCmd).m_nWeight) / 100;
-		dPercent += (double)m_nProgressBase;
+		dPercent = atof(pPercent->c_str());
 	}
 
-	UpdateProgress(m_selRows.at(m_nCurRow), (double)dPercent / 100);
+	if(dPercent < 0.0f)
+	{
+		dPercent = 0.0f;
+	}
+	else if(dPercent > 1.0f)
+	{
+		dPercent = 1.0f;
+	}
+
+	dPercent *= m_cmdInfos.at(m_nCurCmd).m_nWeight;
+	dPercent += (double)m_nProgressBase;
+
+	UpdateProgress(m_selRows.at(m_nCurRow), dPercent / 100);
 	
 	return 0L;
 }

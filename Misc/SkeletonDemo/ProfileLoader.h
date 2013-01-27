@@ -33,7 +33,7 @@ public:
 };
 */
 
-typedef cfl::MutableTreeNode ProfileNode;
+typedef cfl::TreeNode ProfileNode;
 
 class CProfileLoader  
 {

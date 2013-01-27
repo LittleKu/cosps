@@ -8,6 +8,7 @@
 #include "MP4CmdListBuilder.h"
 #include "ProfileLoader.h"
 #include "cflbase/TreeNode.h"
+#include <assert.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -17,25 +18,9 @@ static char THIS_FILE[]=__FILE__;
 
 DECLARE_THE_LOGGER_NAME(_T("ProfileMgr"))
 
-#define BUILDER_BASE	"Builder.Base"
-#define BUILDER_MP4		"Builder.MP4"
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
-
-ProfileCmdBuildInfo::ProfileCmdBuildInfo()
-{
-	m_pBuilderProp = new ssmap();
-}
-ProfileCmdBuildInfo::~ProfileCmdBuildInfo()
-{
-	if(m_pBuilderProp != NULL)
-	{
-		delete m_pBuilderProp;
-		m_pBuilderProp = NULL;
-	}
-}
+#define BUILDER_NAME	"param.builder"
+#define BUILDER_BASE	"ME"
+#define BUILDER_MP4		"MP4"
 
 ProfileMgr::ProfileMgr()
 {
@@ -45,21 +30,32 @@ ProfileMgr::ProfileMgr()
 
 ProfileMgr::~ProfileMgr()
 {
+	CFLPOS pos = NULL;
+	std::string key;
+	
 	//Profile Info map
-	ProfileInfoMap::iterator profileIter = m_mapProfile2Group.begin();
-	for( ; profileIter != m_mapProfile2Group.end(); profileIter++)
+	SSTreeMap* pValue = NULL;
+	pos = m_mapProfile2Group.GetFirstPos();
+	while(pos != NULL)
 	{
-		delete profileIter->second;
+		m_mapProfile2Group.GetNextEntry(pos, key, pValue);
+		assert(pValue);
+		delete pValue;
 	}
-	m_mapProfile2Group.clear();
+	m_mapProfile2Group.ReleasePos(pos);
+	m_mapProfile2Group.Clear();
 
 	//Builder instance map
-	BuilderMap::iterator builderIter = m_mapGroup2Builder.begin();
-	for( ; builderIter != m_mapGroup2Builder.end(); builderIter++)
+	CmdListBuilder* pBuilder = NULL;
+	pos = m_mapGroup2Builder.GetFirstPos();
+	while(pos != NULL)
 	{
-		delete builderIter->second;
+		m_mapGroup2Builder.GetNextEntry(pos, key, pBuilder);
+		assert(pBuilder);
+		delete pBuilder;
 	}
-	m_mapGroup2Builder.clear();
+	m_mapGroup2Builder.ReleasePos(pos);
+	m_mapGroup2Builder.Clear();
 
 	LOG4CPLUS_DEBUG_STR(THE_LOGGER, _T("ProfileMgr::~ProfileMgr() called"))
 }
@@ -72,22 +68,20 @@ ProfileMgr* ProfileMgr::GetInstance()
 
 CmdListBuilder* ProfileMgr::CreateBuilder(const std::string& szProfile, StrObjPtrContext* pContext)
 {
-	ProfileInfoMap::iterator groupIter = m_mapProfile2Group.find(szProfile);
-	if(groupIter == m_mapProfile2Group.end())
+	SSTreeMap* pPropMap = NULL;
+	if(!m_mapProfile2Group.Get(szProfile, pPropMap))
 	{
 		return NULL;
 	}
 
-	ProfileCmdBuildInfo* pBuildInfo = (ProfileCmdBuildInfo*)groupIter->second;
-
-	BuilderMap::iterator builderIter = m_mapGroup2Builder.find(pBuildInfo->m_BuilderName);
-	if(builderIter == m_mapGroup2Builder.end())
+	std::string szBuilderName;
+	if(!pPropMap->Get(BUILDER_NAME, szBuilderName))
 	{
 		return NULL;
 	}
 
-	CmdListBuilder* pBuilder = (CmdListBuilder*)builderIter->second;
-	if(pBuilder == NULL)
+	CmdListBuilder* pBuilder = NULL;
+	if(!m_mapGroup2Builder.Get(szBuilderName, pBuilder))
 	{
 		return NULL;
 	}
@@ -95,16 +89,18 @@ CmdListBuilder* ProfileMgr::CreateBuilder(const std::string& szProfile, StrObjPt
 	//set properties
 	if(pContext)
 	{
-		ssmap::iterator propIter = pBuildInfo->m_pBuilderProp->begin();
-		cfl::tstring* pVal;
-		for( ; propIter != pBuildInfo->m_pBuilderProp->end(); propIter++)
-		{
-			OptionExpObj<cfl::tstring> *pObjProp = new OptionExpObj<cfl::tstring>();
-			pVal = (cfl::tstring*)pObjProp->GetData();
-			pVal->assign(CFL_STRING_TO_TSTRING(propIter->second));
+		std::string key, val;
 
-			pContext->Put(propIter->first, pObjProp);
+		CFLPOS pos = pPropMap->GetFirstPos();		
+		while(pos != NULL)
+		{
+			pPropMap->GetNextEntry(pos, key, val);
+
+			OptionExpObj<cfl::tstring> *pObjProp = new OptionExpObj<cfl::tstring>(CFL_STRING_TO_TSTRING(val));
+
+			pContext->Put(key, pObjProp);
 		}
+		pPropMap->ReleasePos(pos);
 	}
 	
 	return pBuilder->Clone();
@@ -112,45 +108,38 @@ CmdListBuilder* ProfileMgr::CreateBuilder(const std::string& szProfile, StrObjPt
 
 static bool InitProfileGroupProc(cfl::TreeNode* pNode, void* lParam)
 {
-	cfl::MutableTreeNode* pMutableNode = (cfl::MutableTreeNode*)pNode;
-	AttribMap* pNodeMap = (AttribMap*)pMutableNode->GetData();
+	AttribMap* pNodeMap = (AttribMap*)pNode->GetData();
 
 	std::string key, val;
-	cfl::MutableTreeNode *pProp = NULL;
+	cfl::TreeNode *pProp = NULL;
 	AttribMap *pPropMap = NULL;
 	if(pNodeMap->Get(PF_ATTRIB_TAG, val) && val.compare("profile") == 0)
 	{
-		ProfileInfoMap* pOutMap = (ProfileInfoMap*)lParam;
+		ProfilePropMap* pOutMap = (ProfilePropMap*)lParam;
 
 		if(!pNodeMap->Get("id", val))
 		{
 			return true;
 		}
 		ProfileCmdBuildInfo* pBuildInfo = NULL;
-
-		ProfileInfoMap::iterator iter = pOutMap->find(val);
-		if(iter == pOutMap->end())
+		if(!pOutMap->Get(val, pBuildInfo))
 		{
 			pBuildInfo = new ProfileCmdBuildInfo();
-			pOutMap->insert(std::make_pair<std::string, ProfileCmdBuildInfo*>(val, pBuildInfo));
+			pOutMap->Put(val, pBuildInfo);
 		}
-		else
-		{
-			pBuildInfo = iter->second;
-		}
+		assert(pBuildInfo != NULL);
 
 		std::string name, value;
-		int i, nChildCount = pMutableNode->GetChildCount();
+		int i, nChildCount = pNode->GetChildCount();
 		for(i = 0; i < nChildCount; i++)
 		{
-			pProp = (cfl::MutableTreeNode*)pMutableNode->GetChild(i);
-			pPropMap = (AttribMap*)pProp->GetData();
+			pPropMap = (AttribMap*)pNode->GetChild(i)->GetData();
 
 			if(pPropMap->Get(PF_ATTRIB_TAG, val) && val.compare("property") == 0)
 			{
 				if(pPropMap->Get("name", name) && pPropMap->Get("value", value))
 				{
-					(*(pBuildInfo->m_pBuilderProp))[name] = value;
+					pBuildInfo->Put(name, value);
 				}
 			}
 		}
@@ -187,11 +176,9 @@ void ProfileMgr::InitProfileGroupMap()
 }
 void ProfileMgr::InitBuilderMap()
 {
-	ProfileCmdBuildInfo* pBuilderInfo = NULL;
-
 	//Base Builder
-	m_mapGroup2Builder[BUILDER_BASE] = new MeCmdListBuilder();
+	m_mapGroup2Builder.Put(BUILDER_BASE, new MeCmdListBuilder());
 
 	//MP4 Builder
-	m_mapGroup2Builder[BUILDER_MP4] = new MP4CmdListBuilder();
+	m_mapGroup2Builder.Put(BUILDER_MP4, new MP4CmdListBuilder());
 }
