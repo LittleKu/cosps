@@ -270,7 +270,7 @@ void CVCDlg::InitPropList()
 
 void CVCDlg::InitDeviceComboBox()
 {
-	ProfileNode* pRoot = CProfileLoader::GetInstance()->GetRootProfile();
+	ProfileNode* pRoot = ProfileMgr::GetInstance()->GetRootProfile();
 	int nChildCount = ((pRoot == NULL) ? 0 : pRoot->GetChildCount());
 
 	std::string szText;

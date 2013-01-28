@@ -171,7 +171,7 @@ int CDefaultConverter::Convert(LPCTSTR lpszInputFile)
 	
 	std::string szProfileId;
 	AttribMap* pAttribMap = (AttribMap*)pSelectedProfile->GetData();
-	if(!pAttribMap->Get("id", szProfileId))
+	if(!pAttribMap->Get(PF_ATTRIB_ID, szProfileId))
 	{
 		return -2;
 	}

@@ -6,8 +6,10 @@
 #include "ProfileMgr.h"
 #include "MeCmdListBuilder.h"
 #include "MP4CmdListBuilder.h"
-#include "ProfileLoader.h"
 #include "cflbase/TreeNode.h"
+#include "cflbase/TreeNodeFactory.h"
+#include "tinyxml.h"
+#include <list>
 #include <assert.h>
 
 #ifdef _DEBUG
@@ -22,9 +24,16 @@ DECLARE_THE_LOGGER_NAME(_T("ProfileMgr"))
 #define BUILDER_BASE	"ME"
 #define BUILDER_MP4		"MP4"
 
-ProfileMgr::ProfileMgr()
+#define XML_NM_ROOT		"root"
+
+typedef struct
 {
-	InitProfileGroupMap();
+	ProfileNode*	pProfileNode;
+	TiXmlElement*	pXmlNode;	
+}ProfileXmlPair;
+
+ProfileMgr::ProfileMgr() : m_pRootProfile(NULL)
+{
 	InitBuilderMap();
 }
 
@@ -35,27 +44,30 @@ ProfileMgr::~ProfileMgr()
 	
 	//Profile Info map
 	SSTreeMap* pValue = NULL;
-	pos = m_mapProfile2Group.GetFirstPos();
+	pos = m_mapProfileProp.GetFirstPos();
 	while(pos != NULL)
 	{
-		m_mapProfile2Group.GetNextEntry(pos, key, pValue);
+		m_mapProfileProp.GetNextEntry(pos, key, pValue);
 		assert(pValue);
 		delete pValue;
 	}
-	m_mapProfile2Group.ReleasePos(pos);
-	m_mapProfile2Group.Clear();
+	m_mapProfileProp.ReleasePos(pos);
+	m_mapProfileProp.Clear();
 
 	//Builder instance map
 	CmdListBuilder* pBuilder = NULL;
-	pos = m_mapGroup2Builder.GetFirstPos();
+	pos = m_mapBuilder.GetFirstPos();
 	while(pos != NULL)
 	{
-		m_mapGroup2Builder.GetNextEntry(pos, key, pBuilder);
+		m_mapBuilder.GetNextEntry(pos, key, pBuilder);
 		assert(pBuilder);
 		delete pBuilder;
 	}
-	m_mapGroup2Builder.ReleasePos(pos);
-	m_mapGroup2Builder.Clear();
+	m_mapBuilder.ReleasePos(pos);
+	m_mapBuilder.Clear();
+
+	//Root Profile
+	DestroyRootProfile();
 
 	LOG4CPLUS_DEBUG_STR(THE_LOGGER, _T("ProfileMgr::~ProfileMgr() called"))
 }
@@ -66,10 +78,135 @@ ProfileMgr* ProfileMgr::GetInstance()
 	return &singleton;
 }
 
+void ProfileMgr::InitBuilderMap()
+{
+	//MEncoder Builder
+	m_mapBuilder.Put(BUILDER_BASE, new MeCmdListBuilder());
+	
+	//MP4 Builder
+	m_mapBuilder.Put(BUILDER_MP4, new MP4CmdListBuilder());
+}
+
+void ProfileMgr::DestroyRootProfile()
+{
+	if(m_pRootProfile != NULL)
+	{
+		DestoryNode(m_pRootProfile);
+		m_pRootProfile = NULL;
+	}
+}
+
+bool ProfileMgr::LoadProfileTree(const char* lpszXmlFile)
+{
+	DestroyRootProfile();
+	
+	TiXmlDocument doc( lpszXmlFile );
+	bool loadOkay = doc.LoadFile();	
+	if ( !loadOkay )
+	{
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("Failed to load file %s. Error=%s."), CFL_A2T(lpszXmlFile), CFL_A2T(doc.ErrorDesc()));
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, szLog)
+		return false;
+	}
+	
+	TiXmlNode *pNode = NULL;
+	TiXmlElement *pElement = NULL;
+	
+	pNode = doc.FirstChild(XML_NM_ROOT);
+	if(pNode == NULL || (pElement = pNode->ToElement()) == NULL)
+	{
+		cfl::tstring szLog;
+		cfl::tformat(szLog, _T("Failed to find first child node [%s]."), CFL_A2T(XML_NM_ROOT));
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, szLog)
+		return false;
+	}
+	
+	AttribMap* pMap = NULL;
+	
+	m_pRootProfile = CreateNode();
+	pMap = (AttribMap*)m_pRootProfile->GetData();
+	pMap->Put(PF_ATTRIB_TAG, XML_NM_ROOT);
+	
+	ProfileXmlPair pxPair;
+	pxPair.pProfileNode = m_pRootProfile;
+	pxPair.pXmlNode = pElement;
+	
+	std::list<ProfileXmlPair> pxPairList;
+	pxPairList.push_back(pxPair);
+	
+	ProfileNode* pProfileParent = NULL;
+	TiXmlElement* pXmlParent = NULL;
+	TiXmlAttribute	*pAttrib = NULL, *pFirstAttrib = NULL;
+	while(!pxPairList.empty())
+	{
+		pxPair = pxPairList.front();
+		pxPairList.pop_front();
+		
+		pXmlParent = pxPair.pXmlNode;
+		pProfileParent = pxPair.pProfileNode;
+		
+		for(pNode = pXmlParent->FirstChild(); pNode != NULL; pNode = pNode->NextSibling())
+		{
+			pElement = pNode->ToElement();
+			if(pElement == NULL)
+			{
+				continue;
+			}
+			
+			ProfileNode* pProfile = CreateNode();
+			
+			pProfileParent->Add(pProfile);
+			pMap = (AttribMap*)pProfile->GetData();
+			pMap->Put(PF_ATTRIB_TAG, pNode->Value());
+			
+			pAttrib = pFirstAttrib = pElement->FirstAttribute();
+			for( ; pAttrib != NULL; pAttrib = pAttrib->Next())
+			{
+				if(pAttrib->Next() == pFirstAttrib)
+				{
+					break;
+				}
+				pMap->Put(pAttrib->Name(), pAttrib->Value());
+			}
+			
+			pxPair.pProfileNode = pProfile;
+			pxPair.pXmlNode = pElement;
+			
+			pxPairList.push_back(pxPair);
+		}
+	}
+
+	//Init profile property map when load done
+	InitProfilePropMap();
+	
+	return true;
+}
+
+ProfileNode* ProfileMgr::CreateNode()
+{
+	ProfileNode* pProfile = cfl::TreeNodeFactory::CreateTreeNode();
+	pProfile->SetData(new AttribMap());
+	return pProfile;
+}
+
+static void DestroyProc(cfl::TreeNode* pNode, void* pData)
+{
+	if(pData)
+	{
+		AttribMap* pAttribMap = (AttribMap*)pData;
+		delete pAttribMap;
+	}
+}
+void ProfileMgr::DestoryNode(ProfileNode* pNode)
+{
+	cfl::TreeNodeFactory::DestoryTreeNode(pNode, DestroyProc, true);
+}
+
 CmdListBuilder* ProfileMgr::CreateBuilder(const std::string& szProfile, StrObjPtrContext* pContext)
 {
 	SSTreeMap* pPropMap = NULL;
-	if(!m_mapProfile2Group.Get(szProfile, pPropMap))
+	if(!m_mapProfileProp.Get(szProfile, pPropMap))
 	{
 		return NULL;
 	}
@@ -81,7 +218,7 @@ CmdListBuilder* ProfileMgr::CreateBuilder(const std::string& szProfile, StrObjPt
 	}
 
 	CmdListBuilder* pBuilder = NULL;
-	if(!m_mapGroup2Builder.Get(szBuilderName, pBuilder))
+	if(!m_mapBuilder.Get(szBuilderName, pBuilder))
 	{
 		return NULL;
 	}
@@ -110,21 +247,20 @@ static bool InitProfileGroupProc(cfl::TreeNode* pNode, void* lParam)
 {
 	AttribMap* pNodeMap = (AttribMap*)pNode->GetData();
 
-	std::string key, val;
-	cfl::TreeNode *pProp = NULL;
+	std::string val;
 	AttribMap *pPropMap = NULL;
 	if(pNodeMap->Get(PF_ATTRIB_TAG, val) && val.compare("profile") == 0)
 	{
 		ProfilePropMap* pOutMap = (ProfilePropMap*)lParam;
 
-		if(!pNodeMap->Get("id", val))
+		if(!pNodeMap->Get(PF_ATTRIB_ID, val))
 		{
 			return true;
 		}
-		ProfileCmdBuildInfo* pBuildInfo = NULL;
+		SSTreeMap* pBuildInfo = NULL;
 		if(!pOutMap->Get(val, pBuildInfo))
 		{
-			pBuildInfo = new ProfileCmdBuildInfo();
+			pBuildInfo = new SSTreeMap();
 			pOutMap->Put(val, pBuildInfo);
 		}
 		assert(pBuildInfo != NULL);
@@ -148,8 +284,9 @@ static bool InitProfileGroupProc(cfl::TreeNode* pNode, void* lParam)
 	return true;
 }
 
-void ProfileMgr::InitProfileGroupMap()
+void ProfileMgr::InitProfilePropMap()
 {
+	//deprecated hardcode.
 // 	ProfileCmdBuildInfo* pBuildInfo = NULL;
 // 
 // 	//Example: iPhone
@@ -164,21 +301,12 @@ void ProfileMgr::InitProfileGroupMap()
 // 	(*(pBuildInfo->m_pBuilderProp))[PARAM_OUT_EXT] = ".mpg";
 // 	(*(pBuildInfo->m_pBuilderProp))[PARAM_OF] = "dvd_ntsc";
 // 	m_mapProfile2Group["pf_dvd_ntsc"] = pBuildInfo;
-
-	ProfileNode* pRootProfile = CProfileLoader::GetInstance()->GetRootProfile();
-	if(pRootProfile == NULL)
+	if(m_pRootProfile == NULL)
 	{
-		LOG4CPLUS_ERROR_STR(THE_LOGGER, _T("InitProfileGroupMap failed. Root Profile is null"))
+		LOG4CPLUS_ERROR_STR(THE_LOGGER, _T("InitProfilePropMap failed. Root Profile is null"))
 		return;
 	}
 
-	pRootProfile->BFSEnum(InitProfileGroupProc, &m_mapProfile2Group);
+	m_pRootProfile->BFSEnum(InitProfileGroupProc, &m_mapProfileProp);
 }
-void ProfileMgr::InitBuilderMap()
-{
-	//Base Builder
-	m_mapGroup2Builder.Put(BUILDER_BASE, new MeCmdListBuilder());
 
-	//MP4 Builder
-	m_mapGroup2Builder.Put(BUILDER_MP4, new MP4CmdListBuilder());
-}

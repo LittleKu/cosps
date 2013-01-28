@@ -253,11 +253,12 @@ void CSkeletonDemoApp::InitApp()
 	CString szPath;
 	if(SysUtils::GetProfile(szPath, _T("profiles.xml")))
 	{
-		CProfileLoader::GetInstance()->LoadProfileTree(CFL_T2A((LPCTSTR)szPath));
+		ProfileMgr::GetInstance()->LoadProfileTree(CFL_T2A((LPCTSTR)szPath));
+		//CProfileLoader::GetInstance()->LoadProfileTree();
 	}
 
 	//Init ProfileMgr
-	ProfileMgr::GetInstance();
+	//ProfileMgr::GetInstance();
 }
 void CSkeletonDemoApp::DeInitApp()
 {

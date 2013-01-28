@@ -11,7 +11,7 @@
 #include "TaskListCtrl.h"
 #include "AdvComboBox.h"
 #include "PropListMgr.h"
-#include "ProfileLoader.h"
+#include "ProfileMgr.h"
 #include "ProcessExecutor.h"
 #include "CmdBuilder.h"
 

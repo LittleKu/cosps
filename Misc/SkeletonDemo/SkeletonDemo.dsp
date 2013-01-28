@@ -186,10 +186,6 @@ SOURCE=.\ProcessExecutor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ProfileLoader.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\ProfileMgr.cpp
 # End Source File
 # Begin Source File
@@ -300,10 +296,6 @@ SOURCE=.\Preferences.h
 # Begin Source File
 
 SOURCE=.\ProcessExecutor.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ProfileLoader.h
 # End Source File
 # Begin Source File
 
