@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<header version="0" />
+
+<profile id="pf_iphone4s" name="iphone4" file_ext=".mp4" desc="Apple iPhone 4 Video (*.mp4)">
+    <params>
+			<video>
+				<codec id="OVC" name="Video Codec" desc="Video Codec">
+					<item name="x264" value="x264" default="true" />
+					<item name="xvid" value="xvid" /> 
+					<item name="mpeg4" value="mpeg4" />
+				</codec>
+				<size id="VIDEO_SIZE" name="Video Size" desc="Video Size">
+					<item value="480x270" />
+					<item value="480x320" />
+					<item value="480x480" />
+					<item value="640x480" />
+					<item value="960x640" default="true" />
+					<item value="1024x768" />
+					<item value="1280x720" />
+				</size>
+				<bitrate id="VideoBitrate" name="Video Bitrate" desc="Video Bitrate">
+					<item value="2500" />
+					<item value="1800" />
+					<item value="1500" default="true" />
+					<item value="1200"/>
+					<item value="1000" />
+					<item value="800" />
+					<item value="600" />
+					<item value="400" />
+					<item value="200" />
+					<item value="100" />
+				</bitrate>
+				<framerate id="OFPS" name="Video Framerate" desc="Video Framerate">
+					<item value="8" />
+					<item value="10" />
+					<item value="12" />
+					<item value="15" />
+					<item value="23.976" />
+					<item value="24" />
+					<item value="25" default="true"/>
+					<item value="29.97" />
+					<item value="30" />
+				</framerate>
+				<passcount id="PassCount" name="Pass Count" desc="Encode Pass Count">
+					<item value="1" default="true" />
+					<item value="2" />
+				</passcount>
+			</video>
+			<audio>
+				<codec id="OAC" name="Audio Codec" desc="Audio Codec">
+					<item value="aac" default="true" />
+				</codec>
+				<bitrate id="AudioBitrate" name="Audio Bitrate" desc="Audio Bitrate">
+					<item value="32" />
+					<item value="40" />
+					<item value="48" />
+					<item value="56" />
+					<item value="64" />
+					<item value="80" />
+					<item value="96" />
+					<item value="112" />
+					<item value="128"/>
+					<item value="160" />
+					<item value="192" default="true" />
+					<item value="224" />
+					<item value="256" />
+					<item value="320" />
+				</bitrate>
+				<samplerate id="OutputSampleRate" name="Sample Rate" desc="Audio Samplerate (Hz)">
+					<item value="48000" />
+					<item value="44100" default="true" />
+					<item value="32000" />
+					<item value="24000" />
+					<item value="22050" />
+					<item value="11025" />
+					<item value="8000" />
+				</samplerate>
+				<channel id="AudioChannel" name="Audio Channel" desc="Audio Channel">
+					<item value="1" />
+					<item value="2" default="true" />
+				</channel>
+			</audio>
+    </params>
+    
+	  <qualities>
+			<quality name="Highest">
+				<video bitrate="1800k" />
+				<audio bitrate="192k" samplerate="48000" channels="2" />
+			</quality>
+			<quality name="High">
+				<video bitrate="1500k" />
+				<audio bitrate="160k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Standard">
+				<video bitrate="1200k" />
+				<audio bitrate="128k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Low">
+				<video bitrate="800k" />
+				<audio bitrate="96k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Lowest">
+				<video bitrate="200k" />
+				<audio bitrate="32k" samplerate="44100" channels="2" />
+			</quality>
+		</qualities>
+</profile>

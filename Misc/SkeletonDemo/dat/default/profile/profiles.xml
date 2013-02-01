@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<header version="1.0" />
+<root> 
+  <!-- Apple -->
+	<category id="cat_apple" name="apple" icon="" desc="Apple Devices">
+    <!-- iPhone -->
+    <device id="dev_iphone" name="iphone" icon="" desc="Apple iPhone" enabled="true" >
+      <profile id="pf_iphone" name="iphone" desc="Apple iPhone Video (*.mp4)" file="iphone.xml">
+				<property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_iphone4" name="iphone" desc="Apple iPhone 4 Video (*.mp4)" file="iphone4.xml" >
+       	<property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_iphone4s" name="iphone" desc="Apple iPhone 4s Video (*.mp4)" file="iphone4s.xml" >
+       	<property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_iphone5" name="iphone" desc="Apple iPhone 5 Video (*.mp4)" file="iphone5.xml" >
+       	<property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+    <!-- iPad -->
+    <device id="dev_ipad" name="ipad" icon="" desc="Apple iPad">
+      <profile id="pf_ipad" name="iphone" desc="Apple iPad Video (*.mp4)" file="ipad.xml" > 
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_ipad2" name="iphone" desc="Apple iPad 2 Video (*.mp4)" file="ipad2.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_ipad3" name="iphone" desc="Apple iPad 3 Video (*.mp4)" file="ipad3.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+    <!-- iPod -->
+    <device id="dev_ipod" name="ipod" icon="" desc="Apple iPod">
+      <profile id="pf_ipod_video" name="iphone" desc="Apple iPod Video (*.mp4)" file="ipod.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_ipod_nano" name="iphone" desc="Apple iPod nano Video (*.mp4)" file="ipod_nano.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+    <!-- iTV -->
+    <device id="dev_appletv" name="appletv" icon="" desc="Apple TV">
+      <profile id="pf_appletv_mpeg4" name="iphone" desc="Apple TV MPEG4 Video (*.mp4)" file="appletv_mpeg4.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_appletv_avc" name="iphone" desc="Apple TV AVC Video (*.mp4)" file="appletv_avc.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+  </category>
+  
+  <!-- Android -->
+	<category id="cat_android" name="android" icon="" desc="Android Devices">
+    <!-- Android Phone -->
+    <device id="dev_android_phone" name="android phone" icon="" desc="Android Phone" enabled="true" >
+      <profile id="pf_android_phone_mpeg4" name="iphone" desc="Android Phone MPEG4 Video (*.mp4)" file="android_phone_mpeg4.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_android_phone_nexus_one" name="iphone" desc="Android Phone nexus one Video (*.mp4)" file="android_phone_nexus_one.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+    <!-- Android Pad -->
+    <device id="dev_android_pad" name="android pad" icon="" desc="Android Pad">
+      <profile id="pf_kindlefire" name="iphone" desc="Kindle Fire Video (*.mp4)" file="kindlefire.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+      <profile id="pf_kindlefirehd_7" name="iphone" desc="Kindle Fire HD 7 Video (*.mp4)" file="kindlefirehd_7.xml" >
+        <property name="param.builder" value="MP4" />
+				<property name="param.out.ext" value=".mp4" />
+      </profile>
+    </device>
+  </category>
+  
+  <!-- DVD -->
+	<category id="cat_dvd" name="dvd" icon="" desc="DVD/SVCD/XVCD Movie">    
+    <device id="dev_dvd" name="DVD Movie" icon="" desc="DVD Movie">
+      <profile id="pf_dvd_ntsc" name="iphone" desc="DVD NTSC Movie (*.mpg)" file="dvd_ntsc.xml">
+       	<property name="param.builder" value="ME" />
+				<property name="param.out.ext" value=".mpg" />
+				<property name="param.out.format" value="dvd_ntsc" />
+			</profile>
+      <profile id="pf_dvd_pal" name="iphone" desc="DVD PAL Movie (*.mpg)" file="dvd_pal.xml" />
+    </device>
+    <device id="dev_svcd" name="SVCD Movie" icon="" desc="SVCD Movie">
+      <profile id="pf_dvd_ntsc" name="iphone" desc="SVCD NTSC Movie (*.mpg)" file="dvd_ntsc.xml" />
+      <profile id="pf_dvd_pal" name="iphone" desc="SVCD PAL Movie (*.mpg)" file="dvd_pal.xml" />
+    </device>
+    <device id="dev_xvcd" name="XVCD Movie" icon="" desc="XVCD Movie">
+      <profile id="pf_dvd_ntsc" name="iphone" desc="XVCD NTSC Movie (*.mpg)" file="dvd_ntsc.xml" />
+      <profile id="pf_dvd_pal" name="iphone" desc="XVCD PAL Movie (*.mpg)" file="dvd_pal.xml" />
+    </device>
+  </category>
+</root>

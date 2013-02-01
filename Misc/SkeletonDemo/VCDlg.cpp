@@ -366,6 +366,11 @@ PLIST_ITEM CVCDlg::AddProfile(ProfileNode* pProfile, PLIST_ITEM pItemParent)
 	}
 	std::string szText;
 	AttribMap* pAttribMap = (AttribMap*)pProfile->GetData();
+	if(!pAttribMap->Get(PF_ATTRIB_TAG, szText) || (szText.compare("device") != 0 && szText.compare("profile") != 0))
+	{
+		return NULL;
+	}
+
 	if(!pAttribMap->Get(PF_ATTRIB_DESC, szText))
 	{
 		cfl::tstring szLog;
@@ -676,7 +681,17 @@ void CVCDlg::StartTask()
 	m_nCurCmd = -1;
 	m_delList.clear();
 	
-	cvter.Convert(pTaskInfo->m_szFileName);
+	int nResult = cvter.Convert(pTaskInfo->m_szFileName);
+	if(nResult != 0)
+	{
+		ChangeState(TSE_ERROR);
+
+		CString szErrorText;
+		szErrorText.Format(_T("Failed to start converting. result=%d"), nResult);
+		AfxMessageBox(szErrorText);
+
+		return;
+	}
 	
 	//Execute now
 	m_nCurCmd = 0;

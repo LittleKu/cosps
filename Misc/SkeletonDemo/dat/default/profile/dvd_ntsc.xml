@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<header version="0" />
+
+<profile id="pf_dvd_ntsc" name="DVD NTSC Movie" file_ext=".mpg" desc="DVD NTSC Movie (*.mpg)">
+    <params>
+			<video>
+				<codec id="OVC" name="Video Codec" desc="Video Codec">
+					<item value="mpeg2video" default="true" />
+				</codec>
+				<size id="VideoSize" name="Video Size" desc="Video Size">
+					<item value="720x480" default="true" />
+				</size>
+				<size id="Aspect" name="Aspect" desc="Aspect">
+					<item value="16/9" default="true" />
+					<item value="4/3" />
+				</size>
+				<bitrate id="VideoBitrate" name="Video Bitrate" desc="Video Bitrate">
+					<item value="8000" default="true" />
+					<item value="5000" />
+					<item value="2000" />
+				</bitrate>
+				<framerate id="OFPS" name="Video Framerate" desc="Video Framerate">
+					<item value="29.97" default="true" />
+				</framerate>
+				<passcount id="PassCount" name="Pass Count" desc="Encode Pass Count">
+					<item value="1"/>
+					<item value="2" default="true" />
+				</passcount>
+			</video>
+			<audio>
+				<codec id="OAC" name="Audio Codec" desc="Audio Codec">
+					<item value="ac3" default="true" />
+				</codec>
+				<bitrate id="AudioBitrate" name="Audio Bitrate" desc="Audio Bitrate">
+					<item value="128" default="true" />
+					<item value="192" />
+				</bitrate>
+				<samplerate id="OutputSampleRate" name="Sample Rate" desc="Audio Samplerate (Hz)">
+					<item value="48000" default="true" />
+				</samplerate>
+				<channel id="AudioChannel" name="Audio Channel" desc="Audio Channel">
+					<item value="2" default="true" />
+				</channel>
+			</audio>
+    </params>
+    
+	  <qualities>
+			<quality name="Highest">
+				<video bitrate="1800k" />
+				<audio bitrate="192k" samplerate="48000" channels="2" />
+			</quality>
+			<quality name="High">
+				<video bitrate="1500k" />
+				<audio bitrate="160k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Standard">
+				<video bitrate="1200k" />
+				<audio bitrate="128k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Low">
+				<video bitrate="800k" />
+				<audio bitrate="96k" samplerate="44100" channels="2" />
+			</quality>
+			<quality name="Lowest">
+				<video bitrate="200k" />
+				<audio bitrate="32k" samplerate="44100" channels="2" />
+			</quality>
+		</qualities>
+</profile>
