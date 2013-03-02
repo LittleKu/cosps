@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <header version="0" />
 
-<profile id="pf_iphone4s" name="iphone4" file_ext=".mp4" desc="Apple iPhone 4 Video (*.mp4)">
+<profile id="profile_iphone4s" name="iphone4s" file_ext=".mp4" desc="Apple iPhone 4s Video (*.mp4)">
     <params>
 			<video>
 				<codec id="OVC" name="Video Codec" desc="Video Codec">
@@ -21,8 +21,8 @@
 				<bitrate id="VideoBitrate" name="Video Bitrate" desc="Video Bitrate">
 					<item value="2500" />
 					<item value="1800" />
-					<item value="1500" default="true" />
-					<item value="1200"/>
+					<item value="1500" />
+					<item value="1200" default="true" />
 					<item value="1000" />
 					<item value="800" />
 					<item value="600" />
@@ -41,10 +41,6 @@
 					<item value="29.97" />
 					<item value="30" />
 				</framerate>
-				<passcount id="PassCount" name="Pass Count" desc="Encode Pass Count">
-					<item value="1" default="true" />
-					<item value="2" />
-				</passcount>
 			</video>
 			<audio>
 				<codec id="OAC" name="Audio Codec" desc="Audio Codec">
@@ -59,9 +55,9 @@
 					<item value="80" />
 					<item value="96" />
 					<item value="112" />
-					<item value="128"/>
+					<item value="128" default="true" />
 					<item value="160" />
-					<item value="192" default="true" />
+					<item value="192" />
 					<item value="224" />
 					<item value="256" />
 					<item value="320" />

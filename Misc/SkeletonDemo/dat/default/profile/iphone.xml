@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <header version="0" />
 
-<profile id="pf_iphone" name="iphone" file_ext=".mp4" desc="Apple iPhone Video (*.mp4)">
-		<params>
+<profile id="profile_iphone" name="iphone" file_ext=".mp4" desc="Apple iPhone Video (*.mp4)">
+    <params>
 			<video>
 				<codec id="OVC" name="Video Codec" desc="Video Codec">
 					<item name="x264" value="x264" default="true" />

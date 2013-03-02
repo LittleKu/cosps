@@ -101,7 +101,10 @@ MPlayerMetaProbe::~MPlayerMetaProbe()
 int MPlayerMetaProbe::Probe(LPCTSTR lpszFileName)
 {
 	ExecArgument* pArg = new ExecArgument();
-	cfl::tformat(pArg->szCmdLine, _T("mplayer.exe \"%s\" -frames 0 -vo null -ao null -identify"), lpszFileName);
+	CString szBinFile;
+	SysUtils::GetBinFile(szBinFile, _T("mplayer.exe"));
+	cfl::tformat(pArg->szCmdLine, _T("\"%s\" \"%s\" -frames 0 -vo null -ao null -identify"), 
+		(LPCTSTR)szBinFile, lpszFileName);
 
 	cfl::tstring szDumpFile;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <header version="0" />
 
-<profile id="pf_dvd_ntsc" name="DVD NTSC Movie" file_ext=".mpg" desc="DVD NTSC Movie (*.mpg)">
+<profile id="profile_dvd_ntsc" name="DVD NTSC Movie" file_ext=".mpg" desc="DVD NTSC Movie (*.mpg)">
     <params>
 			<video>
 				<codec id="OVC" name="Video Codec" desc="Video Codec">
@@ -10,22 +10,18 @@
 				<size id="VideoSize" name="Video Size" desc="Video Size">
 					<item value="720x480" default="true" />
 				</size>
-				<size id="Aspect" name="Aspect" desc="Aspect">
+				<bitrate id="Aspect" name="Aspect" desc="Aspect">
 					<item value="16/9" default="true" />
 					<item value="4/3" />
-				</size>
+				</bitrate>
 				<bitrate id="VideoBitrate" name="Video Bitrate" desc="Video Bitrate">
 					<item value="8000" default="true" />
 					<item value="5000" />
 					<item value="2000" />
 				</bitrate>
 				<framerate id="OFPS" name="Video Framerate" desc="Video Framerate">
-					<item value="29.97" default="true" />
+					<item value="29.97" default="true"/>
 				</framerate>
-				<passcount id="PassCount" name="Pass Count" desc="Encode Pass Count">
-					<item value="1"/>
-					<item value="2" default="true" />
-				</passcount>
 			</video>
 			<audio>
 				<codec id="OAC" name="Audio Codec" desc="Audio Codec">
@@ -39,6 +35,7 @@
 					<item value="48000" default="true" />
 				</samplerate>
 				<channel id="AudioChannel" name="Audio Channel" desc="Audio Channel">
+					<item value="1" />
 					<item value="2" default="true" />
 				</channel>
 			</audio>

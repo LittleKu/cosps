@@ -127,6 +127,10 @@ SOURCE=.\main.cpp
 
 SOURCE=.\string.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\vector.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
