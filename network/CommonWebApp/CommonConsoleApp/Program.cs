@@ -12,7 +12,8 @@ namespace CommonConsoleApp
     {
         static void Main(string[] args)
         {
-            WebAgentTest.Run(args);
+            //WebAgentTest.Run(args);
+            Log4netTest.Run(args);
         }
     }
 }
