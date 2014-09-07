@@ -11,7 +11,8 @@
     <RootNamespace>CommonConsoleApp</RootNamespace>
     <AssemblyName>CommonConsoleApp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -48,6 +49,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebAgentAsync.cs" />
+    <Compile Include="WebAgentTest.cs" />
     <Compile Include="WebRequestGetExample.cs" />
     <Compile Include="WebRequest_BeginGetResponse.cs" />
   </ItemGroup>
@@ -56,6 +58,9 @@
       <Project>{BDAB316A-0BEF-470F-ABA8-70A741D7068E}</Project>
       <Name>CommonLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
