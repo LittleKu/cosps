@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
+using CommonLib;
 
 namespace CommonWebApp
 {
@@ -13,7 +14,7 @@ namespace CommonWebApp
         void Application_Start(object sender, EventArgs e)
         {
             // Code that runs on application startup
-
+            LogManager.Info("Application_Start", sender.ToString(), e.ToString());
         }
 
         void Application_End(object sender, EventArgs e)
