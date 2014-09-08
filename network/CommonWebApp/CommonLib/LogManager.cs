@@ -97,7 +97,7 @@ namespace CommonLib
             {
                 if (sb.Length > 0)
                 {
-                    sb.Append(",");
+                    sb.Append(", ");
                 }
                 sb.Append("message=").Append(message);
             }
@@ -105,7 +105,7 @@ namespace CommonLib
             {
                 if (sb.Length > 0)
                 {
-                    sb.Append(",");
+                    sb.Append(", ");
                 }
                 sb.Append("remark=").Append(remark);
             }

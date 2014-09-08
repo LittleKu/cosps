@@ -46,9 +46,11 @@ namespace CommonConsoleApp
                 return null;
             }
 
+            Random rnd = new Random();
+
             if (removedKey == "key2")
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(rnd.Next(5000, 25000));
 
                 return expiredValue + "-value2";
             }
@@ -61,8 +63,13 @@ namespace CommonConsoleApp
             }
             else if (removedKey == "key4")
             {
+                if (rnd.Next(0, 1) == 0)
+                {
+                    throw new Exception("key4-" + expiredValue);
+                }
                 return expiredValue + "-value4";
             }
+
             return null;
         }
     }

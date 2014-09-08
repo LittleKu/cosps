@@ -118,7 +118,7 @@ namespace CommonLib.Cache
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("CacheItem[key=").Append(m_key);
-            sb.Append(", next expiration=").Append(this.NextExpirationTime).Append("]");
+            sb.Append(", expiration=").Append(this.NextExpirationTime).Append("]");
             return sb.ToString();
         }
     }

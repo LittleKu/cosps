@@ -155,7 +155,7 @@ namespace CommonLib.Cache
                 //This should not happen. If it does, then this is a critial bug!
                 if (!m_messages.TryDequeue(out cme))
                 {
-                    LogManager.Warn("Assert Failure", "Failed to dequeue a message");
+                    LogManager.Warn("CacheManager:Assert Failure", "Failed to dequeue a message");
                     continue;
                 }
 
@@ -192,7 +192,7 @@ namespace CommonLib.Cache
                     break;
                 default:
                     {
-                        LogManager.Warn("ProcessUserAction", "Unsupported operation: " + (int)cme.OperType);
+                        LogManager.Warn("CacheManager:ProcessUserAction", "Unsupported operation: " + (int)cme.OperType);
                     }
                     break;
             }
@@ -204,27 +204,49 @@ namespace CommonLib.Cache
         {
             if (ci == null)
             {
-                LogManager.Warn("Assert Failure", "DoAdd a null item");
+                LogManager.Warn("CacheManager:Assert Failure", "DoAdd a null item");
                 return true;
             }
 
-            //This key already exists. It's possible.
-            m_cacheItems.AddOrUpdate(ci.Key, ci, (k, v) => 
-                {
-                    LogManager.Warn("DoAdd", string.Format("The CacheItem key[{0}] is updated from [{1}] to [{2}]", 
-                        k, ((v == null) ? "null" : v.ToString()), ci.ToString()));
-                    return ci;
-                });
+            CacheItem existingItem = null;
 
+            //If the key exists, remove it firstly, then re-add it again
+            if (m_cacheItems.TryRemove(ci.Key, out existingItem))
+            {
+                SchedulerKey existingSK = new SchedulerKey(existingItem.NextExpirationTime, existingItem.Key);
+                if (!m_heap.ContainsKey(existingSK))
+                {
+                    //This should not happen. If it does, then this is a critial bug!
+                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The key [{0}] exists in CacheItems but not in SchedulerKeys", existingItem.Key));
+                }
+                else
+                {
+                    m_heap.Remove(existingSK);
+                }
+            }
+
+            //Cache Item
+            if (!m_cacheItems.TryAdd(ci.Key, ci))
+            {
+                //This should not happen. If it does, then this is a critial bug!
+                LogManager.Warn("CacheManager:Assert Failure", string.Format("The key [{0}] add failed", ci.Key));
+            }
+
+            //And the SchedulerKey
             SchedulerKey sk = new SchedulerKey(ci.NextExpirationTime, ci.Key);
             if (m_heap.ContainsKey(sk))
             {
-                LogManager.Warn("DoAdd", string.Format("The SchedulerKey key[{0}] is already exising", sk.ToString()));
+                //This should not happen. If it does, then this is a critial bug!
+                LogManager.Warn("CacheManager:Assert Failure", string.Format("The SchedulerKey key[{0}] is already exising", sk.ToString()));
             }
             else
             {
                 m_heap.Add(sk, DUMMY);
             }
+
+            LogManager.Info("CacheManager:DoAdd", string.Format("The key [{0}] is added, current={1}, original={2}", 
+                ci.Key, ci.ToString(), ((existingItem == null) ? "null" : existingItem.ToString())));
+            
             return true;
         }
 
@@ -232,20 +254,20 @@ namespace CommonLib.Cache
         {
             if (ci == null)
             {
-                LogManager.Warn("Assert Failure", "DoRemove a null item");
+                LogManager.Warn("CacheManager:Assert Failure", "DoRemove a null item");
                 return true;
             }
 
             CacheItem value = null;
             if (!m_cacheItems.TryRemove(ci.Key, out value))
             {
-                LogManager.Warn("DoRemove", string.Format("The CacheItem key[{0}] is already removed", ci.Key));
+                LogManager.Warn("CacheManager:DoRemove", string.Format("The CacheItem key[{0}] is already removed", ci.Key));
             }
 
             SchedulerKey sk = new SchedulerKey(ci.NextExpirationTime, ci.Key);
             if (!m_heap.ContainsKey(sk))
             {
-                LogManager.Warn("DoRemove", string.Format("The SchedulerKey key[{0}] is already removed", sk.ToString()));
+                LogManager.Warn("CacheManager:DoRemove", string.Format("The SchedulerKey key[{0}] is already removed", sk.ToString()));
             }
             else
             {
@@ -281,7 +303,7 @@ namespace CommonLib.Cache
             if (!m_cacheItems.TryGetValue(sk.Key, out ci))
             {
                 //This should not happen. If it does, then this is a critial bug!
-                LogManager.Warn("Assert Failure", string.Format("The key[{0}] exists in heap, but not in dictionary", sk.Key));
+                LogManager.Warn("CacheManager:Assert Failure", string.Format("The key[{0}] exists in heap, but not in dictionary", sk.Key));
                 return;
             }
 
@@ -289,7 +311,7 @@ namespace CommonLib.Cache
             if (ci.RefreshAction == null)
             {
                 m_cacheItems.TryRemove(sk.Key, out ci);
-                LogManager.Warn("ProcessTimerEvents", string.Format("The key[{0}] expired without a refresh action, just remove it"));
+                LogManager.Warn("CacheManager:ProcessTimerEvents", string.Format("The key[{0}] expired without a refresh action, just remove it"));
                 return;
             }
 
@@ -304,7 +326,7 @@ namespace CommonLib.Cache
             ts = ci.NextExpirationTime - ci.LastExpirationInfo.LastExpiration;
             if (ts.TotalMilliseconds < MIN_WAIT_TIME)
             {
-                LogManager.Warn("ProcessTimerEvents", "Too short time interval, ts=" + ts.TotalMilliseconds);
+                LogManager.Warn("CacheManager:ProcessTimerEvents", "Too short time interval, ts=" + ts.TotalMilliseconds);
 
                 //wait 3s
                 ci.NextExpirationTime = ci.LastExpirationInfo.LastExpiration.AddMilliseconds(3000);
