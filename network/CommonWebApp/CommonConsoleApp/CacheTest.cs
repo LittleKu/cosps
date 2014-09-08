@@ -6,6 +6,7 @@ using CommonLib.Cache;
 using System.Threading;
 using CommonLib;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace CommonConsoleApp
 {
@@ -45,6 +46,8 @@ namespace CommonConsoleApp
 
         public void Run()
         {
+            Stopwatch sw = new Stopwatch();
+            object obj;
             int sleepTime;
             for (int i = 0; i < m_round; i++)
             {
@@ -65,6 +68,14 @@ namespace CommonConsoleApp
                         m_cm.Remove(m_key);
                     }
                 }
+
+                sw.Restart();
+                for (int j = 0; j < 10000; j++)
+                {
+                    obj = m_cm.GetData(m_key);
+                }
+                sw.Stop();
+                LogManager.Info("CacheTest", string.Format("key={0}, cost={1}, {2}", m_key, sw.ElapsedMilliseconds, sw.ElapsedMilliseconds / 10));
 
                 Thread.Sleep(3);
                 sleepTime = rnd.Next(1000, 500000);
