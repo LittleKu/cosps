@@ -45,10 +45,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteBuffer.cs" />
+    <Compile Include="CacheTest.cs" />
+    <Compile Include="CD_Ctor.cs" />
+    <Compile Include="DelegateTest.cs" />
     <Compile Include="Log4netTest.cs" />
     <Compile Include="LogUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SortedDictionaryAsBinaryHeap.cs" />
     <Compile Include="WebAgentAsync.cs" />
     <Compile Include="WebAgentTest.cs" />
     <Compile Include="WebRequestGetExample.cs" />

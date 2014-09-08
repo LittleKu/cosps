@@ -13,7 +13,11 @@ namespace CommonConsoleApp
         static void Main(string[] args)
         {
             //WebAgentTest.Run(args);
-            Log4netTest.Run(args);
+            //Log4netTest.Run(args);
+            //SortedDictionaryAsBinaryHeap.Run(args);
+            //CD_Ctor.Run();
+            CacheTest.Run();
+            //DelegateTest.Run();
         }
     }
 }

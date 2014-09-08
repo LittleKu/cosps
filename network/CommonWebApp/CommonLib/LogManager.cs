@@ -11,7 +11,7 @@ namespace CommonLib
 
         static LogManager()
         {
-            m_log4net = log4net.LogManager.GetLogger("default");
+            m_log4net = log4net.LogManager.GetLogger("");
         }
 
         public static void Error(string title, Exception message, string remark)
