@@ -278,6 +278,8 @@ namespace CommonLib.Cache
             {
                 m_heap.Remove(sk);
             }
+
+            LogManager.Info("CacheManager:DoRemove", string.Format("The key [{0}] is removed", ci.Key));
             return true;
         }
 

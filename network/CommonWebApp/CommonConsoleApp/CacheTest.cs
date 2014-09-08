@@ -60,11 +60,11 @@ namespace CommonConsoleApp
                 }
                 else
                 {
-                    LogManager.Info("CacheTest", string.Format("key={0}, value={1}", m_key, value));
+                    //LogManager.Info("CacheTest", string.Format("key={0}, value={1}", m_key, value));
                     int val = rnd.Next(1, 10);
                     if (val <= 5)
                     {
-                        LogManager.Info("CacheTest", string.Format("try to remove key={0}", m_key));
+                        //LogManager.Info("CacheTest", string.Format("try to remove key={0}", m_key));
                         m_cm.Remove(m_key);
                     }
                 }
@@ -77,7 +77,7 @@ namespace CommonConsoleApp
                     obj = m_cm[m_key];
                 }
                 sw.Stop();
-                LogManager.Info("CacheTest", string.Format("key={0}, cost={1}, {2}", m_key, sw.ElapsedMilliseconds, sw.ElapsedMilliseconds / 10));
+                //LogManager.Info("CacheTest", string.Format("key={0}, cost={1}, {2}", m_key, sw.ElapsedMilliseconds, sw.ElapsedMilliseconds / 10));
 
                 Thread.Sleep(3);
                 sleepTime = rnd.Next(1000, 500000);
