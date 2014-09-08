@@ -73,6 +73,8 @@ namespace CommonConsoleApp
                 for (int j = 0; j < 10000; j++)
                 {
                     obj = m_cm.GetData(m_key);
+
+                    obj = m_cm[m_key];
                 }
                 sw.Stop();
                 LogManager.Info("CacheTest", string.Format("key={0}, cost={1}, {2}", m_key, sw.ElapsedMilliseconds, sw.ElapsedMilliseconds / 10));

@@ -16,8 +16,8 @@ namespace CommonConsoleApp
             //Log4netTest.Run(args);
             //SortedDictionaryAsBinaryHeap.Run(args);
             //CD_Ctor.Run();
-            CacheTest.Run();
-            //DelegateTest.Run();
+            //CacheTest.Run();
+            DelegateTest.Run();
         }
     }
 }

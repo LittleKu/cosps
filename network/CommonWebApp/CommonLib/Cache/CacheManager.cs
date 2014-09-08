@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace CommonLib.Cache
 {
+    //This class is used to manage the cache. It starts a background thread to see if there's any
+    //cache items expired. If found one, the CacheManager will try to call "RefreshAction" of 
+    //that item to refresh it. If there's no "RefreshAction", the expired item will be discarded directly.
+    //If the cache items are added without expiration, they will NEVER be expired.
     public class CacheManager
     {
         private static readonly object DUMMY = new object();
@@ -78,6 +82,14 @@ namespace CommonLib.Cache
             }
 
             return ci.Value;
+        }
+
+        public object this[string key]
+        {
+            get
+            {
+                return GetData(key);
+            }
         }
 
         public void Remove(string key)

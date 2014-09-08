@@ -29,16 +29,25 @@ namespace CommonConsoleApp
         public void Test1()
         {
             m_dic.AddOrUpdate("k1", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
+            m_dic.AddOrUpdate("k2", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
+            m_dic.AddOrUpdate("k3", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
             m_dic.AddOrUpdate("k1", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
             m_dic.AddOrUpdate("k1", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
-            m_dic.AddOrUpdate("k1", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
-            m_dic.AddOrUpdate("k1", new Func<string, int>(AddValueFactory), new Func<string, int, int>(UpdateValueFactory));
+        }
+
+        public int this[string key]
+        {
+            get
+            {
+                return m_dic[key];
+            }
         }
 
         public static void Run()
         {
             DelegateTest dt = new DelegateTest();
             dt.Test1();
+            Console.WriteLine(dt["k2"]);
         }
     }
 }
