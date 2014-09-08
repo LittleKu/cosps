@@ -5,6 +5,7 @@ using System.Text;
 using CommonLib.Cache;
 using System.Threading;
 using CommonLib;
+using System.Threading.Tasks;
 
 namespace CommonConsoleApp
 {
@@ -15,25 +16,71 @@ namespace CommonConsoleApp
             CacheManager cm = new CacheManager();
 
             Random rnd = new Random();
-            cm.Add("key1", "value1");
-            cm.Add("key2", "value2", new MyRefreshAction(), 20000);
 
-            cm.Add("key3", "value3", new MyRefreshAction(), 20000);
-
-            string[] keys = {"key1", "key2", "key3", "key4"};
-            for (int i = 0; i < 20; i++)
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < 30; i++)
             {
-                for (int j = 0; j < keys.Length; j++)
+                Worker w = new Worker(cm, "key" + i, rnd.Next(20, 100));
+                Task task = Task.Factory.StartNew(() => w.Run());
+                tasks.Add(task);
+                Thread.Sleep(3);
+            }
+
+            Task.WaitAll(tasks.ToArray());
+        }
+    }
+
+    class Worker : ICacheItemRefreshAction
+    {
+        private CacheManager m_cm;
+        private string m_key;
+        private int m_round;
+        private Random rnd = new Random();
+        public Worker(CacheManager cm, string key, int round)
+        {
+            m_cm = cm;
+            m_key = key;
+            m_round = round;
+        }
+
+        public void Run()
+        {
+            int sleepTime;
+            for (int i = 0; i < m_round; i++)
+            {
+                string value = m_cm.GetData(m_key) as string;
+
+                if (value == null)
                 {
-                    object value = cm.GetData(keys[j]);
-
-                    LogManager.Info(keys[j], value == null ? "null" : value.ToString());
-
-                    Thread.Sleep(rnd.Next(30, 5000));
+                    Thread.Sleep(3);
+                    m_cm.Add(m_key, m_key + "-init", this, rnd.Next(30000, 300000));
+                }
+                else
+                {
+                    LogManager.Info("CacheTest", string.Format("key={0}, value={1}", m_key, value));
+                    int val = rnd.Next(1, 10);
+                    if (val <= 5)
+                    {
+                        LogManager.Info("CacheTest", string.Format("try to remove key={0}", m_key));
+                        m_cm.Remove(m_key);
+                    }
                 }
 
-                cm.Add("key4", "value0", new MyRefreshAction(), 5000);
+                Thread.Sleep(3);
+                sleepTime = rnd.Next(1000, 500000);
+
+                Thread.Sleep(sleepTime);
             }
+        }
+        public object Refresh(string removedKey, object expiredValue, CacheItemRemovedReason removalReason)
+        {
+            if (removalReason != CacheItemRemovedReason.EXPIRED)
+            {
+                return null;
+            }
+            Thread.Sleep(3);
+            Thread.Sleep(rnd.Next(5000, 20000));
+            return expiredValue.ToString() + "-" + removedKey;
         }
     }
 

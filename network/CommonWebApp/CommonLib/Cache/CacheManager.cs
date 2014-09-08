@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -8,13 +7,6 @@ using System.Threading.Tasks;
 
 namespace CommonLib.Cache
 {
-    public enum CacheItemRemovedReason
-    {
-        REMOVED,
-
-        EXPIRED
-    }
-
     public class CacheManager
     {
         private static readonly object DUMMY = new object();
@@ -145,8 +137,8 @@ namespace CommonLib.Cache
             LogManager.Info("CacheManager:Run", "Stopped to run");
         }
 
-        //处理操作事件，所有对CacheManager内容有修改的API操作都在此函数中处理
-        //为保证效率，全部由调度线程完成修改操作，读取操作可由多个线程同时访问
+        //This function is triggered by public API call, such as Add/Remove etc.
+        //Only this dispatching thread CAN modify the content of CacheManager, but it is allowed to read by any thread.
         private bool ProcessOperationEvents()
         {
             OperationEvent cme = null;
@@ -276,7 +268,8 @@ namespace CommonLib.Cache
             return true;
         }
 
-         //处理定时器事件，当CacheItem过期的时候，此函数被触发去完成更新操作
+        //This function is triggered by timer. If a key is expired, this function will 
+        //try to refresh the value if there's a refresh action associated with it
         private void ProcessTimerEvents()
         {
             if (m_heap.Count <= 0)
