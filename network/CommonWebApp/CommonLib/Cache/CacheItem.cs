@@ -3,30 +3,38 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
+using CommonLib;
 
 namespace CommonLib.Cache
 {
-    public class CacheItem
+    class CacheItem
     {
         private const int STOPPED = 0;
         private const int RUNNING = 1;
 
         private int m_running;
+        private readonly object m_lock = new object();
 
         private string m_key;
 
         private object m_value;
 
-        private ICacheItemRefreshAction m_refreshAction;
+        private CacheItemRefreshAction m_refreshAction;
 
         private ICacheItemExpiration m_expiration;
+
+        //Lock for Refresh Action
+        public object Lock
+        {
+            get { return m_lock; }
+        }
 
         public string Key
         {
             get { return m_key; }
         }
 
-        public ICacheItemRefreshAction RefreshAction
+        public CacheItemRefreshAction RefreshAction
         {
             get { return m_refreshAction; }
         }
@@ -46,7 +54,7 @@ namespace CommonLib.Cache
 
         public DateTime NextExpirationTime { get; set; }
 
-        public CacheItem(string key, object value, ICacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
+        public CacheItem(string key, object value, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
         {
             this.m_running = STOPPED;
             this.m_key = key;
@@ -67,13 +75,99 @@ namespace CommonLib.Cache
             }
         }
 
-        public CacheItem(string key, object value, ICacheItemRefreshAction refreshAction, long expiration)
+        public CacheItem(string key, object value, CacheItemRefreshAction refreshAction, long expiration)
             : this(key, value, refreshAction, new DefaultCacheItemExpiration(expiration))
         {
         }
 
         public CacheItem(string key, object value) : this(key, value, null, null)
         {
+        }
+
+        private void DoRefresh(CacheItemRemovedReason reason)
+        {
+            if (m_refreshAction == null)
+            {
+                return;
+            }
+
+            LogManager.Info("CacheItem", string.Format("The key [{0}] begin to refresh", this.Key));
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            this.LastExpirationInfo.LastBeginRefresh = DateTime.Now;
+
+            object newValue = null;
+            try
+            {
+                newValue = m_refreshAction(m_key, m_value, reason);
+            }
+            catch (Exception ex)
+            {
+                newValue = null;
+                LogManager.Error(string.Format("CacheItem Refresh key[{0}] failed", Key), ex);
+            }
+            m_value = newValue;
+
+            this.LastExpirationInfo.LastEndRefresh = DateTime.Now;
+
+            sw.Stop();
+            LogManager.Info("CacheItem", string.Format("The key [{0}] end to refresh, cost {1}ms", this.Key, sw.ElapsedMilliseconds));
+        }
+
+        public void RefreshNoWait(CacheItemRemovedReason reason)
+        {
+            bool acquiredLock = false;
+            try
+            {
+                Monitor.TryEnter(Lock, ref acquiredLock);
+                if (!acquiredLock)
+                {
+                    LogManager.Warn("CacheItem", string.Format("The key [{0}] is already in refreshing", this.Key), "Refresh");
+                }
+                else
+                {
+                    DoRefresh(reason);
+                }
+            }
+            finally
+            {
+                Monitor.Exit(Lock);
+            }
+        }
+
+        public object RefreshWait(CacheItemRemovedReason reason, int waitTimeout)
+        {
+            object result = null;
+
+            bool acquiredLock = false;
+            try
+            {
+                Monitor.TryEnter(Lock, waitTimeout, ref acquiredLock);
+                if (!acquiredLock)
+                {
+                    LogManager.Warn("CacheItem", string.Format("Timeout when try to refresh [{0}]", this.Key));
+                }
+                else
+                {
+                    if (m_value == null)
+                    {
+                        DoRefresh(reason);
+                    }
+                }
+
+                result = m_value;
+            }
+            finally
+            {
+                if (acquiredLock)
+                {
+                    Monitor.Exit(Lock);
+                }
+            }
+
+            return result;
         }
 
         public void Refresh(CacheItemRemovedReason reason)
@@ -96,7 +190,7 @@ namespace CommonLib.Cache
                 object newValue = null;
                 try
                 {
-                    newValue = m_refreshAction.Refresh(m_key, m_value, reason);
+                    newValue = m_refreshAction(m_key, m_value, reason);
                 }
                 catch (Exception ex)
                 {
@@ -122,27 +216,54 @@ namespace CommonLib.Cache
         }
     }
 
-    public enum OperationType
+    enum OperationType
     {
         OP_ADD,
         OP_REMOVE,
+        OP_CLEAR,
         OP_STOP
     }
 
-    public class OperationEvent
+    class OperationEvent
     {
+        private readonly object m_lock = new object();
+
         public OperationType OperType { get; set; }
 
+        public bool Processed { get; set; }
+
         public object OperObject { get; set; }
+
+        public object Lock
+        {
+            get { return m_lock; }
+        }
 
         public OperationEvent(OperationType oper, object obj)
         {
             this.OperType = oper;
             this.OperObject = obj;
+            this.Processed = false;
+        }
+
+        public void WaitUntilProcessed()
+        {
+            try
+            {
+                Monitor.Enter(Lock);
+                while (!this.Processed)
+                {
+                    Monitor.Wait(Lock);
+                }
+            }
+            finally
+            {
+                Monitor.Exit(Lock);
+            }
         }
     }
 
-    public class SchedulerKey : IComparable<SchedulerKey>
+    class SchedulerKey : IComparable<SchedulerKey>
     {
         public DateTime NextExpirationTime { get; set; }
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonLib;
 
 namespace CommonLib.Cache
 {
@@ -30,24 +31,35 @@ namespace CommonLib.Cache
         //A auto reset event for processing user actions events and timer events
         private AutoResetEvent m_waitHandle = null;
 
+        //The current available thread count that could be used to Refresh
+        private int m_availRefreshThreadCount = 0;
+
         //Is this scheduler thread still running?
         private bool m_running = false;
 
-        public CacheManager()
+        public CacheManager(int maxRefreshThreadCount = 3)
         {
             m_cacheItems = new ConcurrentDictionary<string, CacheItem>();
             m_messages = new ConcurrentQueue<OperationEvent>();
             m_heap = new SortedDictionary<SchedulerKey, object>();
             m_waitHandle = new AutoResetEvent(false);
+            m_availRefreshThreadCount = maxRefreshThreadCount;
+            if (m_availRefreshThreadCount <= 0)
+            {
+                m_availRefreshThreadCount = 1;
+            }
 
             //start to run scheduler
             m_running = true;
             Task.Factory.StartNew(() => Run());
         }
 
-        public int Count()
+        public int Count 
         {
-            return m_cacheItems.Count;
+            get
+            {
+                return m_cacheItems.Count;
+            }
         }
 
         public void Add(string key, object value)
@@ -56,16 +68,29 @@ namespace CommonLib.Cache
             PostEvent(OperationType.OP_ADD, ci);
         }
 
-        public void Add(string key, object value, ICacheItemRefreshAction refreshAction, long expiration)
+        public void Add(string key, object value, CacheItemRefreshAction refreshAction, long expiration)
         {
             CacheItem ci = new CacheItem(key, value, refreshAction, expiration);
             PostEvent(OperationType.OP_ADD, ci);
         }
 
-        public void Add(string key, object value, ICacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
+        public void Add(string key, object value, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
         {
             CacheItem ci = new CacheItem(key, value, refreshAction, expiration);
             PostEvent(OperationType.OP_ADD, ci);
+        }
+
+        public object GetOrAdd(string key, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration, int lockTimeout)
+        {
+            object result = null;
+
+            CacheItem ci = m_cacheItems.GetOrAdd(key, (newKey) => new CacheItem(newKey, null, refreshAction, expiration));
+            if ((result = ci.Value) == null)
+            {
+                result = ci.RefreshWait(CacheItemRemovedReason.EXPIRED, lockTimeout);
+            }
+
+            return result;
         }
 
         public bool Contains(string key)
@@ -101,11 +126,18 @@ namespace CommonLib.Cache
             }
         }
 
+        public void Flush()
+        {
+            PostEvent(OperationType.OP_CLEAR, null);
+        }
+
         private void PostEvent(OperationType operType, object operObj)
         {
             OperationEvent cme = new OperationEvent(operType, operObj);
             m_messages.Enqueue(cme);
             m_waitHandle.Set();
+
+            cme.WaitUntilProcessed();
         }
 
         private void Run()
@@ -122,7 +154,10 @@ namespace CommonLib.Cache
                     }
 
                     //2. process timer events
-                    ProcessTimerEvents();
+                    if (!ProcessTimerEvents())
+                    {
+                        continue;
+                    }
 
                     //3. wait events
                     if (m_heap.Count <= 0)
@@ -174,6 +209,31 @@ namespace CommonLib.Cache
 
         private bool ProcessOperationEvent(OperationEvent cme)
         {
+            bool result = true;
+            bool acquiredLock = false;
+            try
+            {
+                Monitor.Enter(cme.Lock, ref acquiredLock);
+                if (acquiredLock)
+                {
+                    result = DoProcessOperationEvent(cme);
+                }
+            }
+            finally
+            {
+                if (acquiredLock)
+                {
+                    cme.Processed = true;
+                    Monitor.PulseAll(cme.Lock);
+                    Monitor.Exit(cme.Lock);
+                }
+            }
+
+            return result;
+        }
+
+        private bool DoProcessOperationEvent(OperationEvent cme)
+        {
             bool shouldContinue = true;
             switch (cme.OperType)
             {
@@ -189,12 +249,19 @@ namespace CommonLib.Cache
                     }
                     break;
 
+                case OperationType.OP_CLEAR:
+                    {
+                        Clear();
+                    }
+                    break;
+
                 case OperationType.OP_STOP:
                     {
                         m_running = false;
                         shouldContinue = false;
                     }
                     break;
+
                 default:
                     {
                         LogManager.Warn("CacheManager:ProcessUserAction", "Unsupported operation: " + (int)cme.OperType);
@@ -283,13 +350,21 @@ namespace CommonLib.Cache
             return true;
         }
 
+        private void Clear()
+        {
+            m_cacheItems.Clear();
+            m_heap.Clear();
+
+            LogManager.Info("CacheManager:Clear", "Clear all the cached items");
+        }
+
         //This function is triggered by timer. If a key is expired, this function will 
         //try to refresh the value if there's a refresh action associated with it
-        private void ProcessTimerEvents()
+        private bool ProcessTimerEvents()
         {
             if (m_heap.Count <= 0)
             {
-                return;
+                return true;
             }
 
             //The first key is the minimum value to be the first expiration value
@@ -300,38 +375,68 @@ namespace CommonLib.Cache
             //not yet, wait
             if (ts.TotalMilliseconds >= MIN_WAIT_TIME)
             {
-                return;
+                return true;
             }
 
-            //Expired, remove this key firstly.
-            //Don't remove the cache item to make sure we still can access the old one
-            m_heap.Remove(sk);
+            //Expired, don't remove the cache item to make sure we can still access the old one
 
             CacheItem ci = null;
             if (!m_cacheItems.TryGetValue(sk.Key, out ci))
             {
+                m_heap.Remove(sk);
+
                 //This should not happen. If it does, then this is a critial bug!
                 LogManager.Warn("CacheManager:Assert Failure", string.Format("The key[{0}] exists in heap, but not in dictionary", sk.Key));
-                return;
+                return true;
             }
 
             //No refresh action, just remove it directly
             if (ci.RefreshAction == null)
             {
                 m_cacheItems.TryRemove(sk.Key, out ci);
-                LogManager.Warn("CacheManager:ProcessTimerEvents", string.Format("The key[{0}] expired without a refresh action, just remove it"));
-                return;
+                m_heap.Remove(sk);
+
+                LogManager.Info("CacheManager:ProcessTimerEvents", string.Format("The key[{0}] expired without a refresh action, just remove it", sk.Key));
+                return true;
             }
 
-            //Refresh the expired item now
+            return RefreshExpiredCache(sk, ci);
+        }
+
+        //The item is expired, call the "Refresh" action of this item to get a refresh value
+        //1. If there's not enough worker threads, the dispatching thread will wait until the below 2 conditions happend:
+        //(1). There is worker threads available
+        //(2). There is user event comming (Add/Remove etc.)
+        //2. If there's at least one worker thread, the dispatching thread will schedule the "Refresh" action in one worker thread
+        //after the worker thread end to refresh the cache item, it will release the worker thread resource, and notify the
+        //dispatching thread, so that other expired cache items wait for refresh worker thread can do their refresh job
+        private bool RefreshExpiredCache(SchedulerKey sk, CacheItem ci)
+        {
+            //Refresh the expired item now, but firstly we should get a token
+            if (Interlocked.Decrement(ref m_availRefreshThreadCount) < 0)
+            {
+                //Got an invalid token, return it
+                Interlocked.Increment(ref m_availRefreshThreadCount);
+
+                //No available refresh thread now, wait for one
+                LogManager.Info("CacheManager:ProcessTimerEvents", string.Format("Begin to wait for refreshing thread token with key [{0}]", sk.Key));
+
+                m_waitHandle.WaitOne();
+
+                //Either there's an user event comming or a refresh thread token is available
+                LogManager.Info("CacheManager:ProcessTimerEvents", string.Format("End to wait for refreshing thread token with key [{0}]", sk.Key));
+
+                //No need to wait again, start a new loop
+                return false;
+            }
 
             //Save the last expiration time
             ci.LastExpirationInfo.LastExpiration = ci.NextExpirationTime;
             //Update the next expiration time for next schedule
             ci.NextExpirationTime = ci.Expiration.NextExpiration(ci.LastExpirationInfo);
-            
+
             //Validation
-            ts = ci.NextExpirationTime - ci.LastExpirationInfo.LastExpiration;
+            TimeSpan ts = ci.NextExpirationTime - ci.LastExpirationInfo.LastExpiration;
             if (ts.TotalMilliseconds < MIN_WAIT_TIME)
             {
                 LogManager.Warn("CacheManager:ProcessTimerEvents", "Too short time interval, ts=" + ts.TotalMilliseconds);
@@ -341,10 +446,22 @@ namespace CommonLib.Cache
             }
 
             //Re-schedule again
+            m_heap.Remove(sk);
             m_heap.Add(new SchedulerKey(ci.NextExpirationTime, sk.Key), DUMMY);
 
             //Fire the refresh action
-            Task.Factory.StartNew(() => ci.Refresh(CacheItemRemovedReason.EXPIRED));
+            Task.Factory.StartNew(() =>
+            {
+                ci.Refresh(CacheItemRemovedReason.EXPIRED);
+
+                //Release the token
+                Interlocked.Increment(ref m_availRefreshThreadCount);
+
+                //And notify the listeners
+                m_waitHandle.Set();
+            });
+
+            return true;
         }
     }
 }

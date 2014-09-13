@@ -31,7 +31,7 @@ namespace CommonConsoleApp
         }
     }
 
-    class Worker : ICacheItemRefreshAction
+    class Worker
     {
         private CacheManager m_cm;
         private string m_key;
@@ -56,7 +56,7 @@ namespace CommonConsoleApp
                 if (value == null)
                 {
                     Thread.Sleep(3);
-                    m_cm.Add(m_key, m_key + "-init", this, rnd.Next(30000, 300000));
+                    m_cm.Add(m_key, m_key + "-init", Refresh, rnd.Next(30000, 300000));
                 }
                 else
                 {
@@ -97,7 +97,7 @@ namespace CommonConsoleApp
         }
     }
 
-    class MyRefreshAction : ICacheItemRefreshAction
+    class MyRefreshAction
     {
         public object Refresh(string removedKey, object expiredValue, CacheItemRemovedReason removalReason)
         {

@@ -44,10 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteArrays.cs" />
+    <Compile Include="Cache\CacheFactory.cs" />
     <Compile Include="Cache\CacheItem.cs" />
+    <Compile Include="Cache\CacheItemRefreshAction.cs" />
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Cache\ICacheItemExpiration.cs" />
-    <Compile Include="Cache\ICacheItemRefreshAction.cs" />
     <Compile Include="LogManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
