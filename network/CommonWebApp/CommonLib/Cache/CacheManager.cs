@@ -138,7 +138,7 @@ namespace CommonLib.Cache
 
                     //Release the token
                     int prevCount = m_refreshSyncSem.Release();
-                    LogManager.Info("CacheManager", string.Format("Refresh done for [{0}], the previous semaphore count is [{1}]", ci.Key, prevCount));
+                    LogManager.Info("CacheManager", string.Format("Try to refresh [{0}] done, the previous semaphore count is [{1}]", ci.Key, prevCount));
                 }
 
                 //get the updated value
@@ -192,7 +192,7 @@ namespace CommonLib.Cache
             m_operEvents.Enqueue(operEvent);
             m_waitHandle.Set();
 
-            //Make the public API call synchornized
+            //synchronously wait for the result
             return operEvent.WaitUntilProcessed();
         }
 
@@ -288,26 +288,26 @@ namespace CommonLib.Cache
             return result;
         }
 
-        private bool DoProcessOperationEvent(OperationEvent cme)
+        private bool DoProcessOperationEvent(OperationEvent operEvent)
         {
             bool shouldContinue = true;
-            switch (cme.OperType)
+            switch (operEvent.OperType)
             {
                 case OperationType.OP_ADD:
                     {
-                        shouldContinue = DoAdd(cme.OperObject as CacheItem);
+                        shouldContinue = DoAdd(operEvent.OperObject as CacheItem);
                     }
                     break;
 
                 case OperationType.OP_ADD_OR_GET:
                     {
-                        shouldContinue = DoGetOrAdd(cme);
+                        shouldContinue = DoGetOrAdd(operEvent);
                     }
                     break;
 
                 case OperationType.OP_REMOVE:
                     {
-                        shouldContinue = DoRemove(cme.OperObject as CacheItem);
+                        shouldContinue = DoRemove(operEvent.OperObject as CacheItem);
                     }
                     break;
 
@@ -326,7 +326,7 @@ namespace CommonLib.Cache
 
                 default:
                     {
-                        LogManager.Warn("CacheManager:ProcessUserAction", "Unsupported operation: " + (int)cme.OperType);
+                        LogManager.Warn("CacheManager:ProcessUserAction", "Unsupported operation: " + (int)operEvent.OperType);
                     }
                     break;
             }
@@ -379,8 +379,8 @@ namespace CommonLib.Cache
                 else
                 {
                     operEvent.OperResult = existingItem;
-                    LogManager.Info("CacheManager:DoGetOrAdd", string.Format("The key [{0}] is already existing, value=[{1}]", 
-                        ci.Key, existingItem.ToString()));
+                    //LogManager.Debug("CacheManager:DoGetOrAdd", string.Format("The key [{0}] is already existing, value=[{1}]", 
+                    //    ci.Key, existingItem.ToString()));
                 }
             }
 

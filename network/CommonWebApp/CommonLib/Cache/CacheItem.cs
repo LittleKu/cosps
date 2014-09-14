@@ -153,6 +153,10 @@ namespace CommonLib.Cache
                     {
                         DoRefresh();
                     }
+                    else
+                    {
+                        LogManager.Info("CacheItem", string.Format("The key [{0}] is already refreshed", this.Key));
+                    }
                 }
             }
             finally
