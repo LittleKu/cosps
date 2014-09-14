@@ -128,7 +128,10 @@ namespace CommonLib.Cache
             }
             finally
             {
-                Monitor.Exit(RefreshLock);
+                if (acquiredLock)
+                {
+                    Monitor.Exit(RefreshLock);
+                }
             }
         }
 
@@ -173,6 +176,7 @@ namespace CommonLib.Cache
     enum OperationType
     {
         OP_ADD,
+        OP_ADD_OR_GET,
         OP_REMOVE,
         OP_CLEAR,
         OP_STOP
@@ -188,6 +192,8 @@ namespace CommonLib.Cache
 
         public object OperObject { get; set; }
 
+        public object OperResult { get; set; }
+
         public object ProcessedLock
         {
             get { return m_processedLock; }
@@ -197,23 +203,39 @@ namespace CommonLib.Cache
         {
             this.OperType = oper;
             this.OperObject = obj;
+            this.OperResult = null;
             this.Processed = false;
         }
 
-        public void WaitUntilProcessed()
+        public object WaitUntilProcessed()
         {
+            bool acquiredLock = false;
+            object result = null;
             try
             {
-                Monitor.Enter(ProcessedLock);
-                while (!this.Processed)
+                Monitor.Enter(ProcessedLock, ref acquiredLock);
+                if (acquiredLock)
                 {
-                    Monitor.Wait(ProcessedLock);
+                    while (!this.Processed)
+                    {
+                        Monitor.Wait(ProcessedLock);
+                    }
+                    result = this.OperResult;
                 }
+            }
+            catch (Exception ex)
+            {
+                LogManager.Error("CacheItem:WaitUntilProcessed", ex);
+                result = null;
             }
             finally
             {
-                Monitor.Exit(ProcessedLock);
+                if (acquiredLock)
+                {
+                    Monitor.Exit(ProcessedLock);
+                }
             }
+            return result;
         }
     }
 

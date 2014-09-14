@@ -80,19 +80,19 @@ namespace CommonLib.Cache
         public void Add(string key, object value)
         {
             CacheItem ci = new CacheItem(key, value);
-            PostEvent(OperationType.OP_ADD, ci);
+            SendEvent(OperationType.OP_ADD, ci);
         }
 
         public void Add(string key, object value, CacheItemRefreshAction refreshAction, long expiration)
         {
             CacheItem ci = new CacheItem(key, value, refreshAction, expiration);
-            PostEvent(OperationType.OP_ADD, ci);
+            SendEvent(OperationType.OP_ADD, ci);
         }
 
         public void Add(string key, object value, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
         {
             CacheItem ci = new CacheItem(key, value, refreshAction, expiration);
-            PostEvent(OperationType.OP_ADD, ci);
+            SendEvent(OperationType.OP_ADD, ci);
         }
 
         public object GetOrAdd(string key, CacheItemRefreshAction refreshAction, long expiration, int lockTimeout)
@@ -102,9 +102,19 @@ namespace CommonLib.Cache
 
         public object GetOrAdd(string key, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration, int lockTimeout)
         {
-            object result = null;
+            //First try to get the value for the key, if it doesn't exist, then try to add the candidate value.
+            //It's thread safe. The result "ci" for multiple threads should be the exactly the same value.
+            CacheItem candidate = new CacheItem(key, null, refreshAction, expiration);
+            CacheItem ci = SendEvent(OperationType.OP_ADD_OR_GET, candidate) as CacheItem;
+            if (ci == null)
+            {
+                //This should not happen. If it does, then this is a critial bug!
+                LogManager.Warn("CacheManager:Assert Failure", string.Format("The result of GetOrAdd for key [{0}] is null", key));
+                return null;
+            }
 
-            CacheItem ci = m_cacheItems.GetOrAdd(key, (newKey) => new CacheItem(newKey, null, refreshAction, expiration));
+            //Try to get the value. If there's no valid value, try to refresh it now.
+            object result = null;
             if ((result = ci.Value) == null)
             {
                 Stopwatch sw = new Stopwatch();
@@ -167,23 +177,23 @@ namespace CommonLib.Cache
             CacheItem ci = null;
             if (m_cacheItems.TryGetValue(key, out ci))
             {
-                PostEvent(OperationType.OP_REMOVE, ci);
+                SendEvent(OperationType.OP_REMOVE, ci);
             }
         }
 
         public void Flush()
         {
-            PostEvent(OperationType.OP_CLEAR, null);
+            SendEvent(OperationType.OP_CLEAR, null);
         }
 
-        private void PostEvent(OperationType operType, object operObj)
+        private object SendEvent(OperationType operType, object operObj)
         {
             OperationEvent operEvent = new OperationEvent(operType, operObj);
             m_operEvents.Enqueue(operEvent);
             m_waitHandle.Set();
 
             //Make the public API call synchornized
-            operEvent.WaitUntilProcessed();
+            return operEvent.WaitUntilProcessed();
         }
 
         private void Run()
@@ -289,6 +299,12 @@ namespace CommonLib.Cache
                     }
                     break;
 
+                case OperationType.OP_ADD_OR_GET:
+                    {
+                        shouldContinue = DoGetOrAdd(cme);
+                    }
+                    break;
+
                 case OperationType.OP_REMOVE:
                     {
                         shouldContinue = DoRemove(cme.OperObject as CacheItem);
@@ -318,6 +334,59 @@ namespace CommonLib.Cache
             return shouldContinue;
         }
 
+        private bool DoGetOrAdd(OperationEvent operEvent)
+        {
+            CacheItem ci = operEvent.OperObject as CacheItem;
+            if (ci == null)
+            {
+                LogManager.Warn("CacheManager:Assert Failure", "DoGetOrAdd a null item");
+                return true;
+            }
+
+            //Cache Item
+            bool added = m_cacheItems.TryAdd(ci.Key, ci);
+            if (added)
+            {
+                //Add the SchedulerKey at the same time
+                SchedulerKey sk = new SchedulerKey(ci.NextExpirationTime, ci.Key);
+                if (m_heap.ContainsKey(sk))
+                {
+                    //This should not happen. If it does, then this is a critial bug!
+                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The SchedulerKey key[{0}] is already exising", sk.ToString()));
+                }
+                else
+                {
+                    m_heap.Add(sk, DUMMY);
+                }
+
+                operEvent.OperResult = ci;
+
+                LogManager.Info("CacheManager:DoGetOrAdd", string.Format("The key [{0}] is added, value=[{1}]", ci.Key, ci.ToString()));
+            }
+            else
+            {
+                CacheItem existingItem = null;
+                if (!m_cacheItems.TryGetValue(ci.Key, out existingItem))
+                {
+                    //This should not happen. If it does, then this is a critial bug!
+                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The expected existing key[{0}] doesn't exist", ci.Key));
+                }
+                else if (existingItem == null)
+                {
+                    //This should not happen. If it does, then this is a critial bug!
+                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The expected existing key[{0}] is null", ci.Key));
+                }
+                else
+                {
+                    operEvent.OperResult = existingItem;
+                    LogManager.Info("CacheManager:DoGetOrAdd", string.Format("The key [{0}] is already existing, value=[{1}]", 
+                        ci.Key, existingItem.ToString()));
+                }
+            }
+
+            return true;
+        }
+
         private bool DoAdd(CacheItem ci)
         {
             if (ci == null)
@@ -326,45 +395,32 @@ namespace CommonLib.Cache
                 return true;
             }
 
-            CacheItem existingItem = null;
-
-            //If the key exists, remove it firstly, then re-add it again
-            if (m_cacheItems.TryRemove(ci.Key, out existingItem))
+            //Cache Item
+            bool added = m_cacheItems.TryAdd(ci.Key, ci);
+            if (added)
             {
-                SchedulerKey existingSK = new SchedulerKey(existingItem.NextExpirationTime, existingItem.Key);
-                if (!m_heap.ContainsKey(existingSK))
+                //Add the SchedulerKey at the same time
+                SchedulerKey sk = new SchedulerKey(ci.NextExpirationTime, ci.Key);
+                if (m_heap.ContainsKey(sk))
                 {
                     //This should not happen. If it does, then this is a critial bug!
-                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The key [{0}] exists in CacheItems but not in SchedulerKeys", existingItem.Key));
+                    LogManager.Warn("CacheManager:Assert Failure", string.Format("The SchedulerKey key[{0}] is already exising", sk.ToString()));
                 }
                 else
                 {
-                    m_heap.Remove(existingSK);
+                    m_heap.Add(sk, DUMMY);
                 }
             }
 
-            //Cache Item
-            if (!m_cacheItems.TryAdd(ci.Key, ci))
+            if (added)
             {
-                //This should not happen. If it does, then this is a critial bug!
-                LogManager.Warn("CacheManager:Assert Failure", string.Format("The key [{0}] add failed", ci.Key));
-            }
-
-            //And the SchedulerKey
-            SchedulerKey sk = new SchedulerKey(ci.NextExpirationTime, ci.Key);
-            if (m_heap.ContainsKey(sk))
-            {
-                //This should not happen. If it does, then this is a critial bug!
-                LogManager.Warn("CacheManager:Assert Failure", string.Format("The SchedulerKey key[{0}] is already exising", sk.ToString()));
+                LogManager.Info("CacheManager:DoAdd", string.Format("The key [{0}] is added, value=[{1}]", ci.Key, ci.ToString()));
             }
             else
             {
-                m_heap.Add(sk, DUMMY);
+                LogManager.Info("CacheManager:DoAdd", string.Format("The key [{0}] is already existing", ci.Key));
             }
 
-            LogManager.Info("CacheManager:DoAdd", string.Format("The key [{0}] is added, current={1}, original={2}", 
-                ci.Key, ci.ToString(), ((existingItem == null) ? "null" : existingItem.ToString())));
-            
             return true;
         }
 
@@ -498,13 +554,20 @@ namespace CommonLib.Cache
             //Fire the refresh action
             Task.Factory.StartNew(() =>
             {
-                ci.RefreshAsync();
+                try
+                {
+                    ci.RefreshAsync();
 
-                //Release the token
-                Interlocked.Increment(ref m_availRefreshThreadCount);
+                    //Release the token
+                    Interlocked.Increment(ref m_availRefreshThreadCount);
 
-                //And notify the listeners
-                m_waitHandle.Set();
+                    //And notify the listeners
+                    m_waitHandle.Set();
+                }
+                catch (Exception ex)
+                {
+                    LogManager.Error(string.Format("Task for key [{0}] exception", ci.Key), ex);
+                }
             });
 
             return true;
