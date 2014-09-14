@@ -52,6 +52,7 @@
     <Compile Include="LogUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SemaphoreTest.cs" />
     <Compile Include="SortedDictionaryAsBinaryHeap.cs" />
     <Compile Include="WebAgentAsync.cs" />
     <Compile Include="WebAgentTest.cs" />

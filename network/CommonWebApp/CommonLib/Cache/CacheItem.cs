@@ -9,11 +9,7 @@ namespace CommonLib.Cache
 {
     class CacheItem
     {
-        private const int STOPPED = 0;
-        private const int RUNNING = 1;
-
-        private int m_running;
-        private readonly object m_lock = new object();
+        private readonly object m_refreshLock = new object();
 
         private string m_key;
 
@@ -23,10 +19,11 @@ namespace CommonLib.Cache
 
         private ICacheItemExpiration m_expiration;
 
-        //Lock for Refresh Action
-        public object Lock
+        //ProcessedLock for Refresh Action
+        //This lock should be locked when do refresh action
+        public object RefreshLock
         {
-            get { return m_lock; }
+            get { return m_refreshLock; }
         }
 
         public string Key
@@ -54,9 +51,8 @@ namespace CommonLib.Cache
 
         public DateTime NextExpirationTime { get; set; }
 
-        public CacheItem(string key, object value, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration)
+        public CacheItem(string key, object value, CacheItemRefreshAction refreshAction = null, ICacheItemExpiration expiration = null)
         {
-            this.m_running = STOPPED;
             this.m_key = key;
             this.m_value = value;
             this.m_refreshAction = refreshAction;
@@ -80,14 +76,11 @@ namespace CommonLib.Cache
         {
         }
 
-        public CacheItem(string key, object value) : this(key, value, null, null)
-        {
-        }
-
-        private void DoRefresh(CacheItemRemovedReason reason)
+        private void DoRefresh()
         {
             if (m_refreshAction == null)
             {
+                LogManager.Warn("CacheItem", string.Format("The key [{0}] has not Refresh action", this.Key));
                 return;
             }
 
@@ -101,12 +94,12 @@ namespace CommonLib.Cache
             object newValue = null;
             try
             {
-                newValue = m_refreshAction(m_key, m_value, reason);
+                newValue = m_refreshAction(m_key, m_value);
             }
             catch (Exception ex)
             {
                 newValue = null;
-                LogManager.Error(string.Format("CacheItem Refresh key[{0}] failed", Key), ex);
+                LogManager.Error(string.Format("CacheItem [{0}] refresh failed", Key), ex);
             }
             m_value = newValue;
 
@@ -116,95 +109,56 @@ namespace CommonLib.Cache
             LogManager.Info("CacheItem", string.Format("The key [{0}] end to refresh, cost {1}ms", this.Key, sw.ElapsedMilliseconds));
         }
 
-        public void RefreshNoWait(CacheItemRemovedReason reason)
+        //This function is only executed by CacheManager worker thread in asynchoronisely
+        public void RefreshAsync()
         {
             bool acquiredLock = false;
             try
             {
-                Monitor.TryEnter(Lock, ref acquiredLock);
+                Monitor.TryEnter(RefreshLock, ref acquiredLock);
                 if (!acquiredLock)
                 {
                     LogManager.Warn("CacheItem", string.Format("The key [{0}] is already in refreshing", this.Key), "Refresh");
                 }
                 else
                 {
-                    DoRefresh(reason);
+                    //alwasy refresh even the current value is valid
+                    DoRefresh();
                 }
             }
             finally
             {
-                Monitor.Exit(Lock);
+                Monitor.Exit(RefreshLock);
             }
         }
 
-        public object RefreshWait(CacheItemRemovedReason reason, int waitTimeout)
+        //This function is only executed by external thread in synchoronisely
+        public void RefreshSync(int waitTimeout)
         {
-            object result = null;
-
             bool acquiredLock = false;
             try
             {
-                Monitor.TryEnter(Lock, waitTimeout, ref acquiredLock);
+                Monitor.TryEnter(RefreshLock, waitTimeout, ref acquiredLock);
                 if (!acquiredLock)
                 {
-                    LogManager.Warn("CacheItem", string.Format("Timeout when try to refresh [{0}]", this.Key));
+                    LogManager.Warn("CacheItem", string.Format("Timeout when try to refresh [{0}], timeout=[{1}]", this.Key, waitTimeout));
                 }
                 else
                 {
+                    //only refresh when there's no valid values
                     if (m_value == null)
                     {
-                        DoRefresh(reason);
+                        DoRefresh();
                     }
                 }
-
-                result = m_value;
             }
             finally
             {
                 if (acquiredLock)
                 {
-                    Monitor.Exit(Lock);
+                    Monitor.Exit(RefreshLock);
                 }
             }
-
-            return result;
-        }
-
-        public void Refresh(CacheItemRemovedReason reason)
-        {
-            if(Interlocked.CompareExchange(ref m_running, RUNNING, STOPPED) != STOPPED)
-            {
-                LogManager.Warn("CacheItem", string.Format("The key [{0}] is already in refreshing", this.Key), "Refresh");
-                return;
-            }
-
-            LogManager.Info("CacheItem", string.Format("The key [{0}] begin to refresh", this.Key));
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            if (m_refreshAction != null)
-            {
-                this.LastExpirationInfo.LastBeginRefresh = DateTime.Now;
-
-                object newValue = null;
-                try
-                {
-                    newValue = m_refreshAction(m_key, m_value, reason);
-                }
-                catch (Exception ex)
-                {
-                    newValue = null;
-                    LogManager.Error(string.Format("CacheItem Refresh key[{0}] failed", Key), ex);
-                }
-                m_value = newValue;
-
-                this.LastExpirationInfo.LastEndRefresh = DateTime.Now;
-            }
-
-            sw.Stop();
-            LogManager.Info("CacheItem", string.Format("The key [{0}] end to refresh, cost {1}ms", this.Key, sw.ElapsedMilliseconds));
-            Interlocked.Exchange(ref m_running, STOPPED);
         }
 
         public override string ToString()
@@ -226,7 +180,7 @@ namespace CommonLib.Cache
 
     class OperationEvent
     {
-        private readonly object m_lock = new object();
+        private readonly object m_processedLock = new object();
 
         public OperationType OperType { get; set; }
 
@@ -234,9 +188,9 @@ namespace CommonLib.Cache
 
         public object OperObject { get; set; }
 
-        public object Lock
+        public object ProcessedLock
         {
-            get { return m_lock; }
+            get { return m_processedLock; }
         }
 
         public OperationEvent(OperationType oper, object obj)
@@ -250,15 +204,15 @@ namespace CommonLib.Cache
         {
             try
             {
-                Monitor.Enter(Lock);
+                Monitor.Enter(ProcessedLock);
                 while (!this.Processed)
                 {
-                    Monitor.Wait(Lock);
+                    Monitor.Wait(ProcessedLock);
                 }
             }
             finally
             {
-                Monitor.Exit(Lock);
+                Monitor.Exit(ProcessedLock);
             }
         }
     }

@@ -14,14 +14,14 @@ namespace CommonConsoleApp
     {
         public static void Run()
         {
-            CacheManager cm = new CacheManager();
+            CacheManager cm = new CacheManager(2, 20);
 
             Random rnd = new Random();
 
             List<Task> tasks = new List<Task>();
             for (int i = 0; i < 30; i++)
             {
-                Worker w = new Worker(cm, "key" + i, rnd.Next(20, 100));
+                Worker w = new Worker(cm, "key" + i % 6, rnd.Next(20, 100));
                 Task task = Task.Factory.StartNew(() => w.Run());
                 tasks.Add(task);
                 Thread.Sleep(3);
@@ -51,86 +51,61 @@ namespace CommonConsoleApp
             int sleepTime;
             for (int i = 0; i < m_round; i++)
             {
-                string value = m_cm.GetData(m_key) as string;
+                string value = m_cm.GetOrAdd(m_key, Refresh, rnd.Next(10000, 60000), 200) as string;
+                //string value = m_cm.GetData(m_key) as string;
 
-                if (value == null)
-                {
-                    Thread.Sleep(3);
-                    m_cm.Add(m_key, m_key + "-init", Refresh, rnd.Next(30000, 300000));
-                }
-                else
-                {
-                    //LogManager.Info("CacheTest", string.Format("key={0}, value={1}", m_key, value));
-                    int val = rnd.Next(1, 10);
-                    if (val <= 5)
-                    {
-                        //LogManager.Info("CacheTest", string.Format("try to remove key={0}", m_key));
-                        m_cm.Remove(m_key);
-                    }
-                }
+                //if (value == null)
+                //{
+                //    Thread.Sleep(3);
+                //    m_cm.Add(m_key, m_key + "-init", Refresh, rnd.Next(30000, 300000));
+                //}
+                //else
+                //{
+                //    //LogManager.Info("CacheTest", string.Format("key={0}, value={1}", m_key, value));
+                //    int val = rnd.Next(1, 10);
+                //    if (val <= 5)
+                //    {
+                //        //LogManager.Info("CacheTest", string.Format("try to remove key={0}", m_key));
+                //        m_cm.Remove(m_key);
+                //    }
+                //}
 
-                sw.Restart();
-                for (int j = 0; j < 10000; j++)
-                {
-                    obj = m_cm.GetData(m_key);
+                //sw.Restart();
+                //for (int j = 0; j < 10000; j++)
+                //{
+                //    obj = m_cm.GetData(m_key);
 
-                    obj = m_cm[m_key];
-                }
-                sw.Stop();
+                //    obj = m_cm[m_key];
+                //}
+                //sw.Stop();
                 //LogManager.Info("CacheTest", string.Format("key={0}, cost={1}, {2}", m_key, sw.ElapsedMilliseconds, sw.ElapsedMilliseconds / 10));
 
-                Thread.Sleep(3);
+                LogManager.Info("CacheTest", string.Format("key=[{0}], value=[{1}]", m_key, ((value == null) ? "null" : value)));
+                Thread.Sleep(10);
                 sleepTime = rnd.Next(1000, 500000);
 
                 Thread.Sleep(sleepTime);
             }
         }
-        public object Refresh(string removedKey, object expiredValue, CacheItemRemovedReason removalReason)
+        public object Refresh(string removedKey, object expiredValue)
         {
-            if (removalReason != CacheItemRemovedReason.EXPIRED)
-            {
-                return null;
-            }
             Thread.Sleep(3);
             Thread.Sleep(rnd.Next(5000, 20000));
-            return expiredValue.ToString() + "-" + removedKey;
-        }
-    }
+            //return expiredValue.ToString() + "-" + removedKey;
 
-    class MyRefreshAction
-    {
-        public object Refresh(string removedKey, object expiredValue, CacheItemRemovedReason removalReason)
-        {
-            if (removalReason != CacheItemRemovedReason.EXPIRED)
+            if (expiredValue == null)
             {
-                return null;
+                return removedKey;
             }
 
-            Random rnd = new Random();
-
-            if (removedKey == "key2")
+            if (removedKey.EndsWith("1"))
             {
-                Thread.Sleep(rnd.Next(5000, 25000));
-
-                return expiredValue + "-value2";
+                throw new Exception("Can't get value for key=" + removedKey);
             }
-            else if(removedKey == "key3")
+            else
             {
-                Thread.Sleep(10000);
-
-
-                return expiredValue + "-value3";
+                return expiredValue.ToString() + "-" + removedKey; 
             }
-            else if (removedKey == "key4")
-            {
-                if (rnd.Next(0, 1) == 0)
-                {
-                    throw new Exception("key4-" + expiredValue);
-                }
-                return expiredValue + "-value4";
-            }
-
-            return null;
         }
     }
 }

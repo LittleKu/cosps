@@ -18,6 +18,7 @@ namespace CommonConsoleApp
             //CD_Ctor.Run();
             CacheTest.Run();
             //DelegateTest.Run();
+            //SemaphoreTest.Run();
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonLib;
+using System.Diagnostics;
 
 namespace CommonLib.Cache
 {
@@ -23,26 +24,40 @@ namespace CommonLib.Cache
         private ConcurrentDictionary<string, CacheItem> m_cacheItems = null;
 
         //All modify operations for the cache are processed by dispatching thread
-        private ConcurrentQueue<OperationEvent> m_messages = null;
+        private ConcurrentQueue<OperationEvent> m_operEvents = null;
 
         //A min heap for task scheduler
         private SortedDictionary<SchedulerKey, object> m_heap = null;
 
-        //A auto reset event for processing user actions events and timer events
+        //Auto reset event for processing user actions events and timer events
         private AutoResetEvent m_waitHandle = null;
 
-        //The current available thread count that could be used to Refresh
+        //The semaphore for counting the concurrent threads to refresh the invalid items
+        private Semaphore m_refreshSyncSem = null;
+
+        //The maximum count of m_refreshSyncSem
+        private int m_maxRefreshSyncSemCount = 0;
+
+        //The current available thread count that could be used to Refresh by CacheManager
         private int m_availRefreshThreadCount = 0;
 
         //Is this scheduler thread still running?
         private bool m_running = false;
 
-        public CacheManager(int maxRefreshThreadCount = 3)
+        public CacheManager(int maxRefreshThreadCount = 3, int maxWaitRefreshSemCount = Int32.MaxValue)
         {
             m_cacheItems = new ConcurrentDictionary<string, CacheItem>();
-            m_messages = new ConcurrentQueue<OperationEvent>();
+            m_operEvents = new ConcurrentQueue<OperationEvent>();
             m_heap = new SortedDictionary<SchedulerKey, object>();
             m_waitHandle = new AutoResetEvent(false);
+
+            m_maxRefreshSyncSemCount = maxWaitRefreshSemCount;
+            if (m_maxRefreshSyncSemCount <= 0)
+            {
+                m_maxRefreshSyncSemCount = Int32.MaxValue;
+            }
+            m_refreshSyncSem = new Semaphore(m_maxRefreshSyncSemCount, m_maxRefreshSyncSemCount);
+
             m_availRefreshThreadCount = maxRefreshThreadCount;
             if (m_availRefreshThreadCount <= 0)
             {
@@ -80,6 +95,11 @@ namespace CommonLib.Cache
             PostEvent(OperationType.OP_ADD, ci);
         }
 
+        public object GetOrAdd(string key, CacheItemRefreshAction refreshAction, long expiration, int lockTimeout)
+        {
+            return GetOrAdd(key, refreshAction, new DefaultCacheItemExpiration(expiration), lockTimeout);
+        }
+
         public object GetOrAdd(string key, CacheItemRefreshAction refreshAction, ICacheItemExpiration expiration, int lockTimeout)
         {
             object result = null;
@@ -87,7 +107,32 @@ namespace CommonLib.Cache
             CacheItem ci = m_cacheItems.GetOrAdd(key, (newKey) => new CacheItem(newKey, null, refreshAction, expiration));
             if ((result = ci.Value) == null)
             {
-                result = ci.RefreshWait(CacheItemRemovedReason.EXPIRED, lockTimeout);
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                if (!m_refreshSyncSem.WaitOne(lockTimeout))
+                {
+                    LogManager.Warn("CacheManager", string.Format("Timeout when try to get a refresh token for [{0}]", ci.Key));
+                }
+                else
+                {
+                    sw.Stop();
+                    int remainTime = lockTimeout - (int)sw.ElapsedMilliseconds;
+                    if (remainTime < 0 || remainTime > lockTimeout)
+                    {
+                        LogManager.Warn("CacheManager", string.Format("Invalid remaining time for [{0}], remainTime=[{1}]", ci.Key, remainTime));
+                        remainTime = 0;
+                    }
+
+                    //Now we are allowed to refresh this key
+                    ci.RefreshSync(remainTime);
+
+                    //Release the token
+                    int prevCount = m_refreshSyncSem.Release();
+                    LogManager.Info("CacheManager", string.Format("Refresh done for [{0}], the previous semaphore count is [{1}]", ci.Key, prevCount));
+                }
+
+                //get the updated value
+                result = ci.Value;
             }
 
             return result;
@@ -133,11 +178,12 @@ namespace CommonLib.Cache
 
         private void PostEvent(OperationType operType, object operObj)
         {
-            OperationEvent cme = new OperationEvent(operType, operObj);
-            m_messages.Enqueue(cme);
+            OperationEvent operEvent = new OperationEvent(operType, operObj);
+            m_operEvents.Enqueue(operEvent);
             m_waitHandle.Set();
 
-            cme.WaitUntilProcessed();
+            //Make the public API call synchornized
+            operEvent.WaitUntilProcessed();
         }
 
         private void Run()
@@ -189,17 +235,17 @@ namespace CommonLib.Cache
         //Only this dispatching thread CAN modify the content of CacheManager, but it is allowed to read by any thread.
         private bool ProcessOperationEvents()
         {
-            OperationEvent cme = null;
-            while (!m_messages.IsEmpty)
+            OperationEvent operEvent = null;
+            while (!m_operEvents.IsEmpty)
             {
                 //This should not happen. If it does, then this is a critial bug!
-                if (!m_messages.TryDequeue(out cme))
+                if (!m_operEvents.TryDequeue(out operEvent))
                 {
                     LogManager.Warn("CacheManager:Assert Failure", "Failed to dequeue a message");
                     continue;
                 }
 
-                if (!ProcessOperationEvent(cme))
+                if (!ProcessOperationEvent(operEvent))
                 {
                     return false;
                 }
@@ -207,25 +253,25 @@ namespace CommonLib.Cache
             return true;
         }
 
-        private bool ProcessOperationEvent(OperationEvent cme)
+        private bool ProcessOperationEvent(OperationEvent operEvent)
         {
             bool result = true;
             bool acquiredLock = false;
             try
             {
-                Monitor.Enter(cme.Lock, ref acquiredLock);
+                Monitor.Enter(operEvent.ProcessedLock, ref acquiredLock);
                 if (acquiredLock)
                 {
-                    result = DoProcessOperationEvent(cme);
+                    result = DoProcessOperationEvent(operEvent);
                 }
             }
             finally
             {
                 if (acquiredLock)
                 {
-                    cme.Processed = true;
-                    Monitor.PulseAll(cme.Lock);
-                    Monitor.Exit(cme.Lock);
+                    operEvent.Processed = true;
+                    Monitor.PulseAll(operEvent.ProcessedLock);
+                    Monitor.Exit(operEvent.ProcessedLock);
                 }
             }
 
@@ -452,7 +498,7 @@ namespace CommonLib.Cache
             //Fire the refresh action
             Task.Factory.StartNew(() =>
             {
-                ci.Refresh(CacheItemRemovedReason.EXPIRED);
+                ci.RefreshAsync();
 
                 //Release the token
                 Interlocked.Increment(ref m_availRefreshThreadCount);
