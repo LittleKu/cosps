@@ -1,0 +1,1 @@
+This project is a collection of useful open source projects. They are ready to be compiled without any more configurations. That means you can use it right away and no more painful compiling processes. The target platform is Windows system with VC6/VC8 or higher.
